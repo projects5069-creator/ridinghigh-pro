@@ -175,7 +175,7 @@ def save_portfolio_to_sheets(df: pd.DataFrame) -> bool:
         return False
 
 
-def load_portfolio_from_sheets() -> pd.DataFrame | None:
+def load_portfolio_from_sheets():
     """
     Load portfolio from Google Sheets (used on cloud where local file doesn't exist).
     """
@@ -232,7 +232,7 @@ def load_timeline_dates_from_sheets() -> list:
         return []
 
 
-def load_timeline_from_sheets(date: str) -> pd.DataFrame | None:
+def load_timeline_from_sheets(date: str):
     """Load a specific date's timeline from Google Sheets."""
     try:
         gc = _get_client()
