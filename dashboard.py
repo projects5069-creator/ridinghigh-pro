@@ -1326,8 +1326,23 @@ def main_page():
 def daily_summary_page():
     st.title("📅 DAILY SUMMARY")
     
-    logger = DataLogger()
-    dates = logger.get_all_dates()
+    if is_cloud():
+        try:
+            gc = _get_gc()
+            sh = gc.open_by_key(SHEET_ID)
+            ws = sh.worksheet("daily_snapshots")
+            data = ws.get_all_values()
+            if len(data) <= 1:
+                st.warning("⚠️ No data yet - will be saved at 14:59")
+                return
+            all_df = pd.DataFrame(data[1:], columns=data[0])
+            dates = sorted(all_df["Date"].unique().tolist(), reverse=True)
+        except Exception as e:
+            st.error(f"Error: {e}")
+            return
+    else:
+        logger = DataLogger()
+        dates = logger.get_all_dates()
     
     if not dates:
         st.warning("⚠️ No data")
@@ -1335,7 +1350,10 @@ def daily_summary_page():
     
     selected_date = st.selectbox("📆 Date", dates, index=0)
     
-    df = logger.load_date(selected_date)
+    if is_cloud():
+        df = all_df[all_df["Date"] == selected_date].drop(columns=["Date"], errors="ignore")
+    else:
+        df = logger.load_date(selected_date)
     
     if df is None or df.empty:
         st.error("❌ No data")
@@ -1355,8 +1373,23 @@ def daily_summary_page():
 def timeline_archive_page():
     st.title("📦 TIMELINE ARCHIVE")
     
-    tracker = LiveTracker()
-    dates = tracker.get_archive_dates()
+    if is_cloud():
+        try:
+            gc = _get_gc()
+            sh = gc.open_by_key(SHEET_ID)
+            ws = sh.worksheet("timeline_archive")
+            data = ws.get_all_values()
+            if len(data) <= 1:
+                st.warning("⚠️ No archived timelines yet")
+                return
+            all_df = pd.DataFrame(data[1:], columns=data[0])
+            dates = sorted(all_df["Date"].unique().tolist(), reverse=True)
+        except Exception as e:
+            st.error(f"Error: {e}")
+            return
+    else:
+        tracker = LiveTracker()
+        dates = tracker.get_archive_dates()
     
     if not dates:
         st.warning("⚠️ No archived timelines yet")
@@ -1423,7 +1456,23 @@ def portfolio_tracker_page():
             st.rerun()
     
     with st.spinner("Loading portfolio..."):
-        df = portfolio.get_portfolio_with_current_prices()
+        if is_cloud():
+            try:
+                gc = _get_gc()
+                sh = gc.open_by_key(SHEET_ID)
+                ws = sh.worksheet("portfolio")
+                data = ws.get_all_values()
+                if len(data) <= 1:
+                    df = None
+                else:
+                    df = pd.DataFrame(data[1:], columns=data[0])
+                    for col in ["Score","BuyPrice","CurrentPrice","Change%","P/L"]:
+                        if col in df.columns:
+                            df[col] = pd.to_numeric(df[col], errors="coerce")
+            except:
+                df = None
+        else:
+            df = portfolio.get_portfolio_with_current_prices()
     
     if df is None or df.empty:
         st.info("💡 Portfolio is empty. Stocks with score 60+ will be added automatically at 14:59")
