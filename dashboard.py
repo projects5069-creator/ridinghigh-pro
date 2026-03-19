@@ -1159,7 +1159,8 @@ def main_page():
                 results, latest_time = load_from_sheets()
                 if results:
                     st.session_state.results = results
-                    st.session_state.last_scan = datetime.now()
+                    import pytz
+                    st.session_state.last_scan = datetime.now(pytz.timezone('America/Lima'))
                     st.sidebar.success(f"✅ {len(results)} stocks loaded! (scan: {latest_time})")
                 else:
                     st.sidebar.info("⏳ Waiting for next scan...")
