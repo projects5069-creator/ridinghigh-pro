@@ -268,3 +268,7 @@ def load_timeline_from_sheets(date: str):
     except Exception as e:
         print(f"[GSheets] load timeline error: {e}")
         return None
+
+# Alias for compatibility
+def get_gsheets_client():
+    return _get_client()
