@@ -1237,7 +1237,9 @@ def main_page():
         
         with col4:
             if st.session_state.last_scan:
-                st.metric("Last Scan", st.session_state.last_scan.strftime("%H:%M:%S"))
+                import pytz
+                peru_time = st.session_state.last_scan.astimezone(pytz.timezone('America/Lima')) if st.session_state.last_scan.tzinfo else st.session_state.last_scan
+                st.metric("Last Scan", peru_time.strftime("%H:%M:%S"))
         
         display_data = []
         for r in results:
