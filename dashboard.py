@@ -1317,7 +1317,7 @@ def main_page():
         
         styled_timeline = df_timeline.style.applymap(color_score).format("{:.2f}")
         
-        timeline_height = min(840, max(400, 20 * 40 + 50))
+        timeline_height = 600
         
         st.dataframe(styled_timeline, use_container_width=True, height=timeline_height)
         
