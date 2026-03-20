@@ -323,13 +323,50 @@ def run_scan():
 
     print(f"📊 Analyzing {len(finviz_df)} stocks...")
     results = []
+    scanned_tickers = set()
     for idx, row in finviz_df.iterrows():
         ticker = row['Ticker']
+        scanned_tickers.add(ticker)
         data = analyze_ticker(ticker, row)
         if data:
             results.append(data)
             print(f"  ✅ {ticker}: {data['Score']}")
         time.sleep(0.1)
+
+    # ── Scan tracked tickers not in FINVIZ ──────────────────────────────────
+    try:
+        gc = get_gsheets_client()
+        sh = gc.open_by_key(SPREADSHEET_ID)
+        ws_tl = sh.worksheet("timeline_live")
+        tl_data = ws_tl.get_all_values()
+        if len(tl_data) > 1:
+            tl_df = pd.DataFrame(tl_data[1:], columns=tl_data[0])
+            today_str = now_peru.strftime('%Y-%m-%d')
+            tracked = set(tl_df[tl_df['Date'] == today_str]['Ticker'].unique())
+            missing = tracked - scanned_tickers
+            if missing:
+                print(f"📌 Tracking {len(missing)} missing tickers...")
+                for ticker in missing:
+                    try:
+                        stock = yf.Ticker(ticker)
+                        hist = stock.history(period='60d')
+                        if hist.empty or len(hist) < 2:
+                            continue
+                        info = stock.info
+                        price = hist.iloc[-1]['Close']
+                        prev = hist.iloc[-2]['Close']
+                        change = ((price - prev) / prev) * 100
+                        volume = int(hist.iloc[-1]['Volume'])
+                        finviz_row = {'Price': price, 'Change': change/100, 'Volume': str(volume), 'Market Cap': None}
+                        data = analyze_ticker(ticker, finviz_row)
+                        if data:
+                            results.append(data)
+                            print(f"  📌 {ticker}: {data['Score']}")
+                        time.sleep(0.2)
+                    except:
+                        pass
+    except:
+        pass
 
     if not results:
         print("❌ No results")
@@ -340,8 +377,9 @@ def run_scan():
 
     # ── Save to Google Sheets ────────────────────────────────────────────────
     try:
-        gc = get_gsheets_client()
-        sh = gc.open_by_key(SPREADSHEET_ID)
+        if 'gc' not in dir() or gc is None:
+            gc = get_gsheets_client()
+            sh = gc.open_by_key(SPREADSHEET_ID)
         scan_time = now_peru.strftime('%H:%M')
         today     = now_peru.strftime('%Y-%m-%d')
 
