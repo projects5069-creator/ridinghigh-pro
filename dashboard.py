@@ -1388,7 +1388,16 @@ def daily_summary_page():
     for col in df.columns:
         df[col] = pd.to_numeric(df[col], errors='ignore')
     
-    styled_df = df.style.apply(highlight_score, axis=1).format("{:.2f}", subset=[c for c in df.columns if df[c].dtype in ['float64','float32']])
+    def fmt(val):
+        try:
+            v = float(val)
+            if abs(v) >= 1000 and v == int(v):
+                return f"{int(v):,}"
+            return f"{v:.2f}"
+        except:
+            return val
+    
+    styled_df = df.style.apply(highlight_score, axis=1).format(fmt, subset=[c for c in df.columns if df[c].dtype in ['float64','float32','int64','int32']])
     st.dataframe(styled_df, use_container_width=True, hide_index=True, height=table_height)
     
     csv = df.to_csv(index=False)
