@@ -891,6 +891,16 @@ class PortfolioTracker:
         else:
             existing_df = pd.DataFrame()
         
+        # In cloud mode, also load from Sheets to preserve history
+        if is_cloud():
+            try:
+                from gsheets_sync import load_portfolio_from_sheets
+                sheets_df = load_portfolio_from_sheets()
+                if sheets_df is not None and not sheets_df.empty:
+                    existing_df = sheets_df
+            except:
+                pass
+        
         new_positions = []
         for stock in high_score_stocks:
             position_key = f"{stock['Ticker']}_{date}"
