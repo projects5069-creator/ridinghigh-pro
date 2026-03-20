@@ -1370,7 +1370,26 @@ def daily_summary_page():
         return
     
     table_height = min(800, len(df) * 40 + 50)
-    st.dataframe(df, use_container_width=True, hide_index=True, height=table_height)
+    
+    def highlight_score(row):
+        try:
+            score = float(row['Score'])
+            if score >= 85:
+                return ['background-color: #800020; color: white; font-weight: bold'] * len(row)
+            elif score >= 60:
+                return ['background-color: #cc0000; color: white'] * len(row)
+            elif score >= 40:
+                return ['background-color: #ff6600; color: white'] * len(row)
+            else:
+                return ['background-color: #ffcc00; color: black'] * len(row)
+        except:
+            return [''] * len(row)
+    
+    for col in df.columns:
+        df[col] = pd.to_numeric(df[col], errors='ignore')
+    
+    styled_df = df.style.apply(highlight_score, axis=1)
+    st.dataframe(styled_df, use_container_width=True, hide_index=True, height=table_height)
     
     csv = df.to_csv(index=False)
     st.download_button(
