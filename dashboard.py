@@ -1441,8 +1441,12 @@ def timeline_archive_page():
         all_df = pd.DataFrame(all_data[1:], columns=all_data[0])
         day_df = all_df[all_df["Date"] == selected_date].drop(columns=["Date"], errors="ignore")
         day_df["Score"] = pd.to_numeric(day_df.get("Score", 0), errors="coerce")
-        df = day_df.pivot_table(index="Ticker", columns="ScanTime", values="Score", aggfunc="last")
-        df = df[sorted(df.columns, reverse=True)].round(2)
+        if "ScanTime" in day_df.columns:
+            df = day_df.pivot_table(index="Ticker", columns="ScanTime", values="Score", aggfunc="last")
+            df = df[sorted(df.columns, reverse=True)].round(2)
+        else:
+            numeric_cols = day_df.select_dtypes(include="number").columns
+            df = day_df.set_index("Ticker")[numeric_cols].round(2) if "Ticker" in day_df.columns else day_df.round(2)
     else:
         df = tracker.load_archive(selected_date)
     
