@@ -434,17 +434,20 @@ def run_scan():
                     print(f"💼 Portfolio saved! {len(new_positions)} new stocks")
             # Save timeline archive at 14:59
             ws_arch = get_or_create_sheet(sh, "timeline_archive")
-            arch_df = results_df.copy()
-            arch_df.insert(0, 'Date', today)
-            existing_arch = ws_arch.get_all_values()
-            if len(existing_arch) <= 1:
-                df_to_sheet(ws_arch, arch_df)
-            else:
-                ex_arch = pd.DataFrame(existing_arch[1:], columns=existing_arch[0])
-                other_arch = ex_arch[ex_arch['Date'] != today]
-                combined_arch = pd.concat([other_arch, arch_df], ignore_index=True)
-                df_to_sheet(ws_arch, combined_arch)
-            print("📦 Timeline archive saved!")
+            # Save full day timeline from timeline_live
+            tl_all = ws_timeline.get_all_values()
+            if len(tl_all) > 1:
+                tl_full = pd.DataFrame(tl_all[1:], columns=tl_all[0])
+                today_tl = tl_full[tl_full['Date'] == today].copy()
+                existing_arch = ws_arch.get_all_values()
+                if len(existing_arch) <= 1:
+                    df_to_sheet(ws_arch, today_tl)
+                else:
+                    ex_arch = pd.DataFrame(existing_arch[1:], columns=existing_arch[0])
+                    other_arch = ex_arch[ex_arch['Date'] != today]
+                    combined_arch = pd.concat([other_arch, today_tl], ignore_index=True)
+                    df_to_sheet(ws_arch, combined_arch)
+                print("📦 Timeline archive saved!")
 
         print(f"✅ Saved {len(results)} stocks to Google Sheets at {scan_time}")
 
