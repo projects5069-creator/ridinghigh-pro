@@ -1691,10 +1691,10 @@ def post_analysis_page():
     def color_drop(val):
         try:
             v = float(val)
-            if v <= -15: return "color: #2ecc71; font-weight: bold"
-            if v <= -10: return "color: #27ae60"
-            if v <= -5:  return "color: #f39c12"
-            return "color: #e74c3c"
+            if v <= -15: return "color: #e74c3c; font-weight: bold"
+            if v <= -10: return "color: #c0392b"
+            if v <= -5:  return "color: #e67e22"
+            return "color: #2ecc71"
         except:
             return ""
 
@@ -1702,7 +1702,7 @@ def post_analysis_page():
         try:
             v = float(val)
             if v > 0:  return "color: #2ecc71"
-            if v < 0:  return "color: #e74c3c"
+            if v < 0:  return "color: #2ecc71"
             return ""
         except:
             return ""
