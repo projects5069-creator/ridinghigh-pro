@@ -1620,30 +1620,6 @@ def portfolio_tracker_page():
         mime="text/csv"
     )
 
-def main():
-    page = st.sidebar.radio(
-        "🧭 Navigation",
-        ["📊 Live Tracker", "💼 Portfolio Tracker", "📅 Daily Summary", "📦 Timeline Archive", "🔬 Post Analysis"]
-    )
-    
-    if page == "📊 Live Tracker":
-        main_page()
-    elif page == "💼 Portfolio Tracker":
-        portfolio_tracker_page()
-    elif page == "📅 Daily Summary":
-        daily_summary_page()
-    elif page == "📦 Timeline Archive":
-        timeline_archive_page()
-    else:
-        post_analysis_page()
-
-if __name__ == "__main__":
-    main()
-
-
-if __name__ == "__main__":
-    main()
-
 
 def post_analysis_page():
     st.title("🔬 Post Analysis")
@@ -1658,7 +1634,6 @@ def post_analysis_page():
         st.info("📭 אין נתונים עדיין — הקולקטור יתחיל לאסוף לאחר 5 ימי מסחר מהסריקה הראשונה")
         return
 
-    # ── Summary KPIs ────────────────────────────────────────────────────────
     total = len(df)
     tp10  = int(df["TP10_Hit"].sum()) if "TP10_Hit" in df.columns else 0
     tp15  = int(df["TP15_Hit"].sum()) if "TP15_Hit" in df.columns else 0
@@ -1674,7 +1649,6 @@ def post_analysis_page():
 
     st.divider()
 
-    # ── Filters ─────────────────────────────────────────────────────────────
     col1, col2 = st.columns(2)
     with col1:
         score_filter = st.slider("Score מינימום", 60, 100, 60)
@@ -1685,14 +1659,13 @@ def post_analysis_page():
     if show_only_hits and "TP10_Hit" in filtered.columns:
         filtered = filtered[filtered["TP10_Hit"] == 1]
 
-    # ── Main Table ───────────────────────────────────────────────────────────
     st.subheader(f"📋 תוצאות ({len(filtered)} מניות)")
 
     display_cols = ["Ticker", "ScanDate", "Score", "ScanPrice", "ScanChange%",
                     "MaxDrop%", "BestDay", "TP10_Hit", "TP15_Hit", "TP20_Hit"]
     display_cols = [c for c in display_cols if c in filtered.columns]
 
-    def color_row(val):
+    def color_tp(val):
         if val == 1:
             return "background-color: #1a4a1a; color: #00ff88"
         elif val == 0:
@@ -1712,7 +1685,7 @@ def post_analysis_page():
     styled = filtered[display_cols].style
     for col in ["TP10_Hit", "TP15_Hit", "TP20_Hit"]:
         if col in display_cols:
-            styled = styled.applymap(color_row, subset=[col])
+            styled = styled.applymap(color_tp, subset=[col])
     if "MaxDrop%" in display_cols:
         styled = styled.applymap(color_drop, subset=["MaxDrop%"])
 
@@ -1720,7 +1693,6 @@ def post_analysis_page():
 
     st.divider()
 
-    # ── BestDay Distribution ─────────────────────────────────────────────────
     if "BestDay" in df.columns and not df["BestDay"].dropna().empty:
         st.subheader("📅 באיזה יום הגיע ה-Low הכי נמוך?")
         best_day_counts = df["BestDay"].value_counts().sort_index()
@@ -1730,7 +1702,26 @@ def post_analysis_page():
         })
         st.bar_chart(best_day_df.set_index("יום"))
 
-    # ── Download ─────────────────────────────────────────────────────────────
     st.divider()
     csv = filtered.to_csv(index=False)
     st.download_button("⬇️ הורד CSV", csv, "post_analysis.csv", "text/csv")
+
+def main():
+    page = st.sidebar.radio(
+        "🧭 Navigation",
+        ["📊 Live Tracker", "💼 Portfolio Tracker", "📅 Daily Summary", "📦 Timeline Archive", "🔬 Post Analysis"]
+    )
+    
+    if page == "📊 Live Tracker":
+        main_page()
+    elif page == "💼 Portfolio Tracker":
+        portfolio_tracker_page()
+    elif page == "📅 Daily Summary":
+        daily_summary_page()
+    elif page == "📦 Timeline Archive":
+        timeline_archive_page()
+    else:
+        post_analysis_page()
+
+if __name__ == "__main__":
+    main()
