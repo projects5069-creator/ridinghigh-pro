@@ -181,11 +181,11 @@ def run():
         new_row = {
             "Ticker":      ticker,
             "ScanDate":    scan_date,
-            "Score":       score,
-            "ScanPrice":   scan_price,
+            "Score":       round(float(score), 2),
+            "ScanPrice":   round(float(scan_price), 2),
             "ScanChange%": round(pd.to_numeric(row.get("Change", 0), errors="coerce"), 2),
-            **ohlc,
-            **stats
+            **{k: round(v, 2) if isinstance(v, float) else v for k, v in ohlc.items()},
+            **{k: round(v, 2) if isinstance(v, float) else v for k, v in stats.items()}
         }
         new_rows.append(new_row)
 
