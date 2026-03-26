@@ -183,7 +183,7 @@ def run():
             "ScanDate":    scan_date,
             "Score":       score,
             "ScanPrice":   scan_price,
-            "ScanChange%": pd.to_numeric(row.get("Change%", 0), errors="coerce"),
+            "ScanChange%": round(pd.to_numeric(row.get("Change", 0), errors="coerce"), 2),
             **ohlc,
             **stats
         }
