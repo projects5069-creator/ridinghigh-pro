@@ -1682,13 +1682,15 @@ def post_analysis_page():
         except:
             return ""
 
+    # Round all numeric columns to 2 decimal places for display
+    for col in filtered[display_cols].select_dtypes(include="number").columns:
+        filtered[col] = filtered[col].round(2)
     styled = filtered[display_cols].style
     for col in ["TP10_Hit", "TP15_Hit", "TP20_Hit"]:
         if col in display_cols:
             styled = styled.applymap(color_tp, subset=[col])
     if "MaxDrop%" in display_cols:
         styled = styled.applymap(color_drop, subset=["MaxDrop%"])
-
     st.dataframe(styled, use_container_width=True, height=500)
 
     st.divider()
