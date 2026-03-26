@@ -1773,7 +1773,11 @@ def post_analysis_page():
             except:
                 return ""
 
-        styled_dyn = dyn_display.style.applymap(color_diff, subset=["הפרש"])
+        # Round all numeric cols to 2 decimals
+        for col in dyn_display.select_dtypes(include="number").columns:
+            dyn_display[col] = dyn_display[col].round(2)
+        format_dyn = {col: "{:.2f}" for col in dyn_display.select_dtypes(include="number").columns}
+        styled_dyn = dyn_display.style.applymap(color_diff, subset=["הפרש"]).format(format_dyn)
         st.dataframe(styled_dyn, use_container_width=True, hide_index=True)
         st.caption("הפרש אדום = הציון המקורי גבוה מהדינמי (אולי מוערך יתר על המידה). ירוק = הציון הדינמי גבוה יותר.")
     else:
