@@ -178,12 +178,17 @@ def run():
 
         stats = calculate_stats(scan_price, ohlc)
 
+        # Grab all metrics from snapshot
+        metric_fields = ["MxV","RunUp","RSI","ATRX","REL_VOL","Gap","VWAP","Float%","PriceToHigh","PriceTo52WHigh"]
+        metrics = {f: round(pd.to_numeric(row.get(f, None), errors="coerce"), 2) for f in metric_fields}
+
         new_row = {
             "Ticker":      ticker,
             "ScanDate":    scan_date,
             "Score":       round(float(score), 2),
             "ScanPrice":   round(float(scan_price), 2),
             "ScanChange%": round(pd.to_numeric(row.get("Change", 0), errors="coerce"), 2),
+            **metrics,
             **{k: round(v, 2) if isinstance(v, float) else v for k, v in ohlc.items()},
             **{k: round(v, 2) if isinstance(v, float) else v for k, v in stats.items()}
         }

@@ -1771,7 +1771,7 @@ def post_analysis_page():
     # ── 2. Metric Correlation ────────────────────────────────────────────────
     st.subheader("📐 אילו מדדים מנבאים ירידה גדולה יותר?")
     st.caption("קורלציה חיובית = ככל שהמדד גבוה יותר, הירידה קטנה יותר. קורלציה שלילית = ככל שהמדד גבוה יותר, הירידה גדולה יותר.")
-    metric_cols = ["Score", "ScanChange%", "ScanPrice"]
+    metric_cols = ["Score", "ScanChange%", "MxV", "ATRX", "RSI", "RunUp", "REL_VOL", "Float%", "Gap"]
     available_metrics = [c for c in metric_cols if c in df.columns]
     if available_metrics and "MaxDrop%" in df.columns:
         corr_data = []
