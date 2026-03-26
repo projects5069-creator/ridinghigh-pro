@@ -1677,7 +1677,7 @@ def post_analysis_page():
 
     st.subheader(f"📋 תוצאות ({len(filtered)} מניות)")
 
-    display_cols = ["Ticker", "ScanDate", "Score", "ScanPrice", "ScanChange%",
+    display_cols = ["Ticker", "ScanDate", "Score", "ScanChange%", "ScanPrice",
                     "CurrentPrice", "EntryChange%", "MaxDrop%", "BestDay", "TP10_Hit", "TP15_Hit", "TP20_Hit"]
     display_cols = [c for c in display_cols if c in filtered.columns]
 
@@ -1691,18 +1691,18 @@ def post_analysis_page():
     def color_drop(val):
         try:
             v = float(val)
-            if v <= -15: return "color: #00ff88; font-weight: bold"
-            if v <= -10: return "color: #88ff44"
-            if v <= -5:  return "color: #ffaa00"
-            return "color: #ff4444"
+            if v <= -15: return "color: #2ecc71; font-weight: bold"
+            if v <= -10: return "color: #27ae60"
+            if v <= -5:  return "color: #f39c12"
+            return "color: #e74c3c"
         except:
             return ""
 
     def color_change(val):
         try:
             v = float(val)
-            if v > 0:  return "color: #ff4444"
-            if v < 0:  return "color: #00ff88"
+            if v > 0:  return "color: #2ecc71"
+            if v < 0:  return "color: #e74c3c"
             return ""
         except:
             return ""
