@@ -1630,6 +1630,22 @@ def post_analysis_page():
     with st.spinner("טוען נתונים..."):
         df = load_post_analysis_from_sheets()
 
+    # Fetch current prices
+    if not df.empty and "Ticker" in df.columns:
+        import yfinance as yf
+        tickers = df["Ticker"].unique().tolist()
+        try:
+            prices = yf.download(tickers, period="1d", progress=False, auto_adjust=True)["Close"]
+            if len(tickers) == 1:
+                current_price = {tickers[0]: round(float(prices.iloc[-1]), 2)}
+            else:
+                current_price = {t: round(float(prices[t].iloc[-1]), 2) for t in tickers if t in prices.columns}
+            df["CurrentPrice"] = df["Ticker"].map(current_price)
+            df["EntryChange%"] = ((df["CurrentPrice"] - df["ScanPrice"]) / df["ScanPrice"] * 100).round(2)
+        except:
+            df["CurrentPrice"] = None
+            df["EntryChange%"] = None
+
     if df.empty:
         st.info("📭 אין נתונים עדיין — הקולקטור יתחיל לאסוף לאחר 5 ימי מסחר מהסריקה הראשונה")
         return
@@ -1662,7 +1678,7 @@ def post_analysis_page():
     st.subheader(f"📋 תוצאות ({len(filtered)} מניות)")
 
     display_cols = ["Ticker", "ScanDate", "Score", "ScanPrice", "ScanChange%",
-                    "MaxDrop%", "BestDay", "TP10_Hit", "TP15_Hit", "TP20_Hit"]
+                    "CurrentPrice", "EntryChange%", "MaxDrop%", "BestDay", "TP10_Hit", "TP15_Hit", "TP20_Hit"]
     display_cols = [c for c in display_cols if c in filtered.columns]
 
     def color_tp(val):
@@ -1682,6 +1698,15 @@ def post_analysis_page():
         except:
             return ""
 
+    def color_change(val):
+        try:
+            v = float(val)
+            if v > 0:  return "color: #ff4444"
+            if v < 0:  return "color: #00ff88"
+            return ""
+        except:
+            return ""
+
     # Round all numeric columns to 2 decimal places for display
     for col in filtered[display_cols].select_dtypes(include="number").columns:
         filtered[col] = filtered[col].round(2)
@@ -1691,6 +1716,10 @@ def post_analysis_page():
             styled = styled.applymap(color_tp, subset=[col])
     if "MaxDrop%" in display_cols:
         styled = styled.applymap(color_drop, subset=["MaxDrop%"])
+    if "ScanChange%" in display_cols:
+        styled = styled.applymap(color_change, subset=["ScanChange%"])
+    if "EntryChange%" in display_cols:
+        styled = styled.applymap(color_change, subset=["EntryChange%"])
     format_dict = {col: "{:.2f}" for col in filtered[display_cols].select_dtypes(include="number").columns if col not in ["TP10_Hit", "TP15_Hit", "TP20_Hit", "BestDay"]}
     styled = styled.format(format_dict)
     st.dataframe(styled, use_container_width=True, height=500, hide_index=True)
