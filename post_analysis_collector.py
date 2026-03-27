@@ -33,43 +33,48 @@ def get_trading_days_after(scan_date_str: str, n: int) -> list:
 
 
 def fetch_ohlc_for_days(ticker: str, trading_days: list) -> dict:
-    """Fetch OHLC for specific trading days using Yahoo Finance."""
-    try:
-        start = trading_days[0]
-        # End = day after last trading day
-        end_dt = datetime.strptime(trading_days[-1], "%Y-%m-%d") + timedelta(days=3)
-        end = end_dt.strftime("%Y-%m-%d")
+    """Fetch OHLC for specific trading days using Yahoo Finance. Retries up to 5 times."""
+    import time
+    max_retries = 5
+    for attempt in range(1, max_retries + 1):
+        try:
+            start = trading_days[0]
+            end_dt = datetime.strptime(trading_days[-1], "%Y-%m-%d") + timedelta(days=3)
+            end = end_dt.strftime("%Y-%m-%d")
 
-        hist = yf.download(ticker, start=start, end=end, progress=False, auto_adjust=True)
-        if hist.empty:
-            return {}
+            hist = yf.download(ticker, start=start, end=end, progress=False, auto_adjust=True)
+            if hist.empty:
+                print(f"[Collector] {ticker} attempt {attempt}/{max_retries} — empty data")
+                time.sleep(2)
+                continue
 
-        # Flatten MultiIndex if needed
-        if isinstance(hist.columns, pd.MultiIndex):
-            # For single ticker, get level 0 (Price type)
-            hist.columns = hist.columns.get_level_values(0)
-        # Ensure columns are strings
-        hist.columns = [str(c) for c in hist.columns]
+            # Flatten MultiIndex if needed
+            if isinstance(hist.columns, pd.MultiIndex):
+                hist.columns = hist.columns.get_level_values(0)
+            hist.columns = [str(c) for c in hist.columns]
 
-        hist.index = pd.to_datetime(hist.index).strftime("%Y-%m-%d")
-        result = {}
-        for i, day in enumerate(trading_days, 1):
-            if day in hist.index:
-                row = hist.loc[day]
-                result[f"D{i}_Open"]  = round(float(row["Open"]), 4)
-                result[f"D{i}_High"]  = round(float(row["High"]), 4)
-                result[f"D{i}_Low"]   = round(float(row["Low"]), 4)
-                result[f"D{i}_Close"] = round(float(row["Close"]), 4)
-            else:
-                result[f"D{i}_Open"]  = None
-                result[f"D{i}_High"]  = None
-                result[f"D{i}_Low"]   = None
-                result[f"D{i}_Close"] = None
-        return result
+            hist.index = pd.to_datetime(hist.index).strftime("%Y-%m-%d")
+            result = {}
+            for i, day in enumerate(trading_days, 1):
+                if day in hist.index:
+                    row = hist.loc[day]
+                    result[f"D{i}_Open"]  = round(float(row["Open"]), 4)
+                    result[f"D{i}_High"]  = round(float(row["High"]), 4)
+                    result[f"D{i}_Low"]   = round(float(row["Low"]), 4)
+                    result[f"D{i}_Close"] = round(float(row["Close"]), 4)
+                else:
+                    result[f"D{i}_Open"]  = None
+                    result[f"D{i}_High"]  = None
+                    result[f"D{i}_Low"]   = None
+                    result[f"D{i}_Close"] = None
+            return result
 
-    except Exception as e:
-        print(f"[Collector] Error fetching {ticker}: {e}")
-        return {}
+        except Exception as e:
+            print(f"[Collector] {ticker} attempt {attempt}/{max_retries} error: {e}")
+            time.sleep(2)
+
+    print(f"[Collector] {ticker} — failed after {max_retries} attempts")
+    return {}
 
 
 def calculate_stats(scan_price: float, ohlc: dict) -> dict:
