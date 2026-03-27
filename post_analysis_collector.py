@@ -23,8 +23,48 @@ CATALYST_CATEGORIES = [
     "lawsuit", "share_dilution", "reverse_split", "no_clear_reason"
 ]
 
+def fetch_finviz_news(ticker: str, scan_date: str) -> list:
+    """Fetch news headlines from FINVIZ filtered by date range."""
+    import urllib.request, re, time
+    from datetime import datetime, timedelta
+
+    scan_dt = datetime.strptime(scan_date, "%Y-%m-%d")
+    date_from = scan_dt - timedelta(days=30)  # Look back 30 days for context
+    date_to   = scan_dt + timedelta(days=1)
+
+    for attempt in range(1, 4):
+        try:
+            url = f"https://finviz.com/quote.ashx?t={ticker}&p=d"
+            req = urllib.request.Request(url, headers={
+                "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36"
+            })
+            response = urllib.request.urlopen(req, timeout=10)
+            html = response.read().decode("utf-8")
+
+            dates  = re.findall(r'width="130"[^>]*>\s*(.*?)\s*</td>', html)
+            titles = re.findall(r'class="tab-link-news"[^>]*>\s*(.*?)\s*</a>', html)
+
+            relevant = []
+            for date_str, title in zip(dates, titles):
+                title = title.strip().lower()
+                try:
+                    pub_dt = datetime.strptime(date_str.strip()[:9], "%b-%d-%y")
+                    if date_from <= pub_dt <= date_to:
+                        relevant.append(title)
+                except:
+                    continue
+
+            print(f"[Collector] FINVIZ: {len(relevant)} headlines for {ticker} around {scan_date}")
+            return relevant
+
+        except Exception as e:
+            print(f"[Collector] FINVIZ attempt {attempt}/3 failed for {ticker}: {e}")
+            time.sleep(2)
+    return []
+
+
 def analyze_catalyst(ticker: str, scan_date: str) -> dict:
-    """Analyze catalyst using Google News RSS + keyword matching. Filters by date and ticker mention."""
+    """Analyze catalyst using FINVIZ news + keyword matching."""
     import urllib.request, urllib.parse, time, re
     from datetime import datetime, timedelta
     from email.utils import parsedate_to_datetime
@@ -35,56 +75,15 @@ def analyze_catalyst(ticker: str, scan_date: str) -> dict:
         "clinical_trial":         ["phase 1", "phase 2", "phase 3", "clinical trial", "clinical study", "ind application", "topline data", "trial results", "patient enrollment"],
         "marketing_announcement": ["partnership", "collaboration agreement", "license agreement", "commercialization", "distribution agreement", "strategic alliance"],
         "earnings_report":        ["earnings report", "quarterly results", "q1 results", "q2 results", "q3 results", "q4 results", "annual results", "revenue report", "full year results"],
-        "regulatory_compliance":  ["nasdaq compliance", "nyse compliance", "regained compliance", "listing compliance", "deficiency notice", "reverse split", "bid price"],
+        "regulatory_compliance":  ["nasdaq compliance", "nyse compliance", "regained compliance", "listing compliance", "deficiency notice", "bid price", "non-compliance"],
         "lawsuit":                ["class action", "sec charges", "sec investigation", "securities fraud", "lawsuit filed", "legal action", "complaint filed"],
         "share_dilution":         ["public offering", "private placement", "at-the-market", "atm offering", "registered direct", "shares offered", "warrant exercise", "capital raise"],
         "reverse_split":          ["reverse stock split", "reverse split", "1-for-", "share consolidation"],
         "no_clear_reason":        []
     }
 
-    scan_dt = datetime.strptime(scan_date, "%Y-%m-%d")
-    date_from = scan_dt - timedelta(days=2)
-    date_to   = scan_dt + timedelta(days=1)
-
-    # Fetch Google News RSS
-    relevant_headlines = []
-    for attempt in range(1, 4):
-        try:
-            query = urllib.parse.quote(f'"{ticker}" stock')
-            url = f"https://news.google.com/rss/search?q={query}&hl=en-US&gl=US&ceid=US:en"
-            req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
-            response = urllib.request.urlopen(req, timeout=10)
-            raw = response.read().decode("utf-8")
-
-            # Extract items with title + pubDate
-            items = re.findall(r"<item>(.*?)</item>", raw, re.DOTALL)
-            for item in items:
-                title_match = re.search(r"<title>(.*?)</title>", item)
-                date_match  = re.search(r"<pubDate>(.*?)</pubDate>", item)
-                if not title_match or not date_match:
-                    continue
-
-                title = title_match.group(1).lower()
-                # Check ticker appears in title
-                if ticker.lower() not in title:
-                    continue
-
-                # Check date range
-                try:
-                    pub_dt = parsedate_to_datetime(date_match.group(1)).replace(tzinfo=None)
-                    if not (date_from <= pub_dt <= date_to):
-                        continue
-                except:
-                    pass  # include if date parse fails
-
-                relevant_headlines.append(title)
-
-            print(f"[Collector] Found {len(relevant_headlines)} relevant headlines for {ticker} around {scan_date}")
-            break
-
-        except Exception as e:
-            print(f"[Collector] News attempt {attempt}/3 failed for {ticker}: {e}")
-            time.sleep(2)
+    # Fetch from FINVIZ
+    relevant_headlines = fetch_finviz_news(ticker, scan_date)
 
     if not relevant_headlines:
         result = {f"cat_{k}": 0 for k in CATALYST_CATEGORIES}
