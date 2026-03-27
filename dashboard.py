@@ -1831,91 +1831,73 @@ def post_analysis_page():
 
     # ── 3. Catalyst Search ───────────────────────────────────────────────────
     st.subheader("🔍 ניתוח חדשות אוטומטי")
-    st.caption("Claude מחפש ומסווג אוטומטית את סוג האירוע שגרם לעלייה.")
+    st.caption("ניתוח אוטומטי של סוג האירוע שגרם לעלייה — לכל המניות בטבלה.")
 
-    ticker_list = df["Ticker"].unique().tolist() if "Ticker" in df.columns else []
-    col_t, col_d = st.columns(2)
-    with col_t:
-        selected_ticker = st.selectbox("בחר מניה", ticker_list, key="catalyst_ticker")
-    with col_d:
-        ticker_dates = df[df["Ticker"] == selected_ticker]["ScanDate"].tolist() if selected_ticker else []
-        selected_scan_date = st.selectbox("בחר תאריך סריקה", ticker_dates, key="catalyst_date")
+    category_labels = {
+        "merger_acquisition":     "מיזוג",
+        "fda_approval":           "FDA",
+        "clinical_trial":         "מחקר קליני",
+        "marketing_announcement": "הודעה שיווקית",
+        "earnings_report":        "דוח רווחים",
+        "regulatory_compliance":  "ציות רגולטורי",
+        "lawsuit":                "תביעה",
+        "share_dilution":         "דילול",
+        "reverse_split":          "ספליט הפוך",
+        "no_clear_reason":        "Pump"
+    }
 
-    if selected_ticker and selected_scan_date and st.button(f"🔍 נתח {selected_ticker}"):
-        with st.spinner(f"מנתח חדשות על {selected_ticker}..."):
+    if st.button("🔍 נתח את כל המניות"):
+        import anthropic, json
+        client = anthropic.Anthropic()
+
+        cat_rows = []
+        unique_stocks = df[["Ticker","ScanDate"]].drop_duplicates().values.tolist()
+
+        progress = st.progress(0)
+        status = st.empty()
+
+        for i, (ticker, scan_date) in enumerate(unique_stocks):
+            status.text(f"מנתח {ticker} ({scan_date})...")
+            progress.progress((i+1) / len(unique_stocks))
+
             try:
-                import anthropic, json
-                client = anthropic.Anthropic()
-
-                prompt = f"""You are a stock news analyst. Research the stock {selected_ticker} around {selected_scan_date}.
-Classify what caused the stock to surge on or around that date.
-Return ONLY valid JSON (no markdown, no explanation):
-{{
-  "summary": "one sentence in Hebrew explaining what happened",
-  "categories": {{
-    "merger_acquisition": true or false,
-    "fda_approval": true or false,
-    "clinical_trial": true or false,
-    "marketing_announcement": true or false,
-    "earnings_report": true or false,
-    "regulatory_compliance": true or false,
-    "lawsuit": true or false,
-    "share_dilution": true or false,
-    "reverse_split": true or false,
-    "forward_split": true or false,
-    "no_clear_reason": true or false
-  }}
-}}"""
+                prompt = f"""Research stock {ticker} around {scan_date} to find what caused it to surge.
+Return ONLY valid JSON, no markdown:
+{{"categories": {{"merger_acquisition": true/false, "fda_approval": true/false, "clinical_trial": true/false, "marketing_announcement": true/false, "earnings_report": true/false, "regulatory_compliance": true/false, "lawsuit": true/false, "share_dilution": true/false, "reverse_split": true/false, "no_clear_reason": true/false}}}}"""
 
                 response = client.messages.create(
                     model="claude-sonnet-4-20250514",
-                    max_tokens=1000,
+                    max_tokens=500,
                     tools=[{{"type": "web_search_20250305", "name": "web_search"}}],
                     messages=[{{"role": "user", "content": prompt}}]
                 )
 
-                result_text = ""
-                for block in response.content:
-                    if hasattr(block, "text"):
-                        result_text += block.text
-
-                clean = result_text.strip().replace("```json", "").replace("```", "").strip()
+                result_text = "".join(b.text for b in response.content if hasattr(b, "text"))
+                clean = result_text.strip().replace("```json","").replace("```","").strip()
                 data = json.loads(clean)
-
-                st.info(f"📰 {data.get('summary', '')}")
-
-                category_labels = {
-                    "merger_acquisition":     "מיזוג / רכישה",
-                    "fda_approval":           "אישור FDA",
-                    "clinical_trial":         "מחקר קליני",
-                    "marketing_announcement": "הודעה שיווקית",
-                    "earnings_report":        "דוח רווחים",
-                    "regulatory_compliance":  "ציות רגולטורי",
-                    "lawsuit":                "תביעה משפטית",
-                    "share_dilution":         "דילול מניות",
-                    "reverse_split":          "ספליט הפוך",
-                    "forward_split":          "ספליט רגיל",
-                    "no_clear_reason":        "Pump ללא סיבה"
-                }
-
                 cats = data.get("categories", {})
-                rows = []
-                for key, label in category_labels.items():
-                    val = cats.get(key, False)
-                    rows.append({{"קטגוריה": label, selected_ticker: "✅" if val else "❌"}})
 
-                cat_df = pd.DataFrame(rows)
+            except Exception:
+                cats = {}
 
-                def color_cat(val):
-                    if val == "✅": return "color: #2ecc71; font-weight: bold"
-                    if val == "❌": return "color: #e74c3c"
-                    return ""
+            row = {{"Ticker": ticker, "ScanDate": scan_date}}
+            for key, label in category_labels.items():
+                row[label] = "✅" if cats.get(key, False) else ""
+            cat_rows.append(row)
 
-                styled_cat = cat_df.style.applymap(color_cat, subset=[selected_ticker])
-                st.dataframe(styled_cat, use_container_width=True, hide_index=True)
+        progress.empty()
+        status.empty()
 
-            except Exception as e:
-                st.error(f"שגיאה: {e}")
+        if cat_rows:
+            cat_df = pd.DataFrame(cat_rows)
+
+            def color_check(val):
+                if val == "✅": return "color: #2ecc71; font-weight: bold; font-size: 16px"
+                return ""
+
+            label_cols = list(category_labels.values())
+            styled_cat = cat_df.style.applymap(color_check, subset=label_cols)
+            st.dataframe(styled_cat, use_container_width=True, hide_index=True, height=500)
 
     st.divider()
     csv = filtered.to_csv(index=False)
