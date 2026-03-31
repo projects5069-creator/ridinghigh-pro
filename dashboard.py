@@ -1812,17 +1812,13 @@ def post_analysis_page():
             "Entry $":   f"${scan_price:.2f}" if scan_price else "—",
         }
 
-        prev_close = scan_price
         for d in range(1, 6):
             close = pd.to_numeric(row.get(f"D{d}_Close", None), errors="coerce")
             if close is None or pd.isna(close):
                 tr[f"D+{d}"] = "⏳"
-                prev_close = None
             else:
-                daily_chg  = ((close - prev_close) / prev_close * 100) if prev_close and prev_close > 0 else 0
-                entry_chg  = ((close - scan_price) / scan_price * 100) if scan_price > 0 else 0
-                tr[f"D+{d}"] = f"${close:.2f} | {daily_chg:+.1f}% | {entry_chg:+.1f}%"
-                prev_close = close
+                entry_chg = ((close - scan_price) / scan_price * 100) if scan_price > 0 else 0
+                tr[f"D+{d}"] = f"{entry_chg:+.1f}%"
 
         tracker_rows.append(tr)
 
@@ -1833,21 +1829,12 @@ def post_analysis_page():
             if not isinstance(val, str) or val in ("⏳", "—"):
                 return "color: gray"
             try:
-                # entry_chg is the last % value
-                parts = val.split("|")
-                if len(parts) < 3:
-                    return ""
-                entry_chg = float(parts[2].strip().replace("%", "").replace("+", ""))
-                if entry_chg < -10:
-                    return "background-color: #800020; color: white; font-weight: bold"
-                elif entry_chg < -5:
-                    return "background-color: #cc0000; color: white"
-                elif entry_chg < 0:
-                    return "background-color: #ff6600; color: white"
-                elif entry_chg > 5:
-                    return "background-color: #1a4a1a; color: #00ff88; font-weight: bold"
-                elif entry_chg > 0:
-                    return "background-color: #2ecc71; color: black"
+                v = float(val.replace("%", "").replace("+", ""))
+                if v < -10:  return "background-color: #800020; color: white; font-weight: bold"
+                elif v < -5: return "background-color: #cc0000; color: white"
+                elif v < 0:  return "background-color: #ff6600; color: white"
+                elif v > 5:  return "background-color: #1a4a1a; color: #00ff88; font-weight: bold"
+                elif v > 0:  return "background-color: #2ecc71; color: black"
                 return ""
             except:
                 return ""
