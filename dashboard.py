@@ -1650,11 +1650,13 @@ def post_analysis_page():
         st.info("📭 אין נתונים עדיין — הקולקטור יתחיל לאסוף לאחר 5 ימי מסחר מהסריקה הראשונה")
         return
 
-    total = len(df)
-    tp10  = int(df["TP10_Hit"].sum()) if "TP10_Hit" in df.columns else 0
-    tp15  = int(df["TP15_Hit"].sum()) if "TP15_Hit" in df.columns else 0
-    tp20  = int(df["TP20_Hit"].sum()) if "TP20_Hit" in df.columns else 0
-    avg_drop = df["MaxDrop%"].mean() if "MaxDrop%" in df.columns else 0
+    # Only include rows with complete OHLC data
+    complete_df = df[df["MaxDrop%"].notna() & (df["MaxDrop%"] != 0)] if "MaxDrop%" in df.columns else df
+    total = len(complete_df)
+    tp10  = int(complete_df["TP10_Hit"].sum()) if "TP10_Hit" in complete_df.columns else 0
+    tp15  = int(complete_df["TP15_Hit"].sum()) if "TP15_Hit" in complete_df.columns else 0
+    tp20  = int(complete_df["TP20_Hit"].sum()) if "TP20_Hit" in complete_df.columns else 0
+    avg_drop = complete_df["MaxDrop%"].mean() if "MaxDrop%" in complete_df.columns else 0
 
     c1, c2, c3, c4, c5 = st.columns(5)
     c1.metric("סה״כ מניות", total)
