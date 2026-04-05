@@ -1444,7 +1444,7 @@ def daily_summary_page():
             return [''] * len(row)
     
     for col in df.columns:
-        df[col] = pd.to_numeric(df[col], errors='ignore')
+        df[col] = pd.to_numeric(df[col], errors='coerce')
     
     def fmt(val):
         try:
