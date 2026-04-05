@@ -2,24 +2,23 @@ name: Post Analysis Collector
 
 on:
   schedule:
-    # Runs at 08:00 UTC = 03:00 Peru time (after market close previous day)
-    - cron: '0 21 * * 1-5'  # Mon-Fri at 21:00 UTC = 16:00 Peru (1hr after market close)
-  workflow_dispatch:  # Manual trigger
+    - cron: '0 21 * * 1-5'
+  workflow_dispatch:
 
 jobs:
   collect:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: '3.11'
 
       - name: Install dependencies
         run: |
-          pip install gspread google-auth pandas yfinance
+          pip install gspread google-auth pandas yfinance pytz pandas_market_calendars
 
       - name: Create credentials file
         run: |
