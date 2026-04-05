@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-RidingHigh Pro v14.2 - EXCEL EXPORT FIXED
+RidingHigh Pro v14.6 - Score 7 Metrics
 - Timeline Archive exported as proper grid (pivot) per date
 - New "Analysis Export" with Timeline Summary for AI analysis
 - Full export unchanged except Timeline Archive fix
@@ -24,7 +24,7 @@ from gsheets_sync import save_snapshot_to_sheets, save_timeline_to_sheets, save_
 import json
 
 st.set_page_config(
-    page_title="RidingHigh Pro v14.2",
+    page_title="RidingHigh Pro v14.6",
     page_icon="🚀",
     layout="wide"
 )
@@ -1143,7 +1143,7 @@ def _build_timeline_summary(arch_df):
 
 
 def main_page():
-    st.title("🚀 RidingHigh Pro v14.2")
+    st.title("🚀 RidingHigh Pro v14.6")
     st.caption("Portfolio Tracker - Auto-saves stocks with score 60+ at 14:59")
     
     if 'dashboard' not in st.session_state:
