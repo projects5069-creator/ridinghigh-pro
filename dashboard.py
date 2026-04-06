@@ -11,7 +11,7 @@ import pandas as pd
 import time
 import plotly.express as px
 from finvizfinance.screener.overview import Overview
-from datetime import datetime, time as dt_time
+from datetime import datetime, time as dt_time, timedelta
 import pytz
 import pytz
 from data_logger import DataLogger
@@ -2072,12 +2072,90 @@ def post_analysis_page():
                     st.error(f"שגיאה: {e}")
 
 
+@st.cache_data(ttl=300)
+def _fetch_health_data():
+    """Fetch last scan (timeline_live) and last collector (post_analysis) timestamps. Cached 5 min."""
+    try:
+        gc = _get_gc()
+        if not gc:
+            return None, None
+        sh = gc.open_by_key(SHEET_ID)
+
+        last_scan = None
+        try:
+            ws_tl = sh.worksheet("timeline_live")
+            tl_vals = ws_tl.get_all_values()
+            if len(tl_vals) > 1:
+                df_tl = pd.DataFrame(tl_vals[1:], columns=tl_vals[0])
+                if "Date" in df_tl.columns and "ScanTime" in df_tl.columns:
+                    df_tl["_dt"] = df_tl["Date"] + " " + df_tl["ScanTime"]
+                    last_scan = df_tl["_dt"].max()
+        except Exception:
+            pass
+
+        last_collector = None
+        try:
+            ws_pa = sh.worksheet("post_analysis")
+            pa_vals = ws_pa.get_all_values()
+            if len(pa_vals) > 1:
+                df_pa = pd.DataFrame(pa_vals[1:], columns=pa_vals[0])
+                if "ScanDate" in df_pa.columns:
+                    last_collector = df_pa["ScanDate"].max()
+        except Exception:
+            pass
+
+        return last_scan, last_collector
+    except Exception:
+        return None, None
+
+
+def system_health_bar():
+    today     = datetime.now(PERU_TZ).strftime("%Y-%m-%d")
+    yesterday = (datetime.now(PERU_TZ) - timedelta(days=1)).strftime("%Y-%m-%d")
+
+    last_scan, last_collector = _fetch_health_data()
+
+    parts = []
+
+    # ── Last scan status ────────────────────────────────────────────────────
+    if last_scan:
+        scan_date = last_scan[:10]
+        if scan_date == today:
+            scan_icon = "✅"
+        elif scan_date == yesterday:
+            scan_icon = "⚠️"
+        else:
+            scan_icon = "🔴"
+        parts.append(f"{scan_icon} Last scan: **{last_scan}**")
+    else:
+        parts.append("🔴 Last scan: **unknown**")
+
+    # ── Last collector status ───────────────────────────────────────────────
+    if last_collector:
+        try:
+            collector_dt = datetime.strptime(last_collector, "%Y-%m-%d")
+            days_old = (datetime.now(PERU_TZ).replace(tzinfo=None) - collector_dt).days
+            if days_old > 2:
+                parts.append(f"🔴 Collector may be failing — last update: **{last_collector}**")
+            else:
+                parts.append(f"✅ Last collector: **{last_collector}**")
+        except Exception:
+            parts.append(f"✅ Last collector: **{last_collector}**")
+    else:
+        parts.append("🔴 Last collector: **unknown**")
+
+    st.markdown("&nbsp;&nbsp;|&nbsp;&nbsp;".join(parts))
+    st.markdown("<hr style='margin:4px 0 12px 0; border-color:#333'>", unsafe_allow_html=True)
+
+
 def main():
     page = st.sidebar.radio(
         "🧭 Navigation",
         ["📊 Live Tracker", "💼 Portfolio Tracker", "📅 Daily Summary", "📦 Timeline Archive", "🔬 Post Analysis"]
     )
     
+    system_health_bar()
+
     if page == "📊 Live Tracker":
         main_page()
     elif page == "💼 Portfolio Tracker":
