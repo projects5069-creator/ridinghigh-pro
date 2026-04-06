@@ -1021,14 +1021,63 @@ def _get_gc():
 SHEET_ID = "1oyefUPV52SMeAlC4UejECYoPRNRudJJS42rukNGYx5k"
 PERU_TZ = pytz.timezone("America/Lima")
 
-def load_latest_from_sheets():
+
+# ── Cached sheet loaders ──────────────────────────────────────────────────────
+
+@st.cache_data(ttl=120)
+def _cached_timeline_live() -> pd.DataFrame:
+    """timeline_live → raw DataFrame. Refreshes every 2 min."""
     try:
         gc = _get_gc()
-        if not gc: return None, None
-        ws = gc.open_by_key(SHEET_ID).worksheet("timeline_live")
-        data = ws.get_all_values()
-        if len(data) <= 1: return None, None
+        if not gc: return pd.DataFrame()
+        data = gc.open_by_key(SHEET_ID).worksheet("timeline_live").get_all_values()
+        if len(data) <= 1: return pd.DataFrame()
+        return pd.DataFrame(data[1:], columns=data[0])
+    except Exception:
+        return pd.DataFrame()
+
+
+@st.cache_data(ttl=3600)
+def _cached_daily_snapshots() -> pd.DataFrame:
+    """daily_snapshots → raw DataFrame. Refreshes every 60 min."""
+    try:
+        gc = _get_gc()
+        if not gc: return pd.DataFrame()
+        data = gc.open_by_key(SHEET_ID).worksheet("daily_snapshots").get_all_values()
+        if len(data) <= 1: return pd.DataFrame()
+        return pd.DataFrame(data[1:], columns=data[0])
+    except Exception:
+        return pd.DataFrame()
+
+
+@st.cache_data(ttl=1800)
+def _cached_portfolio() -> pd.DataFrame:
+    """portfolio → DataFrame with numeric cols. Refreshes every 30 min."""
+    try:
+        gc = _get_gc()
+        if not gc: return pd.DataFrame()
+        data = gc.open_by_key(SHEET_ID).worksheet("portfolio").get_all_values()
+        if len(data) <= 1: return pd.DataFrame()
         df = pd.DataFrame(data[1:], columns=data[0])
+        for col in ["Score", "BuyPrice", "CurrentPrice", "Change%", "P/L"]:
+            if col in df.columns:
+                df[col] = pd.to_numeric(df[col], errors="coerce")
+        return df
+    except Exception:
+        return pd.DataFrame()
+
+
+@st.cache_data(ttl=3600)
+def _cached_post_analysis() -> pd.DataFrame:
+    """post_analysis → DataFrame via gsheets_sync. Refreshes every 60 min."""
+    from gsheets_sync import load_post_analysis_from_sheets
+    return load_post_analysis_from_sheets()
+
+
+def load_latest_from_sheets():
+    try:
+        df = _cached_timeline_live()
+        if df.empty: return None, None
         today = datetime.now(PERU_TZ).strftime("%Y-%m-%d")
         df = df[df["Date"] == today]
         if df.empty: return None, None
@@ -1041,17 +1090,13 @@ def load_latest_from_sheets():
                 results.append({"Ticker":row["Ticker"],"Score":f("Score"),"Price":f("Price"),"Change":f("Change"),"MxV":f("MxV"),"PriceTo52WHigh":f("PriceTo52WHigh"),"PriceToHigh":f("PriceToHigh"),"RSI":f("RSI"),"ATRX":f("ATRX"),"REL_VOL":f("REL_VOL"),"RunUp":f("RunUp"),"Float%":f("Float%"),"Gap":f("Gap"),"VWAP":f("VWAP")})
             except: continue
         return results, latest_time
-    except Exception as e:
+    except Exception:
         return None, None
 
 def load_timeline_today_from_sheets():
     try:
-        gc = _get_gc()
-        if not gc: return None
-        ws = gc.open_by_key(SHEET_ID).worksheet("timeline_live")
-        data = ws.get_all_values()
-        if len(data) <= 1: return None
-        df = pd.DataFrame(data[1:], columns=data[0])
+        df = _cached_timeline_live()
+        if df.empty: return None
         today = datetime.now(PERU_TZ).strftime("%Y-%m-%d")
         df = df[df["Date"] == today].copy()
         if df.empty: return None
@@ -1394,29 +1439,21 @@ def daily_summary_page():
     system_health_bar()
 
     if is_cloud():
-        try:
-            gc = _get_gc()
-            sh = gc.open_by_key(SHEET_ID)
-            ws = sh.worksheet("daily_snapshots")
-            data = ws.get_all_values()
-            if len(data) <= 1:
-                st.warning("⚠️ No data yet - will be saved at 14:59")
-                return
-            all_df = pd.DataFrame(data[1:], columns=data[0])
-            dates = sorted(all_df["Date"].unique().tolist(), reverse=True)
-        except Exception as e:
-            st.error(f"Error: {e}")
+        all_df = _cached_daily_snapshots()
+        if all_df.empty:
+            st.warning("⚠️ No data yet - will be saved at 14:59")
             return
+        dates = sorted(all_df["Date"].unique().tolist(), reverse=True)
     else:
         logger = DataLogger()
         dates = logger.get_all_dates()
-    
+
     if not dates:
         st.warning("⚠️ No data")
         return
-    
+
     selected_date = st.selectbox("📆 Date", dates, index=0)
-    
+
     if is_cloud():
         df = all_df[all_df["Date"] == selected_date].drop(columns=["Date"], errors="ignore")
     else:
@@ -1573,33 +1610,21 @@ def portfolio_tracker_page():
     
     with st.spinner("Loading portfolio..."):
         if is_cloud():
-            try:
-                gc = _get_gc()
-                sh = gc.open_by_key(SHEET_ID)
-                ws = sh.worksheet("portfolio")
-                data = ws.get_all_values()
-                if len(data) <= 1:
-                    df = None
-                else:
-                    df = pd.DataFrame(data[1:], columns=data[0])
-                    for col in ["Score","BuyPrice","CurrentPrice","Change%","P/L"]:
-                        if col in df.columns:
-                            df[col] = pd.to_numeric(df[col], errors="coerce")
-                    import yfinance as yf
-                    for idx, row in df.iterrows():
-                        try:
-                            ticker = row["Ticker"]
-                            hist = yf.Ticker(ticker).history(period="1d")
-                            if not hist.empty:
-                                current = hist.iloc[-1]["Close"]
-                                buy = float(row["BuyPrice"])
-                                df.at[idx, "CurrentPrice"] = round(current, 2)
-                                df.at[idx, "Change%"] = round(((current - buy) / buy) * 100, 2)
-                                df.at[idx, "P/L"] = round(current - buy, 2)
-                        except:
-                            pass
-            except:
-                df = None
+            df = _cached_portfolio().copy() if not _cached_portfolio().empty else None
+            if df is not None:
+                import yfinance as yf
+                for idx, row in df.iterrows():
+                    try:
+                        ticker = row["Ticker"]
+                        hist = yf.Ticker(ticker).history(period="1d")
+                        if not hist.empty:
+                            current = hist.iloc[-1]["Close"]
+                            buy = float(row["BuyPrice"])
+                            df.at[idx, "CurrentPrice"] = round(current, 2)
+                            df.at[idx, "Change%"] = round(((current - buy) / buy) * 100, 2)
+                            df.at[idx, "P/L"] = round(current - buy, 2)
+                    except:
+                        pass
         else:
             df = portfolio.get_portfolio_with_current_prices()
     
@@ -1682,10 +1707,8 @@ def post_analysis_page():
     st.caption("מניות עם Score 60+ — מה קרה ב-5 ימים אחרי הסריקה")
     system_health_bar()
 
-    from gsheets_sync import load_post_analysis_from_sheets
-
     with st.spinner("טוען נתונים..."):
-        df = load_post_analysis_from_sheets()
+        df = _cached_post_analysis()
 
     if not df.empty and "Ticker" in df.columns:
         import yfinance as yf
@@ -2074,41 +2097,25 @@ def post_analysis_page():
                     st.error(f"שגיאה: {e}")
 
 
-@st.cache_data(ttl=300)
 def _fetch_health_data():
-    """Fetch last scan (timeline_live) and last collector (post_analysis) timestamps. Cached 5 min."""
+    """Return last scan timestamp and last collector date using cached loaders."""
+    last_scan = None
+    last_collector = None
     try:
-        gc = _get_gc()
-        if not gc:
-            return None, None
-        sh = gc.open_by_key(SHEET_ID)
-
-        last_scan = None
-        try:
-            ws_tl = sh.worksheet("timeline_live")
-            tl_vals = ws_tl.get_all_values()
-            if len(tl_vals) > 1:
-                df_tl = pd.DataFrame(tl_vals[1:], columns=tl_vals[0])
-                if "Date" in df_tl.columns and "ScanTime" in df_tl.columns:
-                    df_tl["_dt"] = df_tl["Date"] + " " + df_tl["ScanTime"]
-                    last_scan = df_tl["_dt"].max()
-        except Exception:
-            pass
-
-        last_collector = None
-        try:
-            ws_pa = sh.worksheet("post_analysis")
-            pa_vals = ws_pa.get_all_values()
-            if len(pa_vals) > 1:
-                df_pa = pd.DataFrame(pa_vals[1:], columns=pa_vals[0])
-                if "ScanDate" in df_pa.columns:
-                    last_collector = df_pa["ScanDate"].max()
-        except Exception:
-            pass
-
-        return last_scan, last_collector
+        df_tl = _cached_timeline_live()
+        if not df_tl.empty and "Date" in df_tl.columns and "ScanTime" in df_tl.columns:
+            df_tl = df_tl.copy()
+            df_tl["_dt"] = df_tl["Date"] + " " + df_tl["ScanTime"]
+            last_scan = df_tl["_dt"].max()
     except Exception:
-        return None, None
+        pass
+    try:
+        df_pa = _cached_post_analysis()
+        if not df_pa.empty and "ScanDate" in df_pa.columns:
+            last_collector = df_pa["ScanDate"].max()
+    except Exception:
+        pass
+    return last_scan, last_collector
 
 
 def system_health_bar():
@@ -2155,6 +2162,11 @@ def main():
         "🧭 Navigation",
         ["📊 Live Tracker", "💼 Portfolio Tracker", "📅 Daily Summary", "📦 Timeline Archive", "🔬 Post Analysis"]
     )
+
+    st.sidebar.divider()
+    if st.sidebar.button("🔄 Refresh data", help="Clear all caches and reload from Google Sheets"):
+        st.cache_data.clear()
+        st.rerun()
     
     if page == "📊 Live Tracker":
         main_page()
