@@ -38,6 +38,14 @@ def _get_client():
         except Exception:
             pass
 
+        creds_json = os.environ.get("GOOGLE_CREDENTIALS_JSON")
+        if creds_json:
+            creds = Credentials.from_service_account_info(
+                json.loads(creds_json),
+                scopes=SCOPES
+            )
+            return gspread.authorize(creds)
+
         creds_path = os.path.expanduser("~/RidingHighPro/google_credentials.json")
         if os.path.exists(creds_path):
             creds = Credentials.from_service_account_file(creds_path, scopes=SCOPES)

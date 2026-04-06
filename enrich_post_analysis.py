@@ -80,6 +80,9 @@ def run():
         return
 
     gc = _get_client()
+    if gc is None:
+        print("[Enrich] ❌ Cannot connect to Google Sheets — credentials not found")
+        return
     sh = gc.open_by_key(SPREADSHEET_ID)
 
     # ── Load timeline_live (batched to handle 138K+ rows) ──────────────────
