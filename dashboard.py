@@ -1145,7 +1145,8 @@ def _build_timeline_summary(arch_df):
 def main_page():
     st.title("🚀 RidingHigh Pro v14.6")
     st.caption("Portfolio Tracker - Auto-saves stocks with score 60+ at 14:59")
-    
+    system_health_bar()
+
     if 'dashboard' not in st.session_state:
         st.session_state.dashboard = Dashboard()
     
@@ -1300,13 +1301,10 @@ def main_page():
                 'Price': f"${r['Price']:.2f}",
                 'Change': f"{r['Change']:+.1f}%",
                 'MxV': f"{r['MxV']:.1f}%",
-                'P2-52W': f"{r['PriceTo52WHigh']:+.1f}%",
-                'P2High': f"{r['PriceToHigh']:.1f}%",
+                'RunUp': f"{r['RunUp']:+.1f}%",
+                'REL VOL': f"{r['REL_VOL']:.1f}x",
                 'RSI': f"{r['RSI']:.1f}",
                 'ATRX': f"{r['ATRX']:.1f}",
-                'REL VOL': f"{r['REL_VOL']:.1f}x",
-                'RunUp': f"{r['RunUp']:+.1f}%",
-                'Float%': f"{r['Float%']:.2f}%",
                 'Gap': f"{r['Gap']:+.1f}%",
                 'VWAP': f"{r['VWAP']:+.1f}%",
             })
@@ -1393,7 +1391,8 @@ def main_page():
 
 def daily_summary_page():
     st.title("📅 DAILY SUMMARY")
-    
+    system_health_bar()
+
     if is_cloud():
         try:
             gc = _get_gc()
@@ -1476,7 +1475,8 @@ def daily_summary_page():
 
 def timeline_archive_page():
     st.title("📦 Timeline Archive")
-    
+    system_health_bar()
+
     if is_cloud():
         try:
             gc = _get_gc()
@@ -1559,7 +1559,8 @@ def timeline_archive_page():
 def portfolio_tracker_page():
     st.title("💼 PORTFOLIO TRACKER")
     st.caption("Tracking stocks with score 60+ from end of day")
-    
+    system_health_bar()
+
     portfolio = PortfolioTracker()
     
     col1, col2 = st.columns([3, 1])
@@ -1679,6 +1680,7 @@ def portfolio_tracker_page():
 def post_analysis_page():
     st.title("🔬 Post Analysis")
     st.caption("מניות עם Score 60+ — מה קרה ב-5 ימים אחרי הסריקה")
+    system_health_bar()
 
     from gsheets_sync import load_post_analysis_from_sheets
 
@@ -2110,42 +2112,42 @@ def _fetch_health_data():
 
 
 def system_health_bar():
-    today     = datetime.now(PERU_TZ).strftime("%Y-%m-%d")
-    yesterday = (datetime.now(PERU_TZ) - timedelta(days=1)).strftime("%Y-%m-%d")
+    try:
+        today     = datetime.now(PERU_TZ).strftime("%Y-%m-%d")
+        yesterday = (datetime.now(PERU_TZ) - timedelta(days=1)).strftime("%Y-%m-%d")
 
-    last_scan, last_collector = _fetch_health_data()
+        last_scan, last_collector = _fetch_health_data()
 
-    parts = []
+        parts = []
 
-    # ── Last scan status ────────────────────────────────────────────────────
-    if last_scan:
-        scan_date = last_scan[:10]
-        if scan_date == today:
-            scan_icon = "✅"
-        elif scan_date == yesterday:
-            scan_icon = "⚠️"
+        # ── Last scan status ────────────────────────────────────────────────
+        if last_scan:
+            scan_date = last_scan[:10]
+            if scan_date == today:
+                scan_icon = "✅"
+            elif scan_date == yesterday:
+                scan_icon = "⚠️"
+            else:
+                scan_icon = "🔴"
+            parts.append(f"{scan_icon} Last scan: **{last_scan}**")
         else:
-            scan_icon = "🔴"
-        parts.append(f"{scan_icon} Last scan: **{last_scan}**")
-    else:
-        parts.append("🔴 Last scan: **unknown**")
+            parts.append("🔴 Last scan: **unknown**")
 
-    # ── Last collector status ───────────────────────────────────────────────
-    if last_collector:
-        try:
+        # ── Last collector status ────────────────────────────────────────────
+        if last_collector:
             collector_dt = datetime.strptime(last_collector, "%Y-%m-%d")
             days_old = (datetime.now(PERU_TZ).replace(tzinfo=None) - collector_dt).days
             if days_old > 2:
                 parts.append(f"🔴 Collector may be failing — last update: **{last_collector}**")
             else:
                 parts.append(f"✅ Last collector: **{last_collector}**")
-        except Exception:
-            parts.append(f"✅ Last collector: **{last_collector}**")
-    else:
-        parts.append("🔴 Last collector: **unknown**")
+        else:
+            parts.append("🔴 Last collector: **unknown**")
 
-    st.markdown("&nbsp;&nbsp;|&nbsp;&nbsp;".join(parts))
-    st.markdown("<hr style='margin:4px 0 12px 0; border-color:#333'>", unsafe_allow_html=True)
+        st.markdown("&nbsp;&nbsp;|&nbsp;&nbsp;".join(parts))
+        st.markdown("<hr style='margin:4px 0 12px 0; border-color:#333'>", unsafe_allow_html=True)
+    except Exception as e:
+        st.caption(f"⚠️ Health bar error: {e}")
 
 
 def main():
@@ -2154,8 +2156,6 @@ def main():
         ["📊 Live Tracker", "💼 Portfolio Tracker", "📅 Daily Summary", "📦 Timeline Archive", "🔬 Post Analysis"]
     )
     
-    system_health_bar()
-
     if page == "📊 Live Tracker":
         main_page()
     elif page == "💼 Portfolio Tracker":
