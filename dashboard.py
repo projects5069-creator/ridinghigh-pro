@@ -1443,9 +1443,16 @@ def daily_summary_page():
         except:
             return [''] * len(row)
     
+    METRIC_COLS = ["Ticker", "Score", "MxV", "RunUp", "REL_VOL", "RSI", "ATRX", "Gap", "VWAP"]
+    display_cols = [c for c in METRIC_COLS if c in df.columns]
+    df = df[display_cols].copy()
+
     for col in df.columns:
-        df[col] = pd.to_numeric(df[col], errors='coerce')
-    
+        if col != "Ticker":
+            df[col] = pd.to_numeric(df[col], errors='coerce')
+
+    df = df.sort_values("Score", ascending=False, ignore_index=True) if "Score" in df.columns else df
+
     def fmt(val):
         try:
             v = float(val)
@@ -1454,8 +1461,9 @@ def daily_summary_page():
             return f"{v:.2f}"
         except:
             return val
-    
-    styled_df = df.style.apply(highlight_score, axis=1).format(fmt, subset=[c for c in df.columns if df[c].dtype in ['float64','float32','int64','int32']])
+
+    numeric_cols = [c for c in df.columns if c != "Ticker" and df[c].dtype in ['float64','float32','int64','int32']]
+    styled_df = df.style.apply(highlight_score, axis=1).format(fmt, subset=numeric_cols)
     st.dataframe(styled_df, use_container_width=True, hide_index=True, height=table_height)
     
     csv = df.to_csv(index=False)

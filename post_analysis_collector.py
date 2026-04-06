@@ -13,6 +13,7 @@ NEW in v5:
   - Removed: Float% (was wrong formula)
 """
 
+import argparse
 import pandas as pd
 import yfinance as yf
 from datetime import datetime, timedelta
@@ -259,12 +260,15 @@ def is_trading_day(date=None):
 
 
 # ── Main ──────────────────────────────────────────────────────────────────────
-def run():
-    print(f"[Collector] Starting post-analysis collector v5...")
-    today = datetime.now(PERU_TZ).date()
-    if not is_trading_day(today):
-        print(f"[Collector] ⛔ {today} not a trading day — skipping.")
-        return
+def run(target_date: str = None):
+    if target_date:
+        print(f"[Collector] Starting post-analysis collector v5 (backfill: {target_date})...")
+    else:
+        print(f"[Collector] Starting post-analysis collector v5...")
+        today = datetime.now(PERU_TZ).date()
+        if not is_trading_day(today):
+            print(f"[Collector] ⛔ {today} not a trading day — skipping.")
+            return
 
     from gsheets_sync import _get_client, SPREADSHEET_ID, TAB_DAILY_SNAPSHOT
     gc = _get_client()
@@ -280,6 +284,11 @@ def run():
         print("[Collector] No snapshot data"); return
     snapshots_df = pd.DataFrame(data[1:], columns=data[0])
     snapshots_df["Score"] = pd.to_numeric(snapshots_df.get("Score", 0), errors="coerce")
+
+    if target_date:
+        snapshots_df = snapshots_df[snapshots_df.get("Date", pd.Series()) == target_date]
+        print(f"[Collector] Filtered to {len(snapshots_df)} rows for {target_date}")
+
     candidates = snapshots_df[snapshots_df["Score"] >= MIN_SCORE].copy()
     print(f"[Collector] {len(candidates)} stocks with score >= {MIN_SCORE}")
     if candidates.empty: return
@@ -291,7 +300,7 @@ def run():
     tl_df   = pd.DataFrame(tl_data[1:], columns=tl_data[0]) if len(tl_data) > 1 else pd.DataFrame()
 
     existing_df = load_post_analysis_from_sheets()
-    today_str   = datetime.now(PERU_TZ).strftime("%Y-%m-%d")
+    today_str   = target_date if target_date else datetime.now(PERU_TZ).strftime("%Y-%m-%d")
     new_rows    = []
 
     for _, row in candidates.iterrows():
@@ -360,4 +369,8 @@ def run():
 
 
 if __name__ == "__main__":
-    run()
+    parser = argparse.ArgumentParser(description="Post Analysis Collector")
+    parser.add_argument("--date", type=str, default=None,
+                        help="Backfill a specific date (YYYY-MM-DD). Skips trading-day check.")
+    args = parser.parse_args()
+    run(target_date=args.date)
