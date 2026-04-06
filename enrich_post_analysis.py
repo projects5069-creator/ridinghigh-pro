@@ -132,6 +132,8 @@ def run(backfill: bool = False):
                 "PeakScore", "DayRunUp%", "D0_Close", "D0_Volume", "D0_Drop%", "IntraDay_TP10"]:
         if col not in pa.columns:
             pa[col] = None
+    # PeakScoreTime is a time string (e.g. "14:58") — must stay object dtype
+    pa["PeakScoreTime"] = pa["PeakScoreTime"].astype(object)
 
     # ── Columns that must all be filled for a row to be considered complete ──
     TIMELINE_COLS = ["IntraHigh", "IntraLow", "PeakScoreTime", "PeakScorePrice",

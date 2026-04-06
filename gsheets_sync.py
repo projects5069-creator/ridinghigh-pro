@@ -352,7 +352,7 @@ def load_post_analysis_from_sheets() -> pd.DataFrame:
             "D4_Open","D4_High","D4_Low","D4_Close",
             "D5_Open","D5_High","D5_Low","D5_Close",
             "MaxDrop%","BestDay","TP10_Hit","TP15_Hit","TP20_Hit",
-            "IntraHigh","IntraLow","PeakScoreTime","PeakScorePrice",
+            "IntraHigh","IntraLow","PeakScorePrice",
             "PeakScore","DayRunUp%",
         ]
         for col in numeric_cols:
