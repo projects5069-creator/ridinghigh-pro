@@ -6,12 +6,26 @@ Adds:
 """
 
 import sys
+import argparse
 sys.path.insert(0, "/Users/adilevy/RidingHighPro")
 from gsheets_sync import _get_client, SPREADSHEET_ID, load_post_analysis_from_sheets, _df_to_sheet
 import pandas as pd
 import yfinance as yf
 from datetime import datetime, timedelta
 import time
+
+
+def _is_missing(val):
+    """True if value is None, NaN, empty string, or the literal string 'nan'/'None'."""
+    if val is None:
+        return True
+    try:
+        import math
+        if math.isnan(float(val)):
+            return True
+    except (TypeError, ValueError):
+        pass
+    return str(val).strip() in ("", "nan", "None")
 
 def fetch_d0_data(ticker: str, scan_date: str) -> dict:
     """
@@ -69,15 +83,16 @@ def is_trading_day(date=None):
         return date.weekday() < 5
 
 
-def run():
-    print("[Enrich] Starting v2...")
+def run(backfill: bool = False):
+    print("[Enrich] Starting v2..." + (" (backfill mode — all dates)" if backfill else ""))
 
-    # ── Check if today is a trading day ────────────────────────────────────
-    import pytz
-    today = datetime.now(pytz.timezone("America/Lima")).date()
-    if not is_trading_day(today):
-        print(f"[Enrich] ⛔ {today} is not a trading day — skipping.")
-        return
+    # ── Trading-day guard (skipped in backfill mode) ───────────────────────
+    if not backfill:
+        import pytz
+        today = datetime.now(pytz.timezone("America/Lima")).date()
+        if not is_trading_day(today):
+            print(f"[Enrich] ⛔ {today} is not a trading day — skipping.")
+            return
 
     gc = _get_client()
     if gc is None:
@@ -118,43 +133,61 @@ def run():
         if col not in pa.columns:
             pa[col] = None
 
+    # ── Columns that must all be filled for a row to be considered complete ──
+    TIMELINE_COLS = ["IntraHigh", "IntraLow", "PeakScoreTime", "PeakScorePrice",
+                     "PeakScore", "DayRunUp%", "IntraDay_TP10"]
+    D0_COLS       = ["D0_Close", "D0_Volume", "D0_Drop%"]
+
     # ── Enrich each row ─────────────────────────────────────────────────────
     updated = 0
+    skipped = 0
     for idx, row in pa.iterrows():
-        ticker    = row["Ticker"]
-        scan_date = row["ScanDate"]
+        ticker     = str(row.get("Ticker", "")).strip()
+        scan_date  = str(row.get("ScanDate", "")).strip()
         scan_price = pd.to_numeric(row.get("ScanPrice", 0), errors="coerce") or 0
 
+        if not ticker or not scan_date:
+            skipped += 1
+            continue
+
+        timeline_missing = any(_is_missing(row.get(c)) for c in TIMELINE_COLS)
+        d0_missing       = any(_is_missing(row.get(c)) for c in D0_COLS)
+
+        if not timeline_missing and not d0_missing:
+            skipped += 1
+            continue  # row is already fully enriched
+
+        row_changed = False
+
         # ── Timeline-based enrichment ───────────────────────────────────────
-        day_tl = tl[(tl["Ticker"] == ticker) & (tl["Date"] == scan_date)]
+        if timeline_missing:
+            day_tl = tl[(tl["Ticker"] == ticker) & (tl["Date"] == scan_date)]
 
-        if not day_tl.empty:
-            intra_high  = round(day_tl["Price"].max(), 2)
-            intra_low   = round(day_tl["Price"].min(), 2)
-            peak_idx    = day_tl["Score"].idxmax()
-            peak_time   = day_tl.loc[peak_idx, "ScanTime"]
-            peak_price  = round(day_tl.loc[peak_idx, "Price"], 2)
-            peak_score  = round(day_tl.loc[peak_idx, "Score"], 2)
-            first_price = round(day_tl.sort_values("ScanTime").iloc[0]["Price"], 2)
-            run_up_pct  = round((intra_high - first_price) / first_price * 100, 2) if first_price > 0 else 0
+            if not day_tl.empty:
+                intra_high  = round(day_tl["Price"].max(), 2)
+                intra_low   = round(day_tl["Price"].min(), 2)
+                peak_idx    = day_tl["Score"].idxmax()
+                peak_time   = day_tl.loc[peak_idx, "ScanTime"]
+                peak_price  = round(day_tl.loc[peak_idx, "Price"], 2)
+                peak_score  = round(day_tl.loc[peak_idx, "Score"], 2)
+                first_price = round(day_tl.sort_values("ScanTime").iloc[0]["Price"], 2)
+                run_up_pct  = round((intra_high - first_price) / first_price * 100, 2) if first_price > 0 else 0
 
-            pa.at[idx, "IntraHigh"]      = intra_high
-            pa.at[idx, "IntraLow"]       = intra_low
-            pa.at[idx, "PeakScoreTime"]  = peak_time
-            pa.at[idx, "PeakScorePrice"] = peak_price
-            pa.at[idx, "PeakScore"]      = peak_score
-            pa.at[idx, "DayRunUp%"]      = run_up_pct
+                pa.at[idx, "IntraHigh"]      = intra_high
+                pa.at[idx, "IntraLow"]       = intra_low
+                pa.at[idx, "PeakScoreTime"]  = peak_time
+                pa.at[idx, "PeakScorePrice"] = peak_price
+                pa.at[idx, "PeakScore"]      = peak_score
+                pa.at[idx, "DayRunUp%"]      = run_up_pct
 
-            # IntraDay_TP10 — did price drop 10% from ScanPrice within scan day?
-            if scan_price > 0:
-                pa.at[idx, "IntraDay_TP10"] = 1 if intra_low <= scan_price * 0.90 else 0
+                if scan_price > 0:
+                    pa.at[idx, "IntraDay_TP10"] = 1 if intra_low <= scan_price * 0.90 else 0
 
-        # ── D0 enrichment (only if missing or empty) ───────────────────────
-        d0_missing = (
-            pd.isna(row.get("D0_Close")) or
-            str(row.get("D0_Close", "")).strip() in ["", "nan", "None"]
-        )
+                row_changed = True
+            else:
+                print(f"[Enrich] No timeline data for {ticker} {scan_date}")
 
+        # ── D0 enrichment ───────────────────────────────────────────────────
         if d0_missing:
             print(f"[Enrich] Fetching D0 for {ticker} ({scan_date})...")
             d0 = fetch_d0_data(ticker, scan_date)
@@ -163,16 +196,19 @@ def run():
                 pa.at[idx, "D0_Close"]  = d0["D0_Close"]
                 pa.at[idx, "D0_Volume"] = d0["D0_Volume"]
 
-                # D0_Drop% = close vs ScanPrice
                 if scan_price > 0:
                     d0_drop = round((d0["D0_Close"] - scan_price) / scan_price * 100, 2)
                     pa.at[idx, "D0_Drop%"] = d0_drop
 
+                row_changed = True
             time.sleep(0.3)  # rate limit
 
-        updated += 1
+        if row_changed:
+            updated += 1
+        else:
+            skipped += 1
 
-    print(f"[Enrich] Enriched {updated} rows")
+    print(f"[Enrich] Updated: {updated} rows | Skipped (already complete or no data): {skipped} rows")
 
     # ── Save back to Sheets ─────────────────────────────────────────────────
     ws_pa = sh.worksheet("post_analysis")
@@ -181,4 +217,8 @@ def run():
 
 
 if __name__ == "__main__":
-    run()
+    parser = argparse.ArgumentParser(description="Enrich Post Analysis")
+    parser.add_argument("--backfill", action="store_true",
+                        help="Process all dates, skip trading-day guard.")
+    args = parser.parse_args()
+    run(backfill=args.backfill)
