@@ -1614,6 +1614,28 @@ def _fetch_live_prices(tickers: tuple) -> dict:
         return {}
 
 
+@st.cache_data(ttl=3600)
+def _fetch_high_low_since(ticker_dates: tuple) -> dict:
+    """
+    Fetch High and Low for each ticker since its scan_date until today.
+    ticker_dates: tuple of (ticker, scan_date_str) pairs
+    Returns: {ticker_scandate: {"high": x, "low": y}}
+    """
+    result = {}
+    for ticker, scan_date in ticker_dates:
+        key = f"{ticker}_{scan_date}"
+        try:
+            hist = yf.download(ticker, start=scan_date, progress=False, auto_adjust=True)
+            if hist.empty:
+                continue
+            high = round(float(hist["High"].max()), 2)
+            low  = round(float(hist["Low"].min()),  2)
+            result[key] = {"high": high, "low": low}
+        except Exception:
+            continue
+    return result
+
+
 def _simulate_short_trades(pa_df: pd.DataFrame):
     """
     Simulate $1000 short trades for every row in post_analysis.
@@ -1633,6 +1655,13 @@ def _simulate_short_trades(pa_df: pd.DataFrame):
         if pd.isna(pd.to_numeric(row.get("D1_High"), errors="coerce"))
     })
     live_prices = _fetch_live_prices(tuple(sorted(set(pending_tickers))))
+
+    # Pre-fetch High/Low since entry for ALL tickers
+    all_ticker_dates = tuple(sorted({
+        (str(row.get("Ticker", "")), str(row.get("ScanDate", "")))
+        for _, row in pa_df.iterrows()
+    }))
+    high_low_data = _fetch_high_low_since(all_ticker_dates)
 
     rows_a, rows_b = [], []
 
@@ -1662,11 +1691,15 @@ def _simulate_short_trades(pa_df: pd.DataFrame):
                     proxy_investment = round(proxy_shares * scan_price, 2)
                     proxy_current = live_price if live_price is not None else current_price
                     proxy_pnl = round(proxy_shares * (scan_price - live_price), 2) if live_price else None
+                    hl_key = f"{ticker}_{scan_date}"
+                    hl     = high_low_data.get(hl_key, {})
                     rec = {
                         "Ticker": ticker, "ScanDate": scan_date,
                         "Score": None if pd.isna(score) else round(float(score), 2),
                         "EntryPrice": None, "Shares": proxy_shares, "Investment": f"${proxy_investment:.2f}",
-                        "TP10_Price": None, "SL_Price": None, "CurrentPrice": proxy_current,
+                        "TP10_Price": None, "SL_Price": None,
+                        "MaxHigh": hl.get("high"), "MinLow": hl.get("low"),
+                        "CurrentPrice": proxy_current,
                         "Status": "Pending ⏳", "Exit_Day": "—", "PnL_$": proxy_pnl, "TP15_reached": "—",
                     }
                 else:
@@ -1749,6 +1782,8 @@ def _simulate_short_trades(pa_df: pd.DataFrame):
                     elif current_price is not None:
                         pnl = round(shares * (entry_price - current_price), 2)
 
+                hl_key = f"{ticker}_{scan_date}"
+                hl     = high_low_data.get(hl_key, {})
                 rec = {
                     "Ticker":       ticker,
                     "ScanDate":     scan_date,
@@ -1758,6 +1793,8 @@ def _simulate_short_trades(pa_df: pd.DataFrame):
                     "Investment":   f"${investment:.2f}",
                     "TP10_Price":   tp10_price,
                     "SL_Price":     sl_price,
+                    "MaxHigh":      hl.get("high"),
+                    "MinLow":       hl.get("low"),
                     "CurrentPrice": current_price,
                     "Status":       status,
                     "Exit_Day":     f"D{exit_day}" if isinstance(exit_day, int) else (exit_day if exit_day else ("—" if status == "Pending ⏳" else "D5+")),
@@ -1807,7 +1844,7 @@ def _render_short_table(df: pd.DataFrame, download_key: str):
 
     # ── Format display columns ───────────────────────────────────────────────
     display = df.copy()
-    for col in ["Score", "EntryPrice", "TP10_Price", "SL_Price", "CurrentPrice"]:
+    for col in ["Score", "EntryPrice", "TP10_Price", "SL_Price", "MaxHigh", "MinLow", "CurrentPrice"]:
         if col in display.columns:
             display[col] = display[col].apply(
                 lambda v: f"{float(v):.2f}" if pd.notna(v) else "—"
