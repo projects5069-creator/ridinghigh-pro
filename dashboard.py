@@ -1075,6 +1075,25 @@ def _cached_post_analysis() -> pd.DataFrame:
     return load_post_analysis_from_sheets()
 
 
+@st.cache_data(ttl=60)
+def _cached_portfolio_live() -> pd.DataFrame:
+    """portfolio_live tab — RunningHigh/RunningLow per pending stock. Refreshes every 60s."""
+    try:
+        gc = _get_gc()
+        if not gc:
+            return pd.DataFrame()
+        data = gc.open_by_key(SHEET_ID).worksheet("portfolio_live").get_all_values()
+        if len(data) <= 1:
+            return pd.DataFrame()
+        df = pd.DataFrame(data[1:], columns=data[0])
+        for col in ["EntryPrice", "RunningHigh", "RunningLow", "TP10_Price", "SL_Price", "CurrentPrice"]:
+            if col in df.columns:
+                df[col] = pd.to_numeric(df[col], errors="coerce")
+        return df
+    except Exception:
+        return pd.DataFrame()
+
+
 def load_latest_from_sheets():
     try:
         df = _cached_timeline_live()
@@ -1670,20 +1689,16 @@ def _simulate_short_trades(pa_df: pd.DataFrame):
     SL_PCT   = 0.07   # 7%  stop-loss   (short: price rises)
     TP15_PCT = 0.15   # 15% stretch target — mark only
 
-    # Pre-fetch live prices for tickers with no D1 data yet
+    # ── טעון portfolio_live (RunningHigh/RunningLow מה-scanner) ─────────────
+    pl_df = _cached_portfolio_live()
+
+    # Pre-fetch live prices רק למניות שאין להן נתון ב-portfolio_live
     pending_tickers = list({
         str(row.get("Ticker", ""))
         for _, row in pa_df.iterrows()
         if pd.isna(pd.to_numeric(row.get("D1_High"), errors="coerce"))
     })
     live_prices = _fetch_live_prices(tuple(sorted(set(pending_tickers))))
-
-    # Pre-fetch High/Low since entry for ALL tickers
-    all_ticker_dates = tuple(sorted({
-        (str(row.get("Ticker", "")), str(row.get("ScanDate", "")))
-        for _, row in pa_df.iterrows()
-    }))
-    high_low_data = _fetch_high_low_since(all_ticker_dates)
 
     rows_a, rows_b = [], []
 
@@ -1770,58 +1785,70 @@ def _simulate_short_trades(pa_df: pd.DataFrame):
 
                 if status == "Open ⏳":
                     if not has_data:
-                        # ── נתוני High/Low היסטוריים מאז הסריקה ──────────────
-                        hl_key_check = f"{ticker}_{scan_date}"
-                        hl_check     = high_low_data.get(hl_key_check, {})
-                        hist_high    = hl_check.get("high")
-                        hist_low     = hl_check.get("low")
+                        # ── קרא מ-portfolio_live (נתון מהscanner כל דקה) ──────
+                        pl_key  = None
+                        pl_row  = None
+                        if not pl_df.empty:
+                            pl_mask = (pl_df["Ticker"] == ticker) & (pl_df["ScanDate"] == scan_date)
+                            if pl_mask.any():
+                                pl_row = pl_df[pl_mask].iloc[0]
 
-                        live_price = live_prices.get(ticker)
-                        if live_price is not None:
-                            current_price = live_price
+                        if pl_row is not None:
+                            running_high  = pl_row.get("RunningHigh")
+                            running_low   = pl_row.get("RunningLow")
+                            pl_status     = str(pl_row.get("Status", ""))
+                            pl_current    = pl_row.get("CurrentPrice")
+                            if pd.notna(pl_current):
+                                current_price = round(float(pl_current), 2)
 
-                        # ── חשב ימי מסחר מאז הסריקה ─────────────────────────
-                        try:
-                            scan_dt      = datetime.strptime(scan_date, "%Y-%m-%d")
-                            today_dt     = datetime.now().replace(tzinfo=None)
-                            trading_days = 0
-                            d = scan_dt
-                            while d < today_dt:
-                                d += timedelta(days=1)
-                                if d.weekday() < 5:
-                                    trading_days += 1
-                            trading_days = max(trading_days, 1)
-                        except:
-                            trading_days = 1
+                            # חשב ימי מסחר
+                            try:
+                                scan_dt      = datetime.strptime(scan_date, "%Y-%m-%d")
+                                today_dt     = datetime.now().replace(tzinfo=None)
+                                trading_days = 0
+                                d = scan_dt
+                                while d < today_dt:
+                                    d += timedelta(days=1)
+                                    if d.weekday() < 5:
+                                        trading_days += 1
+                                trading_days = max(trading_days, 1)
+                            except:
+                                trading_days = 1
 
-                        # ── SL נבדק מול MaxHigh, TP נבדק מול MinLow ──────────
-                        sl_hit_hist = hist_high is not None and hist_high >= sl_price
-                        tp_hit_hist = hist_low  is not None and hist_low  <= tp10_price
-                        sl_hit_live = live_price is not None and live_price >= sl_price
-                        tp_hit_live = live_price is not None and live_price <= tp10_price
-
-                        if sl_hit_hist and tp_hit_hist:
-                            # שניהם נגעו — SL גובר (שורט)
-                            status   = "SL ❌"
-                            exit_day = trading_days
-                            pnl      = round(-investment * SL_PCT, 2)
-                        elif sl_hit_hist or sl_hit_live:
-                            status   = "SL ❌"
-                            exit_day = trading_days
-                            pnl      = round(-investment * SL_PCT, 2)
-                        elif tp_hit_hist or tp_hit_live:
-                            status   = "TP10 ✅"
-                            exit_day = trading_days
-                            pnl      = round(investment * TP_PCT, 2)
+                            if "SL" in pl_status:
+                                status   = "SL ❌"
+                                exit_day = trading_days
+                                pnl      = round(-investment * SL_PCT, 2)
+                            elif "TP10" in pl_status:
+                                status   = "TP10 ✅"
+                                exit_day = trading_days
+                                pnl      = round(investment * TP_PCT, 2)
+                            else:
+                                status = "Pending ⏳"
+                                if current_price is not None:
+                                    pnl = round(shares * (entry_price - current_price), 2)
                         else:
+                            # אין נתון ב-portfolio_live עדיין — fallback למחיר חי
+                            live_price = live_prices.get(ticker)
+                            if live_price is not None:
+                                current_price = live_price
                             status = "Pending ⏳"
                             if current_price is not None:
                                 pnl = round(shares * (entry_price - current_price), 2)
                     elif current_price is not None:
                         pnl = round(shares * (entry_price - current_price), 2)
 
-                hl_key = f"{ticker}_{scan_date}"
-                hl     = high_low_data.get(hl_key, {})
+                # ── RunningHigh / RunningLow לתצוגה ─────────────────────────
+                running_high_disp = None
+                running_low_disp  = None
+                if not pl_df.empty:
+                    pl_mask2 = (pl_df["Ticker"] == ticker) & (pl_df["ScanDate"] == scan_date)
+                    if pl_mask2.any():
+                        rh = pl_df[pl_mask2].iloc[0].get("RunningHigh")
+                        rl = pl_df[pl_mask2].iloc[0].get("RunningLow")
+                        if pd.notna(rh): running_high_disp = round(float(rh), 2)
+                        if pd.notna(rl): running_low_disp  = round(float(rl), 2)
+
                 rec = {
                     "Ticker":       ticker,
                     "ScanDate":     scan_date,
@@ -1832,8 +1859,8 @@ def _simulate_short_trades(pa_df: pd.DataFrame):
                     "Investment":   f"${investment:.2f}",
                     "TP10_Price":   tp10_price,
                     "SL_Price":     sl_price,
-                    "MaxHigh":      hl.get("high"),
-                    "MinLow":       hl.get("low"),
+                    "MaxHigh":      running_high_disp,
+                    "MinLow":       running_low_disp,
                     "Status":       status,
                     "Exit_Day":     f"D{exit_day}" if isinstance(exit_day, int) else (exit_day if exit_day else ("—" if status == "Pending ⏳" else "D5+")),
                     "PnL_$":        pnl,
