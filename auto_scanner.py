@@ -572,7 +572,7 @@ def update_portfolio_live(gc, sh, now_peru):
             tp_hit = new_low  <= tp10_price
 
             if sl_hit and tp_hit:
-                status = "Pending ⏳"   # שניהם נגעו — לא יודעים הסדר
+                status = "SL ❌"   # בשורט — SL גובר (המחיר עלה קודם או באותו הרגע)
             elif sl_hit:
                 status = "SL ❌"
             elif tp_hit:
