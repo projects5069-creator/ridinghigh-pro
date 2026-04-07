@@ -1957,7 +1957,7 @@ def _render_short_table(df: pd.DataFrame, download_key: str):
     st.dataframe(
         display.style.apply(row_style, axis=1),
         use_container_width=True, hide_index=True,
-        height=min(10 * 35 + 40, max(len(display) * 35 + 40, 500)),
+        height=min(15 * 35 + 40, max(len(display) * 35 + 40, 500)),
     )
 
     st.download_button(
@@ -1970,11 +1970,13 @@ def _render_short_table(df: pd.DataFrame, download_key: str):
 
 
 def portfolio_tracker_page():
-    # ── כותרת + כפתור רענון בשורה אחת ───────────────────────────────────────
+    # ── כותרת + כפתור רענון ──────────────────────────────────────────────────
     h1, h2 = st.columns([5, 1])
     with h1:
-        st.markdown("### 💼 SHORT TRADE SIMULATOR &nbsp; <small style='color:#888;font-size:0.7rem'>$1,000 short · TP 10% · SL 7%</small>", unsafe_allow_html=True)
+        st.markdown("## 💼 SHORT TRADE SIMULATOR")
+        st.caption("$1,000 short per stock — TP 10% / SL 7% — two entry scenarios")
     with h2:
+        st.markdown("<br>", unsafe_allow_html=True)
         if st.button("🔄 Refresh", help="מחיר חי מתעדכן כל שעה — לחץ לרענון מיידי"):
             st.cache_data.clear()
             st.rerun()
@@ -1987,23 +1989,14 @@ def portfolio_tracker_page():
         st.info("📭 No post-analysis data yet.")
         return
 
-    # ── Filters ──────────────────────────────────────────────────────────────
-    with st.expander("🔧 Filters", expanded=False):
-        fc1, fc2, fc3 = st.columns(3)
-        with fc1:
-            all_dates  = sorted(pa["ScanDate"].dropna().unique().tolist(), reverse=True)
-            sel_dates  = st.multiselect("ScanDate", all_dates, default=all_dates)
-        with fc2:
-            all_status = ["TP10 ✅", "SL ❌", "Open ⏳", "Pending ⏳", "No Data"]
-            sel_status = st.multiselect("Status", all_status,
-                                        default=["TP10 ✅", "SL ❌", "Open ⏳", "Pending ⏳"])
-        with fc3:
-            min_score = st.slider("Min Score", 0, 100, 60)
+    # ── ללא פילטרים — ברירות מחדל קבועות ───────────────────────────────────
+    all_dates  = sorted(pa["ScanDate"].dropna().unique().tolist(), reverse=True)
+    sel_dates  = all_dates
+    sel_status = ["TP10 ✅", "SL ❌", "Open ⏳", "Pending ⏳"]
+    min_score  = 60
 
-    # Filter source data before simulation (faster than post-filtering)
+    # Filter source data
     pa_filtered = pa.copy()
-    if sel_dates:
-        pa_filtered = pa_filtered[pa_filtered["ScanDate"].isin(sel_dates)]
     score_col = pd.to_numeric(pa_filtered["Score"], errors="coerce")
     pa_filtered = pa_filtered[score_col >= min_score]
 
@@ -2014,10 +2007,9 @@ def portfolio_tracker_page():
     with st.spinner("Running simulation..."):
         table_a, table_b = _simulate_short_trades(pa_filtered)
 
-    # Apply status filter after simulation
-    if sel_status:
-        table_a = table_a[table_a["Status"].isin(sel_status)]
-        table_b = table_b[table_b["Status"].isin(sel_status)]
+    # Apply status filter
+    table_a = table_a[table_a["Status"].isin(sel_status)]
+    table_b = table_b[table_b["Status"].isin(sel_status)]
 
     # ── Tabs ─────────────────────────────────────────────────────────────────
     tab_a, tab_b = st.tabs([
