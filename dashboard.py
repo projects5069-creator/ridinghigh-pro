@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-RidingHigh Pro v14.2 - EXCEL EXPORT FIXED
+RidingHigh Pro v14.6 - Score 7 Metrics
 - Timeline Archive exported as proper grid (pivot) per date
 - New "Analysis Export" with Timeline Summary for AI analysis
 - Full export unchanged except Timeline Archive fix
@@ -8,10 +8,11 @@ RidingHigh Pro v14.2 - EXCEL EXPORT FIXED
 
 import streamlit as st
 import pandas as pd
+import math
 import time
 import plotly.express as px
 from finvizfinance.screener.overview import Overview
-from datetime import datetime, time as dt_time
+from datetime import datetime, time as dt_time, timedelta
 import pytz
 import pytz
 from data_logger import DataLogger
@@ -24,7 +25,7 @@ from gsheets_sync import save_snapshot_to_sheets, save_timeline_to_sheets, save_
 import json
 
 st.set_page_config(
-    page_title="RidingHigh Pro v14.2",
+    page_title="RidingHigh Pro v14.6",
     page_icon="🚀",
     layout="wide"
 )
@@ -1021,14 +1022,63 @@ def _get_gc():
 SHEET_ID = "1oyefUPV52SMeAlC4UejECYoPRNRudJJS42rukNGYx5k"
 PERU_TZ = pytz.timezone("America/Lima")
 
-def load_latest_from_sheets():
+
+# ── Cached sheet loaders ──────────────────────────────────────────────────────
+
+@st.cache_data(ttl=120)
+def _cached_timeline_live() -> pd.DataFrame:
+    """timeline_live → raw DataFrame. Refreshes every 2 min."""
     try:
         gc = _get_gc()
-        if not gc: return None, None
-        ws = gc.open_by_key(SHEET_ID).worksheet("timeline_live")
-        data = ws.get_all_values()
-        if len(data) <= 1: return None, None
+        if not gc: return pd.DataFrame()
+        data = gc.open_by_key(SHEET_ID).worksheet("timeline_live").get_all_values()
+        if len(data) <= 1: return pd.DataFrame()
+        return pd.DataFrame(data[1:], columns=data[0])
+    except Exception:
+        return pd.DataFrame()
+
+
+@st.cache_data(ttl=300)
+def _cached_daily_snapshots() -> pd.DataFrame:
+    """daily_snapshots → raw DataFrame. Refreshes every 5 min."""
+    try:
+        gc = _get_gc()
+        if not gc: return pd.DataFrame()
+        data = gc.open_by_key(SHEET_ID).worksheet("daily_snapshots").get_all_values()
+        if len(data) <= 1: return pd.DataFrame()
+        return pd.DataFrame(data[1:], columns=data[0])
+    except Exception:
+        return pd.DataFrame()
+
+
+@st.cache_data(ttl=3600)
+def _cached_portfolio() -> pd.DataFrame:
+    """portfolio → DataFrame with numeric cols. Refreshes every 60 min."""
+    try:
+        gc = _get_gc()
+        if not gc: return pd.DataFrame()
+        data = gc.open_by_key(SHEET_ID).worksheet("portfolio").get_all_values()
+        if len(data) <= 1: return pd.DataFrame()
         df = pd.DataFrame(data[1:], columns=data[0])
+        for col in ["Score", "BuyPrice", "CurrentPrice", "Change%", "P/L"]:
+            if col in df.columns:
+                df[col] = pd.to_numeric(df[col], errors="coerce")
+        return df
+    except Exception:
+        return pd.DataFrame()
+
+
+@st.cache_data(ttl=300)
+def _cached_post_analysis() -> pd.DataFrame:
+    """post_analysis → DataFrame via gsheets_sync. Refreshes every 5 min."""
+    from gsheets_sync import load_post_analysis_from_sheets
+    return load_post_analysis_from_sheets()
+
+
+def load_latest_from_sheets():
+    try:
+        df = _cached_timeline_live()
+        if df.empty: return None, None
         today = datetime.now(PERU_TZ).strftime("%Y-%m-%d")
         df = df[df["Date"] == today]
         if df.empty: return None, None
@@ -1041,17 +1091,13 @@ def load_latest_from_sheets():
                 results.append({"Ticker":row["Ticker"],"Score":f("Score"),"Price":f("Price"),"Change":f("Change"),"MxV":f("MxV"),"PriceTo52WHigh":f("PriceTo52WHigh"),"PriceToHigh":f("PriceToHigh"),"RSI":f("RSI"),"ATRX":f("ATRX"),"REL_VOL":f("REL_VOL"),"RunUp":f("RunUp"),"Float%":f("Float%"),"Gap":f("Gap"),"VWAP":f("VWAP")})
             except: continue
         return results, latest_time
-    except Exception as e:
+    except Exception:
         return None, None
 
 def load_timeline_today_from_sheets():
     try:
-        gc = _get_gc()
-        if not gc: return None
-        ws = gc.open_by_key(SHEET_ID).worksheet("timeline_live")
-        data = ws.get_all_values()
-        if len(data) <= 1: return None
-        df = pd.DataFrame(data[1:], columns=data[0])
+        df = _cached_timeline_live()
+        if df.empty: return None
         today = datetime.now(PERU_TZ).strftime("%Y-%m-%d")
         df = df[df["Date"] == today].copy()
         if df.empty: return None
@@ -1143,9 +1189,10 @@ def _build_timeline_summary(arch_df):
 
 
 def main_page():
-    st.title("🚀 RidingHigh Pro v14.2")
+    st.title("🚀 RidingHigh Pro v14.6")
     st.caption("Portfolio Tracker - Auto-saves stocks with score 60+ at 14:59")
-    
+    system_health_bar()
+
     if 'dashboard' not in st.session_state:
         st.session_state.dashboard = Dashboard()
     
@@ -1300,13 +1347,10 @@ def main_page():
                 'Price': f"${r['Price']:.2f}",
                 'Change': f"{r['Change']:+.1f}%",
                 'MxV': f"{r['MxV']:.1f}%",
-                'P2-52W': f"{r['PriceTo52WHigh']:+.1f}%",
-                'P2High': f"{r['PriceToHigh']:.1f}%",
+                'RunUp': f"{r['RunUp']:+.1f}%",
+                'REL VOL': f"{r['REL_VOL']:.1f}x",
                 'RSI': f"{r['RSI']:.1f}",
                 'ATRX': f"{r['ATRX']:.1f}",
-                'REL VOL': f"{r['REL_VOL']:.1f}x",
-                'RunUp': f"{r['RunUp']:+.1f}%",
-                'Float%': f"{r['Float%']:.2f}%",
                 'Gap': f"{r['Gap']:+.1f}%",
                 'VWAP': f"{r['VWAP']:+.1f}%",
             })
@@ -1375,7 +1419,7 @@ def main_page():
             except:
                 return ''
         
-        styled_timeline = df_timeline.style.applymap(color_score).format("{:.2f}")
+        styled_timeline = df_timeline.style.map(color_score).format("{:.2f}")
         
         st.dataframe(styled_timeline, use_container_width=True, height=600)
         
@@ -1393,31 +1437,24 @@ def main_page():
 
 def daily_summary_page():
     st.title("📅 DAILY SUMMARY")
-    
+    system_health_bar()
+
     if is_cloud():
-        try:
-            gc = _get_gc()
-            sh = gc.open_by_key(SHEET_ID)
-            ws = sh.worksheet("daily_snapshots")
-            data = ws.get_all_values()
-            if len(data) <= 1:
-                st.warning("⚠️ No data yet - will be saved at 14:59")
-                return
-            all_df = pd.DataFrame(data[1:], columns=data[0])
-            dates = sorted(all_df["Date"].unique().tolist(), reverse=True)
-        except Exception as e:
-            st.error(f"Error: {e}")
+        all_df = _cached_daily_snapshots()
+        if all_df.empty:
+            st.warning("⚠️ No data yet - will be saved at 14:59")
             return
+        dates = sorted(all_df["Date"].unique().tolist(), reverse=True)
     else:
         logger = DataLogger()
         dates = logger.get_all_dates()
-    
+
     if not dates:
         st.warning("⚠️ No data")
         return
-    
+
     selected_date = st.selectbox("📆 Date", dates, index=0)
-    
+
     if is_cloud():
         df = all_df[all_df["Date"] == selected_date].drop(columns=["Date"], errors="ignore")
     else:
@@ -1443,9 +1480,16 @@ def daily_summary_page():
         except:
             return [''] * len(row)
     
+    METRIC_COLS = ["Ticker", "Score", "MxV", "RunUp", "REL_VOL", "RSI", "ATRX", "Gap", "VWAP"]
+    display_cols = [c for c in METRIC_COLS if c in df.columns]
+    df = df[display_cols].copy()
+
     for col in df.columns:
-        df[col] = pd.to_numeric(df[col], errors='ignore')
-    
+        if col != "Ticker":
+            df[col] = pd.to_numeric(df[col], errors='coerce')
+
+    df = df.sort_values("Score", ascending=False, ignore_index=True) if "Score" in df.columns else df
+
     def fmt(val):
         try:
             v = float(val)
@@ -1454,8 +1498,9 @@ def daily_summary_page():
             return f"{v:.2f}"
         except:
             return val
-    
-    styled_df = df.style.apply(highlight_score, axis=1).format(fmt, subset=[c for c in df.columns if df[c].dtype in ['float64','float32','int64','int32']])
+
+    numeric_cols = [c for c in df.columns if c != "Ticker" and df[c].dtype in ['float64','float32','int64','int32']]
+    styled_df = df.style.apply(highlight_score, axis=1).format(fmt, subset=numeric_cols)
     st.dataframe(styled_df, use_container_width=True, hide_index=True, height=table_height)
     
     csv = df.to_csv(index=False)
@@ -1468,7 +1513,8 @@ def daily_summary_page():
 
 def timeline_archive_page():
     st.title("📦 Timeline Archive")
-    
+    system_health_bar()
+
     if is_cloud():
         try:
             gc = _get_gc()
@@ -1536,7 +1582,7 @@ def timeline_archive_page():
         except:
             return ''
     
-    styled_df = df.style.applymap(color_score).format("{:.2f}")
+    styled_df = df.style.map(color_score).format("{:.2f}")
     
     st.dataframe(styled_df, use_container_width=True, height=600)
     
@@ -1548,134 +1594,302 @@ def timeline_archive_page():
         mime="text/csv"
     )
 
-def portfolio_tracker_page():
-    st.title("💼 PORTFOLIO TRACKER")
-    st.caption("Tracking stocks with score 60+ from end of day")
-    
-    portfolio = PortfolioTracker()
-    
-    col1, col2 = st.columns([3, 1])
-    
-    with col2:
-        filter_status = st.selectbox("Filter", ["All", "Open", "Closed"])
-        
-        if st.button("🔄 Refresh Prices"):
-            st.rerun()
-    
-    with st.spinner("Loading portfolio..."):
-        if is_cloud():
-            try:
-                gc = _get_gc()
-                sh = gc.open_by_key(SHEET_ID)
-                ws = sh.worksheet("portfolio")
-                data = ws.get_all_values()
-                if len(data) <= 1:
-                    df = None
+@st.cache_data(ttl=3600)
+def _fetch_live_prices(tickers: tuple) -> dict:
+    """Batch-fetch latest prices from yfinance. Cached 1 hour. Accepts tuple for hashability."""
+    tickers = list(tickers)
+    if not tickers:
+        return {}
+    try:
+        data = yf.download(tickers, period="1d", progress=False, auto_adjust=True)["Close"]
+        if len(tickers) == 1:
+            prices = data.dropna()
+            return {tickers[0]: round(float(prices.iloc[-1]), 2)} if not prices.empty else {}
+        return {
+            t: round(float(data[t].dropna().iloc[-1]), 2)
+            for t in tickers
+            if t in data.columns and not data[t].dropna().empty
+        }
+    except Exception:
+        return {}
+
+
+def _simulate_short_trades(pa_df: pd.DataFrame):
+    """
+    Simulate $1000 short trades for every row in post_analysis.
+    Returns (table_a, table_b):
+      table_a — entry at ScanPrice (EOD scan day)
+      table_b — entry at D1_Open  (next day open)
+    """
+    POSITION = 1000.0
+    TP_PCT   = 0.10   # 10% take-profit (short: price drops)
+    SL_PCT   = 0.07   # 7%  stop-loss   (short: price rises)
+    TP15_PCT = 0.15   # 15% stretch target — mark only
+
+    # Pre-fetch live prices for tickers with no D1 data yet
+    pending_tickers = list({
+        str(row.get("Ticker", ""))
+        for _, row in pa_df.iterrows()
+        if pd.isna(pd.to_numeric(row.get("D1_High"), errors="coerce"))
+    })
+    live_prices = _fetch_live_prices(tuple(sorted(set(pending_tickers))))
+
+    rows_a, rows_b = [], []
+
+    for _, row in pa_df.iterrows():
+        ticker     = str(row.get("Ticker", ""))
+        scan_date  = str(row.get("ScanDate", ""))
+        score      = pd.to_numeric(row.get("Score"),     errors="coerce")
+        scan_price = pd.to_numeric(row.get("ScanPrice"), errors="coerce")
+        d1_open    = pd.to_numeric(row.get("D1_Open"),   errors="coerce")
+
+        for entry_label, entry_price in [("A", scan_price), ("B", d1_open)]:
+            # Current price = most recent Di_Close available, fallback to ScanPrice
+            current_price = None
+            for day in range(5, 0, -1):
+                c = pd.to_numeric(row.get(f"D{day}_Close"), errors="coerce")
+                if not pd.isna(c):
+                    current_price = round(float(c), 2)
+                    break
+            if current_price is None and not pd.isna(scan_price) and scan_price > 0:
+                current_price = round(float(scan_price), 2)
+
+            if pd.isna(entry_price) or entry_price <= 0:
+                # If scan_price exists, treat as Pending (D1 not yet available)
+                if not pd.isna(scan_price) and scan_price > 0:
+                    live_price = live_prices.get(ticker)
+                    proxy_shares = int(max(1, math.ceil(POSITION / scan_price)))
+                    proxy_investment = round(proxy_shares * scan_price, 2)
+                    proxy_current = live_price if live_price is not None else current_price
+                    proxy_pnl = round(proxy_shares * (scan_price - live_price), 2) if live_price else None
+                    rec = {
+                        "Ticker": ticker, "ScanDate": scan_date,
+                        "Score": None if pd.isna(score) else round(float(score), 2),
+                        "EntryPrice": None, "Shares": proxy_shares, "Investment": f"${proxy_investment:.2f}",
+                        "TP10_Price": None, "SL_Price": None, "CurrentPrice": proxy_current,
+                        "Status": "Pending ⏳", "Exit_Day": "—", "PnL_$": proxy_pnl, "TP15_reached": "—",
+                    }
                 else:
-                    df = pd.DataFrame(data[1:], columns=data[0])
-                    for col in ["Score","BuyPrice","CurrentPrice","Change%","P/L"]:
-                        if col in df.columns:
-                            df[col] = pd.to_numeric(df[col], errors="coerce")
-                    import yfinance as yf
-                    for idx, row in df.iterrows():
-                        try:
-                            ticker = row["Ticker"]
-                            hist = yf.Ticker(ticker).history(period="1d")
-                            if not hist.empty:
-                                current = hist.iloc[-1]["Close"]
-                                buy = float(row["BuyPrice"])
-                                df.at[idx, "CurrentPrice"] = round(current, 2)
-                                df.at[idx, "Change%"] = round(((current - buy) / buy) * 100, 2)
-                                df.at[idx, "P/L"] = round(current - buy, 2)
-                        except:
-                            pass
-            except:
-                df = None
-        else:
-            df = portfolio.get_portfolio_with_current_prices()
-    
-    if df is None or df.empty:
-        st.info("💡 Portfolio is empty. Stocks with score 60+ will be added automatically at 14:59")
-        return
-    
-    if filter_status != "All":
-        df = df[df['Status'] == filter_status]
-    
+                    rec = {
+                        "Ticker": ticker, "ScanDate": scan_date,
+                        "Score": None if pd.isna(score) else round(float(score), 2),
+                        "EntryPrice": None, "Shares": None, "Investment": None,
+                        "TP10_Price": None, "SL_Price": None, "CurrentPrice": current_price,
+                        "Status": "No Data", "Exit_Day": "—", "PnL_$": None, "TP15_reached": "—",
+                    }
+            else:
+                shares     = int(max(1, math.ceil(POSITION / entry_price)))  # always >= $1000
+                investment = round(shares * entry_price, 2)
+                tp10_price = round(entry_price * (1 - TP_PCT),  4)
+                sl_price   = round(entry_price * (1 + SL_PCT),  4)
+                tp15_price = round(entry_price * (1 - TP15_PCT), 4)
+
+                status   = "Open ⏳"
+                exit_day = None
+                pnl      = None
+                tp15_hit = False
+                has_data = False
+
+                for day in range(1, 6):
+                    high = pd.to_numeric(row.get(f"D{day}_High"), errors="coerce")
+                    low  = pd.to_numeric(row.get(f"D{day}_Low"),  errors="coerce")
+                    if pd.isna(high) or pd.isna(low):
+                        break
+                    has_data = True
+
+                    if low <= tp15_price:
+                        tp15_hit = True
+
+                    sl_hit = high >= sl_price
+                    tp_hit = low  <= tp10_price
+
+                    if sl_hit and tp_hit:
+                        status, exit_day, pnl = "SL ❌", day, round(-investment * SL_PCT, 2)
+                        break
+                    elif sl_hit:
+                        status, exit_day, pnl = "SL ❌", day, round(-investment * SL_PCT, 2)
+                        break
+                    elif tp_hit:
+                        status, exit_day, pnl = "TP10 ✅", day, round(investment * TP_PCT, 2)
+                        break
+
+                if status == "Open ⏳":
+                    if not has_data:
+                        live_price = live_prices.get(ticker)
+                        if live_price is not None:
+                            current_price = live_price
+                            # ── בדוק SL/TP מול מחיר חי ──────────────────────
+                            if live_price >= sl_price:
+                                status   = "SL ❌"
+                                exit_day = "Live"
+                                pnl      = round(-investment * SL_PCT, 2)
+                            elif live_price <= tp10_price:
+                                status   = "TP10 ✅"
+                                exit_day = "Live"
+                                pnl      = round(investment * TP_PCT, 2)
+                            else:
+                                pnl    = round(shares * (entry_price - current_price), 2)
+                                status = "Pending ⏳"
+                        else:
+                            status = "Pending ⏳"
+                    elif current_price is not None:
+                        pnl = round(shares * (entry_price - current_price), 2)
+
+                rec = {
+                    "Ticker":       ticker,
+                    "ScanDate":     scan_date,
+                    "Score":        None if pd.isna(score) else round(float(score), 2),
+                    "EntryPrice":   round(entry_price, 2),
+                    "Shares":       shares,
+                    "Investment":   f"${investment:.2f}",
+                    "TP10_Price":   tp10_price,
+                    "SL_Price":     sl_price,
+                    "CurrentPrice": current_price,
+                    "Status":       status,
+                    "Exit_Day":     f"D{exit_day}" if isinstance(exit_day, int) else (exit_day if exit_day else ("—" if status == "Pending ⏳" else "D5+")),
+                    "PnL_$":        pnl,
+                    "TP15_reached": "✅" if tp15_hit else "—",
+                }
+
+            (rows_a if entry_label == "A" else rows_b).append(rec)
+
+    return pd.DataFrame(rows_a), pd.DataFrame(rows_b)
+
+
+def _render_short_table(df: pd.DataFrame, download_key: str):
+    """Render a styled short-trade simulation table with summary metrics at top."""
     if df.empty:
-        st.info(f"📊 No {filter_status.lower()} positions")
+        st.info("No data")
         return
-    
-    col1, col2, col3, col4 = st.columns(4)
-    
-    with col1:
-        st.metric("Total Positions", len(df))
-    
-    with col2:
-        open_positions = len(df[df['Status'] == 'Open'])
-        st.metric("Open", open_positions)
-    
-    with col3:
-        winners = len(df[df['Change%'].astype(float) > 0]) if 'Change%' in df.columns else 0
-        st.metric("Winners", winners)
-    
-    with col4:
-        avg_pl = df['Change%'].astype(float).mean() if 'Change%' in df.columns else 0
-        st.metric("Avg P/L", f"{avg_pl:+.2f}%")
-    
-    display_data = []
-    for idx, row in df.iterrows():
-        display_data.append({
-            'Date': row['Date'],
-            'Ticker': row['Ticker'],
-            'Score': f"{row['Score']:.2f}",
-            'Buy Price': f"${row['BuyPrice']:.2f}",
-            'Current': f"${float(row.get('CurrentPrice') or row.get('BuyPrice') or 0):.2f}",
-            'Change%': f"{float(row.get('Change%', 0)):+.2f}%",
-            'P/L': f"${float(row.get('P/L', 0)):+.2f}",
-            'Status': row['Status'],
-            'PositionKey': row['PositionKey']
-        })
-    
-    display_df = pd.DataFrame(display_data)
-    
-    def highlight_pl(row):
-        try:
-            change_pct = float(row['Change%'].replace('%', '').replace('+', ''))
-            styles = [''] * len(row)
-            change_idx = list(row.index).index('Change%')
-            pl_idx = list(row.index).index('P/L')
-            if change_pct > 0:
-                styles[change_idx] = 'background-color: #90EE90; color: black; font-weight: bold'
-                styles[pl_idx] = 'background-color: #90EE90; color: black; font-weight: bold'
-            elif change_pct < 0:
-                styles[change_idx] = 'background-color: #FFB6C1; color: black; font-weight: bold'
-                styles[pl_idx] = 'background-color: #FFB6C1; color: black; font-weight: bold'
-            return styles
-        except:
-            return [''] * len(row)
-    
-    styled_df = display_df[['Date', 'Ticker', 'Score', 'Buy Price', 'Current', 'Change%', 'P/L', 'Status']].style.apply(highlight_pl, axis=1)
-    
-    table_height = min(800, len(display_df) * 40 + 50)
-    st.dataframe(styled_df, use_container_width=True, hide_index=True, height=table_height)
-    
-    csv = display_df.to_csv(index=False)
-    st.download_button(
-        label="📥 Download Portfolio CSV",
-        data=csv,
-        file_name=f"portfolio_{datetime.now().strftime('%Y-%m-%d')}.csv",
-        mime="text/csv"
+
+    # ── Summary (TOP) ────────────────────────────────────────────────────────
+    closed    = df[df["Status"].isin(["TP10 ✅", "SL ❌"])]
+    alive     = df[df["Status"].isin(["Pending ⏳", "Open ⏳"])]
+    total     = len(closed)
+    wins      = int((closed["Status"] == "TP10 ✅").sum())
+    losses    = int((closed["Status"] == "SL ❌").sum())
+    alive_cnt = len(alive)
+    total_pnl = pd.to_numeric(closed["PnL_$"], errors="coerce").sum()
+    win_rate  = wins / total * 100 if total > 0 else 0.0
+
+    c1, c2, c3, c4, c5, c6 = st.columns(6)
+    c1.metric("Closed trades",  total)
+    c2.metric("✅ Wins (TP10)", wins)
+    c3.metric("❌ Losses (SL)", losses)
+    c4.metric("🟡 Alive",       alive_cnt)
+    c5.metric("Win rate",       f"{win_rate:.1f}%")
+    c6.metric("Total PnL",      f"${total_pnl:+.2f}")
+
+    # ── Row color coding ─────────────────────────────────────────────────────
+    def row_style(row):
+        s = str(row.get("Status", ""))
+        if "TP10" in s:
+            return ["background-color: #1a4d2e; color: #90EE90"] * len(row)   # 🟢 ירוק — רווח
+        elif "SL" in s:
+            return ["background-color: #4d1a1a; color: #FFB6C1"] * len(row)   # 🔴 אדום — הפסד
+        elif "Pending" in s or "Open" in s:
+            return ["background-color: #4d3800; color: #FFD700"] * len(row)   # 🟡 צהוב — חיה, ממתינה
+        return ["color: #888888"] * len(row)                                   # אפור — אין נתונים
+
+    # ── Format display columns ───────────────────────────────────────────────
+    display = df.copy()
+    for col in ["Score", "EntryPrice", "TP10_Price", "SL_Price", "CurrentPrice"]:
+        if col in display.columns:
+            display[col] = display[col].apply(
+                lambda v: f"{float(v):.2f}" if pd.notna(v) else "—"
+            )
+    if "Shares" in display.columns:
+        display["Shares"] = display["Shares"].apply(
+            lambda v: str(int(v)) if pd.notna(v) and v != "" else "—"
+        )
+    if "PnL_$" in display.columns:
+        display["PnL_$"] = display["PnL_$"].apply(
+            lambda v: f"${float(v):+.2f}" if pd.notna(v) else "—"
+        )
+
+    st.dataframe(
+        display.style.apply(row_style, axis=1),
+        use_container_width=True, hide_index=True,
+        height=min(800, len(display) * 38 + 50),
     )
+
+    st.download_button(
+        label="📥 Download CSV",
+        data=df.to_csv(index=False),
+        file_name=f"short_sim_{download_key}_{datetime.now().strftime('%Y-%m-%d')}.csv",
+        mime="text/csv",
+        key=f"dl_{download_key}",
+    )
+
+
+def portfolio_tracker_page():
+    st.title("💼 SHORT TRADE SIMULATOR")
+    st.caption("$1,000 short per stock — TP 10% / SL 7% — two entry scenarios")
+    system_health_bar()
+
+    if st.button("🔄 Refresh Live Prices", help="מחיר חי מתעדכן כל שעה — לחץ לרענון מיידי"):
+        st.cache_data.clear()
+        st.rerun()
+
+    with st.spinner("Loading post-analysis data..."):
+        pa = _cached_post_analysis()
+
+    if pa.empty:
+        st.info("📭 No post-analysis data yet.")
+        return
+
+    # ── Filters ──────────────────────────────────────────────────────────────
+    with st.expander("🔧 Filters", expanded=False):
+        fc1, fc2, fc3 = st.columns(3)
+        with fc1:
+            all_dates  = sorted(pa["ScanDate"].dropna().unique().tolist(), reverse=True)
+            sel_dates  = st.multiselect("ScanDate", all_dates, default=all_dates)
+        with fc2:
+            all_status = ["TP10 ✅", "SL ❌", "Open ⏳", "Pending ⏳", "No Data"]
+            sel_status = st.multiselect("Status", all_status,
+                                        default=["TP10 ✅", "SL ❌", "Open ⏳", "Pending ⏳"])
+        with fc3:
+            min_score = st.slider("Min Score", 0, 100, 60)
+
+    # Filter source data before simulation (faster than post-filtering)
+    pa_filtered = pa.copy()
+    if sel_dates:
+        pa_filtered = pa_filtered[pa_filtered["ScanDate"].isin(sel_dates)]
+    score_col = pd.to_numeric(pa_filtered["Score"], errors="coerce")
+    pa_filtered = pa_filtered[score_col >= min_score]
+
+    if pa_filtered.empty:
+        st.warning("No rows match the current filters.")
+        return
+
+    with st.spinner("Running simulation..."):
+        table_a, table_b = _simulate_short_trades(pa_filtered)
+
+    # Apply status filter after simulation
+    if sel_status:
+        table_a = table_a[table_a["Status"].isin(sel_status)]
+        table_b = table_b[table_b["Status"].isin(sel_status)]
+
+    # ── Tabs ─────────────────────────────────────────────────────────────────
+    tab_a, tab_b = st.tabs([
+        "📌 Table A — Entry at ScanPrice (EOD)",
+        "📌 Table B — Entry at D1_Open (next day)",
+    ])
+
+    with tab_a:
+        _render_short_table(table_a, "table_a")
+
+    with tab_b:
+        _render_short_table(table_b, "table_b")
 
 
 def post_analysis_page():
     st.title("🔬 Post Analysis")
     st.caption("מניות עם Score 60+ — מה קרה ב-5 ימים אחרי הסריקה")
-
-    from gsheets_sync import load_post_analysis_from_sheets
+    system_health_bar()
 
     with st.spinner("טוען נתונים..."):
-        df = load_post_analysis_from_sheets()
+        df = _cached_post_analysis()
 
     if not df.empty and "Ticker" in df.columns:
         import yfinance as yf
@@ -1776,13 +1990,13 @@ def post_analysis_page():
     styled = filtered[display_cols].style
     for col in ["TP10_Hit", "TP15_Hit", "TP20_Hit"]:
         if col in display_cols:
-            styled = styled.applymap(color_tp, subset=[col])
+            styled = styled.map(color_tp, subset=[col])
     if "MaxDrop%" in display_cols:
-        styled = styled.applymap(color_drop, subset=["MaxDrop%"])
+        styled = styled.map(color_drop, subset=["MaxDrop%"])
     if "ScanChange%" in display_cols:
-        styled = styled.applymap(color_change, subset=["ScanChange%"])
+        styled = styled.map(color_change, subset=["ScanChange%"])
     if "EntryChange%" in display_cols:
-        styled = styled.applymap(color_change, subset=["EntryChange%"])
+        styled = styled.map(color_change, subset=["EntryChange%"])
     format_dict = {}
     for col in filtered[display_cols].select_dtypes(include="number").columns:
         if col in ["TP10_Hit", "TP15_Hit", "TP20_Hit", "BestDay"]:
@@ -1836,7 +2050,7 @@ def post_analysis_page():
         for col in dyn_display.select_dtypes(include="number").columns:
             dyn_display[col] = dyn_display[col].round(2)
         format_dyn = {col: "{:.2f}" for col in dyn_display.select_dtypes(include="number").columns}
-        styled_dyn = dyn_display.style.applymap(color_diff, subset=["הפרש"]).format(format_dyn)
+        styled_dyn = dyn_display.style.map(color_diff, subset=["הפרש"]).format(format_dyn)
         st.dataframe(styled_dyn, use_container_width=True, hide_index=True)
         st.caption("הפרש אדום = הציון המקורי גבוה מהדינמי (אולי מוערך יתר על המידה). ירוק = הציון הדינמי גבוה יותר.")
     else:
@@ -1918,7 +2132,7 @@ def post_analysis_page():
         def color_check(val):
             if val == "✅": return "color: #2ecc71; font-weight: bold"
             return ""
-        styled_cat = cat_display.style.applymap(color_check, subset=label_cols)
+        styled_cat = cat_display.style.map(color_check, subset=label_cols)
         st.dataframe(styled_cat, use_container_width=True, hide_index=True, height=400)
     else:
         st.info("⏳ נתוני catalyst יופיעו כאן לאחר הריצה הראשונה של הקולקטור")
@@ -2064,11 +2278,76 @@ def post_analysis_page():
                     st.error(f"שגיאה: {e}")
 
 
+def _fetch_health_data():
+    """Return last scan timestamp and last collector date using cached loaders."""
+    last_scan = None
+    last_collector = None
+    try:
+        df_tl = _cached_timeline_live()
+        if not df_tl.empty and "Date" in df_tl.columns and "ScanTime" in df_tl.columns:
+            df_tl = df_tl.copy()
+            df_tl["_dt"] = df_tl["Date"] + " " + df_tl["ScanTime"]
+            last_scan = df_tl["_dt"].max()
+    except Exception:
+        pass
+    try:
+        df_pa = _cached_post_analysis()
+        if not df_pa.empty and "ScanDate" in df_pa.columns:
+            last_collector = df_pa["ScanDate"].max()
+    except Exception:
+        pass
+    return last_scan, last_collector
+
+
+def system_health_bar():
+    try:
+        today     = datetime.now(PERU_TZ).strftime("%Y-%m-%d")
+        yesterday = (datetime.now(PERU_TZ) - timedelta(days=1)).strftime("%Y-%m-%d")
+
+        last_scan, last_collector = _fetch_health_data()
+
+        parts = []
+
+        # ── Last scan status ────────────────────────────────────────────────
+        if last_scan:
+            scan_date = last_scan[:10]
+            if scan_date == today:
+                scan_icon = "✅"
+            elif scan_date == yesterday:
+                scan_icon = "⚠️"
+            else:
+                scan_icon = "🔴"
+            parts.append(f"{scan_icon} Last scan: **{last_scan}**")
+        else:
+            parts.append("🔴 Last scan: **unknown**")
+
+        # ── Last collector status ────────────────────────────────────────────
+        if last_collector:
+            collector_dt = datetime.strptime(last_collector, "%Y-%m-%d")
+            days_old = (datetime.now(PERU_TZ).replace(tzinfo=None) - collector_dt).days
+            if days_old > 2:
+                parts.append(f"🔴 Collector may be failing — last update: **{last_collector}**")
+            else:
+                parts.append(f"✅ Last collector: **{last_collector}**")
+        else:
+            parts.append("🔴 Last collector: **unknown**")
+
+        st.markdown("&nbsp;&nbsp;|&nbsp;&nbsp;".join(parts))
+        st.markdown("<hr style='margin:4px 0 12px 0; border-color:#333'>", unsafe_allow_html=True)
+    except Exception as e:
+        st.caption(f"⚠️ Health bar error: {e}")
+
+
 def main():
     page = st.sidebar.radio(
         "🧭 Navigation",
         ["📊 Live Tracker", "💼 Portfolio Tracker", "📅 Daily Summary", "📦 Timeline Archive", "🔬 Post Analysis"]
     )
+
+    st.sidebar.divider()
+    if st.sidebar.button("🔄 Refresh data", help="Clear all caches and reload from Google Sheets"):
+        st.cache_data.clear()
+        st.rerun()
     
     if page == "📊 Live Tracker":
         main_page()
