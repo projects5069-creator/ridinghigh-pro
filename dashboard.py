@@ -1908,7 +1908,7 @@ def _render_short_table(df: pd.DataFrame, download_key: str):
         st.info("No data")
         return
 
-    # ── Summary — שורה קומפקטית אחת ─────────────────────────────────────────
+    # ── Summary ───────────────────────────────────────────────────────────────
     closed    = df[df["Status"].isin(["TP10 ✅", "SL ❌"])]
     alive     = df[df["Status"].isin(["Pending ⏳", "Open ⏳"])]
     total     = len(closed)
@@ -1917,15 +1917,14 @@ def _render_short_table(df: pd.DataFrame, download_key: str):
     alive_cnt = len(alive)
     total_pnl = pd.to_numeric(closed["PnL_$"], errors="coerce").sum()
     win_rate  = wins / total * 100 if total > 0 else 0.0
-    pnl_color = "#90EE90" if total_pnl >= 0 else "#FFB6C1"
 
-    st.markdown(
-        f"**Closed:** {total} &nbsp;|&nbsp; "
-        f"✅ **{wins}** &nbsp;❌ **{losses}** &nbsp;🟡 **{alive_cnt}** &nbsp;|&nbsp; "
-        f"**Win rate:** {win_rate:.1f}% &nbsp;|&nbsp; "
-        f"**PnL:** <span style='color:{pnl_color}'>${total_pnl:+.2f}</span>",
-        unsafe_allow_html=True
-    )
+    c1, c2, c3, c4, c5, c6 = st.columns(6)
+    c1.metric("Closed trades",  total)
+    c2.metric("✅ Wins (TP10)", wins)
+    c3.metric("❌ Losses (SL)", losses)
+    c4.metric("🟡 Alive",       alive_cnt)
+    c5.metric("Win rate",       f"{win_rate:.1f}%")
+    c6.metric("Total PnL",      f"${total_pnl:+.2f}")
 
     # ── Row color coding ─────────────────────────────────────────────────────
     def row_style(row):
@@ -1970,17 +1969,30 @@ def _render_short_table(df: pd.DataFrame, download_key: str):
 
 
 def portfolio_tracker_page():
-    # ── כותרת + כפתור רענון ──────────────────────────────────────────────────
-    h1, h2 = st.columns([5, 1])
-    with h1:
-        st.markdown("## 💼 SHORT TRADE SIMULATOR")
-        st.caption("$1,000 short per stock — TP 10% / SL 7% — two entry scenarios")
-    with h2:
+    # ── כותרת ────────────────────────────────────────────────────────────────
+    t1, t2 = st.columns([6, 1])
+    with t1:
+        st.title("💼 SHORT TRADE SIMULATOR")
+    with t2:
         st.markdown("<br>", unsafe_allow_html=True)
         if st.button("🔄 Refresh", help="מחיר חי מתעדכן כל שעה — לחץ לרענון מיידי"):
             st.cache_data.clear()
             st.rerun()
-    system_health_bar()
+
+    # ── caption + health bar בשורה אחת ──────────────────────────────────────
+    last_scan, last_collector = _fetch_health_data()
+    today     = datetime.now(PERU_TZ).strftime("%Y-%m-%d")
+    yesterday = (datetime.now(PERU_TZ) - timedelta(days=1)).strftime("%Y-%m-%d")
+
+    scan_icon = "✅" if last_scan and last_scan[:10] == today else ("⚠️" if last_scan and last_scan[:10] == yesterday else "🔴")
+    coll_icon = "✅" if last_collector and (datetime.now(PERU_TZ).replace(tzinfo=None) - datetime.strptime(last_collector, "%Y-%m-%d")).days <= 2 else "🔴"
+
+    st.markdown(
+        f"$1,000 short · TP 10% · SL 7% &nbsp;&nbsp;|&nbsp;&nbsp; "
+        f"{scan_icon} Last scan: **{last_scan or '—'}** &nbsp;|&nbsp; "
+        f"{coll_icon} Last collector: **{last_collector or '—'}**"
+    )
+    st.markdown("<hr style='margin:4px 0 8px 0; border-color:#333'>", unsafe_allow_html=True)
 
     with st.spinner("Loading post-analysis data..."):
         pa = _cached_post_analysis()
