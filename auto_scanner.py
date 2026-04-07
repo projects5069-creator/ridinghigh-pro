@@ -477,8 +477,129 @@ def run_scan():
 
         print(f"✅ Saved {len(results)} stocks to Google Sheets at {scan_time}")
 
+        # ── עדכן RunningHigh/RunningLow למניות Pending ───────────────────────
+        update_portfolio_live(gc, sh, now_peru)
+
     except Exception as e:
         print(f"❌ Google Sheets error: {e}")
+
+
+def update_portfolio_live(gc, sh, now_peru):
+    """
+    בכל ריצה (כל דקה) — מעדכן RunningHigh/RunningLow למניות Pending.
+    RunningHigh = מקסימום מחיר שנראה מאז הכניסה
+    RunningLow  = מינימום מחיר שנראה מאז הכניסה
+    אם RunningHigh >= SL  → SL ❌
+    אם RunningLow  <= TP10 → TP10 ✅
+    אם שניהם נגעו → Pending (לא יודעים הסדר, ממתינים לנתון יומי)
+    """
+    TP_PCT = 0.10
+    SL_PCT = 0.07
+
+    try:
+        # טעון post_analysis
+        try:
+            ws_pa  = sh.worksheet("post_analysis")
+            pa_raw = ws_pa.get_all_values()
+        except:
+            return
+        if len(pa_raw) <= 1:
+            return
+
+        pa_df = pd.DataFrame(pa_raw[1:], columns=pa_raw[0])
+        pa_df["ScanPrice"] = pd.to_numeric(pa_df.get("ScanPrice", 0), errors="coerce")
+        pa_df["D1_High"]   = pd.to_numeric(pa_df.get("D1_High",  ""), errors="coerce")
+
+        # מניות Pending = אין D1_High עדיין
+        pending = pa_df[pa_df["D1_High"].isna() & pa_df["ScanPrice"].notna()].copy()
+        if pending.empty:
+            print("📈 No pending stocks to track")
+            return
+
+        # טעון portfolio_live הקיים
+        ws_pl  = get_or_create_sheet(sh, "portfolio_live")
+        pl_raw = ws_pl.get_all_values()
+        if len(pl_raw) > 1:
+            pl_df = pd.DataFrame(pl_raw[1:], columns=pl_raw[0])
+            for col in ["EntryPrice","RunningHigh","RunningLow","TP10_Price","SL_Price"]:
+                if col in pl_df.columns:
+                    pl_df[col] = pd.to_numeric(pl_df[col], errors="coerce")
+        else:
+            pl_df = pd.DataFrame(columns=[
+                "Ticker","ScanDate","EntryPrice","TP10_Price","SL_Price",
+                "RunningHigh","RunningLow","CurrentPrice","Status","LastUpdated"
+            ])
+
+        scan_time = now_peru.strftime('%Y-%m-%d %H:%M')
+
+        for _, row in pending.iterrows():
+            ticker     = str(row.get("Ticker", ""))
+            scan_date  = str(row.get("ScanDate", ""))
+            scan_price = float(row["ScanPrice"])
+            tp10_price = round(scan_price * (1 - TP_PCT), 4)
+            sl_price   = round(scan_price * (1 + SL_PCT), 4)
+
+            # מחיר חי
+            try:
+                hist = yf.Ticker(ticker).history(period="1d")
+                if hist.empty:
+                    continue
+                live_price = round(float(hist.iloc[-1]["Close"]), 2)
+            except:
+                continue
+
+            # מצא שורה קיימת
+            mask = (pl_df["Ticker"] == ticker) & (pl_df["ScanDate"] == scan_date)
+
+            if mask.any():
+                idx = pl_df[mask].index[0]
+                # לא לעדכן מניות שכבר יצאו
+                cur_status = str(pl_df.at[idx, "Status"])
+                if "TP10" in cur_status or "SL" in cur_status:
+                    continue
+                prev_high = pl_df.at[idx, "RunningHigh"]
+                prev_low  = pl_df.at[idx, "RunningLow"]
+                prev_high = float(prev_high) if pd.notna(prev_high) else live_price
+                prev_low  = float(prev_low)  if pd.notna(prev_low)  else live_price
+                new_high  = max(prev_high, live_price)
+                new_low   = min(prev_low,  live_price)
+            else:
+                new_high = live_price
+                new_low  = live_price
+
+            # קבע סטטוס
+            sl_hit = new_high >= sl_price
+            tp_hit = new_low  <= tp10_price
+
+            if sl_hit and tp_hit:
+                status = "Pending ⏳"   # שניהם נגעו — לא יודעים הסדר
+            elif sl_hit:
+                status = "SL ❌"
+            elif tp_hit:
+                status = "TP10 ✅"
+            else:
+                status = "Pending ⏳"
+
+            new_row = {
+                "Ticker": ticker, "ScanDate": scan_date,
+                "EntryPrice": scan_price, "TP10_Price": tp10_price, "SL_Price": sl_price,
+                "RunningHigh": new_high, "RunningLow": new_low,
+                "CurrentPrice": live_price, "Status": status, "LastUpdated": scan_time
+            }
+
+            if mask.any():
+                for col, val in new_row.items():
+                    if col in pl_df.columns:
+                        pl_df.at[pl_df[mask].index[0], col] = val
+            else:
+                pl_df = pd.concat([pl_df, pd.DataFrame([new_row])], ignore_index=True)
+
+        df_to_sheet(ws_pl, pl_df)
+        print(f"📈 portfolio_live updated: {len(pending)} pending stocks")
+
+    except Exception as e:
+        print(f"⚠️ portfolio_live error: {e}")
+
 
 if __name__ == "__main__":
     run_scan()
