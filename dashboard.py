@@ -1770,37 +1770,53 @@ def _simulate_short_trades(pa_df: pd.DataFrame):
 
                 if status == "Open ⏳":
                     if not has_data:
+                        # ── נתוני High/Low היסטוריים מאז הסריקה ──────────────
+                        hl_key_check = f"{ticker}_{scan_date}"
+                        hl_check     = high_low_data.get(hl_key_check, {})
+                        hist_high    = hl_check.get("high")
+                        hist_low     = hl_check.get("low")
+
                         live_price = live_prices.get(ticker)
                         if live_price is not None:
                             current_price = live_price
-                            # ── בדוק SL/TP מול מחיר חי ──────────────────────
-                            # ── חשב כמה ימי מסחר עברו מאז הסריקה ──
-                            try:
-                                from datetime import datetime, timedelta
-                                scan_dt = datetime.strptime(scan_date, "%Y-%m-%d")
-                                today_dt = datetime.now().replace(tzinfo=None)
-                                trading_days = 0
-                                d = scan_dt
-                                while d < today_dt:
-                                    d += timedelta(days=1)
-                                    if d.weekday() < 5:
-                                        trading_days += 1
-                                trading_days = max(trading_days, 1)
-                            except:
-                                trading_days = 1
-                            if live_price >= sl_price:
-                                status   = "SL ❌"
-                                exit_day = trading_days
-                                pnl      = round(-investment * SL_PCT, 2)
-                            elif live_price <= tp10_price:
-                                status   = "TP10 ✅"
-                                exit_day = trading_days
-                                pnl      = round(investment * TP_PCT, 2)
-                            else:
-                                pnl    = round(shares * (entry_price - current_price), 2)
-                                status = "Pending ⏳"
+
+                        # ── חשב ימי מסחר מאז הסריקה ─────────────────────────
+                        try:
+                            scan_dt      = datetime.strptime(scan_date, "%Y-%m-%d")
+                            today_dt     = datetime.now().replace(tzinfo=None)
+                            trading_days = 0
+                            d = scan_dt
+                            while d < today_dt:
+                                d += timedelta(days=1)
+                                if d.weekday() < 5:
+                                    trading_days += 1
+                            trading_days = max(trading_days, 1)
+                        except:
+                            trading_days = 1
+
+                        # ── SL נבדק מול MaxHigh, TP נבדק מול MinLow ──────────
+                        sl_hit_hist = hist_high is not None and hist_high >= sl_price
+                        tp_hit_hist = hist_low  is not None and hist_low  <= tp10_price
+                        sl_hit_live = live_price is not None and live_price >= sl_price
+                        tp_hit_live = live_price is not None and live_price <= tp10_price
+
+                        if sl_hit_hist and tp_hit_hist:
+                            # שניהם נגעו — SL גובר (שורט)
+                            status   = "SL ❌"
+                            exit_day = trading_days
+                            pnl      = round(-investment * SL_PCT, 2)
+                        elif sl_hit_hist or sl_hit_live:
+                            status   = "SL ❌"
+                            exit_day = trading_days
+                            pnl      = round(-investment * SL_PCT, 2)
+                        elif tp_hit_hist or tp_hit_live:
+                            status   = "TP10 ✅"
+                            exit_day = trading_days
+                            pnl      = round(investment * TP_PCT, 2)
                         else:
                             status = "Pending ⏳"
+                            if current_price is not None:
+                                pnl = round(shares * (entry_price - current_price), 2)
                     elif current_price is not None:
                         pnl = round(shares * (entry_price - current_price), 2)
 
