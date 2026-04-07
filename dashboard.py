@@ -1621,16 +1621,38 @@ def _fetch_high_low_since(ticker_dates: tuple) -> dict:
     ticker_dates: tuple of (ticker, scan_date_str) pairs
     Returns: {ticker_scandate: {"high": x, "low": y}}
     """
-    result = {}
+    if not ticker_dates:
+        return {}
+
+    # Group tickers by earliest scan_date
+    from collections import defaultdict
+    date_to_tickers = defaultdict(list)
     for ticker, scan_date in ticker_dates:
-        key = f"{ticker}_{scan_date}"
+        date_to_tickers[scan_date].append(ticker)
+
+    result = {}
+    for scan_date, tickers in date_to_tickers.items():
         try:
-            hist = yf.download(ticker, start=scan_date, progress=False, auto_adjust=True)
-            if hist.empty:
+            all_tickers = list(set(tickers))
+            data = yf.download(all_tickers, start=scan_date, progress=False, auto_adjust=True)
+            if data.empty:
                 continue
-            high = round(float(hist["High"].max()), 2)
-            low  = round(float(hist["Low"].min()),  2)
-            result[key] = {"high": high, "low": low}
+            highs = data["High"] if "High" in data else None
+            lows  = data["Low"]  if "Low"  in data else None
+            if highs is None or lows is None:
+                continue
+            for ticker in all_tickers:
+                key = f"{ticker}_{scan_date}"
+                try:
+                    if len(all_tickers) == 1:
+                        h = round(float(highs.max()), 2)
+                        l = round(float(lows.min()),  2)
+                    else:
+                        h = round(float(highs[ticker].dropna().max()), 2)
+                        l = round(float(lows[ticker].dropna().min()),  2)
+                    result[key] = {"high": h, "low": l}
+                except Exception:
+                    continue
         except Exception:
             continue
     return result
@@ -1696,10 +1718,10 @@ def _simulate_short_trades(pa_df: pd.DataFrame):
                     rec = {
                         "Ticker": ticker, "ScanDate": scan_date,
                         "Score": None if pd.isna(score) else round(float(score), 2),
-                        "EntryPrice": None, "Shares": proxy_shares, "Investment": f"${proxy_investment:.2f}",
+                        "EntryPrice": None, "CurrentPrice": proxy_current,
+                        "Shares": proxy_shares, "Investment": f"${proxy_investment:.2f}",
                         "TP10_Price": None, "SL_Price": None,
                         "MaxHigh": hl.get("high"), "MinLow": hl.get("low"),
-                        "CurrentPrice": proxy_current,
                         "Status": "Pending ⏳", "Exit_Day": "—", "PnL_$": proxy_pnl, "TP15_reached": "—",
                     }
                 else:
@@ -1789,13 +1811,13 @@ def _simulate_short_trades(pa_df: pd.DataFrame):
                     "ScanDate":     scan_date,
                     "Score":        None if pd.isna(score) else round(float(score), 2),
                     "EntryPrice":   round(entry_price, 2),
+                    "CurrentPrice": current_price,
                     "Shares":       shares,
                     "Investment":   f"${investment:.2f}",
                     "TP10_Price":   tp10_price,
                     "SL_Price":     sl_price,
                     "MaxHigh":      hl.get("high"),
                     "MinLow":       hl.get("low"),
-                    "CurrentPrice": current_price,
                     "Status":       status,
                     "Exit_Day":     f"D{exit_day}" if isinstance(exit_day, int) else (exit_day if exit_day else ("—" if status == "Pending ⏳" else "D5+")),
                     "PnL_$":        pnl,
