@@ -1719,13 +1719,27 @@ def _simulate_short_trades(pa_df: pd.DataFrame):
                         if live_price is not None:
                             current_price = live_price
                             # ── בדוק SL/TP מול מחיר חי ──────────────────────
+                            # ── חשב כמה ימי מסחר עברו מאז הסריקה ──
+                            try:
+                                from datetime import datetime, timedelta
+                                scan_dt = datetime.strptime(scan_date, "%Y-%m-%d")
+                                today_dt = datetime.now().replace(tzinfo=None)
+                                trading_days = 0
+                                d = scan_dt
+                                while d < today_dt:
+                                    d += timedelta(days=1)
+                                    if d.weekday() < 5:
+                                        trading_days += 1
+                                trading_days = max(trading_days, 1)
+                            except:
+                                trading_days = 1
                             if live_price >= sl_price:
                                 status   = "SL ❌"
-                                exit_day = "Live"
+                                exit_day = trading_days
                                 pnl      = round(-investment * SL_PCT, 2)
                             elif live_price <= tp10_price:
                                 status   = "TP10 ✅"
-                                exit_day = "Live"
+                                exit_day = trading_days
                                 pnl      = round(investment * TP_PCT, 2)
                             else:
                                 pnl    = round(shares * (entry_price - current_price), 2)
