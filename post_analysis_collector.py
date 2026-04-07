@@ -309,7 +309,8 @@ def run(target_date: str = None):
         score      = float(row.get("Score", 0))
         scan_price = pd.to_numeric(row.get("Price", 0), errors="coerce") or 0
 
-        if not ticker or not scan_date or scan_date > today_str: continue
+        if not ticker or not scan_date: continue
+        is_today = (scan_date == today_str)
 
         trading_days = get_trading_days_after(scan_date, DAYS_FORWARD)
         existing_match = pd.DataFrame()
@@ -321,28 +322,35 @@ def run(target_date: str = None):
             print(f"[Collector] Complete: {ticker} {scan_date} — skipping")
             continue
 
+        # מניות של היום — נכנסות עם ScanPrice בלבד, בלי OHLC
+        if is_today and not existing_match.empty:
+            print(f"[Collector] Today's stock already exists: {ticker} {scan_date} — skipping")
+            continue
+
         print(f"[Collector] Processing {ticker} {scan_date}...")
         today_dt = datetime.now()
         available_days = [d for d in trading_days if datetime.strptime(d, "%Y-%m-%d") < today_dt]
-        ohlc  = fetch_ohlc_for_days(ticker, available_days) if available_days else {}
+        ohlc  = fetch_ohlc_for_days(ticker, available_days) if available_days and not is_today else {}
         stats = calculate_stats(scan_price, ohlc)
 
-        # Score metrics (updated - removed Float%, PriceToHigh, PriceTo52WHigh)
+        # Score metrics
         metric_fields = ["MxV", "RunUp", "RSI", "ATRX", "REL_VOL", "Gap", "VWAP"]
         metrics = {f: round(pd.to_numeric(row.get(f, None), errors="coerce"), 2) for f in metric_fields}
 
-        # D0 + fundamental
-        d0_fund = fetch_d0_and_fundamental(ticker, scan_date)
+        # D0 + fundamental (לא למניות של היום — עוד לא יש נתונים)
+        d0_fund = fetch_d0_and_fundamental(ticker, scan_date) if not is_today else {}
 
         # Timeline stats
         tl_stats = fetch_timeline_stats(ticker, scan_date, tl_df) if not tl_df.empty else {}
 
-        # Catalyst
-        if existing_match.empty:
+        # Catalyst (לא למניות של היום — חוסך זמן)
+        if existing_match.empty and not is_today:
             catalyst_data = analyze_catalyst(ticker, scan_date)
-        else:
+        elif not existing_match.empty:
             catalyst_data = {f"cat_{cat}": existing_match.iloc[0].get(f"cat_{cat}", 0)
                              for cat in CATALYST_CATEGORIES}
+        else:
+            catalyst_data = {f"cat_{cat}": 0 for cat in CATALYST_CATEGORIES}
 
         new_row = {
             "Ticker":      ticker,
