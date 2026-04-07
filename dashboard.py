@@ -1908,7 +1908,7 @@ def _render_short_table(df: pd.DataFrame, download_key: str):
         st.info("No data")
         return
 
-    # ── Summary (TOP) ────────────────────────────────────────────────────────
+    # ── Summary — שורה קומפקטית אחת ─────────────────────────────────────────
     closed    = df[df["Status"].isin(["TP10 ✅", "SL ❌"])]
     alive     = df[df["Status"].isin(["Pending ⏳", "Open ⏳"])]
     total     = len(closed)
@@ -1917,14 +1917,15 @@ def _render_short_table(df: pd.DataFrame, download_key: str):
     alive_cnt = len(alive)
     total_pnl = pd.to_numeric(closed["PnL_$"], errors="coerce").sum()
     win_rate  = wins / total * 100 if total > 0 else 0.0
+    pnl_color = "#90EE90" if total_pnl >= 0 else "#FFB6C1"
 
-    c1, c2, c3, c4, c5, c6 = st.columns(6)
-    c1.metric("Closed trades",  total)
-    c2.metric("✅ Wins (TP10)", wins)
-    c3.metric("❌ Losses (SL)", losses)
-    c4.metric("🟡 Alive",       alive_cnt)
-    c5.metric("Win rate",       f"{win_rate:.1f}%")
-    c6.metric("Total PnL",      f"${total_pnl:+.2f}")
+    st.markdown(
+        f"**Closed:** {total} &nbsp;|&nbsp; "
+        f"✅ **{wins}** &nbsp;❌ **{losses}** &nbsp;🟡 **{alive_cnt}** &nbsp;|&nbsp; "
+        f"**Win rate:** {win_rate:.1f}% &nbsp;|&nbsp; "
+        f"**PnL:** <span style='color:{pnl_color}'>${total_pnl:+.2f}</span>",
+        unsafe_allow_html=True
+    )
 
     # ── Row color coding ─────────────────────────────────────────────────────
     def row_style(row):
@@ -1956,7 +1957,7 @@ def _render_short_table(df: pd.DataFrame, download_key: str):
     st.dataframe(
         display.style.apply(row_style, axis=1),
         use_container_width=True, hide_index=True,
-        height=min(10 * 35 + 40, len(display) * 35 + 40),
+        height=min(10 * 35 + 40, max(len(display) * 35 + 40, 500)),
     )
 
     st.download_button(
@@ -1969,13 +1970,15 @@ def _render_short_table(df: pd.DataFrame, download_key: str):
 
 
 def portfolio_tracker_page():
-    st.title("💼 SHORT TRADE SIMULATOR")
-    st.caption("$1,000 short per stock — TP 10% / SL 7% — two entry scenarios")
+    # ── כותרת + כפתור רענון בשורה אחת ───────────────────────────────────────
+    h1, h2 = st.columns([5, 1])
+    with h1:
+        st.markdown("### 💼 SHORT TRADE SIMULATOR &nbsp; <small style='color:#888;font-size:0.7rem'>$1,000 short · TP 10% · SL 7%</small>", unsafe_allow_html=True)
+    with h2:
+        if st.button("🔄 Refresh", help="מחיר חי מתעדכן כל שעה — לחץ לרענון מיידי"):
+            st.cache_data.clear()
+            st.rerun()
     system_health_bar()
-
-    if st.button("🔄 Refresh Live Prices", help="מחיר חי מתעדכן כל שעה — לחץ לרענון מיידי"):
-        st.cache_data.clear()
-        st.rerun()
 
     with st.spinner("Loading post-analysis data..."):
         pa = _cached_post_analysis()
