@@ -1741,15 +1741,22 @@ def _simulate_short_trades(pa_df: pd.DataFrame):
                     proxy_investment = round(proxy_shares * scan_price, 2)
                     proxy_current = live_price if live_price is not None else current_price
                     proxy_pnl = round(proxy_shares * (scan_price - live_price), 2) if live_price else None
-                    hl_key = f"{ticker}_{scan_date}"
-                    hl     = high_low_data.get(hl_key, {})
+                    # RunningHigh/Low מה-portfolio_live
+                    rh_disp, rl_disp = None, None
+                    if not pl_df.empty:
+                        pl_m = (pl_df["Ticker"] == ticker) & (pl_df["ScanDate"] == scan_date)
+                        if pl_m.any():
+                            rh = pl_df[pl_m].iloc[0].get("RunningHigh")
+                            rl = pl_df[pl_m].iloc[0].get("RunningLow")
+                            if pd.notna(rh): rh_disp = round(float(rh), 2)
+                            if pd.notna(rl): rl_disp = round(float(rl), 2)
                     rec = {
                         "Ticker": ticker, "ScanDate": scan_date,
                         "Score": None if pd.isna(score) else round(float(score), 2),
                         "EntryPrice": None, "CurrentPrice": proxy_current,
                         "Shares": proxy_shares, "Investment": f"${proxy_investment:.2f}",
                         "TP10_Price": None, "SL_Price": None,
-                        "MaxHigh": hl.get("high"), "MinLow": hl.get("low"),
+                        "MaxHigh": rh_disp, "MinLow": rl_disp,
                         "Status": "Pending ⏳", "Exit_Day": "—", "PnL_$": proxy_pnl, "TP15_reached": "—",
                     }
                 else:
