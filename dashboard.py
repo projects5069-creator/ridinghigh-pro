@@ -1810,7 +1810,7 @@ def _render_short_table(df: pd.DataFrame, download_key: str):
     st.dataframe(
         display.style.apply(row_style, axis=1),
         use_container_width=True, hide_index=True,
-        height=min(14 * 38 + 50, len(display) * 38 + 50),
+        height=min(10 * 35 + 40, len(display) * 35 + 40),
     )
 
     st.download_button(
