@@ -1858,10 +1858,20 @@ def _simulate_short_trades(pa_df: pd.DataFrame):
                     elif current_price is not None:
                         pnl = round(shares * (entry_price - current_price), 2)
 
-                # ── RunningHigh / RunningLow לתצוגה ─────────────────────────
+                # ── MaxHigh / MinLow לתצוגה ──────────────────────────────────
+                # קודם מנסה מנתוני D1-D5 שיש בשורה
                 running_high_disp = None
                 running_low_disp  = None
-                if not pl_df.empty:
+                highs, lows = [], []
+                for d in range(1, 6):
+                    h = pd.to_numeric(row.get(f"D{d}_High"), errors="coerce")
+                    l = pd.to_numeric(row.get(f"D{d}_Low"),  errors="coerce")
+                    if pd.notna(h): highs.append(float(h))
+                    if pd.notna(l): lows.append(float(l))
+                if highs: running_high_disp = round(max(highs), 2)
+                if lows:  running_low_disp  = round(min(lows),  2)
+                # fallback: portfolio_live (למניות Pending)
+                if running_high_disp is None and not pl_df.empty:
                     pl_mask2 = (pl_df["Ticker"] == ticker) & (pl_df["ScanDate"] == scan_date)
                     if pl_mask2.any():
                         rh = pl_df[pl_mask2].iloc[0].get("RunningHigh")
