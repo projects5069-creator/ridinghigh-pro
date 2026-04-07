@@ -1038,9 +1038,9 @@ def _cached_timeline_live() -> pd.DataFrame:
         return pd.DataFrame()
 
 
-@st.cache_data(ttl=3600)
+@st.cache_data(ttl=300)
 def _cached_daily_snapshots() -> pd.DataFrame:
-    """daily_snapshots → raw DataFrame. Refreshes every 60 min."""
+    """daily_snapshots → raw DataFrame. Refreshes every 5 min."""
     try:
         gc = _get_gc()
         if not gc: return pd.DataFrame()
@@ -1068,9 +1068,9 @@ def _cached_portfolio() -> pd.DataFrame:
         return pd.DataFrame()
 
 
-@st.cache_data(ttl=3600)
+@st.cache_data(ttl=300)
 def _cached_post_analysis() -> pd.DataFrame:
-    """post_analysis → DataFrame via gsheets_sync. Refreshes every 60 min."""
+    """post_analysis → DataFrame via gsheets_sync. Refreshes every 5 min."""
     from gsheets_sync import load_post_analysis_from_sheets
     return load_post_analysis_from_sheets()
 
