@@ -1594,6 +1594,24 @@ def timeline_archive_page():
         mime="text/csv"
     )
 
+def _fetch_live_prices(tickers: list) -> dict:
+    """Batch-fetch latest prices from yfinance. Returns {ticker: price}."""
+    if not tickers:
+        return {}
+    try:
+        data = yf.download(tickers, period="1d", progress=False, auto_adjust=True)["Close"]
+        if len(tickers) == 1:
+            prices = data.dropna()
+            return {tickers[0]: round(float(prices.iloc[-1]), 2)} if not prices.empty else {}
+        return {
+            t: round(float(data[t].dropna().iloc[-1]), 2)
+            for t in tickers
+            if t in data.columns and not data[t].dropna().empty
+        }
+    except Exception:
+        return {}
+
+
 def _simulate_short_trades(pa_df: pd.DataFrame):
     """
     Simulate $1000 short trades for every row in post_analysis.
@@ -1605,6 +1623,14 @@ def _simulate_short_trades(pa_df: pd.DataFrame):
     TP_PCT   = 0.10   # 10% take-profit (short: price drops)
     SL_PCT   = 0.07   # 7%  stop-loss   (short: price rises)
     TP15_PCT = 0.15   # 15% stretch target — mark only
+
+    # Pre-fetch live prices for tickers with no D1 data yet
+    pending_tickers = list({
+        str(row.get("Ticker", ""))
+        for _, row in pa_df.iterrows()
+        if pd.isna(pd.to_numeric(row.get("D1_High"), errors="coerce"))
+    })
+    live_prices = _fetch_live_prices(pending_tickers)
 
     rows_a, rows_b = [], []
 
@@ -1627,13 +1653,28 @@ def _simulate_short_trades(pa_df: pd.DataFrame):
                 current_price = round(float(scan_price), 2)
 
             if pd.isna(entry_price) or entry_price <= 0:
-                rec = {
-                    "Ticker": ticker, "ScanDate": scan_date,
-                    "Score": None if pd.isna(score) else round(float(score), 2),
-                    "EntryPrice": None, "Shares": None, "Investment": None,
-                    "TP10_Price": None, "SL_Price": None, "CurrentPrice": current_price,
-                    "Status": "No Data", "Exit_Day": "—", "PnL_$": None, "TP15_reached": "—",
-                }
+                # If scan_price exists, treat as Pending (D1 not yet available)
+                if not pd.isna(scan_price) and scan_price > 0:
+                    live_price = live_prices.get(ticker)
+                    proxy_shares = int(max(1, math.ceil(POSITION / scan_price)))
+                    proxy_investment = round(proxy_shares * scan_price, 2)
+                    proxy_current = live_price if live_price is not None else current_price
+                    proxy_pnl = round(proxy_shares * (scan_price - live_price), 2) if live_price else None
+                    rec = {
+                        "Ticker": ticker, "ScanDate": scan_date,
+                        "Score": None if pd.isna(score) else round(float(score), 2),
+                        "EntryPrice": None, "Shares": proxy_shares, "Investment": f"${proxy_investment:.2f}",
+                        "TP10_Price": None, "SL_Price": None, "CurrentPrice": proxy_current,
+                        "Status": "Pending ⏳", "Exit_Day": "—", "PnL_$": proxy_pnl, "TP15_reached": "—",
+                    }
+                else:
+                    rec = {
+                        "Ticker": ticker, "ScanDate": scan_date,
+                        "Score": None if pd.isna(score) else round(float(score), 2),
+                        "EntryPrice": None, "Shares": None, "Investment": None,
+                        "TP10_Price": None, "SL_Price": None, "CurrentPrice": current_price,
+                        "Status": "No Data", "Exit_Day": "—", "PnL_$": None, "TP15_reached": "—",
+                    }
             else:
                 shares     = int(max(1, math.ceil(POSITION / entry_price)))  # always >= $1000
                 investment = round(shares * entry_price, 2)
@@ -1672,7 +1713,11 @@ def _simulate_short_trades(pa_df: pd.DataFrame):
 
                 if status == "Open ⏳":
                     if not has_data:
-                        status = "Pending ⏸️"
+                        live_price = live_prices.get(ticker)
+                        if live_price is not None:
+                            current_price = live_price
+                            pnl = round(shares * (entry_price - current_price), 2)
+                        status = "Pending ⏳"
                     elif current_price is not None:
                         pnl = round(shares * (entry_price - current_price), 2)
 
@@ -1687,7 +1732,7 @@ def _simulate_short_trades(pa_df: pd.DataFrame):
                     "SL_Price":     sl_price,
                     "CurrentPrice": current_price,
                     "Status":       status,
-                    "Exit_Day":     f"D{exit_day}" if exit_day else ("—" if status == "Pending ⏸️" else "D5+"),
+                    "Exit_Day":     f"D{exit_day}" if exit_day else ("—" if status == "Pending ⏳" else "D5+"),
                     "PnL_$":        pnl,
                     "TP15_reached": "✅" if tp15_hit else "—",
                 }
@@ -1705,20 +1750,23 @@ def _render_short_table(df: pd.DataFrame, download_key: str):
 
     # ── Summary (TOP) ────────────────────────────────────────────────────────
     active    = df[df["Status"].isin(["TP10 ✅", "SL ❌", "Open ⏳"])]
+    pending   = df[df["Status"] == "Pending ⏳"]
     total     = len(active)
     wins      = int((active["Status"] == "TP10 ✅").sum())
     losses    = int((active["Status"] == "SL ❌").sum())
     opens     = int((active["Status"] == "Open ⏳").sum())
+    pendings  = len(pending)
     total_pnl = pd.to_numeric(active["PnL_$"], errors="coerce").sum()
     win_rate  = wins / total * 100 if total > 0 else 0.0
 
-    c1, c2, c3, c4, c5, c6 = st.columns(6)
+    c1, c2, c3, c4, c5, c6, c7 = st.columns(7)
     c1.metric("Total trades",   total)
     c2.metric("✅ Wins (TP10)", wins)
     c3.metric("❌ Losses (SL)", losses)
     c4.metric("⏳ Open",        opens)
-    c5.metric("Win rate",       f"{win_rate:.1f}%")
-    c6.metric("Total PnL",      f"${total_pnl:+.2f}")
+    c5.metric("⏳ Pending",     pendings)
+    c6.metric("Win rate",       f"{win_rate:.1f}%")
+    c7.metric("Total PnL",      f"${total_pnl:+.2f}")
 
     # ── Row color coding ─────────────────────────────────────────────────────
     def row_style(row):
@@ -1781,9 +1829,9 @@ def portfolio_tracker_page():
             all_dates  = sorted(pa["ScanDate"].dropna().unique().tolist(), reverse=True)
             sel_dates  = st.multiselect("ScanDate", all_dates, default=all_dates)
         with fc2:
-            all_status = ["TP10 ✅", "SL ❌", "Open ⏳", "Pending ⏸️", "No Data"]
+            all_status = ["TP10 ✅", "SL ❌", "Open ⏳", "Pending ⏳", "No Data"]
             sel_status = st.multiselect("Status", all_status,
-                                        default=["TP10 ✅", "SL ❌", "Open ⏳"])
+                                        default=["TP10 ✅", "SL ❌", "Open ⏳", "Pending ⏳"])
         with fc3:
             min_score = st.slider("Min Score", 0, 100, 60)
 
