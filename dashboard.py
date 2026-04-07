@@ -1636,36 +1636,49 @@ def _fetch_live_prices(tickers: tuple) -> dict:
 @st.cache_data(ttl=3600)
 def _fetch_high_low_since(ticker_dates: tuple) -> dict:
     """
-    Fetch High and Low for each ticker since its scan_date until today.
+    Fetch High and Low for each ticker starting from D1 (next trading day after scan_date).
     ticker_dates: tuple of (ticker, scan_date_str) pairs
     Returns: {ticker_scandate: {"high": x, "low": y}}
     """
     if not ticker_dates:
         return {}
 
-    # Group tickers by earliest scan_date
     from collections import defaultdict
-    date_to_tickers = defaultdict(list)
+    from datetime import datetime, timedelta
+
+    def next_trading_day(date_str):
+        """Returns the next weekday after scan_date (= D1 start)"""
+        d = datetime.strptime(date_str, "%Y-%m-%d")
+        d += timedelta(days=1)
+        while d.weekday() >= 5:   # skip Sat/Sun
+            d += timedelta(days=1)
+        return d.strftime("%Y-%m-%d")
+
+    # Group tickers by their D1 start date
+    d1_to_tickers = defaultdict(list)
+    scan_to_d1    = {}
     for ticker, scan_date in ticker_dates:
-        date_to_tickers[scan_date].append(ticker)
+        d1 = next_trading_day(scan_date)
+        d1_to_tickers[d1].append((ticker, scan_date))
+        scan_to_d1[scan_date] = d1
 
     result = {}
-    for scan_date, tickers in date_to_tickers.items():
+    for d1_date, ticker_scan_pairs in d1_to_tickers.items():
         try:
-            all_tickers = list(set(tickers))
-            data = yf.download(all_tickers, start=scan_date, progress=False, auto_adjust=True)
+            all_tickers = list({t for t, _ in ticker_scan_pairs})
+            data = yf.download(all_tickers, start=d1_date, progress=False, auto_adjust=True)
             if data.empty:
                 continue
             highs = data["High"] if "High" in data else None
             lows  = data["Low"]  if "Low"  in data else None
             if highs is None or lows is None:
                 continue
-            for ticker in all_tickers:
+            for ticker, scan_date in ticker_scan_pairs:
                 key = f"{ticker}_{scan_date}"
                 try:
                     if len(all_tickers) == 1:
-                        h = round(float(highs.max()), 2)
-                        l = round(float(lows.min()),  2)
+                        h = round(float(highs.dropna().max()), 2)
+                        l = round(float(lows.dropna().min()),  2)
                     else:
                         h = round(float(highs[ticker].dropna().max()), 2)
                         l = round(float(lows[ticker].dropna().min()),  2)
