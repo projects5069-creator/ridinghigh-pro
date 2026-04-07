@@ -8,6 +8,7 @@ RidingHigh Pro v14.6 - Score 7 Metrics
 
 import streamlit as st
 import pandas as pd
+import math
 import time
 import plotly.express as px
 from finvizfinance.screener.overview import Overview
@@ -1615,16 +1616,26 @@ def _simulate_short_trades(pa_df: pd.DataFrame):
         d1_open    = pd.to_numeric(row.get("D1_Open"),   errors="coerce")
 
         for entry_label, entry_price in [("A", scan_price), ("B", d1_open)]:
+            # Current price = most recent Di_Close available, fallback to ScanPrice
+            current_price = None
+            for day in range(5, 0, -1):
+                c = pd.to_numeric(row.get(f"D{day}_Close"), errors="coerce")
+                if not pd.isna(c):
+                    current_price = round(float(c), 2)
+                    break
+            if current_price is None and not pd.isna(scan_price) and scan_price > 0:
+                current_price = round(float(scan_price), 2)
+
             if pd.isna(entry_price) or entry_price <= 0:
                 rec = {
                     "Ticker": ticker, "ScanDate": scan_date,
                     "Score": None if pd.isna(score) else round(float(score), 2),
                     "EntryPrice": None, "Shares": None, "Investment": None,
-                    "TP10_Price": None, "SL_Price": None,
+                    "TP10_Price": None, "SL_Price": None, "CurrentPrice": current_price,
                     "Status": "No Data", "Exit_Day": "—", "PnL_$": None, "TP15_reached": "—",
                 }
             else:
-                shares     = max(1, round(POSITION / entry_price))
+                shares     = int(max(1, math.ceil(POSITION / entry_price)))  # always >= $1000
                 investment = round(shares * entry_price, 2)
                 tp10_price = round(entry_price * (1 - TP_PCT),  4)
                 sl_price   = round(entry_price * (1 + SL_PCT),  4)
@@ -1650,7 +1661,6 @@ def _simulate_short_trades(pa_df: pd.DataFrame):
                     tp_hit = low  <= tp10_price
 
                     if sl_hit and tp_hit:
-                        # Both triggered same day → SL wins (conservative)
                         status, exit_day, pnl = "SL ❌", day, round(-investment * SL_PCT, 2)
                         break
                     elif sl_hit:
@@ -1663,16 +1673,8 @@ def _simulate_short_trades(pa_df: pd.DataFrame):
                 if status == "Open ⏳":
                     if not has_data:
                         status = "Pending ⏸️"
-                    else:
-                        # P&L vs most recent available close
-                        last_close = None
-                        for day in range(5, 0, -1):
-                            c = pd.to_numeric(row.get(f"D{day}_Close"), errors="coerce")
-                            if not pd.isna(c):
-                                last_close = c
-                                break
-                        if last_close is not None:
-                            pnl = round(shares * (entry_price - last_close), 2)
+                    elif current_price is not None:
+                        pnl = round(shares * (entry_price - current_price), 2)
 
                 rec = {
                     "Ticker":       ticker,
@@ -1683,6 +1685,7 @@ def _simulate_short_trades(pa_df: pd.DataFrame):
                     "Investment":   f"${investment:.2f}",
                     "TP10_Price":   tp10_price,
                     "SL_Price":     sl_price,
+                    "CurrentPrice": current_price,
                     "Status":       status,
                     "Exit_Day":     f"D{exit_day}" if exit_day else ("—" if status == "Pending ⏸️" else "D5+"),
                     "PnL_$":        pnl,
@@ -1695,40 +1698,13 @@ def _simulate_short_trades(pa_df: pd.DataFrame):
 
 
 def _render_short_table(df: pd.DataFrame, download_key: str):
-    """Render a styled short-trade simulation table with summary metrics."""
+    """Render a styled short-trade simulation table with summary metrics at top."""
     if df.empty:
         st.info("No data")
         return
 
-    def row_style(row):
-        s = str(row.get("Status", ""))
-        if "TP10" in s:
-            return ["background-color: #1a4d2e; color: #90EE90"] * len(row)
-        elif "SL" in s:
-            return ["background-color: #4d1a1a; color: #FFB6C1"] * len(row)
-        elif "Open" in s:
-            return ["background-color: #3d3500; color: #FFD700"] * len(row)
-        return ["color: #888888"] * len(row)
-
-    display = df.copy()
-    for col in ["Score", "EntryPrice", "TP10_Price", "SL_Price"]:
-        if col in display.columns:
-            display[col] = display[col].apply(
-                lambda v: f"{float(v):.2f}" if pd.notna(v) else "—"
-            )
-    if "PnL_$" in display.columns:
-        display["PnL_$"] = display["PnL_$"].apply(
-            lambda v: f"${float(v):+.2f}" if pd.notna(v) else "—"
-        )
-
-    st.dataframe(
-        display.style.apply(row_style, axis=1),
-        use_container_width=True, hide_index=True,
-        height=min(800, len(display) * 38 + 50),
-    )
-
-    # ── Summary ─────────────────────────────────────────────────────────────
-    active = df[df["Status"].isin(["TP10 ✅", "SL ❌", "Open ⏳"])]
+    # ── Summary (TOP) ────────────────────────────────────────────────────────
+    active    = df[df["Status"].isin(["TP10 ✅", "SL ❌", "Open ⏳"])]
     total     = len(active)
     wins      = int((active["Status"] == "TP10 ✅").sum())
     losses    = int((active["Status"] == "SL ❌").sum())
@@ -1743,6 +1719,39 @@ def _render_short_table(df: pd.DataFrame, download_key: str):
     c4.metric("⏳ Open",        opens)
     c5.metric("Win rate",       f"{win_rate:.1f}%")
     c6.metric("Total PnL",      f"${total_pnl:+.2f}")
+
+    # ── Row color coding ─────────────────────────────────────────────────────
+    def row_style(row):
+        s = str(row.get("Status", ""))
+        if "TP10" in s:
+            return ["background-color: #1a4d2e; color: #90EE90"] * len(row)   # green
+        elif "SL" in s:
+            return ["background-color: #4d1a1a; color: #FFB6C1"] * len(row)   # red
+        elif "Open" in s:
+            return ["background-color: #4d3800; color: #FFD700"] * len(row)   # orange/amber
+        return ["color: #888888"] * len(row)                                   # gray (pending/no data)
+
+    # ── Format display columns ───────────────────────────────────────────────
+    display = df.copy()
+    for col in ["Score", "EntryPrice", "TP10_Price", "SL_Price", "CurrentPrice"]:
+        if col in display.columns:
+            display[col] = display[col].apply(
+                lambda v: f"{float(v):.2f}" if pd.notna(v) else "—"
+            )
+    if "Shares" in display.columns:
+        display["Shares"] = display["Shares"].apply(
+            lambda v: str(int(v)) if pd.notna(v) and v != "" else "—"
+        )
+    if "PnL_$" in display.columns:
+        display["PnL_$"] = display["PnL_$"].apply(
+            lambda v: f"${float(v):+.2f}" if pd.notna(v) else "—"
+        )
+
+    st.dataframe(
+        display.style.apply(row_style, axis=1),
+        use_container_width=True, hide_index=True,
+        height=min(800, len(display) * 38 + 50),
+    )
 
     st.download_button(
         label="📥 Download CSV",
