@@ -234,6 +234,10 @@ def analyze_ticker(ticker, finviz_row):
         gap = 0; vwap_dist = 0; price_to_high = 0
         price_to_52w_high = 0; float_pct = 0
         shares_outstanding = _shares_cache.get(ticker, 0)
+        # Raw variables for metric validation
+        open_price = 0; prev_close = 0; atr14_raw = 0
+        high_today = 0; low_today = 0; vwap_price = 0
+        week52_high = 0
 
         try:
             stock = yf.Ticker(ticker)
@@ -258,6 +262,7 @@ def analyze_ticker(ticker, finviz_row):
                         ).average_true_range()
                         atr = atr_vals.iloc[-1] if not atr_vals.empty else current['High'] - current['Low']
                         atrx = (current["High"] - current["Low"]) / atr if atr > 0 else 0
+                        atr14_raw = round(float(atr), 4)  # raw ATR14
                     except: pass
 
                 try:
@@ -266,24 +271,30 @@ def analyze_ticker(ticker, finviz_row):
                 except: pass
 
                 try:
+                    open_price = round(float(current['Open']), 4)
                     run_up = ((price - current['Open']) / current['Open']) * 100
                 except: pass
 
                 try:
+                    prev_close = round(float(previous['Close']), 4)
                     gap = ((current['Open'] - previous['Close']) / previous['Close']) * 100
                 except: pass
 
                 try:
-                    vwap = (current['High'] + current['Low'] + price) / 3
-                    vwap_dist = ((price / vwap) - 1) * 100 if vwap > 0 else 0
+                    high_today = round(float(current['High']), 4)
+                    low_today  = round(float(current['Low']), 4)
+                    vwap_price = round((current['High'] + current['Low'] + price) / 3, 4)
+                    vwap_dist  = ((price / vwap_price) - 1) * 100 if vwap_price > 0 else 0
                 except: pass
 
                 try:
-                    price_to_high = ((price - current['High']) / current['High']) * 100
+                    high_today     = round(float(current['High']), 4) if high_today == 0 else high_today
+                    price_to_high  = ((price - current['High']) / current['High']) * 100
                 except: pass
 
                 try:
-                    h52 = info.get('fiftyTwoWeekHigh', price)
+                    week52_high       = float(info.get('fiftyTwoWeekHigh', price))
+                    h52               = week52_high
                     price_to_52w_high = ((price - h52) / h52) * 100 if h52 > 0 else 0
                 except: pass
 
@@ -305,31 +316,45 @@ def analyze_ticker(ticker, finviz_row):
         }
         score = calculate_score(metrics)
 
-        # AvgVolume — needed for collector analysis
-        avg_volume = 0
+        # AvgVolume & FloatShares (already fetched above if available)
+        avg_volume   = int(yf.Ticker(ticker).info.get('averageVolume',   0) or 0) if 'stock' not in dir() else 0
+        float_shares = int(yf.Ticker(ticker).info.get('floatShares',     0) or 0) if 'stock' not in dir() else 0
         try:
-            avg_volume = int(yf.Ticker(ticker).info.get('averageVolume', 0) or 0)
-        except: pass
-
-        # Float shares
-        float_shares = 0
-        try:
-            float_shares = int(yf.Ticker(ticker).info.get('floatShares', 0) or 0)
+            if 'stock' in dir() and stock:
+                avg_volume   = int(stock.info.get('averageVolume',   0) or 0)
+                float_shares = int(stock.info.get('floatShares',     0) or 0)
         except: pass
 
         return {
-            'Ticker': ticker, 'Price': round(price, 2),
-            'Change': round(change, 2), 'Volume': int(volume),
+            # ── Core ──────────────────────────────────────────────────────────
+            'Ticker':    ticker,
+            'Price':     round(price, 2),
+            'Change':    round(change, 2),
+            'Volume':    int(volume),
             'MarketCap': int(market_cap),
-            'AvgVolume': avg_volume,
-            'FloatShares': float_shares,
-            'MxV': round(mxv, 2), 'RunUp': round(run_up, 2),
-            'PriceToHigh': round(price_to_high, 2),
-            'PriceTo52WHigh': round(price_to_52w_high, 2),
-            'RSI': round(rsi, 2), 'ATRX': round(atrx, 2),
-            'REL_VOL': round(rel_vol, 2), 'Gap': round(gap, 2),
-            'VWAP': round(vwap_dist, 2), 'Float%': round(float_pct, 2),
-            'Score': round(score, 2),
+            # ── Computed score metrics ─────────────────────────────────────────
+            'Score':         round(score, 2),
+            'MxV':           round(mxv, 2),
+            'RunUp':         round(run_up, 2),
+            'RSI':           round(rsi, 2),
+            'ATRX':          round(atrx, 2),
+            'REL_VOL':       round(rel_vol, 2),
+            'Gap':           round(gap, 2),
+            'VWAP':          round(vwap_dist, 2),
+            'PriceToHigh':   round(price_to_high, 2),
+            'PriceTo52WHigh':round(price_to_52w_high, 2),
+            'Float%':        round(float_pct, 2),
+            # ── Raw inputs — for metric validation & future regression ─────────
+            'Open_price':       open_price,
+            'PrevClose':        prev_close,
+            'High_today':       high_today,
+            'Low_today':        low_today,
+            'VWAP_price':       vwap_price,
+            'ATR14_raw':        atr14_raw,
+            'Week52High':       round(week52_high, 4),
+            'SharesOutstanding':int(shares_outstanding),
+            'AvgVolume':        avg_volume,
+            'FloatShares':      float_shares,
         }
     except: return None
 

@@ -333,18 +333,34 @@ def run(target_date: str = None):
         ohlc  = fetch_ohlc_for_days(ticker, available_days) if available_days and not is_today else {}
         stats = calculate_stats(scan_price, ohlc)
 
-        # Score metrics — raw values for regression analysis
-        metric_fields = ["MxV", "RunUp", "RSI", "ATRX", "REL_VOL", "Gap", "VWAP"]
-        metrics = {f: round(pd.to_numeric(row.get(f, None), errors="coerce"), 2) for f in metric_fields}
+        # Score metrics
+        metric_fields = ["MxV", "RunUp", "RSI", "ATRX", "REL_VOL", "Gap", "VWAP",
+                         "PriceToHigh", "PriceTo52WHigh", "Float%"]
+        metrics = {f: round(pd.to_numeric(row.get(f, None), errors="coerce"), 2)
+                   for f in metric_fields}
 
-        # Raw inputs to scoring formula — needed to validate each metric independently
+        # ── Raw inputs for metric validation & future regression ──────────────
         raw_inputs = {}
-        for field, col in [("Volume_raw", "Volume"), ("MarketCap_raw", "MarketCap"),
-                           ("AvgVolume_raw", "AvgVolume"), ("FloatShares_raw", "FloatShares")]:
-            val = pd.to_numeric(row.get(col, None), errors="coerce")
-            raw_inputs[field] = int(val) if pd.notna(val) else None
 
-        # MxV_calc: recompute from raw for cross-validation
+        for field, col in [("Volume_raw",           "Volume"),
+                           ("MarketCap_raw",         "MarketCap"),
+                           ("AvgVolume_raw",         "AvgVolume"),
+                           ("FloatShares_raw",       "FloatShares"),
+                           ("SharesOutstanding_raw", "SharesOutstanding")]:
+            val = pd.to_numeric(row.get(col, None), errors="coerce")
+            raw_inputs[field] = int(val) if pd.notna(val) and val > 0 else None
+
+        for field, col in [("Open_price_raw", "Open_price"),
+                           ("PrevClose_raw",  "PrevClose"),
+                           ("High_today_raw", "High_today"),
+                           ("Low_today_raw",  "Low_today"),
+                           ("VWAP_price_raw", "VWAP_price"),
+                           ("ATR14_raw",      "ATR14_raw"),
+                           ("Week52High_raw", "Week52High")]:
+            val = pd.to_numeric(row.get(col, None), errors="coerce")
+            raw_inputs[field] = round(float(val), 4) if pd.notna(val) else None
+
+        # Cross-validation recalculations
         try:
             mc  = raw_inputs.get("MarketCap_raw") or 0
             vol = raw_inputs.get("Volume_raw") or 0
@@ -352,12 +368,33 @@ def run(target_date: str = None):
             if mc > 0:
                 raw_inputs["MxV_calc"] = round(((mc - (pr * vol)) / mc) * 100, 2)
         except: pass
-
-        # REL_VOL_calc: recompute for cross-validation
         try:
             avg_vol = raw_inputs.get("AvgVolume_raw") or 0
             if avg_vol > 0 and vol > 0:
                 raw_inputs["REL_VOL_calc"] = round(vol / avg_vol, 2)
+        except: pass
+        try:
+            op = raw_inputs.get("Open_price_raw") or 0
+            if op > 0 and pr > 0:
+                raw_inputs["RunUp_calc"] = round(((pr - op) / op) * 100, 2)
+        except: pass
+        try:
+            pc = raw_inputs.get("PrevClose_raw") or 0
+            op = raw_inputs.get("Open_price_raw") or 0
+            if pc > 0 and op > 0:
+                raw_inputs["Gap_calc"] = round(((op - pc) / pc) * 100, 2)
+        except: pass
+        try:
+            h   = raw_inputs.get("High_today_raw") or 0
+            l   = raw_inputs.get("Low_today_raw") or 0
+            atr = raw_inputs.get("ATR14_raw") or 0
+            if atr > 0 and h > 0 and l > 0:
+                raw_inputs["ATRX_calc"] = round((h - l) / atr, 2)
+        except: pass
+        try:
+            vp = raw_inputs.get("VWAP_price_raw") or 0
+            if vp > 0 and pr > 0:
+                raw_inputs["VWAP_calc"] = round(((pr / vp) - 1) * 100, 2)
         except: pass
 
         # D0 + fundamental (לא למניות של היום — עוד לא יש נתונים)
