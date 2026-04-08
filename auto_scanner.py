@@ -305,10 +305,24 @@ def analyze_ticker(ticker, finviz_row):
         }
         score = calculate_score(metrics)
 
+        # AvgVolume — needed for collector analysis
+        avg_volume = 0
+        try:
+            avg_volume = int(yf.Ticker(ticker).info.get('averageVolume', 0) or 0)
+        except: pass
+
+        # Float shares
+        float_shares = 0
+        try:
+            float_shares = int(yf.Ticker(ticker).info.get('floatShares', 0) or 0)
+        except: pass
+
         return {
             'Ticker': ticker, 'Price': round(price, 2),
             'Change': round(change, 2), 'Volume': int(volume),
             'MarketCap': int(market_cap),
+            'AvgVolume': avg_volume,
+            'FloatShares': float_shares,
             'MxV': round(mxv, 2), 'RunUp': round(run_up, 2),
             'PriceToHigh': round(price_to_high, 2),
             'PriceTo52WHigh': round(price_to_52w_high, 2),

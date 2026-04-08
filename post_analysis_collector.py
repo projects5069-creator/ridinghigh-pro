@@ -333,9 +333,32 @@ def run(target_date: str = None):
         ohlc  = fetch_ohlc_for_days(ticker, available_days) if available_days and not is_today else {}
         stats = calculate_stats(scan_price, ohlc)
 
-        # Score metrics
+        # Score metrics — raw values for regression analysis
         metric_fields = ["MxV", "RunUp", "RSI", "ATRX", "REL_VOL", "Gap", "VWAP"]
         metrics = {f: round(pd.to_numeric(row.get(f, None), errors="coerce"), 2) for f in metric_fields}
+
+        # Raw inputs to scoring formula — needed to validate each metric independently
+        raw_inputs = {}
+        for field, col in [("Volume_raw", "Volume"), ("MarketCap_raw", "MarketCap"),
+                           ("AvgVolume_raw", "AvgVolume"), ("FloatShares_raw", "FloatShares")]:
+            val = pd.to_numeric(row.get(col, None), errors="coerce")
+            raw_inputs[field] = int(val) if pd.notna(val) else None
+
+        # MxV_calc: recompute from raw for cross-validation
+        try:
+            mc  = raw_inputs.get("MarketCap_raw") or 0
+            vol = raw_inputs.get("Volume_raw") or 0
+            pr  = float(row.get("Price", 0) or 0)
+            if mc > 0:
+                raw_inputs["MxV_calc"] = round(((mc - (pr * vol)) / mc) * 100, 2)
+        except: pass
+
+        # REL_VOL_calc: recompute for cross-validation
+        try:
+            avg_vol = raw_inputs.get("AvgVolume_raw") or 0
+            if avg_vol > 0 and vol > 0:
+                raw_inputs["REL_VOL_calc"] = round(vol / avg_vol, 2)
+        except: pass
 
         # D0 + fundamental (לא למניות של היום — עוד לא יש נתונים)
         d0_fund = fetch_d0_and_fundamental(ticker, scan_date) if not is_today else {}
@@ -359,6 +382,7 @@ def run(target_date: str = None):
             "ScanPrice":   round(float(scan_price), 2),
             "ScanChange%": round(pd.to_numeric(row.get("Change", 0), errors="coerce"), 2),
             **metrics,
+            **raw_inputs,
             **catalyst_data,
             **{k: round(v, 2) if isinstance(v, float) else v for k, v in ohlc.items()},
             **{k: round(v, 2) if isinstance(v, float) else v for k, v in stats.items()},
