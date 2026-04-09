@@ -22,8 +22,14 @@ import json
 from datetime import datetime
 
 ROOT_FOLDER_ID = "1LKJwf4ryvGa1Cvgs6ZC8JIfuQdgZE4_p"
-CONFIG_PATH = os.path.expanduser("~/RidingHighPro/sheets_config.json")
 LEGACY_SPREADSHEET_ID = "1oyefUPV52SMeAlC4UejECYoPRNRudJJS42rukNGYx5k"
+
+# Config is looked up in two places:
+#   1. Same directory as this file (works in repo-based envs: Streamlit Cloud, GitHub Actions)
+#   2. ~/RidingHighPro/ (local Mac fallback)
+_REPO_CONFIG_PATH  = os.path.join(os.path.dirname(os.path.abspath(__file__)), "sheets_config.json")
+_LOCAL_CONFIG_PATH = os.path.expanduser("~/RidingHighPro/sheets_config.json")
+CONFIG_PATH = _REPO_CONFIG_PATH  # canonical write target
 
 SHEET_NAMES = [
     "timeline_live",
@@ -47,12 +53,14 @@ SCOPES = [
 # ── Config helpers ────────────────────────────────────────────────────────────
 
 def _load_config() -> dict:
-    if os.path.exists(CONFIG_PATH):
-        try:
-            with open(CONFIG_PATH) as f:
-                return json.load(f)
-        except Exception:
-            pass
+    """Check repo dir first (Streamlit Cloud / GitHub Actions), then local ~/RidingHighPro/."""
+    for path in [_REPO_CONFIG_PATH, _LOCAL_CONFIG_PATH]:
+        if os.path.exists(path):
+            try:
+                with open(path) as f:
+                    return json.load(f)
+            except Exception:
+                pass
     return {}
 
 
