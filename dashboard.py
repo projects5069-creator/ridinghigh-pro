@@ -1104,6 +1104,21 @@ def _cached_portfolio_live() -> pd.DataFrame:
         return pd.DataFrame()
 
 
+@st.cache_data(ttl=300)
+def _cached_daily_summary() -> pd.DataFrame:
+    """daily_summary → raw DataFrame. Refreshes every 5 min."""
+    try:
+        gc = _get_gc()
+        if not gc: return pd.DataFrame()
+        ws = sheets_manager.get_worksheet("daily_summary", gc=gc)
+        if not ws: return pd.DataFrame()
+        data = ws.get_all_values()
+        if len(data) <= 1: return pd.DataFrame()
+        return pd.DataFrame(data[1:], columns=data[0])
+    except Exception:
+        return pd.DataFrame()
+
+
 def load_latest_from_sheets():
     try:
         df = _cached_timeline_live()
@@ -1469,9 +1484,12 @@ def daily_summary_page():
     system_health_bar()
 
     if is_cloud():
-        all_df = _cached_daily_snapshots()
+        all_df = _cached_daily_summary()
         if all_df.empty:
-            st.warning("⚠️ No data yet - will be saved at 14:59")
+            # fallback: daily_snapshots has full-column 14:59 snapshot data
+            all_df = _cached_daily_snapshots()
+        if all_df.empty:
+            st.warning("⚠️ No data yet - will be populated at 14:59")
             return
         dates = sorted(all_df["Date"].unique().tolist(), reverse=True)
     else:
@@ -2436,6 +2454,25 @@ def _fetch_health_data():
             last_scan = df_tl["_dt"].max()
     except Exception:
         pass
+    # Fallback: if timeline_live is empty, derive last scan from daily_snapshots
+    if not last_scan:
+        try:
+            df_snap = _cached_daily_snapshots()
+            if not df_snap.empty and "Date" in df_snap.columns:
+                last_date = df_snap["Date"].max()
+                scan_time = df_snap[df_snap["Date"] == last_date]["ScanTime"].max() if "ScanTime" in df_snap.columns else "14:59"
+                last_scan = f"{last_date} {scan_time}"
+        except Exception:
+            pass
+    # Second fallback: daily_summary
+    if not last_scan:
+        try:
+            df_ds = _cached_daily_summary()
+            if not df_ds.empty and "Date" in df_ds.columns:
+                last_date = df_ds["Date"].max()
+                last_scan = f"{last_date} (daily summary)"
+        except Exception:
+            pass
     try:
         df_pa = _cached_post_analysis()
         if not df_pa.empty and "ScanDate" in df_pa.columns:
