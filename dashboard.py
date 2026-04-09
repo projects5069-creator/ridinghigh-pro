@@ -2491,6 +2491,126 @@ def system_health_bar():
         st.caption(f"⚠️ Health bar error: {e}")
 
 
+def score_tracker_page():
+    import plotly.graph_objects as go
+    from plotly.subplots import make_subplots
+
+    st.title("\U0001f3af Portfolio Score Tracker")
+    st.caption("\u05de\u05e2\u05e7\u05d1 \u05e6\u05d9\u05d5\u05df + \u05de\u05d3\u05d3\u05d9\u05dd \u05dc\u05d0\u05d7\u05e8 \u05d9\u05d5\u05dd \u05d4\u05db\u05e0\u05d9\u05e1\u05d4 \u05dc\u05e4\u05d5\u05e8\u05d8\u05e4\u05d5\u05dc\u05d9\u05d5 \u2014 3 \u05d9\u05de\u05d9 \u05de\u05e1\u05d7\u05e8, \u05d3\u05e7\u05d4 \u05d0\u05d7\u05e8 \u05d3\u05e7\u05d4")
+    system_health_bar()
+
+    @st.cache_data(ttl=300)
+    def load_score_tracker():
+        try:
+            from gsheets_sync import _get_client, SPREADSHEET_ID
+            gc = _get_client()
+            if gc is None: return pd.DataFrame()
+            sh = gc.open_by_key(SPREADSHEET_ID)
+            ws = sh.worksheet("score_tracker")
+            data = ws.get_all_values()
+            if len(data) <= 1: return pd.DataFrame()
+            df = pd.DataFrame(data[1:], columns=data[0])
+            for col in ["Score","Price","MxV","RunUp","RSI","ATRX","REL_VOL","Gap","VWAP"]:
+                if col in df.columns:
+                    df[col] = pd.to_numeric(df[col], errors="coerce")
+            return df
+        except Exception as e:
+            st.error(f"Error: {e}")
+            return pd.DataFrame()
+
+    with st.spinner("Loading..."):
+        df = load_score_tracker()
+
+    if df.empty:
+        st.info("No data yet - Portfolio Score Tracker will start collecting at 08:30 Peru on trading days")
+        return
+
+    with st.sidebar:
+        st.header("\U0001f3af Portfolio Score Tracker")
+        pairs = sorted(set(
+            f"{r.Ticker} ({r.ScanDate})"
+            for r in df.drop_duplicates(["Ticker","ScanDate"]).itertuples()
+        ), reverse=True)
+        selected = st.selectbox("Select stock", pairs)
+        if not selected: return
+        ticker = selected.split(" (")[0]
+        scan_date = selected.split("(")[1].rstrip(")")
+        show_metrics = st.multiselect(
+            "Metrics", ["MxV","RunUp","RSI","ATRX","REL_VOL","Gap","VWAP"],
+            default=["MxV","ATRX","REL_VOL"]
+        )
+
+    sdf = df[(df["Ticker"]==ticker)&(df["ScanDate"]==scan_date)].copy()
+    sdf = sdf.sort_values(["Date","ScanTime"])
+    sdf["DateTime"] = pd.to_datetime(sdf["Date"]+" "+sdf["ScanTime"], errors="coerce")
+    if sdf.empty:
+        st.warning("No data for this stock"); return
+
+    days = sorted(sdf["Date"].unique())
+    first_s = sdf["Score"].iloc[0]
+    last_s  = sdf["Score"].iloc[-1]
+    delta_s = last_s - first_s
+
+    st.subheader(f"\U0001f4c8 {ticker} - Entry {scan_date}")
+    c1,c2,c3,c4,c5 = st.columns(5)
+    c1.metric("Entry Score", f"{first_s:.2f}")
+    c2.metric("Current Score", f"{last_s:.2f}", f"{delta_s:+.2f}")
+    c3.metric("Max", f"{sdf['Score'].max():.2f}")
+    c4.metric("Min", f"{sdf['Score'].min():.2f}")
+    c5.metric("Days", len(days))
+    st.divider()
+
+    COLORS = ["#00d4ff","#ff6b35","#7fff7f","#ff88cc"]
+    fig = make_subplots(rows=2, cols=1, shared_xaxes=True,
+        subplot_titles=("Score over time","Price"),
+        row_heights=[0.6,0.4], vertical_spacing=0.12)
+
+    for i,day in enumerate(days):
+        dd = sdf[sdf["Date"]==day]
+        c = COLORS[i%4]
+        lbl = f"D{i+1} ({day})"
+        fig.add_trace(go.Scatter(x=dd["DateTime"],y=dd["Score"],mode="lines",
+            name=lbl,line=dict(color=c,width=2)),row=1,col=1)
+        fig.add_trace(go.Scatter(x=dd["DateTime"],y=dd["Price"],mode="lines",
+            name=lbl,line=dict(color=c,width=1.5,dash="dot"),showlegend=False),row=2,col=1)
+
+    fig.add_hline(y=60,line_dash="dash",line_color="#ff4444",opacity=0.5,
+                  annotation_text="Score 60",row=1,col=1)
+    fig.update_layout(height=550,paper_bgcolor="rgba(0,0,0,0)",
+        plot_bgcolor="rgba(0,0,0,0.1)",font=dict(color="#cccccc"),
+        legend=dict(orientation="h",yanchor="bottom",y=1.02,xanchor="right",x=1),
+        margin=dict(l=40,r=40,t=60,b=40))
+    fig.update_xaxes(showgrid=False,color="#888888")
+    fig.update_yaxes(showgrid=True,gridcolor="rgba(255,255,255,0.05)",color="#888888")
+    st.plotly_chart(fig, use_container_width=True)
+
+    if show_metrics:
+        mc = {"MxV":"#ff6b35","RunUp":"#00d4ff","RSI":"#ffdd57",
+              "ATRX":"#7fff7f","REL_VOL":"#ff88cc","Gap":"#b388ff","VWAP":"#80deea"}
+        avail = [m for m in show_metrics if m in sdf.columns and sdf[m].notna().any()]
+        if avail:
+            st.subheader("Metrics breakdown")
+            fig2 = go.Figure()
+            dashes = ["solid","dot","dash","dashdot"]
+            for m in avail:
+                for i,day in enumerate(days):
+                    dd = sdf[sdf["Date"]==day]
+                    fig2.add_trace(go.Scatter(x=dd["DateTime"],y=dd[m],mode="lines",
+                        name=f"{m} D{i+1}",line=dict(color=mc.get(m,"#aaa"),width=1.5,dash=dashes[i%4])))
+            fig2.update_layout(height=350,paper_bgcolor="rgba(0,0,0,0)",
+                plot_bgcolor="rgba(0,0,0,0.1)",font=dict(color="#cccccc"),
+                legend=dict(orientation="h",yanchor="bottom",y=1.02),
+                margin=dict(l=40,r=40,t=40,b=40))
+            fig2.update_xaxes(showgrid=False,color="#888888")
+            fig2.update_yaxes(showgrid=True,gridcolor="rgba(255,255,255,0.05)",color="#888888")
+            st.plotly_chart(fig2, use_container_width=True)
+
+    st.divider()
+    with st.expander("Raw data"):
+        scols = ["Date","ScanTime","Price","Score"]+[m for m in ["MxV","RunUp","RSI","ATRX","REL_VOL","Gap","VWAP"] if m in sdf.columns]
+        st.dataframe(sdf[scols].style.format({c:"{:.2f}" for c in scols if c not in ["Date","ScanTime"]}),
+            height=400,use_container_width=True)
+
 
 
 def main():
@@ -2513,8 +2633,7 @@ def main():
     elif page == "📦 Timeline Archive":
         timeline_archive_page()
     elif page == "🎯 Portfolio Score Tracker":
-        score_tracker_page()
-    else:
         post_analysis_page()
+
 if __name__ == "__main__":
     main()
