@@ -12,6 +12,7 @@ ENV/
 data/
 *.csv
 *.json
+!sheets_config.json
 
 # Streamlit
 .streamlit/secrets.toml

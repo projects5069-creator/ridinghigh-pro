@@ -270,16 +270,14 @@ def run(target_date: str = None):
             print(f"[Collector] ⛔ {today} not a trading day — skipping.")
             return
 
-    from gsheets_sync import _get_client, SPREADSHEET_ID, TAB_DAILY_SNAPSHOT
-    gc = _get_client()
+    import sheets_manager
+    gc = sheets_manager._get_gc()
     if gc is None:
         print("[Collector] ❌ Cannot connect to Google Sheets"); return
 
-    sh = gc.open_by_key(SPREADSHEET_ID)
-
     # Load snapshots
-    ws      = sh.worksheet(TAB_DAILY_SNAPSHOT)
-    data    = ws.get_all_values()
+    ws   = sheets_manager.get_worksheet("daily_snapshots", gc=gc)
+    data = ws.get_all_values() if ws else []
     if len(data) <= 1:
         print("[Collector] No snapshot data"); return
     snapshots_df = pd.DataFrame(data[1:], columns=data[0])
@@ -295,8 +293,8 @@ def run(target_date: str = None):
 
     # Load timeline_live for stats
     print("[Collector] Loading timeline_live...")
-    ws_tl   = sh.worksheet("timeline_live")
-    tl_data = ws_tl.get_all_values()
+    ws_tl   = sheets_manager.get_worksheet("timeline_live", gc=gc)
+    tl_data = ws_tl.get_all_values() if ws_tl else []
     tl_df   = pd.DataFrame(tl_data[1:], columns=tl_data[0]) if len(tl_data) > 1 else pd.DataFrame()
 
     existing_df = load_post_analysis_from_sheets()

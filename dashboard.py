@@ -22,6 +22,7 @@ from ta.volatility import AverageTrueRange
 import os
 import shutil
 from gsheets_sync import save_snapshot_to_sheets, save_timeline_to_sheets, save_portfolio_to_sheets, load_portfolio_from_sheets, load_timeline_dates_from_sheets, load_timeline_from_sheets
+import sheets_manager
 import json
 
 st.set_page_config(
@@ -1019,7 +1020,7 @@ def _get_gc():
         return gspread.authorize(creds)
     return None
 
-SHEET_ID = "1oyefUPV52SMeAlC4UejECYoPRNRudJJS42rukNGYx5k"
+SHEET_ID = "1oyefUPV52SMeAlC4UejECYoPRNRudJJS42rukNGYx5k"  # legacy backup
 PERU_TZ = pytz.timezone("America/Lima")
 
 
@@ -1031,7 +1032,9 @@ def _cached_timeline_live() -> pd.DataFrame:
     try:
         gc = _get_gc()
         if not gc: return pd.DataFrame()
-        data = gc.open_by_key(SHEET_ID).worksheet("timeline_live").get_all_values()
+        ws = sheets_manager.get_worksheet("timeline_live", gc=gc)
+        if not ws: return pd.DataFrame()
+        data = ws.get_all_values()
         if len(data) <= 1: return pd.DataFrame()
         return pd.DataFrame(data[1:], columns=data[0])
     except Exception:
@@ -1044,7 +1047,9 @@ def _cached_daily_snapshots() -> pd.DataFrame:
     try:
         gc = _get_gc()
         if not gc: return pd.DataFrame()
-        data = gc.open_by_key(SHEET_ID).worksheet("daily_snapshots").get_all_values()
+        ws = sheets_manager.get_worksheet("daily_snapshots", gc=gc)
+        if not ws: return pd.DataFrame()
+        data = ws.get_all_values()
         if len(data) <= 1: return pd.DataFrame()
         return pd.DataFrame(data[1:], columns=data[0])
     except Exception:
@@ -1057,7 +1062,9 @@ def _cached_portfolio() -> pd.DataFrame:
     try:
         gc = _get_gc()
         if not gc: return pd.DataFrame()
-        data = gc.open_by_key(SHEET_ID).worksheet("portfolio").get_all_values()
+        ws = sheets_manager.get_worksheet("portfolio", gc=gc)
+        if not ws: return pd.DataFrame()
+        data = ws.get_all_values()
         if len(data) <= 1: return pd.DataFrame()
         df = pd.DataFrame(data[1:], columns=data[0])
         for col in ["Score", "BuyPrice", "CurrentPrice", "Change%", "P/L"]:
@@ -1082,7 +1089,10 @@ def _cached_portfolio_live() -> pd.DataFrame:
         gc = _get_gc()
         if not gc:
             return pd.DataFrame()
-        data = gc.open_by_key(SHEET_ID).worksheet("portfolio_live").get_all_values()
+        ws = sheets_manager.get_worksheet("portfolio_live", gc=gc)
+        if not ws:
+            return pd.DataFrame()
+        data = ws.get_all_values()
         if len(data) <= 1:
             return pd.DataFrame()
         df = pd.DataFrame(data[1:], columns=data[0])
@@ -1532,18 +1542,15 @@ def daily_summary_page():
 
 def timeline_archive_page():
     st.title("📦 Timeline Archive")
+    st.caption("Score timeline per scan — pivoted by ScanTime (from timeline_live)")
     system_health_bar()
 
     if is_cloud():
         try:
-            gc = _get_gc()
-            sh = gc.open_by_key(SHEET_ID)
-            ws = sh.worksheet("timeline_archive")
-            data = ws.get_all_values()
-            if len(data) <= 1:
-                st.warning("⚠️ No archived timelines yet")
+            all_df = _cached_timeline_live()
+            if all_df.empty:
+                st.warning("⚠️ No timeline data yet")
                 return
-            all_df = pd.DataFrame(data[1:], columns=data[0])
             dates = sorted(all_df["Date"].unique().tolist(), reverse=True)
         except Exception as e:
             st.error(f"Error: {e}")
@@ -1551,17 +1558,14 @@ def timeline_archive_page():
     else:
         tracker = LiveTracker()
         dates = tracker.get_archive_dates()
-    
+
     if not dates:
-        st.warning("⚠️ No archived timelines yet")
-        st.info("💡 Timelines are automatically archived at 14:59")
+        st.warning("⚠️ No timeline data yet")
         return
-    
+
     selected_date = st.selectbox("📆 Select Date", dates, index=0)
-    
+
     if is_cloud():
-        all_data = ws.get_all_values()
-        all_df = pd.DataFrame(all_data[1:], columns=all_data[0])
         day_df = all_df[all_df["Date"] == selected_date].drop(columns=["Date"], errors="ignore")
         day_df["Score"] = pd.to_numeric(day_df.get("Score", 0), errors="coerce")
         if "ScanTime" in day_df.columns:
@@ -2311,48 +2315,44 @@ def post_analysis_page():
             with st.spinner("טוען נתונים מכל הטאבים..."):
                 try:
                     import io
-                    from gsheets_sync import _get_client, SPREADSHEET_ID
-
+                    from gsheets_sync import _get_client
                     gc = _get_client()
-                    sh = gc.open_by_key(SPREADSHEET_ID)
 
                     output = io.BytesIO()
                     with pd.ExcelWriter(output, engine="openpyxl") as writer:
 
-                        # Regular tabs
+                        # Regular tabs — each is its own Spreadsheet now
                         regular_tabs = {
-                            "Post Analysis":  "post_analysis",
+                            "Post Analysis":   "post_analysis",
                             "Daily Snapshots": "daily_snapshots",
+                            "Daily Summary":   "daily_summary",
                             "Portfolio":       "portfolio",
                         }
                         for sheet_name, tab_name in regular_tabs.items():
                             try:
-                                ws = sh.worksheet(tab_name)
+                                ws = sheets_manager.get_worksheet(tab_name, gc=gc)
                                 data = ws.get_all_values()
                                 tab_df = pd.DataFrame(data[1:], columns=data[0])
                                 tab_df.to_excel(writer, sheet_name=sheet_name, index=False)
                             except Exception as e:
                                 st.warning(f"⚠️ {tab_name}: {e}")
 
-                        # Timeline Archive — one pivot sheet per date
+                        # Timeline Live — one pivot sheet per date
                         try:
-                            ws_arch = sh.worksheet("timeline_archive")
-                            arch_data = ws_arch.get_all_values()
-                            arch_df = pd.DataFrame(arch_data[1:], columns=arch_data[0])
-                            arch_df["Score"] = pd.to_numeric(arch_df["Score"], errors="coerce")
-                            arch_dates = sorted(arch_df["Date"].unique().tolist(), reverse=True)
-
-                            for date_val in arch_dates:
-                                day_df = arch_df[arch_df["Date"] == date_val]
-                                pivot = day_df.pivot_table(
-                                    index="Ticker", columns="ScanTime", values="Score", aggfunc="last"
-                                )
-                                pivot = pivot[sorted(pivot.columns, reverse=True)].round(2)
-                                pivot.reset_index(inplace=True)
-                                sheet_label = f"Archive {date_val}"[:31]
-                                pivot.to_excel(writer, sheet_name=sheet_label, index=False)
+                            tl_df = _cached_timeline_live()
+                            if not tl_df.empty and "ScanTime" in tl_df.columns:
+                                tl_df["Score"] = pd.to_numeric(tl_df["Score"], errors="coerce")
+                                for date_val in sorted(tl_df["Date"].unique().tolist(), reverse=True):
+                                    day_df = tl_df[tl_df["Date"] == date_val]
+                                    pivot = day_df.pivot_table(
+                                        index="Ticker", columns="ScanTime", values="Score", aggfunc="last"
+                                    )
+                                    pivot = pivot[sorted(pivot.columns, reverse=True)].round(2)
+                                    pivot.reset_index(inplace=True)
+                                    sheet_label = f"TL {date_val}"[:31]
+                                    pivot.to_excel(writer, sheet_name=sheet_label, index=False)
                         except Exception as e:
-                            st.warning(f"⚠️ timeline_archive: {e}")
+                            st.warning(f"⚠️ timeline_live pivot: {e}")
 
                     output.seek(0)
                     filename = f"RidingHigh_Full_{datetime.now().strftime('%Y%m%d')}.xlsx"
@@ -2375,42 +2375,35 @@ def post_analysis_page():
             with st.spinner("בונה קובץ ניתוח..."):
                 try:
                     import io
-                    from gsheets_sync import _get_client, SPREADSHEET_ID
-
+                    from gsheets_sync import _get_client
                     gc = _get_client()
-                    sh = gc.open_by_key(SPREADSHEET_ID)
 
                     output = io.BytesIO()
                     with pd.ExcelWriter(output, engine="openpyxl") as writer:
 
                         # Tab 1: Post Analysis (full)
                         try:
-                            ws_pa = sh.worksheet("post_analysis")
+                            ws_pa = sheets_manager.get_worksheet("post_analysis", gc=gc)
                             pa_data = ws_pa.get_all_values()
                             pa_df = pd.DataFrame(pa_data[1:], columns=pa_data[0])
                             pa_df.to_excel(writer, sheet_name="Post Analysis", index=False)
                         except Exception as e:
                             st.warning(f"⚠️ post_analysis: {e}")
 
-                        # Tab 2: Timeline Summary (computed from archive)
+                        # Tab 2: Timeline Summary (from timeline_live)
                         try:
-                            ws_arch = sh.worksheet("timeline_archive")
-                            arch_data = ws_arch.get_all_values()
-                            arch_df = pd.DataFrame(arch_data[1:], columns=arch_data[0])
-
-                            if not arch_df.empty and "ScanTime" in arch_df.columns:
-                                summary_df = _build_timeline_summary(arch_df)
+                            tl_df = _cached_timeline_live()
+                            if not tl_df.empty and "ScanTime" in tl_df.columns:
+                                summary_df = _build_timeline_summary(tl_df)
                                 summary_df.to_excel(writer, sheet_name="Timeline Summary", index=False)
                             else:
-                                st.warning("⚠️ Timeline archive ריק או חסר עמודת ScanTime")
+                                st.warning("⚠️ timeline_live ריק או חסר ScanTime")
                         except Exception as e:
                             st.warning(f"⚠️ timeline summary: {e}")
 
                         # Tab 3: Daily Snapshots (last 10 days only to keep light)
                         try:
-                            ws_snap = sh.worksheet("daily_snapshots")
-                            snap_data = ws_snap.get_all_values()
-                            snap_df = pd.DataFrame(snap_data[1:], columns=snap_data[0])
+                            snap_df = _cached_daily_snapshots()
                             if "Date" in snap_df.columns:
                                 last_10_dates = sorted(snap_df["Date"].unique().tolist(), reverse=True)[:10]
                                 snap_df = snap_df[snap_df["Date"].isin(last_10_dates)]
@@ -2515,14 +2508,14 @@ def score_tracker_page():
     @st.cache_data(ttl=60)
     def load_data():
         try:
-            from gsheets_sync import _get_client, SPREADSHEET_ID
+            from gsheets_sync import _get_client
             gc = _get_client()
             if gc is None: return pd.DataFrame(), pd.DataFrame()
-            sh = gc.open_by_key(SPREADSHEET_ID)
             today = datetime.now(PERU_TZ).strftime("%Y-%m-%d")
 
             # Load portfolio — find active stocks
-            port = sh.worksheet("portfolio").get_all_values()
+            ws_port = sheets_manager.get_worksheet("portfolio", gc=gc)
+            port = ws_port.get_all_values() if ws_port else []
             port_df = pd.DataFrame(port[1:], columns=port[0]) if len(port) > 1 else pd.DataFrame()
             active = []
             if not port_df.empty:
@@ -2540,8 +2533,8 @@ def score_tracker_page():
 
             # Load score_tracker data
             try:
-                ws = sh.worksheet("score_tracker")
-                data = ws.get_all_values()
+                ws_st = sheets_manager.get_worksheet("score_tracker", gc=gc)
+                data = ws_st.get_all_values() if ws_st else []
                 tracker_df = pd.DataFrame(data[1:], columns=data[0]) if len(data) > 1 else pd.DataFrame()
                 for col in ["Score","Price","MxV","RunUp","RSI","ATRX","REL_VOL","Gap","VWAP"]:
                     if col in tracker_df.columns:

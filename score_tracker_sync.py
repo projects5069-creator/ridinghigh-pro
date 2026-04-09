@@ -82,15 +82,16 @@ def get_score_and_price(ticker):
 def run():
     if not is_market_hours():
         print("[ScoreTracker] Outside market hours"); return
-    from gsheets_sync import _get_client, SPREADSHEET_ID
-    gc = _get_client()
+    import sheets_manager
+    gc = sheets_manager._get_gc()
     if gc is None: print("[no connection]"); return
-    sh = gc.open_by_key(SPREADSHEET_ID)
     now = datetime.now(PERU_TZ)
     today = now.strftime("%Y-%m-%d")
     scan_time = now.strftime("%H:%M")
     print(f"[ScoreTracker] {today} {scan_time}")
-    port_data = sh.worksheet("portfolio").get_all_values()
+
+    ws_port = sheets_manager.get_worksheet("portfolio", gc=gc)
+    port_data = ws_port.get_all_values() if ws_port else []
     if len(port_data) <= 1: print("no portfolio"); return
     port_df = pd.DataFrame(port_data[1:], columns=port_data[0])
     active = set()
@@ -112,15 +113,12 @@ def run():
         print(f"  ✅ {ticker} {score:.2f}")
     if not new_rows: return
     new_df = pd.DataFrame(new_rows)[["Date","ScanTime","Ticker","ScanDate","Price","Score"]]
-    try:
-        ws = sh.worksheet("score_tracker")
-        if len(ws.get_all_values()) > 1:
-            ws.append_rows(new_df.astype(str).values.tolist())
+    ws_st = sheets_manager.get_worksheet("score_tracker", gc=gc)
+    if ws_st:
+        if len(ws_st.get_all_values()) > 1:
+            ws_st.append_rows(new_df.astype(str).values.tolist())
         else:
-            ws.update([list(new_df.columns)] + new_df.astype(str).values.tolist())
-    except:
-        ws = sh.add_worksheet(title="score_tracker",rows=100000,cols=10)
-        ws.update([list(new_df.columns)] + new_df.astype(str).values.tolist())
-    print(f"\u2705 Saved {len(new_rows)} rows")
+            ws_st.update([list(new_df.columns)] + new_df.astype(str).values.tolist())
+        print(f"✅ Saved {len(new_rows)} rows")
 
 if __name__ == "__main__": run()

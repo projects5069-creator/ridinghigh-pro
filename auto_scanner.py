@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 RidingHigh Pro - Auto Scanner for GitHub Actions
-Runs without Streamlit, saves directly to Google Sheets
+Runs without Streamlit, saves directly to Google Sheets (new multi-sheet architecture)
 """
 
 import os
@@ -12,8 +12,9 @@ import pytz
 import pandas as pd
 from datetime import datetime, time as dt_time
 
-# ── Google Sheets setup ──────────────────────────────────────────────────────
-SPREADSHEET_ID = "1oyefUPV52SMeAlC4UejECYoPRNRudJJS42rukNGYx5k"
+sys.path.insert(0, os.path.expanduser("~/RidingHighPro"))
+import sheets_manager
+
 SCOPES = [
     "https://spreadsheets.google.com/feeds",
     "https://www.googleapis.com/auth/drive"
@@ -57,29 +58,7 @@ def is_trading_day(date=None):
 
 # ── Google Sheets client ─────────────────────────────────────────────────────
 def get_gsheets_client():
-    import gspread
-    from google.oauth2.service_account import Credentials
-
-    # GitHub Actions: credentials in env var
-    creds_json = os.environ.get("GOOGLE_CREDENTIALS_JSON")
-    if creds_json:
-        info = json.loads(creds_json)
-        creds = Credentials.from_service_account_info(info, scopes=SCOPES)
-        return gspread.authorize(creds)
-
-    # Local Mac: credentials file
-    creds_path = os.path.expanduser("~/RidingHighPro/google_credentials.json")
-    if os.path.exists(creds_path):
-        creds = Credentials.from_service_account_file(creds_path, scopes=SCOPES)
-        return gspread.authorize(creds)
-
-    raise Exception("No Google credentials found!")
-
-def get_or_create_sheet(spreadsheet, tab_name):
-    try:
-        return spreadsheet.worksheet(tab_name)
-    except Exception:
-        return spreadsheet.add_worksheet(title=tab_name, rows=5000, cols=30)
+    return sheets_manager._get_gc()
 
 def df_to_sheet(ws, df):
     data = [df.columns.tolist()] + df.astype(str).values.tolist()
@@ -401,9 +380,8 @@ def run_scan():
     # ── Scan tracked tickers not in FINVIZ ──────────────────────────────────
     try:
         gc = get_gsheets_client()
-        sh = gc.open_by_key(SPREADSHEET_ID)
-        ws_tl = sh.worksheet("timeline_live")
-        tl_data = ws_tl.get_all_values()
+        ws_tl = sheets_manager.get_worksheet("timeline_live", gc=gc)
+        tl_data = ws_tl.get_all_values() if ws_tl else []
         if len(tl_data) > 1:
             tl_df = pd.DataFrame(tl_data[1:], columns=tl_data[0])
             today_str = now_peru.strftime('%Y-%m-%d')
@@ -440,31 +418,33 @@ def run_scan():
     results = sorted(results, key=lambda x: x['Score'], reverse=True)
     save_mc_cache()
 
-    # ── Save to Google Sheets ────────────────────────────────────────────────
+    # ── Save to Google Sheets (new multi-sheet architecture) ─────────────────
     try:
         if 'gc' not in dir() or gc is None:
             gc = get_gsheets_client()
-            sh = gc.open_by_key(SPREADSHEET_ID)
         scan_time = now_peru.strftime('%H:%M')
         today     = now_peru.strftime('%Y-%m-%d')
 
-        # Timeline (every scan)
-        ws_timeline = get_or_create_sheet(sh, "timeline_live")
-        existing = ws_timeline.get_all_values()
         results_df = pd.DataFrame(results)
 
-        new_rows = results_df.copy()
+        # ── timeline_live: 8 slim columns only, append-only ──────────────────
+        ws_timeline = sheets_manager.get_worksheet("timeline_live", gc=gc)
+        slim_cols = sheets_manager.TIMELINE_LIVE_COLS  # ["Date","ScanTime","Ticker","Price","Score","MxV","RunUp","REL_VOL"]
+        data_cols = [c for c in slim_cols if c not in ("Date", "ScanTime")]
+        new_rows = results_df.reindex(columns=data_cols)
         new_rows.insert(0, 'ScanTime', scan_time)
         new_rows.insert(0, 'Date', today)
-        if len(existing) <= 1:
+        new_rows = new_rows[slim_cols]  # enforce exact column order
+
+        existing_tl = ws_timeline.get_all_values()
+        if len(existing_tl) <= 1:
             df_to_sheet(ws_timeline, new_rows)
         else:
-            rows_to_add = new_rows.astype(str).values.tolist()
-            ws_timeline.append_rows(rows_to_add)
+            ws_timeline.append_rows(new_rows.astype(str).values.tolist())
 
-        # Daily snapshot at 14:59
+        # ── Daily snapshot at 14:59 ───────────────────────────────────────────
         if is_snapshot_time():
-            ws_snap = get_or_create_sheet(sh, "daily_snapshots")
+            ws_snap = sheets_manager.get_worksheet("daily_snapshots", gc=gc)
             snap_df = results_df.copy()
             snap_df.insert(0, 'Date', today)
             existing_snap = ws_snap.get_all_values()
@@ -476,54 +456,96 @@ def run_scan():
                 combined_snap = pd.concat([other, snap_df], ignore_index=True)
                 df_to_sheet(ws_snap, combined_snap)
             print("📸 Daily snapshot saved!")
-            # Save portfolio at 14:59
-            ws_port = get_or_create_sheet(sh, "portfolio")
+
+            # ── Portfolio: add Score>=60 positions ───────────────────────────
+            ws_port = sheets_manager.get_worksheet("portfolio", gc=gc)
             high_score = results_df[results_df['Score'].astype(float) >= 60].copy()
             if not high_score.empty:
                 existing_port = ws_port.get_all_values()
-                new_positions = []
+                ex_port = pd.DataFrame()
                 existing_keys = set()
                 if len(existing_port) > 1:
                     ex_port = pd.DataFrame(existing_port[1:], columns=existing_port[0])
                     existing_keys = set(ex_port['PositionKey'].values) if 'PositionKey' in ex_port.columns else set()
-                else:
-                    ex_port = pd.DataFrame()
+                new_positions = []
                 for _, row in high_score.iterrows():
                     key = f"{row['Ticker']}_{today}"
                     if key not in existing_keys:
-                        new_positions.append({'PositionKey': key, 'Date': today, 'Ticker': row['Ticker'], 'Score': round(float(row['Score']), 2), 'BuyPrice': round(float(row['Price']), 2), 'Status': 'Open'})
+                        new_positions.append({
+                            'PositionKey': key, 'Date': today, 'Ticker': row['Ticker'],
+                            'Score': round(float(row['Score']), 2),
+                            'BuyPrice': round(float(row['Price']), 2), 'Status': 'Open'
+                        })
                 if new_positions:
                     new_port_df = pd.DataFrame(new_positions)
                     combined_port = pd.concat([ex_port, new_port_df], ignore_index=True) if not ex_port.empty else new_port_df
                     df_to_sheet(ws_port, combined_port)
                     print(f"💼 Portfolio saved! {len(new_positions)} new stocks")
-            # Save timeline archive at 14:59
-            ws_arch = get_or_create_sheet(sh, "timeline_archive")
-            # Save full day timeline from timeline_live
-            tl_all = ws_timeline.get_all_values()
-            if len(tl_all) > 1:
-                tl_full = pd.DataFrame(tl_all[1:], columns=tl_all[0])
-                today_tl = tl_full[tl_full['Date'] == today].copy()
-                existing_arch = ws_arch.get_all_values()
-                if len(existing_arch) <= 1:
-                    df_to_sheet(ws_arch, today_tl)
-                else:
-                    ex_arch = pd.DataFrame(existing_arch[1:], columns=existing_arch[0])
-                    other_arch = ex_arch[ex_arch['Date'] != today]
-                    combined_arch = pd.concat([other_arch, today_tl], ignore_index=True)
-                    df_to_sheet(ws_arch, combined_arch)
-                print("📦 Timeline archive saved!")
 
-        print(f"✅ Saved {len(results)} stocks to Google Sheets at {scan_time}")
+            # ── daily_summary: one row per ticker, peak stats from today's TL ─
+            _save_daily_summary(gc, today, ws_timeline)
 
-        # ── עדכן RunningHigh/RunningLow למניות Pending ───────────────────────
-        update_portfolio_live(gc, sh, now_peru)
+        print(f"✅ Saved {len(results)} stocks at {scan_time}")
+
+        # ── Update RunningHigh/RunningLow for Pending stocks ─────────────────
+        update_portfolio_live(gc, now_peru)
 
     except Exception as e:
         print(f"❌ Google Sheets error: {e}")
 
 
-def update_portfolio_live(gc, sh, now_peru):
+def _save_daily_summary(gc, today: str, ws_timeline):
+    """Build and upsert daily_summary: one row per ticker with peak-score stats."""
+    try:
+        tl_raw = ws_timeline.get_all_values()
+        if len(tl_raw) <= 1:
+            return
+        tl_df = pd.DataFrame(tl_raw[1:], columns=tl_raw[0])
+        today_tl = tl_df[tl_df["Date"] == today].copy()
+        if today_tl.empty:
+            return
+
+        for col in ["Score", "Price", "MxV", "RunUp", "REL_VOL"]:
+            if col in today_tl.columns:
+                today_tl[col] = pd.to_numeric(today_tl[col], errors="coerce")
+
+        summary_rows = []
+        for ticker, grp in today_tl.groupby("Ticker"):
+            grp = grp.sort_values("ScanTime")
+            peak_idx = grp["Score"].idxmax()
+            peak_row = grp.loc[peak_idx]
+            summary_rows.append({
+                "Date":          today,
+                "Ticker":        ticker,
+                "Score":         round(float(grp["Score"].max()), 2),
+                "Price":         round(float(peak_row.get("Price", 0) or 0), 2),
+                "MxV":           round(float(peak_row.get("MxV", 0) or 0), 2),
+                "RunUp":         round(float(peak_row.get("RunUp", 0) or 0), 2),
+                "REL_VOL":       round(float(peak_row.get("REL_VOL", 0) or 0), 2),
+                "ScanCount":     len(grp),
+                "FirstScanTime": grp["ScanTime"].iloc[0] if "ScanTime" in grp.columns else "",
+                "LastScanTime":  grp["ScanTime"].iloc[-1] if "ScanTime" in grp.columns else "",
+            })
+
+        if not summary_rows:
+            return
+
+        ws_ds = sheets_manager.get_worksheet("daily_summary", gc=gc)
+        summary_df = pd.DataFrame(summary_rows)
+        existing_ds = ws_ds.get_all_values()
+        if len(existing_ds) <= 1:
+            df_to_sheet(ws_ds, summary_df)
+        else:
+            ex_ds = pd.DataFrame(existing_ds[1:], columns=existing_ds[0])
+            other = ex_ds[ex_ds["Date"] != today]
+            combined = pd.concat([other, summary_df], ignore_index=True)
+            df_to_sheet(ws_ds, combined)
+        print(f"📊 Daily summary saved ({len(summary_rows)} tickers)")
+    except Exception as e:
+        print(f"⚠️ daily_summary error: {e}")
+
+
+def update_portfolio_live(gc, now_peru):
     """
     בכל ריצה (כל דקה) — מעדכן RunningHigh/RunningLow למניות Pending.
     RunningHigh = מקסימום מחיר שנראה מאז הכניסה
@@ -537,11 +559,10 @@ def update_portfolio_live(gc, sh, now_peru):
 
     try:
         # טעון post_analysis
-        try:
-            ws_pa  = sh.worksheet("post_analysis")
-            pa_raw = ws_pa.get_all_values()
-        except:
+        ws_pa  = sheets_manager.get_worksheet("post_analysis", gc=gc)
+        if ws_pa is None:
             return
+        pa_raw = ws_pa.get_all_values()
         if len(pa_raw) <= 1:
             return
 
@@ -556,8 +577,8 @@ def update_portfolio_live(gc, sh, now_peru):
             return
 
         # טעון portfolio_live הקיים
-        ws_pl  = get_or_create_sheet(sh, "portfolio_live")
-        pl_raw = ws_pl.get_all_values()
+        ws_pl  = sheets_manager.get_worksheet("portfolio_live", gc=gc)
+        pl_raw = ws_pl.get_all_values() if ws_pl else []
         if len(pl_raw) > 1:
             pl_df = pd.DataFrame(pl_raw[1:], columns=pl_raw[0])
             for col in ["EntryPrice","RunningHigh","RunningLow","TP10_Price","SL_Price"]:
