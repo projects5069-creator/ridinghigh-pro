@@ -2494,7 +2494,7 @@ def system_health_bar():
 def main():
     page = st.sidebar.radio(
         "🧭 Navigation",
-        ["📊 Live Tracker", "💼 Portfolio Tracker", "📅 Daily Summary", "📦 Timeline Archive", "🔬 Post Analysis", "🎯 Score Tracker"]
+        ["📈 Live Tracker", "💼 Portfolio Tracker", "ίὯ Portfolio Score Tracker", "📅 Daily Summary", "📦 Timeline Archive", "🕬 Post Analysis"]
     )
 
     st.sidebar.divider()
@@ -2510,7 +2510,7 @@ def main():
         daily_summary_page()
     elif page == "📦 Timeline Archive":
         timeline_archive_page()
-    elif page == "🎯 Score Tracker":
+    elif page == "ίὯ Portfolio Score Tracker":
         score_tracker_page()
     else:
         post_analysis_page()
