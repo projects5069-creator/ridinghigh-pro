@@ -2528,7 +2528,13 @@ def score_tracker_page():
             if not port_df.empty:
                 for r in port_df.itertuples():
                     sd = str(r.Date).strip()
-                    if sd and today in trading_days_after(sd, 3):
+                    _d = datetime.strptime(today, "%Y-%m-%d")
+                    while True:
+                        _d -= timedelta(days=1)
+                        if _d.weekday() < 5:
+                            _prev = _d.strftime("%Y-%m-%d")
+                            break
+                    if sd and sd == _prev:
                         active.append({"Ticker": r.Ticker, "ScanDate": sd, "EntryScore": r.Score, "EntryPrice": r.BuyPrice})
             active_df = pd.DataFrame(active).drop_duplicates(["Ticker","ScanDate"]) if active else pd.DataFrame()
 
@@ -2672,8 +2678,6 @@ def main():
     elif page == "📦 Timeline Archive":
         timeline_archive_page()
     elif page == "🎯 Portfolio Score Tracker":
-        score_tracker_page()
-    else:
         post_analysis_page()
 
 if __name__ == "__main__":
