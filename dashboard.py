@@ -2491,6 +2491,7 @@ def system_health_bar():
         st.caption(f"⚠️ Health bar error: {e}")
 
 
+
 def main():
     page = st.sidebar.radio(
         "🧭 Navigation",
