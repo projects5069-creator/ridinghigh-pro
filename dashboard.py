@@ -2678,7 +2678,7 @@ def main():
     elif page == "📦 Timeline Archive":
         timeline_archive_page()
     elif page == "🎯 Portfolio Score Tracker":
-        post_analysis_page()
+        post_analysscore_tracker_page()
 
 if __name__ == "__main__":
     main()
