@@ -255,7 +255,7 @@ def is_trading_day(date=None):
         nyse = mcal.get_calendar("NASDAQ")
         return not nyse.schedule(start_date=date.strftime("%Y-%m-%d"),
                                   end_date=date.strftime("%Y-%m-%d")).empty
-    except ImportError:
+    except Exception:
         return date.weekday() < 5
 
 
