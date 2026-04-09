@@ -163,7 +163,11 @@ class Dashboard:
                 return float(market_cap_str.replace('B', '')) * 1_000_000_000
             elif 'M' in market_cap_str:
                 return float(market_cap_str.replace('M', '')) * 1_000_000
-            else:
+            elif page == "🎯 Score Tracker":
+ score_tracker_page()
+ elif page == "🎯 Score Tracker":
+ score_tracker_page()
+ elif page == "🎯 Score Tracker": score_tracker_page() else:
                 return float(market_cap_str)
         except:
             return None
@@ -179,7 +183,11 @@ class Dashboard:
                 return int(float(volume_str.replace('M', '')) * 1_000_000)
             elif 'K' in volume_str:
                 return int(float(volume_str.replace('K', '')) * 1_000)
-            else:
+            elif page == "🎯 Score Tracker":
+ score_tracker_page()
+ elif page == "🎯 Score Tracker":
+ score_tracker_page()
+ elif page == "🎯 Score Tracker": score_tracker_page() else:
                 return int(float(volume_str))
         except:
             return None
@@ -320,9 +328,17 @@ class Dashboard:
                         atr_values = atr_indicator.average_true_range()
                         if not atr_values.empty and not pd.isna(atr_values.iloc[-1]):
                             atr = atr_values.iloc[-1]
-                        else:
+                        elif page == "🎯 Score Tracker":
+ score_tracker_page()
+ elif page == "🎯 Score Tracker":
+ score_tracker_page()
+ elif page == "🎯 Score Tracker": score_tracker_page() else:
                             atr = current['High'] - current['Low']
-                    else:
+                    elif page == "🎯 Score Tracker":
+ score_tracker_page()
+ elif page == "🎯 Score Tracker":
+ score_tracker_page()
+ elif page == "🎯 Score Tracker": score_tracker_page() else:
                         atr = current['High'] - current['Low']
                     atrx = (atr / price) * 100 if price > 0 else 0
                 except:
@@ -333,10 +349,18 @@ class Dashboard:
                     avg_volume = info.get('averageVolume', volume)
                     if avg_volume > 0:
                         rel_vol = volume / avg_volume
-                    else:
+                    elif page == "🎯 Score Tracker":
+ score_tracker_page()
+ elif page == "🎯 Score Tracker":
+ score_tracker_page()
+ elif page == "🎯 Score Tracker": score_tracker_page() else:
                         if len(full_hist) >= 20:
                             avg_vol_20 = full_hist['Volume'].tail(20).mean()
-                        else:
+                        elif page == "🎯 Score Tracker":
+ score_tracker_page()
+ elif page == "🎯 Score Tracker":
+ score_tracker_page()
+ elif page == "🎯 Score Tracker": score_tracker_page() else:
                             avg_vol_20 = full_hist['Volume'].mean()
                         rel_vol = volume / avg_vol_20 if avg_vol_20 > 0 else 1.0
                 except:
@@ -490,9 +514,17 @@ class Dashboard:
                             atr_values = atr_indicator.average_true_range()
                             if not atr_values.empty and not pd.isna(atr_values.iloc[-1]):
                                 atr = atr_values.iloc[-1]
-                            else:
+                            elif page == "🎯 Score Tracker":
+ score_tracker_page()
+ elif page == "🎯 Score Tracker":
+ score_tracker_page()
+ elif page == "🎯 Score Tracker": score_tracker_page() else:
                                 atr = current['High'] - current['Low']
-                        else:
+                        elif page == "🎯 Score Tracker":
+ score_tracker_page()
+ elif page == "🎯 Score Tracker":
+ score_tracker_page()
+ elif page == "🎯 Score Tracker": score_tracker_page() else:
                             atr = current['High'] - current['Low']
                         atrx = (atr / price) * 100 if price > 0 else 0
                     except:
@@ -503,10 +535,18 @@ class Dashboard:
                         avg_volume = info.get('averageVolume', volume)
                         if avg_volume > 0:
                             rel_vol = volume / avg_volume
-                        else:
+                        elif page == "🎯 Score Tracker":
+ score_tracker_page()
+ elif page == "🎯 Score Tracker":
+ score_tracker_page()
+ elif page == "🎯 Score Tracker": score_tracker_page() else:
                             if len(hist) >= 20:
                                 avg_vol_20 = hist['Volume'].tail(20).mean()
-                            else:
+                            elif page == "🎯 Score Tracker":
+ score_tracker_page()
+ elif page == "🎯 Score Tracker":
+ score_tracker_page()
+ elif page == "🎯 Score Tracker": score_tracker_page() else:
                                 avg_vol_20 = hist['Volume'].mean()
                             rel_vol = volume / avg_vol_20 if avg_vol_20 > 0 else 1.0
                     except:
@@ -672,7 +712,11 @@ class Dashboard:
         try:
             if metrics['rsi'] > 80:
                 score += 15
-            else:
+            elif page == "🎯 Score Tracker":
+ score_tracker_page()
+ elif page == "🎯 Score Tracker":
+ score_tracker_page()
+ elif page == "🎯 Score Tracker": score_tracker_page() else:
                 score += (metrics['rsi'] / 80) * 15
         except:
             pass
@@ -762,7 +806,11 @@ class LiveTracker:
             except:
                 df = pd.DataFrame()
                 df.index.name = 'Ticker'
-        else:
+        elif page == "🎯 Score Tracker":
+ score_tracker_page()
+ elif page == "🎯 Score Tracker":
+ score_tracker_page()
+ elif page == "🎯 Score Tracker": score_tracker_page() else:
             df = pd.DataFrame()
             df.index.name = 'Ticker'
         
@@ -888,7 +936,11 @@ class PortfolioTracker:
                 existing_df = pd.read_csv(self.portfolio_file)
             except:
                 existing_df = pd.DataFrame()
-        else:
+        elif page == "🎯 Score Tracker":
+ score_tracker_page()
+ elif page == "🎯 Score Tracker":
+ score_tracker_page()
+ elif page == "🎯 Score Tracker": score_tracker_page() else:
             existing_df = pd.DataFrame()
         
         if is_cloud():
@@ -1184,9 +1236,17 @@ def _build_timeline_summary(arch_df):
                 trend = "Rising"
             elif diff < -2:
                 trend = "Falling"
-            else:
+            elif page == "🎯 Score Tracker":
+ score_tracker_page()
+ elif page == "🎯 Score Tracker":
+ score_tracker_page()
+ elif page == "🎯 Score Tracker": score_tracker_page() else:
                 trend = "Stable"
-        else:
+        elif page == "🎯 Score Tracker":
+ score_tracker_page()
+ elif page == "🎯 Score Tracker":
+ score_tracker_page()
+ elif page == "🎯 Score Tracker": score_tracker_page() else:
             trend = "Stable"
 
         time_above_60 = int((scores >= 60).sum())
@@ -1279,16 +1339,28 @@ def main_page():
                 st.session_state.results = results
                 st.session_state.last_scan = now_peru
                 st.sidebar.success(f"✅ {len(results)} stocks! (scan: {latest_time})")
-            else:
+            elif page == "🎯 Score Tracker":
+ score_tracker_page()
+ elif page == "🎯 Score Tracker":
+ score_tracker_page()
+ elif page == "🎯 Score Tracker": score_tracker_page() else:
                 st.sidebar.info("⏳ Waiting for next scan...")
-    else:
+    elif page == "🎯 Score Tracker":
+ score_tracker_page()
+ elif page == "🎯 Score Tracker":
+ score_tracker_page()
+ elif page == "🎯 Score Tracker": score_tracker_page() else:
         if st.session_state.force_scan:
             should_scan = True
             st.session_state.force_scan = False
         elif auto_scan:
             if st.session_state.last_scan is None:
                 should_scan = True
-            else:
+            elif page == "🎯 Score Tracker":
+ score_tracker_page()
+ elif page == "🎯 Score Tracker":
+ score_tracker_page()
+ elif page == "🎯 Score Tracker": score_tracker_page() else:
                 time_diff = (datetime.now() - st.session_state.last_scan).total_seconds()
                 if time_diff >= 60:
                     should_scan = True
@@ -1328,7 +1400,11 @@ def main_page():
                     added_count = tracker.add_minute_data(results, scan_start_time)
                     
                     st.success(f"✅ {len(results)} stocks tracked!")
-                else:
+                elif page == "🎯 Score Tracker":
+ score_tracker_page()
+ elif page == "🎯 Score Tracker":
+ score_tracker_page()
+ elif page == "🎯 Score Tracker": score_tracker_page() else:
                     st.warning("⚠️ No stocks")
                 
                 time.sleep(1)
@@ -1384,7 +1460,11 @@ def main_page():
                 return ['background-color: #cc0000; color: white'] * len(row)
             elif score >= 40:
                 return ['background-color: #ff6600; color: white'] * len(row)
-            else:
+            elif page == "🎯 Score Tracker":
+ score_tracker_page()
+ elif page == "🎯 Score Tracker":
+ score_tracker_page()
+ elif page == "🎯 Score Tracker": score_tracker_page() else:
                 return ['background-color: #ffcc00; color: black'] * len(row)
         
         styled_df = df.style.apply(highlight_score, axis=1)
@@ -1393,7 +1473,11 @@ def main_page():
         
         st.dataframe(styled_df, use_container_width=True, hide_index=True, height=table_height)
         
-    else:
+    elif page == "🎯 Score Tracker":
+ score_tracker_page()
+ elif page == "🎯 Score Tracker":
+ score_tracker_page()
+ elif page == "🎯 Score Tracker": score_tracker_page() else:
         st.info("👈 Click 'Scan Now' or enable Auto-Scan")
     
     st.markdown("---")
@@ -1401,13 +1485,21 @@ def main_page():
     
     if is_cloud():
         df_timeline = load_timeline_today_from_sheets()
-    else:
+    elif page == "🎯 Score Tracker":
+ score_tracker_page()
+ elif page == "🎯 Score Tracker":
+ score_tracker_page()
+ elif page == "🎯 Score Tracker": score_tracker_page() else:
         tracker = LiveTracker()
         df_timeline = tracker.get_today_grid()
     
     if df_timeline is None or df_timeline.empty:
         st.info("📊 No timeline data yet")
-    else:
+    elif page == "🎯 Score Tracker":
+ score_tracker_page()
+ elif page == "🎯 Score Tracker":
+ score_tracker_page()
+ elif page == "🎯 Score Tracker": score_tracker_page() else:
         col1, col2, col3 = st.columns(3)
         
         with col1:
@@ -1433,7 +1525,11 @@ def main_page():
                     return 'background-color: #cc0000; color: white'
                 elif score >= 50:
                     return 'background-color: #ff6600; color: white'
-                else:
+                elif page == "🎯 Score Tracker":
+ score_tracker_page()
+ elif page == "🎯 Score Tracker":
+ score_tracker_page()
+ elif page == "🎯 Score Tracker": score_tracker_page() else:
                     return 'background-color: #ffcc00; color: black'
             except:
                 return ''
@@ -1464,7 +1560,11 @@ def daily_summary_page():
             st.warning("⚠️ No data yet - will be saved at 14:59")
             return
         dates = sorted(all_df["Date"].unique().tolist(), reverse=True)
-    else:
+    elif page == "🎯 Score Tracker":
+ score_tracker_page()
+ elif page == "🎯 Score Tracker":
+ score_tracker_page()
+ elif page == "🎯 Score Tracker": score_tracker_page() else:
         logger = DataLogger()
         dates = logger.get_all_dates()
 
@@ -1476,7 +1576,11 @@ def daily_summary_page():
 
     if is_cloud():
         df = all_df[all_df["Date"] == selected_date].drop(columns=["Date"], errors="ignore")
-    else:
+    elif page == "🎯 Score Tracker":
+ score_tracker_page()
+ elif page == "🎯 Score Tracker":
+ score_tracker_page()
+ elif page == "🎯 Score Tracker": score_tracker_page() else:
         df = logger.load_date(selected_date)
     
     if df is None or df.empty:
@@ -1494,7 +1598,11 @@ def daily_summary_page():
                 return ['background-color: #cc0000; color: white'] * len(row)
             elif score >= 40:
                 return ['background-color: #ff6600; color: white'] * len(row)
-            else:
+            elif page == "🎯 Score Tracker":
+ score_tracker_page()
+ elif page == "🎯 Score Tracker":
+ score_tracker_page()
+ elif page == "🎯 Score Tracker": score_tracker_page() else:
                 return ['background-color: #ffcc00; color: black'] * len(row)
         except:
             return [''] * len(row)
@@ -1548,7 +1656,11 @@ def timeline_archive_page():
         except Exception as e:
             st.error(f"Error: {e}")
             return
-    else:
+    elif page == "🎯 Score Tracker":
+ score_tracker_page()
+ elif page == "🎯 Score Tracker":
+ score_tracker_page()
+ elif page == "🎯 Score Tracker": score_tracker_page() else:
         tracker = LiveTracker()
         dates = tracker.get_archive_dates()
     
@@ -1567,10 +1679,18 @@ def timeline_archive_page():
         if "ScanTime" in day_df.columns:
             df = day_df.pivot_table(index="Ticker", columns="ScanTime", values="Score", aggfunc="last")
             df = df[sorted(df.columns, reverse=True)].round(2)
-        else:
+        elif page == "🎯 Score Tracker":
+ score_tracker_page()
+ elif page == "🎯 Score Tracker":
+ score_tracker_page()
+ elif page == "🎯 Score Tracker": score_tracker_page() else:
             numeric_cols = day_df.select_dtypes(include="number").columns
             df = day_df.set_index("Ticker")[numeric_cols].round(2) if "Ticker" in day_df.columns else day_df.round(2)
-    else:
+    elif page == "🎯 Score Tracker":
+ score_tracker_page()
+ elif page == "🎯 Score Tracker":
+ score_tracker_page()
+ elif page == "🎯 Score Tracker": score_tracker_page() else:
         df = tracker.load_archive(selected_date)
     
     if df is None or df.empty:
@@ -1596,7 +1716,11 @@ def timeline_archive_page():
                 return 'background-color: #cc0000; color: white'
             elif score >= 50:
                 return 'background-color: #ff6600; color: white'
-            else:
+            elif page == "🎯 Score Tracker":
+ score_tracker_page()
+ elif page == "🎯 Score Tracker":
+ score_tracker_page()
+ elif page == "🎯 Score Tracker": score_tracker_page() else:
                 return 'background-color: #ffcc00; color: black'
         except:
             return ''
@@ -1679,7 +1803,11 @@ def _fetch_high_low_since(ticker_dates: tuple) -> dict:
                     if len(all_tickers) == 1:
                         h = round(float(highs.dropna().max()), 2)
                         l = round(float(lows.dropna().min()),  2)
-                    else:
+                    elif page == "🎯 Score Tracker":
+ score_tracker_page()
+ elif page == "🎯 Score Tracker":
+ score_tracker_page()
+ elif page == "🎯 Score Tracker": score_tracker_page() else:
                         h = round(float(highs[ticker].dropna().max()), 2)
                         l = round(float(lows[ticker].dropna().min()),  2)
                     result[key] = {"high": h, "low": l}
@@ -1759,7 +1887,11 @@ def _simulate_short_trades(pa_df: pd.DataFrame):
                         "MaxHigh": rh_disp, "MinLow": rl_disp,
                         "Status": "Pending ⏳", "Exit_Day": "—", "PnL_$": proxy_pnl, "TP15_reached": "—",
                     }
-                else:
+                elif page == "🎯 Score Tracker":
+ score_tracker_page()
+ elif page == "🎯 Score Tracker":
+ score_tracker_page()
+ elif page == "🎯 Score Tracker": score_tracker_page() else:
                     rec = {
                         "Ticker": ticker, "ScanDate": scan_date,
                         "Score": None if pd.isna(score) else round(float(score), 2),
@@ -1767,7 +1899,11 @@ def _simulate_short_trades(pa_df: pd.DataFrame):
                         "TP10_Price": None, "SL_Price": None, "CurrentPrice": current_price,
                         "Status": "No Data", "Exit_Day": "—", "PnL_$": None, "TP15_reached": "—",
                     }
-            else:
+            elif page == "🎯 Score Tracker":
+ score_tracker_page()
+ elif page == "🎯 Score Tracker":
+ score_tracker_page()
+ elif page == "🎯 Score Tracker": score_tracker_page() else:
                 shares     = int(max(1, math.ceil(POSITION / entry_price)))  # always >= $1000
                 investment = round(shares * entry_price, 2)
                 tp10_price = round(entry_price * (1 - TP_PCT),  4)
@@ -1843,11 +1979,19 @@ def _simulate_short_trades(pa_df: pd.DataFrame):
                                 status   = "TP10 ✅"
                                 exit_day = trading_days
                                 pnl      = round(investment * TP_PCT, 2)
-                            else:
+                            elif page == "🎯 Score Tracker":
+ score_tracker_page()
+ elif page == "🎯 Score Tracker":
+ score_tracker_page()
+ elif page == "🎯 Score Tracker": score_tracker_page() else:
                                 status = "Pending ⏳"
                                 if current_price is not None:
                                     pnl = round(shares * (entry_price - current_price), 2)
-                        else:
+                        elif page == "🎯 Score Tracker":
+ score_tracker_page()
+ elif page == "🎯 Score Tracker":
+ score_tracker_page()
+ elif page == "🎯 Score Tracker": score_tracker_page() else:
                             # אין נתון ב-portfolio_live עדיין — fallback למחיר חי
                             live_price = live_prices.get(ticker)
                             if live_price is not None:
@@ -2051,7 +2195,11 @@ def post_analysis_page():
             prices = yf.download(tickers, period="1d", progress=False, auto_adjust=True)["Close"]
             if len(tickers) == 1:
                 current_price = {tickers[0]: round(float(prices.iloc[-1]), 2)}
-            else:
+            elif page == "🎯 Score Tracker":
+ score_tracker_page()
+ elif page == "🎯 Score Tracker":
+ score_tracker_page()
+ elif page == "🎯 Score Tracker": score_tracker_page() else:
                 current_price = {t: round(float(prices[t].iloc[-1]), 2) for t in tickers if t in prices.columns}
             df["CurrentPrice"] = df["Ticker"].map(current_price)
             df["EntryChange%"] = ((df["CurrentPrice"] - df["ScanPrice"]) / df["ScanPrice"] * 100).round(2)
@@ -2156,7 +2304,11 @@ def post_analysis_page():
             continue
         elif "%" in col:
             format_dict[col] = "{:.2f}%"
-        else:
+        elif page == "🎯 Score Tracker":
+ score_tracker_page()
+ elif page == "🎯 Score Tracker":
+ score_tracker_page()
+ elif page == "🎯 Score Tracker": score_tracker_page() else:
             format_dict[col] = "{:.2f}"
     styled = styled.format(format_dict)
     st.dataframe(styled, use_container_width=True, height=500, hide_index=True)
@@ -2206,7 +2358,11 @@ def post_analysis_page():
         styled_dyn = dyn_display.style.map(color_diff, subset=["הפרש"]).format(format_dyn)
         st.dataframe(styled_dyn, use_container_width=True, hide_index=True)
         st.caption("הפרש אדום = הציון המקורי גבוה מהדינמי (אולי מוערך יתר על המידה). ירוק = הציון הדינמי גבוה יותר.")
-    else:
+    elif page == "🎯 Score Tracker":
+ score_tracker_page()
+ elif page == "🎯 Score Tracker":
+ score_tracker_page()
+ elif page == "🎯 Score Tracker": score_tracker_page() else:
         st.info("אין מספיק נתונים לציון דינמי")
 
     st.divider()
@@ -2287,7 +2443,11 @@ def post_analysis_page():
             return ""
         styled_cat = cat_display.style.map(color_check, subset=label_cols)
         st.dataframe(styled_cat, use_container_width=True, hide_index=True, height=400)
-    else:
+    elif page == "🎯 Score Tracker":
+ score_tracker_page()
+ elif page == "🎯 Score Tracker":
+ score_tracker_page()
+ elif page == "🎯 Score Tracker": score_tracker_page() else:
         st.info("⏳ נתוני catalyst יופיעו כאן לאחר הריצה הראשונה של הקולקטור")
 
     st.divider()
@@ -2401,7 +2561,11 @@ def post_analysis_page():
                             if not arch_df.empty and "ScanTime" in arch_df.columns:
                                 summary_df = _build_timeline_summary(arch_df)
                                 summary_df.to_excel(writer, sheet_name="Timeline Summary", index=False)
-                            else:
+                            elif page == "🎯 Score Tracker":
+ score_tracker_page()
+ elif page == "🎯 Score Tracker":
+ score_tracker_page()
+ elif page == "🎯 Score Tracker": score_tracker_page() else:
                                 st.warning("⚠️ Timeline archive ריק או חסר עמודת ScanTime")
                         except Exception as e:
                             st.warning(f"⚠️ timeline summary: {e}")
@@ -2468,10 +2632,18 @@ def system_health_bar():
                 scan_icon = "✅"
             elif scan_date == yesterday:
                 scan_icon = "⚠️"
-            else:
+            elif page == "🎯 Score Tracker":
+ score_tracker_page()
+ elif page == "🎯 Score Tracker":
+ score_tracker_page()
+ elif page == "🎯 Score Tracker": score_tracker_page() else:
                 scan_icon = "🔴"
             parts.append(f"{scan_icon} Last scan: **{last_scan}**")
-        else:
+        elif page == "🎯 Score Tracker":
+ score_tracker_page()
+ elif page == "🎯 Score Tracker":
+ score_tracker_page()
+ elif page == "🎯 Score Tracker": score_tracker_page() else:
             parts.append("🔴 Last scan: **unknown**")
 
         # ── Last collector status ────────────────────────────────────────────
@@ -2480,9 +2652,17 @@ def system_health_bar():
             days_old = (datetime.now(PERU_TZ).replace(tzinfo=None) - collector_dt).days
             if days_old > 2:
                 parts.append(f"🔴 Collector may be failing — last update: **{last_collector}**")
-            else:
+            elif page == "🎯 Score Tracker":
+ score_tracker_page()
+ elif page == "🎯 Score Tracker":
+ score_tracker_page()
+ elif page == "🎯 Score Tracker": score_tracker_page() else:
                 parts.append(f"✅ Last collector: **{last_collector}**")
-        else:
+        elif page == "🎯 Score Tracker":
+ score_tracker_page()
+ elif page == "🎯 Score Tracker":
+ score_tracker_page()
+ elif page == "🎯 Score Tracker": score_tracker_page() else:
             parts.append("🔴 Last collector: **unknown**")
 
         st.markdown("&nbsp;&nbsp;|&nbsp;&nbsp;".join(parts))
@@ -2494,7 +2674,7 @@ def system_health_bar():
 def main():
     page = st.sidebar.radio(
         "🧭 Navigation",
-        ["📊 Live Tracker", "💼 Portfolio Tracker", "📅 Daily Summary", "📦 Timeline Archive", "🔬 Post Analysis"]
+        ["📊 Live Tracker", "💼 Portfolio Tracker", "📅 Daily Summary", "📦 Timeline Archive", "🔬 Post Analysis", "🎯 Score Tracker"]
     )
 
     st.sidebar.divider()
@@ -2510,8 +2690,136 @@ def main():
         daily_summary_page()
     elif page == "📦 Timeline Archive":
         timeline_archive_page()
-    else:
+    elif page == "🎯 Score Tracker":
+ score_tracker_page()
+ elif page == "🎯 Score Tracker":
+ score_tracker_page()
+ elif page == "🎯 Score Tracker": score_tracker_page() else:
         post_analysis_page()
 
 if __name__ == "__main__":
     main()
+
+
+def score_tracker_page():
+    import plotly.graph_objects as go
+    from plotly.subplots import make_subplots
+
+    st.title("🎯 Score Tracker")
+    st.caption("מעקב ציון + מדדים לאחר יום הכניסה לפורטפוליו — 3 ימי מסחר, דקה אחר דקה")
+    system_health_bar()
+
+    @st.cache_data(ttl=300)
+    def load_score_tracker():
+        try:
+            from gsheets_sync import _get_client, SPREADSHEET_ID
+            gc = _get_client()
+            if gc is None: return pd.DataFrame()
+            sh = gc.open_by_key(SPREADSHEET_ID)
+            ws = sh.worksheet("score_tracker")
+            data = ws.get_all_values()
+            if len(data) <= 1: return pd.DataFrame()
+            df = pd.DataFrame(data[1:], columns=data[0])
+            for col in ["Score","Price","MxV","RunUp","RSI","ATRX","REL_VOL","Gap","VWAP"]:
+                if col in df.columns:
+                    df[col] = pd.to_numeric(df[col], errors="coerce")
+            return df
+        except Exception as e:
+            st.error(f"שגיאה: {e}")
+            return pd.DataFrame()
+
+    with st.spinner("טוען נתונים..."):
+        df = load_score_tracker()
+
+    if df.empty:
+        st.info("📭 אין נתונים עדיין — Score Tracker יתחיל לאסוף ב-15:10 פרו בימי מסחר")
+        return
+
+    with st.sidebar:
+        st.header("🎯 Score Tracker")
+        pairs = sorted(set(
+            f"{r.Ticker} ({r.ScanDate})"
+            for r in df.drop_duplicates(["Ticker","ScanDate"]).itertuples()
+        ), reverse=True)
+        selected = st.selectbox("בחר מניה", pairs)
+        if not selected: return
+        ticker = selected.split(" (")[0]
+        scan_date = selected.split("(")[1].rstrip(")")
+        show_metrics = st.multiselect(
+            "מדדים", ["MxV","RunUp","RSI","ATRX","REL_VOL","Gap","VWAP"],
+            default=["MxV","ATRX","REL_VOL"]
+        )
+
+    sdf = df[(df["Ticker"]==ticker)&(df["ScanDate"]==scan_date)].copy()
+    sdf = sdf.sort_values(["Date","ScanTime"])
+    sdf["DateTime"] = pd.to_datetime(sdf["Date"]+" "+sdf["ScanTime"], errors="coerce")
+    if sdf.empty:
+        st.warning("אין נתונים"); return
+
+    days = sorted(sdf["Date"].unique())
+    first_s = sdf["Score"].iloc[0]
+    last_s  = sdf["Score"].iloc[-1]
+    delta_s = last_s - first_s
+
+    st.subheader(f"📈 {ticker} — כניסה {scan_date}")
+    c1,c2,c3,c4,c5 = st.columns(5)
+    c1.metric("ציון כניסה",  f"{first_s:.2f}")
+    c2.metric("ציון נוכחי",  f"{last_s:.2f}", f"{delta_s:+.2f}")
+    c3.metric("מקסימום",     f"{sdf['Score'].max():.2f}")
+    c4.metric("מינימום",     f"{sdf['Score'].min():.2f}")
+    c5.metric("ימים",        len(days))
+    st.divider()
+
+    COLORS = ["#00d4ff","#ff6b35","#7fff7f","#ff88cc"]
+    fig = make_subplots(rows=2, cols=1, shared_xaxes=True,
+        subplot_titles=("Score ל׀ורך זמן","מחיר"),
+        row_heights=[0.6,0.4], vertical_spacing=0.12)
+
+    for i,day in enumerate(days):
+        dd = sdf[sdf["Date"]==day]
+        c = COLORS[i%4]
+        lbl = f"D{i+1} ({day})"
+        fig.add_trace(go.Scatter(x=dd["DateTime"],y=dd["Score"],mode="lines",
+            name=lbl,line=dict(color=c,width=2),
+            hovertemplate=f"<b>{lbl}</b><br>%{{x|%H:%M}}<br>Score: %{{y:.2f}}<extra></extra>"),row=1,col=1)
+        fig.add_trace(go.Scatter(x=dd["DateTime"],y=dd["Price"],mode="lines",
+            name=lbl,line=dict(color=c,width=1.5,dash="dot"),showlegend=False,
+            hovertemplate=f"<b>מחיר {lbl}</b><br>%{{x|%H:%M}}<br>${{y:.2f}}<extra></extra>"),row=2,col=1)
+
+    fig.add_hline(y=60,line_dash="dash",line_color="#ff4444",opacity=0.5,
+                  annotation_text="Score 60",row=1,col=1)
+    fig.update_layout(height=550,paper_bgcolor="rgba(0,0,0,0)",
+        plot_bgcolor="rgba(0,0,0,0.1)",font=dict(color="#cccccc"),
+        legend=dict(orientation="h",yanchor="bottom",y=1.02,xanchor="right",x=1),
+        margin=dict(l=40,r=40,t=60,b=40))
+    fig.update_xaxes(showgrid=False,color="#888888")
+    fig.update_yaxes(showgrid=True,gridcolor="rgba(255,255,255,0.05)",color="#888888")
+    st.plotly_chart(fig, use_container_width=True)
+
+    if show_metrics:
+        mc = {"MxV":"#ff6b35","RunUp":"#00d4ff","RSI":"#ffdd57",
+              "ATRX":"#7fff7f","REL_VOL":"#ff88cc","Gap":"#b388ff","VWAP":"#80deea"}
+        avail = [m for m in show_metrics if m in sdf.columns and sdf[m].notna().any()]
+        if avail:
+            st.subheader("🔬 פירוט מדדים")
+            fig2 = go.Figure()
+            dashes = ["solid","dot","dash","dashdot"]
+            for m in avail:
+                for i,day in enumerate(days):
+                    dd = sdf[sdf["Date"]==day]
+                    fig2.add_trace(go.Scatter(x=dd["DateTime"],y=dd[m],mode="lines",
+                        name=f"{m} D{i+1}",line=dict(color=mc.get(m,"#aaa"),width=1.5,dash=dashes[i%4]),
+                        hovertemplate=f"<b>{m} D{i+1}</b><br>%{{x|%H:%M}}<br>%{{y:.2f}}<extra></extra>"))
+            fig2.update_layout(height=350,paper_bgcolor="rgba(0,0,0,0)",
+                plot_bgcolor="rgba(0,0,0,0.1)",font=dict(color="#cccccc"),
+                legend=dict(orientation="h",yanchor="bottom",y=1.02),
+                margin=dict(l=40,r=40,t=40,b=40))
+            fig2.update_xaxes(showgrid=False,color="#888888")
+            fig2.update_yaxes(showgrid=True,gridcolor="rgba(255,255,255,0.05)",color="#888888")
+            st.plotly_chart(fig2, use_container_width=True)
+
+    st.divider()
+    with st.expander("📋 נתונים גולמיים"):
+        scols = ["Date","ScanTime","Price","Score"]+[m for m in ["MxV","RunUp","RSI","ATRX","REL_VOL","Gap","VWAP"] if m in sdf.columns]
+        st.dataframe(sdf[scols].style.format({c:"{:.2f}" for c in scols if c not in ["Date","ScanTime"]}),
+            height=400,use_container_width=True)
