@@ -2492,6 +2492,7 @@ def system_health_bar():
 
 
 
+
 def main():
     page = st.sidebar.radio(
         "🧭 Navigation",
