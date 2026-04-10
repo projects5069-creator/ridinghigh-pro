@@ -2545,12 +2545,11 @@ def score_tracker_page():
     @st.cache_data(ttl=60)
     def load_data():
         try:
-            from gsheets_sync import _get_client
-            gc = _get_client()
+            gc = sheets_manager._get_gc()
             if gc is None: return pd.DataFrame(), pd.DataFrame()
             today = datetime.now(PERU_TZ).strftime("%Y-%m-%d")
 
-            # Load portfolio — find active stocks
+            # Load portfolio — find active stocks (within 3 trading days after entry)
             ws_port = sheets_manager.get_worksheet("portfolio", gc=gc)
             port = ws_port.get_all_values() if ws_port else []
             port_df = pd.DataFrame(port[1:], columns=port[0]) if len(port) > 1 else pd.DataFrame()
@@ -2558,25 +2557,28 @@ def score_tracker_page():
             if not port_df.empty:
                 for r in port_df.itertuples():
                     sd = str(r.Date).strip()
-                    _d = datetime.strptime(today, "%Y-%m-%d")
-                    while True:
-                        _d -= timedelta(days=1)
-                        if _d.weekday() < 5:
-                            _prev = _d.strftime("%Y-%m-%d")
-                            break
-                    if sd and sd == _prev:
-                        active.append({"Ticker": r.Ticker, "ScanDate": sd, "EntryScore": r.Score, "EntryPrice": r.BuyPrice})
+                    if not sd: continue
+                    try:
+                        window = trading_days_after(sd, 3)
+                        if today in window:
+                            active.append({
+                                "Ticker": r.Ticker, "ScanDate": sd,
+                                "EntryScore": r.Score, "EntryPrice": r.BuyPrice,
+                                "TrackingDay": f"D{window.index(today)+1}"
+                            })
+                    except Exception:
+                        pass
             active_df = pd.DataFrame(active).drop_duplicates(["Ticker","ScanDate"]) if active else pd.DataFrame()
 
-            # Load score_tracker data
+            # Load score_tracker data (columns: Date, ScanTime, Ticker, ScanDate, Price, Score)
             try:
                 ws_st = sheets_manager.get_worksheet("score_tracker", gc=gc)
                 data = ws_st.get_all_values() if ws_st else []
                 tracker_df = pd.DataFrame(data[1:], columns=data[0]) if len(data) > 1 else pd.DataFrame()
-                for col in ["Score","Price","MxV","RunUp","RSI","ATRX","REL_VOL","Gap","VWAP"]:
+                for col in ["Score", "Price"]:
                     if col in tracker_df.columns:
                         tracker_df[col] = pd.to_numeric(tracker_df[col], errors="coerce")
-            except:
+            except Exception:
                 tracker_df = pd.DataFrame()
 
             return active_df, tracker_df
@@ -2618,10 +2620,6 @@ def score_tracker_page():
         if not selected: return
         ticker = selected.split(" (")[0]
         scan_date = selected.split("(")[1].rstrip(")")
-        show_metrics = st.multiselect(
-            "Metrics", ["MxV","RunUp","RSI","ATRX","REL_VOL","Gap","VWAP"],
-            default=["MxV","ATRX","REL_VOL"]
-        )
 
     sdf = tracker_df[(tracker_df["Ticker"]==ticker)&(tracker_df["ScanDate"]==scan_date)].copy()
     sdf = sdf.sort_values(["Date","ScanTime"])
@@ -2663,26 +2661,9 @@ def score_tracker_page():
     fig.update_yaxes(showgrid=True,gridcolor="rgba(255,255,255,0.05)",color="#888888")
     st.plotly_chart(fig, use_container_width=True)
 
-    if show_metrics:
-        mc = {"MxV":"#ff6b35","RunUp":"#00d4ff","RSI":"#ffdd57","ATRX":"#7fff7f","REL_VOL":"#ff88cc","Gap":"#b388ff","VWAP":"#80deea"}
-        avail = [m for m in show_metrics if m in sdf.columns and sdf[m].notna().any()]
-        if avail:
-            st.subheader("Metrics breakdown")
-            fig2 = go.Figure()
-            for m in avail:
-                for i,day in enumerate(days):
-                    dd = sdf[sdf["Date"]==day]
-                    fig2.add_trace(go.Scatter(x=dd["DateTime"],y=dd[m],mode="lines",
-                        name=f"{m} D{i+1}",line=dict(color=mc.get(m,"#aaa"),width=1.5,dash=["solid","dot","dash","dashdot"][i%4])))
-            fig2.update_layout(height=350,paper_bgcolor="rgba(0,0,0,0)",plot_bgcolor="rgba(0,0,0,0.1)",
-                font=dict(color="#cccccc"),legend=dict(orientation="h",yanchor="bottom",y=1.02),margin=dict(l=40,r=40,t=40,b=40))
-            fig2.update_xaxes(showgrid=False,color="#888888")
-            fig2.update_yaxes(showgrid=True,gridcolor="rgba(255,255,255,0.05)",color="#888888")
-            st.plotly_chart(fig2, use_container_width=True)
-
     st.divider()
     with st.expander("Raw data"):
-        scols = ["Date","ScanTime","Price","Score"]+[m for m in ["MxV","RunUp","RSI","ATRX","REL_VOL","Gap","VWAP"] if m in sdf.columns]
+        scols = [c for c in ["Date","ScanTime","Price","Score"] if c in sdf.columns]
         st.dataframe(sdf[scols].style.format({c:"{:.2f}" for c in scols if c not in ["Date","ScanTime"]}),
             height=400,use_container_width=True)
 

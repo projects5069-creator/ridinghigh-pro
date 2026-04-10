@@ -570,6 +570,10 @@ def update_portfolio_live(gc, now_peru):
         pa_df["ScanPrice"] = pd.to_numeric(pa_df.get("ScanPrice", 0), errors="coerce")
         pa_df["D1_High"]   = pd.to_numeric(pa_df.get("D1_High",  ""), errors="coerce")
 
+        # Only track stocks within last 7 calendar days (avoids scanning 90+ historical rows)
+        cutoff = (now_peru - pd.Timedelta(days=7)).strftime("%Y-%m-%d")
+        pa_df  = pa_df[pa_df.get("ScanDate", pd.Series(dtype=str)) >= cutoff]
+
         # מניות Pending = אין D1_High עדיין
         pending = pa_df[pa_df["D1_High"].isna() & pa_df["ScanPrice"].notna()].copy()
         if pending.empty:
