@@ -2,13 +2,13 @@ name: Post Analysis Collector
 
 on:
   schedule:
-    - cron: '0 21 * * 1-5'
+    - cron: '0 21 * * 1-5'   # 16:00 Peru (UTC-5), Mon-Fri
   workflow_dispatch:
 
 jobs:
   collect:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
 
@@ -19,7 +19,13 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install gspread google-auth google-api-python-client pandas yfinance pytz pandas_market_calendars
+          pip install finvizfinance gspread google-auth google-api-python-client pandas yfinance pytz pandas_market_calendars ta
+
+      - name: EOD Snapshot (portfolio + daily_summary)
+        env:
+          GOOGLE_CREDENTIALS_JSON: ${{ secrets.GOOGLE_CREDENTIALS_JSON }}
+        run: |
+          python auto_scanner.py --eod
 
       - name: Run Post Analysis Collector
         env:

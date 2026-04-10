@@ -835,5 +835,91 @@ def sync_score_tracker(gc, now_peru):
         print(f"[ScoreTracker] ⚠️ {e}")
 
 
+def run_eod():
+    """
+    End-of-day job: runs after market close (16:00 Peru / 21:00 UTC).
+    Ensures today's portfolio + daily_summary are saved even if the
+    14:55-15:05 snapshot window was missed due to GitHub Actions throttling.
+    """
+    import sys
+    now_peru = get_peru_time()
+    today    = now_peru.strftime("%Y-%m-%d")
+    print(f"\n📅 EOD Snapshot — {today} {now_peru.strftime('%H:%M')} Peru")
+
+    gc = get_gsheets_client()
+    if gc is None:
+        print("❌ No Google credentials"); return
+
+    # ── Read today's timeline_live ────────────────────────────────────────────
+    ws_tl = sheets_manager.get_worksheet("timeline_live", gc=gc)
+    if ws_tl is None:
+        print("❌ timeline_live not found"); return
+    tl_raw = ws_tl.get_all_values()
+    if len(tl_raw) <= 1:
+        print("❌ timeline_live is empty"); return
+
+    tl_df = pd.DataFrame(tl_raw[1:], columns=tl_raw[0])
+    today_tl = tl_df[tl_df["Date"] == today].copy()
+    if today_tl.empty:
+        print(f"❌ No timeline_live rows for {today}"); return
+
+    for col in ["Score", "Price", "MxV", "RunUp", "REL_VOL"]:
+        if col in today_tl.columns:
+            today_tl[col] = pd.to_numeric(today_tl[col], errors="coerce")
+
+    print(f"📊 {len(today_tl)} timeline rows for today, {today_tl['Ticker'].nunique()} tickers")
+
+    # ── Portfolio: save Score>=60 stocks (skip if already saved) ─────────────
+    try:
+        ws_port = sheets_manager.get_worksheet("portfolio", gc=gc)
+        high_score = today_tl[today_tl["Score"] >= 60].copy()
+
+        # Use peak score per ticker
+        best = (high_score.sort_values("Score", ascending=False)
+                .drop_duplicates("Ticker"))
+
+        existing_port = ws_port.get_all_values()
+        ex_port = pd.DataFrame()
+        existing_keys = set()
+        if len(existing_port) > 1:
+            ex_port = pd.DataFrame(existing_port[1:], columns=existing_port[0])
+            existing_keys = set(ex_port["PositionKey"].values) if "PositionKey" in ex_port.columns else set()
+
+        new_positions = []
+        for _, row in best.iterrows():
+            key = f"{row['Ticker']}_{today}"
+            if key not in existing_keys:
+                new_positions.append({
+                    "PositionKey": key,
+                    "Date":        today,
+                    "Ticker":      row["Ticker"],
+                    "Score":       round(float(row["Score"]), 2),
+                    "BuyPrice":    round(float(row.get("Price", 0) or 0), 2),
+                    "Status":      "Open",
+                })
+
+        if new_positions:
+            new_port_df   = pd.DataFrame(new_positions)
+            combined_port = pd.concat([ex_port, new_port_df], ignore_index=True) if not ex_port.empty else new_port_df
+            df_to_sheet(ws_port, combined_port)
+            print(f"💼 Portfolio: added {len(new_positions)} new stocks")
+        else:
+            print("💼 Portfolio: already up to date")
+    except Exception as e:
+        print(f"⚠️ portfolio EOD error: {e}")
+
+    # ── Daily summary ──────────────────────────────────────────────────────────
+    try:
+        _save_daily_summary(gc, today, ws_tl)
+    except Exception as e:
+        print(f"⚠️ daily_summary EOD error: {e}")
+
+    print("✅ EOD snapshot complete")
+
+
 if __name__ == "__main__":
-    run_scan()
+    import sys
+    if len(sys.argv) > 1 and sys.argv[1] == "--eod":
+        run_eod()
+    else:
+        run_scan()
