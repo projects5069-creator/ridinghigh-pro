@@ -139,15 +139,12 @@ def run():
     new_df = pd.DataFrame(new_rows)[COLS]
     ws_st = sheets_manager.get_worksheet("score_tracker", gc=gc)
     if ws_st:
-        existing = ws_st.get_all_values()
-        if len(existing) > 1:
-            if len(existing[0]) < len(COLS):
-                print("[ScoreTracker] Upgrading sheet to 18-column format")
-                ws_st.clear()
-                ws_st.update("A1", [COLS] + new_df.astype(str).values.tolist())
-            else:
-                ws_st.append_rows(new_df.astype(str).values.tolist())
+        header = ws_st.row_values(1)
+        if header == COLS:
+            ws_st.append_rows(new_df.astype(str).values.tolist())
         else:
+            # First run or schema upgrade
+            ws_st.clear()
             ws_st.update("A1", [COLS] + new_df.astype(str).values.tolist())
         print(f"✅ Saved {len(new_rows)} rows")
 

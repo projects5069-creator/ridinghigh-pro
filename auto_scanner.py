@@ -820,8 +820,9 @@ def sync_score_tracker(gc, now_peru):
         if not ws_st:
             return
 
-        existing = ws_st.get_all_values()
-        if len(existing) > 1 and len(existing[0]) >= len(COLS):
+        # Only read the header row (A1:R1) — avoids downloading thousands of rows
+        header = ws_st.row_values(1)
+        if header == COLS:
             ws_st.append_rows(new_df.astype(str).values.tolist())
         else:
             # First run or old schema — rewrite with full header
