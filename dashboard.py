@@ -1712,12 +1712,31 @@ def _fetch_high_low_since(ticker_dates: tuple) -> dict:
     return result
 
 
+def _is_day_complete(date_str: str) -> bool:
+    """
+    A D-day is safe to use for exit evaluation only when the full trading
+    session has closed in Peru time:
+      - date_str < today (Peru TZ), AND
+      - date_str is a weekday
+    Never returns True for today or any future date.
+    """
+    try:
+        today_peru = datetime.now(PERU_TZ).date()
+        day = datetime.strptime(date_str, "%Y-%m-%d").date()
+        return day < today_peru and day.weekday() < 5
+    except Exception:
+        return False
+
+
 def _simulate_short_trades(pa_df: pd.DataFrame):
     """
     Simulate $1000 short trades for every row in post_analysis.
     Returns (table_a, table_b):
       table_a — entry at ScanPrice (EOD scan day)
       table_b — entry at D1_Open  (next day open)
+    Only evaluates TP/SL exits on days where the full trading session has
+    closed (strictly before today in Peru TZ). Pre-market / intraday data
+    can never trigger an exit.
     """
     POSITION = 1000.0
     TP_PCT   = 0.10   # 10% take-profit (short: price drops)
@@ -1743,6 +1762,17 @@ def _simulate_short_trades(pa_df: pd.DataFrame):
         score      = pd.to_numeric(row.get("Score"),     errors="coerce")
         scan_price = pd.to_numeric(row.get("ScanPrice"), errors="coerce")
         d1_open    = pd.to_numeric(row.get("D1_Open"),   errors="coerce")
+
+        # Pre-compute the 5 D-day dates for this row so exit loop can gate on them
+        try:
+            _row_trading_days = []
+            _d = datetime.strptime(scan_date, "%Y-%m-%d")
+            while len(_row_trading_days) < 5:
+                _d += timedelta(days=1)
+                if _d.weekday() < 5:
+                    _row_trading_days.append(_d.strftime("%Y-%m-%d"))
+        except Exception:
+            _row_trading_days = [""] * 5
 
         for entry_label, entry_price in [("A", scan_price), ("B", d1_open)]:
             # Current price = most recent Di_Close available, fallback to ScanPrice
@@ -1803,6 +1833,10 @@ def _simulate_short_trades(pa_df: pd.DataFrame):
                 has_data = False
 
                 for day in range(1, 6):
+                    # Skip this day if the full trading session hasn't closed yet
+                    day_date = _row_trading_days[day - 1] if day - 1 < len(_row_trading_days) else ""
+                    if not _is_day_complete(day_date):
+                        break
                     high = pd.to_numeric(row.get(f"D{day}_High"), errors="coerce")
                     low  = pd.to_numeric(row.get(f"D{day}_Low"),  errors="coerce")
                     if pd.isna(high) or pd.isna(low):

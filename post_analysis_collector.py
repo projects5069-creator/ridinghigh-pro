@@ -108,13 +108,30 @@ def get_trading_days_after(scan_date_str: str, n: int) -> list:
     return days
 
 
-def is_complete(existing_row: pd.Series, trading_days: list) -> bool:
-    # Only check days that are strictly before today in Peru TZ (market fully closed)
+def is_day_complete(date_str: str) -> bool:
+    """
+    True only when the full trading day for date_str has closed in Peru time:
+      - date_str must be strictly before today (Peru TZ), AND
+      - date_str must be a weekday (basic trading-day check).
+    Never returns True for today or any future date, regardless of clock time.
+    """
     today_peru = datetime.now(PERU_TZ).date()
+    day = datetime.strptime(date_str, "%Y-%m-%d").date()
+    if day >= today_peru:
+        return False
+    if day.weekday() >= 5:   # Saturday or Sunday — not a trading day
+        return False
+    return True
+
+
+def is_complete(existing_row: pd.Series, trading_days: list) -> bool:
+    """Row is complete when every past trading day has a non-null D{i}_Close."""
     for i, day in enumerate(trading_days, 1):
-        if datetime.strptime(day, "%Y-%m-%d").date() >= today_peru: break
+        if not is_day_complete(day):
+            break   # this day and beyond are not yet settled
         val = existing_row.get(f"D{i}_Close", None)
-        if val is None or str(val).strip() in ["", "nan", "None"]: return False
+        if val is None or str(val).strip() in ["", "nan", "None"]:
+            return False
     return True
 
 
@@ -344,10 +361,8 @@ def run(target_date: str = None):
             continue
 
         print(f"[Collector] Processing {ticker} {scan_date}...")
-        # Only fetch OHLC for days strictly before today in Peru TZ (market fully closed)
-        today_peru = datetime.now(PERU_TZ).date()
-        available_days = [d for d in trading_days
-                          if datetime.strptime(d, "%Y-%m-%d").date() < today_peru]
+        # Only fetch OHLC for days that are fully settled (strictly before today Peru TZ)
+        available_days = [d for d in trading_days if is_day_complete(d)]
         ohlc  = fetch_ohlc_for_days(ticker, available_days) if available_days and not is_today else {}
         stats = calculate_stats(scan_price, ohlc)
 
