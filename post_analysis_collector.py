@@ -110,18 +110,21 @@ def get_trading_days_after(scan_date_str: str, n: int) -> list:
 
 def is_day_complete(date_str: str) -> bool:
     """
-    True only when the full trading day for date_str has closed in Peru time:
-      - date_str must be strictly before today (Peru TZ), AND
-      - date_str must be a weekday (basic trading-day check).
-    Never returns True for today or any future date, regardless of clock time.
+    True when the full trading day for date_str has closed (market close = 15:00 Peru).
+    - Past weekdays: always complete.
+    - Today: complete only after 15:00 Peru.
+    - Future or weekends: never complete.
     """
-    today_peru = datetime.now(PERU_TZ).date()
-    day = datetime.strptime(date_str, "%Y-%m-%d").date()
-    if day >= today_peru:
+    now_peru  = datetime.now(PERU_TZ)
+    today     = now_peru.date()
+    day       = datetime.strptime(date_str, "%Y-%m-%d").date()
+    if day.weekday() >= 5:
         return False
-    if day.weekday() >= 5:   # Saturday or Sunday — not a trading day
-        return False
-    return True
+    if day < today:
+        return True
+    if day == today:
+        return now_peru.hour >= 15   # after market close
+    return False
 
 
 def is_complete(existing_row: pd.Series, trading_days: list) -> bool:
@@ -168,7 +171,7 @@ def fetch_ohlc_for_days(ticker: str, trading_days: list) -> dict:
 def calculate_stats(scan_price: float, ohlc: dict) -> dict:
     lows = [(i, ohlc[f"D{i}_Low"]) for i in range(1,6) if ohlc.get(f"D{i}_Low") is not None]
     if not lows or scan_price <= 0:
-        return {"MaxDrop%": None, "BestDay": None, "TP10_Hit": 0, "TP15_Hit": 0, "TP20_Hit": 0, "D1_Gap%": None}
+        return {"MaxDrop%": None, "BestDay": None, "TP10_Hit": None, "TP15_Hit": None, "TP20_Hit": None, "D1_Gap%": None}
     best_day, min_low = min(lows, key=lambda x: x[1])
     max_drop = round((min_low - scan_price) / scan_price * 100, 2)
     d1_open  = ohlc.get("D1_Open")
