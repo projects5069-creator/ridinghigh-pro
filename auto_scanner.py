@@ -505,6 +505,14 @@ def run_scan():
     except Exception as e:
         print(f"⚠️ portfolio_live final update error: {e}")
 
+    # ── Score Tracker: record minute-by-minute metrics for portfolio stocks ───
+    try:
+        _gc2 = locals().get("gc") or get_gsheets_client()
+        if _gc2:
+            sync_score_tracker(_gc2, now_peru)
+    except Exception as e:
+        print(f"⚠️ score_tracker sync error: {e}")
+
 
 def _save_daily_summary(gc, today: str, ws_timeline):
     """Build and upsert daily_summary: one row per ticker with peak-score stats."""
@@ -675,6 +683,140 @@ def update_portfolio_live(gc, now_peru):
 
     except Exception as e:
         print(f"⚠️ portfolio_live error: {e}")
+
+
+def sync_score_tracker(gc, now_peru):
+    """
+    Record minute-by-minute Score + metrics for portfolio stocks in D1/D2/D3 window.
+    Runs inside auto_scanner (every minute) instead of a separate workflow.
+    Columns: Date, ScanTime, Ticker, ScanDate, Price, Score, MxV, RunUp, REL_VOL, RSI, ATRX
+    """
+    try:
+        import yfinance as yf
+        from ta.momentum import RSIIndicator
+        from ta.volatility import AverageTrueRange
+
+        today     = now_peru.strftime("%Y-%m-%d")
+        scan_time = now_peru.strftime("%H:%M")
+
+        # Which portfolio stocks are in D1/D2/D3 window today?
+        ws_port  = sheets_manager.get_worksheet("portfolio", gc=gc)
+        port_raw = ws_port.get_all_values() if ws_port else []
+        if len(port_raw) <= 1:
+            return
+        port_df = pd.DataFrame(port_raw[1:], columns=port_raw[0])
+
+        def _tdays_after(s, n=3):
+            from datetime import timedelta as _td
+            d = datetime.strptime(s, "%Y-%m-%d")
+            days = []
+            while len(days) < n:
+                d += _td(days=1)
+                if d.weekday() < 5:
+                    days.append(d.strftime("%Y-%m-%d"))
+            return days
+
+        active = set()
+        for _, r in port_df.iterrows():
+            sd = str(r.get("Date", "")).strip()
+            tk = str(r.get("Ticker", "")).strip()
+            if sd and tk:
+                try:
+                    if today in _tdays_after(sd, 3):
+                        active.add((tk, sd))
+                except Exception:
+                    pass
+
+        if not active:
+            return
+
+        COLS = ["Date","ScanTime","Ticker","ScanDate","Price","Score",
+                "MxV","RunUp","REL_VOL","RSI","ATRX"]
+        new_rows = []
+        for ticker, scan_date in sorted(active):
+            try:
+                stock = yf.Ticker(ticker)
+                hist  = stock.history(period="60d")
+                if hist.empty or len(hist) < 2:
+                    continue
+                info     = stock.info
+                current  = hist.iloc[-1]
+                previous = hist.iloc[-2]
+                price    = round(float(current["Close"]), 2)
+                volume   = int(current["Volume"])
+                mkt_cap  = info.get("marketCap", 0)
+                if not mkt_cap:
+                    continue
+
+                rsi = 50.0; atrx = 0.0; rel_vol = 1.0; run_up = 0.0
+                try:
+                    rsi = float(RSIIndicator(hist["Close"], 14).rsi().iloc[-1])
+                except Exception: pass
+                try:
+                    atr  = float(AverageTrueRange(hist["High"],hist["Low"],hist["Close"],14).average_true_range().iloc[-1])
+                    atrx = (float(current["High"]) - float(current["Low"])) / atr if atr > 0 else 0.0
+                except Exception: pass
+                try:
+                    avg_vol = info.get("averageVolume", volume)
+                    rel_vol = volume / avg_vol if avg_vol > 0 else 1.0
+                except Exception: pass
+                try:
+                    run_up = ((price - float(current["Open"])) / float(current["Open"])) * 100
+                except Exception: pass
+
+                mxv   = (mkt_cap - price * volume) / mkt_cap if mkt_cap > 0 else 0.0
+                score = 0.0
+                if mxv < 0:  score += min(abs(mxv)/50, 1) * 30
+                gap = 0.0
+                try:
+                    gap = ((float(current["Open"]) - float(previous["Close"])) / float(previous["Close"])) * 100
+                except Exception: pass
+                if run_up > 0: score += min(run_up/50, 1) * 20
+                score += min(rel_vol/2, 1) * 20
+                score += (rsi/80)*10 if rsi <= 80 else 10
+                score += min(atrx/3, 1) * 10
+                if gap < 15:  score += min((15-gap)/15, 1) * 5
+                vwap_dist = 0.0
+                try:
+                    vwap      = (float(current["High"]) + float(current["Low"]) + price) / 3
+                    vwap_dist = ((price/vwap) - 1)*100 if vwap > 0 else 0.0
+                except Exception: pass
+                if vwap_dist > 0: score += min(vwap_dist/15, 1) * 5
+
+                new_rows.append({
+                    "Date": today, "ScanTime": scan_time,
+                    "Ticker": ticker, "ScanDate": scan_date,
+                    "Price":   round(price,  2),
+                    "Score":   round(score,  2),
+                    "MxV":     round(mxv*100,2),
+                    "RunUp":   round(run_up,  2),
+                    "REL_VOL": round(rel_vol,  2),
+                    "RSI":     round(rsi,     2),
+                    "ATRX":    round(atrx,    2),
+                })
+            except Exception as e:
+                print(f"  [ScoreTracker] {ticker}: {e}")
+
+        if not new_rows:
+            return
+
+        new_df = pd.DataFrame(new_rows)[COLS]
+        ws_st  = sheets_manager.get_worksheet("score_tracker", gc=gc)
+        if not ws_st:
+            return
+
+        existing = ws_st.get_all_values()
+        if len(existing) > 1 and len(existing[0]) >= len(COLS):
+            ws_st.append_rows(new_df.astype(str).values.tolist())
+        else:
+            # First run or old 6-col format — rewrite with header
+            ws_st.clear()
+            ws_st.update("A1", [COLS] + new_df.astype(str).values.tolist())
+
+        print(f"[ScoreTracker] ✅ {len(new_rows)} rows at {scan_time}")
+
+    except Exception as e:
+        print(f"[ScoreTracker] ⚠️ {e}")
 
 
 if __name__ == "__main__":

@@ -2600,16 +2600,10 @@ def system_health_bar():
 
 
 def score_tracker_page():
-    import plotly.graph_objects as go
-    from plotly.subplots import make_subplots
-
     st.title("🎯 Portfolio Score Tracker")
-    st.caption("מעקב דקה-אחר-דקה — ציון ומדדים של מניות פורטפוליו ב-3 ימי מסחר אחרי הכניסה")
     system_health_bar()
 
     METRIC_COLS = ["Score", "Price", "MxV", "RunUp", "REL_VOL", "RSI", "ATRX"]
-    COLORS = ["#00d4ff", "#ff6b35", "#7fff7f", "#ff88cc", "#ffd700", "#c084fc",
-              "#f97316", "#38bdf8", "#4ade80", "#fb923c"]
 
     def _trading_days_after(sd, n=3):
         d = datetime.strptime(sd, "%Y-%m-%d")
@@ -2673,106 +2667,44 @@ def score_tracker_page():
 
     today = datetime.now(PERU_TZ).strftime("%Y-%m-%d")
 
-    # ── 1. Active stocks header ───────────────────────────────────────────────
     if active_df.empty:
         st.info("אין מניות פעילות לעקיבה היום (D1/D2/D3).")
         return
-
-    st.subheader(f"📋 מניות במעקב היום ({today})")
-    disp_active = active_df.copy()
-    for c in ["EntryScore", "EntryPrice"]:
-        if c in disp_active.columns:
-            disp_active[c] = disp_active[c].round(2)
-    st.dataframe(disp_active, use_container_width=True, hide_index=True)
 
     if tracker_df.empty:
         st.warning("⏳ אין נתוני score_tracker עדיין — הסינק רץ כל דקה בשעות המסחר (08:30–15:00 Peru)")
         return
 
-    # ── 2. Filter to today's rows for active stocks ───────────────────────────
+    # Filter to today's rows for active stocks
     active_keys = set(zip(active_df["Ticker"], active_df["ScanDate"]))
     today_df = tracker_df[
         (tracker_df["Date"] == today) &
         tracker_df.apply(lambda r: (r["Ticker"], r["ScanDate"]) in active_keys, axis=1)
     ].copy()
+    today_df = today_df.merge(
+        active_df[["Ticker", "ScanDate", "TrackingDay", "EntryScore", "EntryPrice"]],
+        on=["Ticker", "ScanDate"], how="left"
+    )
+    today_df = today_df.sort_values(["Ticker", "ScanDate", "ScanTime"])
 
     if today_df.empty:
         st.info(f"אין עדיין שורות היום ({today}) עבור המניות הפעילות.")
         return
 
-    # Merge TrackingDay
-    today_df = today_df.merge(active_df[["Ticker", "ScanDate", "TrackingDay", "EntryScore", "EntryPrice"]],
-                               on=["Ticker", "ScanDate"], how="left")
-    today_df = today_df.sort_values(["Ticker", "ScanDate", "ScanTime"])
-
-    st.success(f"✅ {len(today_df)} סריקות היום · {today_df['Ticker'].nunique()} מניות")
-
-    # ── 3. Combined Score chart — all active tickers ──────────────────────────
-    st.divider()
-    st.subheader("📈 Score לאורך היום — כל המניות")
-    fig_all = go.Figure()
-    for i, (tk, sd) in enumerate(sorted(active_keys)):
-        tdf = today_df[(today_df["Ticker"] == tk) & (today_df["ScanDate"] == sd)].sort_values("ScanTime")
-        if tdf.empty:
-            continue
-        day_label = tdf["TrackingDay"].iloc[0] if "TrackingDay" in tdf.columns else ""
-        fig_all.add_trace(go.Scatter(
-            x=tdf["ScanTime"], y=tdf["Score"],
-            mode="lines+markers",
-            name=f"{tk} ({day_label})",
-            line=dict(color=COLORS[i % len(COLORS)], width=2),
-            marker=dict(size=4),
-        ))
-    fig_all.add_hline(y=60, line_dash="dash", line_color="#ff4444",
-                      opacity=0.6, annotation_text="Score 60")
-    fig_all.update_layout(
-        height=420, paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0.1)",
-        font=dict(color="#cccccc"),
-        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
-        margin=dict(l=40, r=40, t=30, b=40),
-        xaxis_title="זמן", yaxis_title="Score",
-    )
-    fig_all.update_xaxes(showgrid=False, color="#888888")
-    fig_all.update_yaxes(showgrid=True, gridcolor="rgba(255,255,255,0.06)", color="#888888")
-    st.plotly_chart(fig_all, use_container_width=True)
-
-    # ── 4. Per-ticker drill-down ──────────────────────────────────────────────
-    st.divider()
-    st.subheader("🔍 פירוט לפי מניה")
-
+    # Selectbox
     ticker_options = sorted(
         f"{tk} ({sd})" for tk, sd in active_keys
         if not today_df[(today_df["Ticker"] == tk) & (today_df["ScanDate"] == sd)].empty
     )
     if not ticker_options:
         return
-
-    selected = st.selectbox("בחר מניה", ticker_options)
+    selected  = st.selectbox("בחר מניה", ticker_options)
     sel_ticker = selected.split(" (")[0]
     sel_sd     = selected.split("(")[1].rstrip(")")
 
     sdf = today_df[(today_df["Ticker"] == sel_ticker) & (today_df["ScanDate"] == sel_sd)].copy()
     sdf = sdf.sort_values("ScanTime")
 
-    # Metrics summary
-    last_row  = sdf.iloc[-1]
-    first_row = sdf.iloc[0]
-    day_label = sdf["TrackingDay"].iloc[0] if "TrackingDay" in sdf.columns else ""
-    entry_score = sdf["EntryScore"].iloc[0] if "EntryScore" in sdf.columns else None
-    entry_price = sdf["EntryPrice"].iloc[0] if "EntryPrice" in sdf.columns else None
-
-    c1, c2, c3, c4, c5, c6 = st.columns(6)
-    c1.metric("מניה", f"{sel_ticker} {day_label}")
-    c2.metric("כניסה", f"{entry_price:.2f}" if entry_price else "—",
-              f"Score {entry_score:.1f}" if entry_score else "")
-    c3.metric("Score עכשיו", f"{last_row['Score']:.2f}" if pd.notna(last_row.get('Score')) else "—",
-              f"{last_row['Score'] - first_row['Score']:+.2f}" if pd.notna(last_row.get('Score')) else "")
-    c4.metric("מחיר עכשיו", f"${last_row['Price']:.2f}" if pd.notna(last_row.get('Price')) else "—")
-    c5.metric("Score מקסימום", f"{sdf['Score'].max():.2f}" if 'Score' in sdf else "—")
-    c6.metric("סריקות היום", len(sdf))
-
-    # ── Metrics table ─────────────────────────────────────────────────────────
-    st.divider()
     available_metrics = [c for c in METRIC_COLS if c in sdf.columns and sdf[c].notna().any()]
     table_cols = ["ScanTime"] + available_metrics
     tbl = sdf[table_cols].copy()
@@ -2793,48 +2725,7 @@ def score_tracker_page():
     styled_tbl = tbl.style.format(fmt)
     if "Score" in tbl.columns:
         styled_tbl = styled_tbl.map(_color_score, subset=["Score"])
-    st.dataframe(styled_tbl, use_container_width=True, hide_index=True, height=400)
-
-    # ── Per-ticker full metrics chart ─────────────────────────────────────────
-    if len(available_metrics) > 2:
-        st.divider()
-        metric_choice = st.multiselect(
-            "מדדים להצגה בגרף",
-            options=[c for c in available_metrics if c != "Price"],
-            default=["Score", "MxV", "RunUp", "REL_VOL"],
-        )
-        if metric_choice:
-            rows_count = len(metric_choice) + 1  # +1 for Price
-            row_heights = [0.4] + [0.6 / len(metric_choice)] * len(metric_choice)
-            fig2 = make_subplots(
-                rows=rows_count, cols=1, shared_xaxes=True,
-                subplot_titles=["Price"] + metric_choice,
-                row_heights=row_heights, vertical_spacing=0.06,
-            )
-            fig2.add_trace(go.Scatter(x=sdf["ScanTime"], y=sdf["Price"],
-                mode="lines", name="Price",
-                line=dict(color="#ffd700", width=2)), row=1, col=1)
-            for idx, metric in enumerate(metric_choice):
-                if metric not in sdf.columns: continue
-                fig2.add_trace(go.Scatter(
-                    x=sdf["ScanTime"], y=sdf[metric],
-                    mode="lines+markers", name=metric,
-                    line=dict(color=COLORS[idx % len(COLORS)], width=2),
-                    marker=dict(size=3),
-                ), row=idx + 2, col=1)
-                if metric == "Score":
-                    fig2.add_hline(y=60, line_dash="dash", line_color="#ff4444",
-                                   opacity=0.5, row=idx + 2, col=1)
-            fig2.update_layout(
-                height=200 * rows_count,
-                paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0.1)",
-                font=dict(color="#cccccc"),
-                showlegend=False,
-                margin=dict(l=40, r=40, t=30, b=40),
-            )
-            fig2.update_xaxes(showgrid=False, color="#888888")
-            fig2.update_yaxes(showgrid=True, gridcolor="rgba(255,255,255,0.05)", color="#888888")
-            st.plotly_chart(fig2, use_container_width=True)
+    st.dataframe(styled_tbl, use_container_width=True, hide_index=True, height=600)
 
 
 
