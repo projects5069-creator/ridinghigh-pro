@@ -113,7 +113,8 @@ def run():
         tk = str(r.get("Ticker","")).strip()
         if sd and tk:
             try:
-                if today in trading_days_after(sd, 3):
+                # D0 (entry day) + D1/D2/D3
+                if today == sd or today in trading_days_after(sd, 3):
                     active.add((tk, sd))
             except Exception:
                 pass

@@ -2646,7 +2646,7 @@ def score_tracker_page():
 
     today = datetime.now(PERU_TZ).strftime("%Y-%m-%d")
 
-    # Build stock list from portfolio, sorted newest first
+    # Build stock list: show stocks where today falls within D0–D3 window
     stocks = []
     for r in port_df.itertuples():
         sd = str(getattr(r, "Date", "")).strip()
@@ -2654,15 +2654,15 @@ def score_tracker_page():
         if not sd or not tk:
             continue
         try:
-            window = _trading_days_after(sd, 3)
-            if today < sd:
-                status = "⏳ עתידי"
-            elif today == sd:
-                status = "📅 יום כניסה"
+            window = _trading_days_after(sd, 3)  # [D1, D2, D3]
+            d3 = window[-1]
+            # Include if today is on or after entry AND on or before D3
+            if not (sd <= today <= d3):
+                continue
+            if today == sd:
+                status = "📅 D0 — יום כניסה"
             elif today in window:
                 status = f"📡 D{window.index(today)+1}"
-            elif today > window[-1]:
-                status = "✅ הושלם"
             else:
                 status = "📡 פעיל"
             stocks.append({"Ticker": tk, "ScanDate": sd, "Window": window, "Status": status})
@@ -2670,19 +2670,12 @@ def score_tracker_page():
             pass
 
     stocks = sorted(stocks, key=lambda x: x["ScanDate"], reverse=True)
-    # Deduplicate (same ticker+date can appear multiple times in portfolio)
     seen = set()
     stocks = [s for s in stocks if (s["Ticker"], s["ScanDate"]) not in seen
               and not seen.add((s["Ticker"], s["ScanDate"]))]
 
-    # Keep only stocks from today onwards with actual score_tracker data
-    if not tracker_df.empty:
-        tracked_keys = set(zip(tracker_df["Ticker"], tracker_df["ScanDate"]))
-        stocks = [s for s in stocks
-                  if s["ScanDate"] >= today and (s["Ticker"], s["ScanDate"]) in tracked_keys]
-
     if not stocks:
-        st.info("⏳ אין עדיין נתוני ציונים — הסינק מתחיל לתעד מהיום בשעות המסחר.")
+        st.info("⏳ אין מניות פעילות בחלון D0–D3 כרגע.")
         return
 
     # Pre-build datetime column once
