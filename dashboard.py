@@ -2600,11 +2600,9 @@ def system_health_bar():
 
 
 def score_tracker_page():
+    import plotly.graph_objects as _go
     st.title("🎯 Portfolio Score Tracker")
     system_health_bar()
-
-    METRIC_COLS = ["Score", "Price", "MxV", "RunUp", "REL_VOL", "RSI", "ATRX",
-                   "Gap", "VWAP_Dist", "Volume", "High", "Low", "Open", "PrevClose"]
 
     def _trading_days_after(sd, n=3):
         d = datetime.strptime(sd, "%Y-%m-%d")
@@ -2616,124 +2614,172 @@ def score_tracker_page():
         return days
 
     @st.cache_data(ttl=60)
-    def _load_tracker():
+    def _load_data():
         try:
             gc = sheets_manager._get_gc()
             if gc is None:
                 return pd.DataFrame(), pd.DataFrame()
-            today = datetime.now(PERU_TZ).strftime("%Y-%m-%d")
 
-            # portfolio sheet → which stocks are in D1/D2/D3 window today
             ws_port = sheets_manager.get_worksheet("portfolio", gc=gc)
             port = ws_port.get_all_values() if ws_port else []
             port_df = pd.DataFrame(port[1:], columns=port[0]) if len(port) > 1 else pd.DataFrame()
-            active = []
-            if not port_df.empty:
-                for r in port_df.itertuples():
-                    sd = str(r.Date).strip()
-                    if not sd:
-                        continue
-                    try:
-                        window = _trading_days_after(sd, 3)
-                        if today in window:
-                            active.append({
-                                "Ticker":      r.Ticker,
-                                "ScanDate":    sd,
-                                "EntryScore":  float(r.Score),
-                                "EntryPrice":  float(r.BuyPrice),
-                                "TrackingDay": f"D{window.index(today)+1}",
-                            })
-                    except Exception:
-                        pass
-            active_df = pd.DataFrame(active).drop_duplicates(["Ticker", "ScanDate"]) if active else pd.DataFrame()
 
-            # score_tracker sheet → minute-by-minute rows
             ws_st = sheets_manager.get_worksheet("score_tracker", gc=gc)
             raw = ws_st.get_all_values() if ws_st else []
             if len(raw) > 1:
                 tracker_df = pd.DataFrame(raw[1:], columns=raw[0])
-                for col in METRIC_COLS:
-                    if col in tracker_df.columns:
-                        tracker_df[col] = pd.to_numeric(tracker_df[col], errors="coerce")
+                tracker_df["Score"] = pd.to_numeric(tracker_df["Score"], errors="coerce")
             else:
                 tracker_df = pd.DataFrame()
 
-            return active_df, tracker_df
+            return port_df, tracker_df
         except Exception as e:
             st.error(f"Load error: {e}")
             return pd.DataFrame(), pd.DataFrame()
 
     with st.spinner("טוען נתונים..."):
-        active_df, tracker_df = _load_tracker()
+        port_df, tracker_df = _load_data()
+
+    if port_df.empty:
+        st.info("אין מניות בפורטפוליו.")
+        return
 
     today = datetime.now(PERU_TZ).strftime("%Y-%m-%d")
 
-    if active_df.empty:
-        st.info("אין מניות פעילות לעקיבה היום (D1/D2/D3).")
-        return
-
-    if tracker_df.empty:
-        st.warning("⏳ אין נתוני score_tracker עדיין — הסינק רץ כל דקה בשעות המסחר (08:30–15:00 Peru)")
-        return
-
-    # Filter to today's rows for active stocks
-    active_keys = set(zip(active_df["Ticker"], active_df["ScanDate"]))
-    today_df = tracker_df[
-        (tracker_df["Date"] == today) &
-        tracker_df.apply(lambda r: (r["Ticker"], r["ScanDate"]) in active_keys, axis=1)
-    ].copy()
-    today_df = today_df.merge(
-        active_df[["Ticker", "ScanDate", "TrackingDay", "EntryScore", "EntryPrice"]],
-        on=["Ticker", "ScanDate"], how="left"
-    )
-    today_df = today_df.sort_values(["Ticker", "ScanDate", "ScanTime"])
-
-    if today_df.empty:
-        st.info(f"אין עדיין שורות היום ({today}) עבור המניות הפעילות.")
-        return
-
-    # Selectbox
-    ticker_options = sorted(
-        f"{tk} ({sd})" for tk, sd in active_keys
-        if not today_df[(today_df["Ticker"] == tk) & (today_df["ScanDate"] == sd)].empty
-    )
-    if not ticker_options:
-        return
-    selected  = st.selectbox("בחר מניה", ticker_options)
-    sel_ticker = selected.split(" (")[0]
-    sel_sd     = selected.split("(")[1].rstrip(")")
-
-    sdf = today_df[(today_df["Ticker"] == sel_ticker) & (today_df["ScanDate"] == sel_sd)].copy()
-    sdf = sdf.sort_values("ScanTime")
-
-    available_metrics = [c for c in METRIC_COLS if c in sdf.columns and sdf[c].notna().any()]
-    table_cols = ["ScanTime"] + available_metrics
-    tbl = sdf[table_cols].copy()
-    fmt = {c: "{:.2f}" for c in available_metrics}
-    fmt["MxV"]       = "{:.1f}%"
-    fmt["RunUp"]     = "{:+.1f}%"
-    fmt["REL_VOL"]   = "{:.2f}x"
-    fmt["Gap"]       = "{:+.1f}%"
-    fmt["VWAP_Dist"] = "{:+.1f}%"
-    fmt["Volume"]    = "{:,.0f}"
-    fmt["High"]      = "{:.2f}"
-    fmt["Low"]       = "{:.2f}"
-    fmt["Open"]      = "{:.2f}"
-    fmt["PrevClose"] = "{:.2f}"
-
-    def _color_score(val):
+    # Build stock list from portfolio, sorted newest first
+    stocks = []
+    for r in port_df.itertuples():
+        sd = str(getattr(r, "Date", "")).strip()
+        tk = str(getattr(r, "Ticker", "")).strip()
+        if not sd or not tk:
+            continue
         try:
-            v = float(val)
-            if v >= 80: return "background-color:#4a0010;color:#ff6b6b;font-weight:bold"
-            if v >= 60: return "background-color:#1a3a1a;color:#7fff7f"
-            if v >= 40: return "background-color:#3a2a00;color:#ffd700"
-            return ""
-        except: return ""
+            window = _trading_days_after(sd, 3)
+            if today < sd:
+                status = "⏳ עתידי"
+            elif today == sd:
+                status = "📅 יום כניסה"
+            elif today in window:
+                status = f"📡 D{window.index(today)+1}"
+            elif today > window[-1]:
+                status = "✅ הושלם"
+            else:
+                status = "📡 פעיל"
+            stocks.append({"Ticker": tk, "ScanDate": sd, "Window": window, "Status": status})
+        except Exception:
+            pass
 
-    styled_tbl = tbl.style.format(fmt)
-    if "Score" in tbl.columns:
-        styled_tbl = styled_tbl.map(_color_score, subset=["Score"])
-    st.dataframe(styled_tbl, use_container_width=True, hide_index=True, height=600)
+    stocks = sorted(stocks, key=lambda x: x["ScanDate"], reverse=True)
+    # Deduplicate (same ticker+date can appear multiple times in portfolio)
+    seen = set()
+    stocks = [s for s in stocks if (s["Ticker"], s["ScanDate"]) not in seen
+              and not seen.add((s["Ticker"], s["ScanDate"]))]
+
+    if not stocks:
+        st.info("אין מניות בפורטפוליו.")
+        return
+
+    # Pre-build datetime column once
+    if not tracker_df.empty and "Date" in tracker_df.columns and "ScanTime" in tracker_df.columns:
+        tracker_df["dt"] = pd.to_datetime(
+            tracker_df["Date"] + " " + tracker_df["ScanTime"], errors="coerce"
+        )
+
+    # ── Header row ──────────────────────────────────────────────────────────────
+    hc = st.columns([2, 2, 1, 1])
+    hc[0].markdown("**Ticker**")
+    hc[1].markdown("**תאריך כניסה**")
+    hc[2].markdown("**סטטוס**")
+    hc[3].markdown("**נקודות**")
+    st.divider()
+
+    # ── One expander per stock ───────────────────────────────────────────────────
+    for s in stocks:
+        tk     = s["Ticker"]
+        sd     = s["ScanDate"]
+        window = s["Window"]
+        status = s["Status"]
+
+        # Count how many data points exist for this stock
+        n_pts = 0
+        if not tracker_df.empty:
+            n_pts = int(((tracker_df["Ticker"] == tk) & (tracker_df["ScanDate"] == sd)).sum())
+
+        label = f"**{tk}** &nbsp;&nbsp; {sd} &nbsp;&nbsp; {status} &nbsp;&nbsp; ({n_pts} נק')"
+        with st.expander(label, expanded=False):
+            if tracker_df.empty:
+                st.info("⏳ אין נתוני score_tracker עדיין.")
+                continue
+
+            sdf = tracker_df[
+                (tracker_df["Ticker"] == tk) & (tracker_df["ScanDate"] == sd)
+            ].dropna(subset=["dt", "Score"]).sort_values("dt").copy()
+
+            if sdf.empty:
+                st.info("⏳ אין עדיין נתונים עבור מניה זו.")
+                continue
+
+            gran = st.radio(
+                "רזולוציה",
+                ["דקות", "שעות"],
+                horizontal=True,
+                key=f"gran_{tk}_{sd}",
+            )
+
+            plot_df = sdf[["dt", "Score"]].copy()
+            if gran == "שעות":
+                plot_df = (
+                    plot_df.set_index("dt")
+                    .resample("1h")["Score"]
+                    .mean()
+                    .dropna()
+                    .reset_index()
+                )
+
+            fig = _go.Figure()
+
+            # Score line
+            fig.add_trace(_go.Scatter(
+                x=plot_df["dt"],
+                y=plot_df["Score"],
+                mode="lines+markers",
+                name="Score",
+                line=dict(color="#00bfff", width=2),
+                marker=dict(size=5 if gran == "שעות" else 3),
+                hovertemplate="%{x|%m/%d %H:%M}<br>Score: %{y:.1f}<extra></extra>",
+            ))
+
+            # Day boundary lines (D1 / D2 / D3)
+            for i, day in enumerate(window):
+                day_open = pd.Timestamp(day + " 08:30")
+                if plot_df["dt"].min() <= day_open <= plot_df["dt"].max() + pd.Timedelta(hours=8):
+                    fig.add_vline(
+                        x=day_open.value / 1e6,  # plotly expects ms
+                        line_dash="dash",
+                        line_color="#555",
+                        line_width=1,
+                        annotation_text=f"D{i+1}",
+                        annotation_font_color="#aaa",
+                        annotation_position="top right",
+                    )
+
+            # Score zone bands
+            fig.add_hrect(y0=80, y1=100, fillcolor="#4a0010", opacity=0.15, line_width=0)
+            fig.add_hrect(y0=60, y1=80, fillcolor="#1a3a1a", opacity=0.15, line_width=0)
+            fig.add_hrect(y0=40, y1=60, fillcolor="#3a2a00", opacity=0.15, line_width=0)
+
+            fig.update_layout(
+                height=320,
+                margin=dict(l=10, r=10, t=25, b=10),
+                paper_bgcolor="#0e1117",
+                plot_bgcolor="#0e1117",
+                font=dict(color="#fafafa", size=12),
+                xaxis=dict(gridcolor="#222", tickformat="%m/%d\n%H:%M"),
+                yaxis=dict(gridcolor="#222", title="Score", range=[0, 100]),
+                showlegend=False,
+            )
+
+            st.plotly_chart(fig, use_container_width=True)
 
 
 
