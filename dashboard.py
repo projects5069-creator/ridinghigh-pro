@@ -2603,7 +2603,8 @@ def score_tracker_page():
     st.title("🎯 Portfolio Score Tracker")
     system_health_bar()
 
-    METRIC_COLS = ["Score", "Price", "MxV", "RunUp", "REL_VOL", "RSI", "ATRX"]
+    METRIC_COLS = ["Score", "Price", "MxV", "RunUp", "REL_VOL", "RSI", "ATRX",
+                   "Gap", "VWAP_Dist", "Volume", "High", "Low", "Open", "PrevClose"]
 
     def _trading_days_after(sd, n=3):
         d = datetime.strptime(sd, "%Y-%m-%d")
@@ -2709,9 +2710,16 @@ def score_tracker_page():
     table_cols = ["ScanTime"] + available_metrics
     tbl = sdf[table_cols].copy()
     fmt = {c: "{:.2f}" for c in available_metrics}
-    fmt["MxV"]     = "{:.1f}%"
-    fmt["RunUp"]   = "{:+.1f}%"
-    fmt["REL_VOL"] = "{:.2f}x"
+    fmt["MxV"]       = "{:.1f}%"
+    fmt["RunUp"]     = "{:+.1f}%"
+    fmt["REL_VOL"]   = "{:.2f}x"
+    fmt["Gap"]       = "{:+.1f}%"
+    fmt["VWAP_Dist"] = "{:+.1f}%"
+    fmt["Volume"]    = "{:,.0f}"
+    fmt["High"]      = "{:.2f}"
+    fmt["Low"]       = "{:.2f}"
+    fmt["Open"]      = "{:.2f}"
+    fmt["PrevClose"] = "{:.2f}"
 
     def _color_score(val):
         try:

@@ -36,49 +36,54 @@ def get_score_and_price(ticker):
         from ta.volatility import AverageTrueRange
         stock = yf.Ticker(ticker)
         hist = stock.history(period="60d")
-        if hist.empty or len(hist) < 2: return None, None
+        if hist.empty or len(hist) < 2: return (None,) * 14
         info = stock.info
         current = hist.iloc[-1]
         previous = hist.iloc[-2]
-        price = float(current["Close"])
-        volume = int(current["Volume"])
+        price      = round(float(current["Close"]), 2)
+        high       = round(float(current["High"]), 2)
+        low        = round(float(current["Low"]), 2)
+        open_price = round(float(current["Open"]), 2)
+        prev_close = round(float(previous["Close"]), 2)
+        volume     = int(current["Volume"])
         market_cap = info.get("marketCap", 0)
-        if not market_cap: return None, None
-        rsi = 50; atrx = 0; rel_vol = 1.0; run_up = 0; gap = 0; vwap_dist = 0
-        if len(hist) >= 14:
-            try: rsi = float(RSIIndicator(hist["Close"], 14).rsi().iloc[-1])
-            except: pass
-            try:
-                atr = float(AverageTrueRange(hist["High"], hist["Low"], hist["Close"], 14).average_true_range().iloc[-1])
-                atrx = (float(current["High"]) - float(current["Low"])) / atr if atr > 0 else 0
-            except: pass
+        if not market_cap: return (None,) * 14
+        rsi = 50.0; atrx = 0.0; rel_vol = 1.0; run_up = 0.0; gap = 0.0; vwap_dist = 0.0
+        try: rsi = float(RSIIndicator(hist["Close"], 14).rsi().iloc[-1])
+        except: pass
+        try:
+            atr = float(AverageTrueRange(hist["High"], hist["Low"], hist["Close"], 14).average_true_range().iloc[-1])
+            atrx = (high - low) / atr if atr > 0 else 0.0
+        except: pass
         try:
             avg_vol = info.get("averageVolume", volume)
             rel_vol = volume / avg_vol if avg_vol > 0 else 1.0
         except: pass
-        try: run_up = ((price - float(current["Open"])) / float(current["Open"])) * 100
+        try: run_up = ((price - open_price) / open_price) * 100
         except: pass
-        try: gap = ((float(current["Open"]) - float(previous["Close"])) / float(previous["Close"])) * 100
+        try: gap = ((open_price - prev_close) / prev_close) * 100
         except: pass
         try:
-            vwap = (float(current["High"]) + float(current["Low"]) + price) / 3
-            vwap_dist = ((price / vwap) - 1) * 100 if vwap > 0 else 0
+            vwap = (high + low + price) / 3
+            vwap_dist = ((price / vwap) - 1) * 100 if vwap > 0 else 0.0
         except: pass
-        mxv = (market_cap - price * volume) / market_cap if market_cap > 0 else 0
-        score = 0
-        if mxv < 0: score += min(abs(mxv)/50,1)*30
-        if run_up > 0: score += min(run_up/50,1)*20
-        score += min(rel_vol/2,1)*20
-        score += (rsi/80)*10 if rsi<=80 else 10
-        score += min(atrx/3,1)*10
-        if gap<15: score += min((15-gap)/15,1)*5
-        if vwap_dist>0: score += min(vwap_dist/15,1)*5
-        return (round(price,2), round(score,2),
+        mxv = (market_cap - price * volume) / market_cap if market_cap > 0 else 0.0
+        score = 0.0
+        if mxv < 0:    score += min(abs(mxv)/50, 1) * 30
+        if run_up > 0: score += min(run_up/50, 1) * 20
+        score += min(rel_vol/2, 1) * 20
+        score += (rsi/80)*10 if rsi <= 80 else 10
+        score += min(atrx/3, 1) * 10
+        if gap < 15:      score += min((15-gap)/15, 1) * 5
+        if vwap_dist > 0: score += min(vwap_dist/15, 1) * 5
+        return (price, round(score,2),
                 round(mxv*100,2), round(run_up,2), round(rel_vol,2),
-                round(rsi,2), round(atrx,2))
+                round(rsi,2), round(atrx,2),
+                round(gap,2), round(vwap_dist,2),
+                volume, high, low, open_price, prev_close)
     except Exception as e:
         print(f"  [!] {ticker}: {e}")
-        return None, None, None, None, None, None, None
+        return (None,) * 14
 
 def run():
     import sheets_manager
@@ -115,24 +120,29 @@ def run():
     if not active:
         print(f"[ScoreTracker] No active stocks for {today}"); return
     print(f"[ScoreTracker] Tracking {len(active)} stocks: {sorted(t for t,_ in active)}")
-    COLS = ["Date","ScanTime","Ticker","ScanDate","Price","Score","MxV","RunUp","REL_VOL","RSI","ATRX"]
+    COLS = ["Date","ScanTime","Ticker","ScanDate","Price","Score",
+            "MxV","RunUp","REL_VOL","RSI","ATRX",
+            "Gap","VWAP_Dist","Volume","High","Low","Open","PrevClose"]
     new_rows = []
     for ticker, scan_date in sorted(active):
-        price, score, mxv, run_up, rel_vol, rsi, atrx = get_score_and_price(ticker)
+        price, score, mxv, run_up, rel_vol, rsi, atrx, gap, vwap_dist, volume, high, low, open_p, prev_close = get_score_and_price(ticker)
         if price is None: continue
-        new_rows.append({"Date":today,"ScanTime":scan_time,"Ticker":ticker,"ScanDate":scan_date,
-                         "Price":price,"Score":score,"MxV":mxv,"RunUp":run_up,
-                         "REL_VOL":rel_vol,"RSI":rsi,"ATRX":atrx})
-        print(f"  ✅ {ticker} Score={score:.2f} MxV={mxv:.1f}% RunUp={run_up:.1f}% REL_VOL={rel_vol:.2f}x")
+        new_rows.append({
+            "Date":today,"ScanTime":scan_time,"Ticker":ticker,"ScanDate":scan_date,
+            "Price":price,"Score":score,"MxV":mxv,"RunUp":run_up,
+            "REL_VOL":rel_vol,"RSI":rsi,"ATRX":atrx,
+            "Gap":gap,"VWAP_Dist":vwap_dist,"Volume":volume,
+            "High":high,"Low":low,"Open":open_p,"PrevClose":prev_close,
+        })
+        print(f"  ✅ {ticker} Score={score:.2f} Gap={gap:.1f}% VWAP_Dist={vwap_dist:.1f}% REL_VOL={rel_vol:.2f}x")
     if not new_rows: return
     new_df = pd.DataFrame(new_rows)[COLS]
     ws_st = sheets_manager.get_worksheet("score_tracker", gc=gc)
     if ws_st:
         existing = ws_st.get_all_values()
         if len(existing) > 1:
-            # If sheet has old 6-col format, clear and rewrite with new header
             if len(existing[0]) < len(COLS):
-                print("[ScoreTracker] Upgrading sheet to 11-column format")
+                print("[ScoreTracker] Upgrading sheet to 18-column format")
                 ws_st.clear()
                 ws_st.update("A1", [COLS] + new_df.astype(str).values.tolist())
             else:

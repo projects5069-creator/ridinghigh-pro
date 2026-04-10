@@ -689,7 +689,8 @@ def sync_score_tracker(gc, now_peru):
     """
     Record minute-by-minute Score + metrics for portfolio stocks in D1/D2/D3 window.
     Runs inside auto_scanner (every minute) instead of a separate workflow.
-    Columns: Date, ScanTime, Ticker, ScanDate, Price, Score, MxV, RunUp, REL_VOL, RSI, ATRX
+    Columns: Date, ScanTime, Ticker, ScanDate, Price, Score, MxV, RunUp, REL_VOL, RSI, ATRX,
+             Gap, VWAP_Dist, Volume, High, Low, Open, PrevClose
     """
     try:
         import yfinance as yf
@@ -731,7 +732,8 @@ def sync_score_tracker(gc, now_peru):
             return
 
         COLS = ["Date","ScanTime","Ticker","ScanDate","Price","Score",
-                "MxV","RunUp","REL_VOL","RSI","ATRX"]
+                "MxV","RunUp","REL_VOL","RSI","ATRX",
+                "Gap","VWAP_Dist","Volume","High","Low","Open","PrevClose"]
         new_rows = []
         for ticker, scan_date in sorted(active):
             try:
@@ -742,9 +744,13 @@ def sync_score_tracker(gc, now_peru):
                 info     = stock.info
                 current  = hist.iloc[-1]
                 previous = hist.iloc[-2]
-                price    = round(float(current["Close"]), 2)
-                volume   = int(current["Volume"])
-                mkt_cap  = info.get("marketCap", 0)
+                price      = round(float(current["Close"]), 2)
+                high       = round(float(current["High"]), 2)
+                low        = round(float(current["Low"]), 2)
+                open_price = round(float(current["Open"]), 2)
+                prev_close = round(float(previous["Close"]), 2)
+                volume     = int(current["Volume"])
+                mkt_cap    = info.get("marketCap", 0)
                 if not mkt_cap:
                     continue
 
@@ -754,45 +760,54 @@ def sync_score_tracker(gc, now_peru):
                 except Exception: pass
                 try:
                     atr  = float(AverageTrueRange(hist["High"],hist["Low"],hist["Close"],14).average_true_range().iloc[-1])
-                    atrx = (float(current["High"]) - float(current["Low"])) / atr if atr > 0 else 0.0
+                    atrx = (high - low) / atr if atr > 0 else 0.0
                 except Exception: pass
                 try:
                     avg_vol = info.get("averageVolume", volume)
                     rel_vol = volume / avg_vol if avg_vol > 0 else 1.0
                 except Exception: pass
                 try:
-                    run_up = ((price - float(current["Open"])) / float(current["Open"])) * 100
+                    run_up = ((price - open_price) / open_price) * 100
+                except Exception: pass
+
+                gap = 0.0
+                try:
+                    gap = ((open_price - prev_close) / prev_close) * 100
+                except Exception: pass
+
+                vwap_dist = 0.0
+                try:
+                    vwap      = (high + low + price) / 3
+                    vwap_dist = ((price / vwap) - 1) * 100 if vwap > 0 else 0.0
                 except Exception: pass
 
                 mxv   = (mkt_cap - price * volume) / mkt_cap if mkt_cap > 0 else 0.0
                 score = 0.0
-                if mxv < 0:  score += min(abs(mxv)/50, 1) * 30
-                gap = 0.0
-                try:
-                    gap = ((float(current["Open"]) - float(previous["Close"])) / float(previous["Close"])) * 100
-                except Exception: pass
+                if mxv < 0:    score += min(abs(mxv)/50, 1) * 30
                 if run_up > 0: score += min(run_up/50, 1) * 20
                 score += min(rel_vol/2, 1) * 20
                 score += (rsi/80)*10 if rsi <= 80 else 10
                 score += min(atrx/3, 1) * 10
-                if gap < 15:  score += min((15-gap)/15, 1) * 5
-                vwap_dist = 0.0
-                try:
-                    vwap      = (float(current["High"]) + float(current["Low"]) + price) / 3
-                    vwap_dist = ((price/vwap) - 1)*100 if vwap > 0 else 0.0
-                except Exception: pass
-                if vwap_dist > 0: score += min(vwap_dist/15, 1) * 5
+                if gap < 15:       score += min((15-gap)/15, 1) * 5
+                if vwap_dist > 0:  score += min(vwap_dist/15, 1) * 5
 
                 new_rows.append({
                     "Date": today, "ScanTime": scan_time,
                     "Ticker": ticker, "ScanDate": scan_date,
-                    "Price":   round(price,  2),
-                    "Score":   round(score,  2),
-                    "MxV":     round(mxv*100,2),
-                    "RunUp":   round(run_up,  2),
-                    "REL_VOL": round(rel_vol,  2),
-                    "RSI":     round(rsi,     2),
-                    "ATRX":    round(atrx,    2),
+                    "Price":     price,
+                    "Score":     round(score,     2),
+                    "MxV":       round(mxv*100,   2),
+                    "RunUp":     round(run_up,     2),
+                    "REL_VOL":   round(rel_vol,    2),
+                    "RSI":       round(rsi,        2),
+                    "ATRX":      round(atrx,       2),
+                    "Gap":       round(gap,         2),
+                    "VWAP_Dist": round(vwap_dist,   2),
+                    "Volume":    volume,
+                    "High":      high,
+                    "Low":       low,
+                    "Open":      open_price,
+                    "PrevClose": prev_close,
                 })
             except Exception as e:
                 print(f"  [ScoreTracker] {ticker}: {e}")
@@ -809,7 +824,7 @@ def sync_score_tracker(gc, now_peru):
         if len(existing) > 1 and len(existing[0]) >= len(COLS):
             ws_st.append_rows(new_df.astype(str).values.tolist())
         else:
-            # First run or old 6-col format — rewrite with header
+            # First run or old schema — rewrite with full header
             ws_st.clear()
             ws_st.update("A1", [COLS] + new_df.astype(str).values.tolist())
 
