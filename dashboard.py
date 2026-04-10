@@ -2232,14 +2232,22 @@ def post_analysis_page():
         except:
             return ""
 
+    # Round all numeric columns to 2 decimal places
     for col in filtered[display_cols].select_dtypes(include="number").columns:
         filtered[col] = filtered[col].round(2)
-    # Replace None/NaN with "-" for display-only columns that may be missing
-    for _col in ["IntraHigh", "IntraLow", "PeakScoreTime", "PeakScorePrice"]:
+    # Replace None/NaN/"None"/"nan" with "-" across ALL display columns
+    def _clean(v):
+        if v is None:
+            return "-"
+        if isinstance(v, float) and pd.isna(v):
+            return "-"
+        if str(v).strip() in ("None", "nan", "NaN", ""):
+            return "-"
+        return v
+    for _col in display_cols:
         if _col in filtered.columns:
-            filtered[_col] = filtered[_col].apply(
-                lambda v: "-" if (v is None or (isinstance(v, float) and pd.isna(v)) or str(v) in ("None", "nan", "")) else v
-            )
+            filtered[_col] = filtered[_col].apply(_clean)
+
     styled = filtered[display_cols].style
     for col in ["TP10_Hit", "TP15_Hit", "TP20_Hit"]:
         if col in display_cols:
@@ -2258,7 +2266,7 @@ def post_analysis_page():
             format_dict[col] = "{:.2f}%"
         else:
             format_dict[col] = "{:.2f}"
-    styled = styled.format(format_dict)
+    styled = styled.format(format_dict, na_rep="-")
     st.dataframe(styled, use_container_width=True, height=500, hide_index=True)
 
     st.divider()
@@ -2646,25 +2654,19 @@ def score_tracker_page():
 
     today = datetime.now(PERU_TZ).strftime("%Y-%m-%d")
 
-    # Build stock list: show stocks where today falls within D0–D3 window
+    # Build stock list: only stocks entered today or in D1-D3 window from today's date
     stocks = []
     for r in port_df.itertuples():
         sd = str(getattr(r, "Date", "")).strip()
         tk = str(getattr(r, "Ticker", "")).strip()
         if not sd or not tk:
             continue
+        # Only today's entries
+        if sd != today:
+            continue
         try:
-            window = _trading_days_after(sd, 3)  # [D1, D2, D3]
-            d3 = window[-1]
-            # Include if today is on or after entry AND on or before D3
-            if not (sd <= today <= d3):
-                continue
-            if today == sd:
-                status = "📅 D0 — יום כניסה"
-            elif today in window:
-                status = f"📡 D{window.index(today)+1}"
-            else:
-                status = "📡 פעיל"
+            window = _trading_days_after(sd, 3)
+            status = "📅 D0 — יום כניסה"
             stocks.append({"Ticker": tk, "ScanDate": sd, "Window": window, "Status": status})
         except Exception:
             pass
