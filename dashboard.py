@@ -1076,7 +1076,7 @@ def _cached_portfolio() -> pd.DataFrame:
         return pd.DataFrame()
 
 
-@st.cache_data(ttl=300)
+@st.cache_data(ttl=60)
 def _cached_post_analysis() -> pd.DataFrame:
     """post_analysis → DataFrame via gsheets_sync. Refreshes every 5 min."""
     from gsheets_sync import load_post_analysis_from_sheets
@@ -2232,21 +2232,31 @@ def post_analysis_page():
         except:
             return ""
 
-    # Round all numeric columns to 2 decimal places
-    for col in filtered[display_cols].select_dtypes(include="number").columns:
+    # Step 1: force-convert all non-text columns to numeric (data from Sheets = strings)
+    TEXT_COLS = {"Ticker", "ScanDate", "PeakScoreTime"}
+    for col in display_cols:
+        if col in filtered.columns and col not in TEXT_COLS:
+            filtered[col] = pd.to_numeric(filtered[col], errors="coerce")
+
+    # Step 2: round numeric columns to 2 decimal places
+    num_cols = [c for c in display_cols if c in filtered.columns and c not in TEXT_COLS]
+    for col in num_cols:
         filtered[col] = filtered[col].round(2)
-    # Replace None/NaN/"None"/"nan" with "-" across ALL display columns
-    def _clean(v):
-        if v is None:
-            return "-"
-        if isinstance(v, float) and pd.isna(v):
-            return "-"
-        if str(v).strip() in ("None", "nan", "NaN", ""):
-            return "-"
-        return v
-    for _col in display_cols:
-        if _col in filtered.columns:
-            filtered[_col] = filtered[_col].apply(_clean)
+
+    # Step 3: clean text columns only (NaN → "-")
+    for col in TEXT_COLS:
+        if col in filtered.columns:
+            filtered[col] = filtered[col].fillna("-").replace({"None": "-", "nan": "-", "": "-"})
+
+    # Step 4: build format dict on actually-numeric columns (NaN stays NaN — na_rep handles display)
+    format_dict = {}
+    for col in num_cols:
+        if col in ["TP10_Hit", "TP15_Hit", "TP20_Hit", "BestDay"]:
+            format_dict[col] = "{:.0f}"
+        elif "%" in col:
+            format_dict[col] = "{:.2f}%"
+        else:
+            format_dict[col] = "{:.2f}"
 
     styled = filtered[display_cols].style
     for col in ["TP10_Hit", "TP15_Hit", "TP20_Hit"]:
@@ -2258,14 +2268,6 @@ def post_analysis_page():
         styled = styled.map(color_change, subset=["ScanChange%"])
     if "EntryChange%" in display_cols:
         styled = styled.map(color_change, subset=["EntryChange%"])
-    format_dict = {}
-    for col in filtered[display_cols].select_dtypes(include="number").columns:
-        if col in ["TP10_Hit", "TP15_Hit", "TP20_Hit", "BestDay"]:
-            continue
-        elif "%" in col:
-            format_dict[col] = "{:.2f}%"
-        else:
-            format_dict[col] = "{:.2f}"
     styled = styled.format(format_dict, na_rep="-")
     st.dataframe(styled, use_container_width=True, height=500, hide_index=True)
 
