@@ -261,11 +261,12 @@ def is_trading_day(date=None):
 
 # ── Main ──────────────────────────────────────────────────────────────────────
 def run(target_date: str = None):
+    run_start = datetime.now(PERU_TZ)
     if target_date:
         print(f"[Collector] Starting post-analysis collector v5 (backfill: {target_date})...")
     else:
-        print(f"[Collector] Starting post-analysis collector v5...")
-        today = datetime.now(PERU_TZ).date()
+        print(f"[Collector] Starting post-analysis collector v5 at {run_start.strftime('%Y-%m-%d %H:%M:%S')} Peru time...")
+        today = run_start.date()
         if not is_trading_day(today):
             print(f"[Collector] ⛔ {today} not a trading day — skipping.")
             return
@@ -273,23 +274,39 @@ def run(target_date: str = None):
     import sheets_manager
     gc = sheets_manager._get_gc()
     if gc is None:
-        print("[Collector] ❌ Cannot connect to Google Sheets"); return
+        print("[Collector] ❌ Cannot connect to Google Sheets — GOOGLE_CREDENTIALS_JSON env var missing or invalid")
+        return
+    print("[Collector] ✅ Google Sheets connected")
 
     # Load snapshots
-    ws   = sheets_manager.get_worksheet("daily_snapshots", gc=gc)
-    data = ws.get_all_values() if ws else []
+    ws = sheets_manager.get_worksheet("daily_snapshots", gc=gc)
+    if ws is None:
+        print("[Collector] ❌ daily_snapshots worksheet not found — check sheets_config.json")
+        return
+    data = ws.get_all_values()
     if len(data) <= 1:
-        print("[Collector] No snapshot data"); return
+        print("[Collector] ❌ daily_snapshots is empty — auto_scanner may not have run at 14:59")
+        return
     snapshots_df = pd.DataFrame(data[1:], columns=data[0])
     snapshots_df["Score"] = pd.to_numeric(snapshots_df.get("Score", 0), errors="coerce")
+    print(f"[Collector] daily_snapshots: {len(snapshots_df)} rows across dates: {sorted(snapshots_df['Date'].unique().tolist(), reverse=True)[:5]}")
 
     if target_date:
         snapshots_df = snapshots_df[snapshots_df.get("Date", pd.Series()) == target_date]
         print(f"[Collector] Filtered to {len(snapshots_df)} rows for {target_date}")
+    else:
+        # Default: process today's date
+        today_str = run_start.strftime("%Y-%m-%d")
+        today_rows = snapshots_df[snapshots_df.get("Date", pd.Series()) == today_str]
+        print(f"[Collector] Today ({today_str}) rows in daily_snapshots: {len(today_rows)}")
+        if today_rows.empty:
+            print(f"[Collector] ⚠️ No rows for today ({today_str}) in daily_snapshots — auto_scanner 14:59 snapshot may have failed")
 
     candidates = snapshots_df[snapshots_df["Score"] >= MIN_SCORE].copy()
     print(f"[Collector] {len(candidates)} stocks with score >= {MIN_SCORE}")
-    if candidates.empty: return
+    if candidates.empty:
+        print("[Collector] ⚠️ No candidates found — check that daily_snapshots has Score>=60 stocks")
+        return
 
     # Load timeline_live for stats
     print("[Collector] Loading timeline_live...")

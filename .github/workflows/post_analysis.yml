@@ -19,16 +19,16 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install gspread google-auth pandas yfinance pytz pandas_market_calendars
-
-      - name: Create credentials file
-        run: |
-          echo '${{ secrets.GOOGLE_CREDENTIALS_JSON }}' > google_credentials.json
+          pip install gspread google-auth google-api-python-client pandas yfinance pytz pandas_market_calendars
 
       - name: Run Post Analysis Collector
+        env:
+          GOOGLE_CREDENTIALS_JSON: ${{ secrets.GOOGLE_CREDENTIALS_JSON }}
         run: |
           python post_analysis_collector.py
 
       - name: Enrich with Intraday Data
+        env:
+          GOOGLE_CREDENTIALS_JSON: ${{ secrets.GOOGLE_CREDENTIALS_JSON }}
         run: |
           python enrich_post_analysis.py

@@ -1,18 +1,19 @@
 """
-RidingHigh Pro - Enrich Post Analysis with Intraday Data v2
+RidingHigh Pro - Enrich Post Analysis with Intraday Data v3
 Adds:
   - IntraHigh, IntraLow, PeakScoreTime, PeakScorePrice, PeakScore, DayRunUp% (from timeline_live)
   - D0_Close, D0_Volume, D0_Drop%, IntraDay_TP10 (from Yahoo Finance)
+
+v3: Uses sheets_manager (new multi-sheet architecture). No hardcoded local paths.
 """
 
-import sys
 import argparse
-sys.path.insert(0, "/Users/adilevy/RidingHighPro")
-from gsheets_sync import _get_client, SPREADSHEET_ID, load_post_analysis_from_sheets, _df_to_sheet
 import pandas as pd
 import yfinance as yf
 from datetime import datetime, timedelta
 import time
+import sheets_manager
+from gsheets_sync import load_post_analysis_from_sheets, save_post_analysis_to_sheets
 
 
 def _is_missing(val):
@@ -27,15 +28,13 @@ def _is_missing(val):
         pass
     return str(val).strip() in ("", "nan", "None")
 
+
 def fetch_d0_data(ticker: str, scan_date: str) -> dict:
-    """
-    Fetch D0 (scan day) closing price and volume from Yahoo Finance.
-    Returns D0_Close, D0_Volume, or None if unavailable.
-    """
+    """Fetch D0 (scan day) closing price and volume from Yahoo Finance."""
     for attempt in range(1, 4):
         try:
-            scan_dt  = datetime.strptime(scan_date, "%Y-%m-%d")
-            end_dt   = scan_dt + timedelta(days=1)
+            scan_dt = datetime.strptime(scan_date, "%Y-%m-%d")
+            end_dt  = scan_dt + timedelta(days=1)
             hist = yf.download(
                 ticker,
                 start=scan_date,
@@ -46,12 +45,10 @@ def fetch_d0_data(ticker: str, scan_date: str) -> dict:
             if hist.empty:
                 time.sleep(1)
                 continue
-
             if isinstance(hist.columns, pd.MultiIndex):
                 hist.columns = hist.columns.get_level_values(0)
             hist.columns = [str(c) for c in hist.columns]
             hist.index = pd.to_datetime(hist.index).strftime("%Y-%m-%d")
-
             if scan_date in hist.index:
                 row = hist.loc[scan_date]
                 return {
@@ -66,27 +63,23 @@ def fetch_d0_data(ticker: str, scan_date: str) -> dict:
 
 
 def is_trading_day(date=None):
-    """Returns True if date is a NASDAQ trading day. Falls back to weekday check."""
     import pytz
     if date is None:
         date = datetime.now(pytz.timezone("America/Lima")).date()
     try:
         import pandas_market_calendars as mcal
         nyse = mcal.get_calendar("NASDAQ")
-        schedule = nyse.schedule(
+        return not nyse.schedule(
             start_date=date.strftime("%Y-%m-%d"),
             end_date=date.strftime("%Y-%m-%d")
-        )
-        return not schedule.empty
-    except ImportError:
-        print("[Enrich] ⚠️ pandas_market_calendars not installed — using weekday-only check")
+        ).empty
+    except Exception:
         return date.weekday() < 5
 
 
 def run(backfill: bool = False):
-    print("[Enrich] Starting v2..." + (" (backfill mode — all dates)" if backfill else ""))
+    print("[Enrich] Starting v3..." + (" (backfill mode)" if backfill else ""))
 
-    # ── Trading-day guard (skipped in backfill mode) ───────────────────────
     if not backfill:
         import pytz
         today = datetime.now(pytz.timezone("America/Lima")).date()
@@ -94,55 +87,48 @@ def run(backfill: bool = False):
             print(f"[Enrich] ⛔ {today} is not a trading day — skipping.")
             return
 
-    gc = _get_client()
+    gc = sheets_manager._get_gc()
     if gc is None:
         print("[Enrich] ❌ Cannot connect to Google Sheets — credentials not found")
         return
-    sh = gc.open_by_key(SPREADSHEET_ID)
 
-    # ── Load timeline_live (batched to handle 138K+ rows) ──────────────────
-    print("[Enrich] Loading timeline_live (batched)...")
-    ws_tl = sh.worksheet("timeline_live")
-    headers_tl = ws_tl.row_values(1)
-    total_rows  = len(ws_tl.col_values(1))
-    col_range   = chr(64 + len(headers_tl))
-    BATCH_SIZE  = 5000
-    all_rows    = []
-    row_start   = 2
-    while row_start <= total_rows:
-        row_end = min(row_start + BATCH_SIZE - 1, total_rows)
-        batch   = ws_tl.get(f"A{row_start}:{col_range}{row_end}")
-        if not batch:
-            break
-        all_rows.extend(batch)
-        row_start += BATCH_SIZE
-
-    tl = pd.DataFrame(all_rows, columns=headers_tl)
-    tl["Price"]  = pd.to_numeric(tl["Price"],  errors="coerce")
-    tl["Score"]  = pd.to_numeric(tl["Score"],  errors="coerce")
-    tl["Volume"] = pd.to_numeric(tl["Volume"], errors="coerce")
-    print(f"[Enrich] Timeline rows loaded: {len(tl)}")
+    # ── Load timeline_live (slim 8 cols: Date, ScanTime, Ticker, Price, Score, MxV, RunUp, REL_VOL)
+    print("[Enrich] Loading timeline_live...")
+    ws_tl = sheets_manager.get_worksheet("timeline_live", gc=gc)
+    if ws_tl is None:
+        print("[Enrich] ❌ Cannot open timeline_live")
+        return
+    tl_raw = ws_tl.get_all_values()
+    if len(tl_raw) <= 1:
+        print("[Enrich] ⚠️ timeline_live is empty")
+        tl = pd.DataFrame()
+    else:
+        tl = pd.DataFrame(tl_raw[1:], columns=tl_raw[0])
+        tl["Price"] = pd.to_numeric(tl["Price"], errors="coerce")
+        tl["Score"] = pd.to_numeric(tl["Score"], errors="coerce")
+        print(f"[Enrich] Timeline rows loaded: {len(tl)}")
 
     # ── Load post_analysis ──────────────────────────────────────────────────
     pa = load_post_analysis_from_sheets()
     print(f"[Enrich] Post analysis rows: {len(pa)}")
+    if pa.empty:
+        print("[Enrich] No post analysis data — nothing to enrich")
+        return
 
-    # Ensure new columns exist
+    # Ensure enrichment columns exist
     for col in ["IntraHigh", "IntraLow", "PeakScoreTime", "PeakScorePrice",
                 "PeakScore", "DayRunUp%", "D0_Close", "D0_Volume", "D0_Drop%", "IntraDay_TP10"]:
         if col not in pa.columns:
             pa[col] = None
-    # PeakScoreTime is a time string (e.g. "14:58") — must stay object dtype
     pa["PeakScoreTime"] = pa["PeakScoreTime"].astype(object)
 
-    # ── Columns that must all be filled for a row to be considered complete ──
     TIMELINE_COLS = ["IntraHigh", "IntraLow", "PeakScoreTime", "PeakScorePrice",
                      "PeakScore", "DayRunUp%", "IntraDay_TP10"]
     D0_COLS       = ["D0_Close", "D0_Volume", "D0_Drop%"]
 
-    # ── Enrich each row ─────────────────────────────────────────────────────
     updated = 0
     skipped = 0
+
     for idx, row in pa.iterrows():
         ticker     = str(row.get("Ticker", "")).strip()
         scan_date  = str(row.get("ScanDate", "")).strip()
@@ -157,14 +143,13 @@ def run(backfill: bool = False):
 
         if not timeline_missing and not d0_missing:
             skipped += 1
-            continue  # row is already fully enriched
+            continue
 
         row_changed = False
 
-        # ── Timeline-based enrichment ───────────────────────────────────────
-        if timeline_missing:
+        # ── Timeline enrichment ─────────────────────────────────────────────
+        if timeline_missing and not tl.empty:
             day_tl = tl[(tl["Ticker"] == ticker) & (tl["Date"] == scan_date)]
-
             if not day_tl.empty:
                 intra_high  = round(day_tl["Price"].max(), 2)
                 intra_low   = round(day_tl["Price"].min(), 2)
@@ -181,10 +166,8 @@ def run(backfill: bool = False):
                 pa.at[idx, "PeakScorePrice"] = peak_price
                 pa.at[idx, "PeakScore"]      = peak_score
                 pa.at[idx, "DayRunUp%"]      = run_up_pct
-
                 if scan_price > 0:
                     pa.at[idx, "IntraDay_TP10"] = 1 if intra_low <= scan_price * 0.90 else 0
-
                 row_changed = True
             else:
                 print(f"[Enrich] No timeline data for {ticker} {scan_date}")
@@ -193,28 +176,23 @@ def run(backfill: bool = False):
         if d0_missing:
             print(f"[Enrich] Fetching D0 for {ticker} ({scan_date})...")
             d0 = fetch_d0_data(ticker, scan_date)
-
             if d0:
                 pa.at[idx, "D0_Close"]  = d0["D0_Close"]
                 pa.at[idx, "D0_Volume"] = d0["D0_Volume"]
-
                 if scan_price > 0:
-                    d0_drop = round((d0["D0_Close"] - scan_price) / scan_price * 100, 2)
-                    pa.at[idx, "D0_Drop%"] = d0_drop
-
+                    pa.at[idx, "D0_Drop%"] = round(
+                        (d0["D0_Close"] - scan_price) / scan_price * 100, 2)
                 row_changed = True
-            time.sleep(0.3)  # rate limit
+            time.sleep(0.3)
 
         if row_changed:
             updated += 1
         else:
             skipped += 1
 
-    print(f"[Enrich] Updated: {updated} rows | Skipped (already complete or no data): {skipped} rows")
+    print(f"[Enrich] Updated: {updated} rows | Skipped: {skipped} rows")
 
-    # ── Save back to Sheets ─────────────────────────────────────────────────
-    ws_pa = sh.worksheet("post_analysis")
-    _df_to_sheet(ws_pa, pa)
+    save_post_analysis_to_sheets(pa)
     print("[Enrich] ✅ Saved to post_analysis")
 
 
