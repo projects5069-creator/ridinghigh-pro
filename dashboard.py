@@ -1030,14 +1030,15 @@ PERU_TZ = pytz.timezone("America/Lima")
 def _cached_timeline_live() -> pd.DataFrame:
     """timeline_live → raw DataFrame. Refreshes every 2 min."""
     try:
-        gc = _get_gc()
+        gc = _get_gc() or sheets_manager._get_gc()
         if not gc: return pd.DataFrame()
         ws = sheets_manager.get_worksheet("timeline_live", gc=gc)
         if not ws: return pd.DataFrame()
         data = ws.get_all_values()
         if len(data) <= 1: return pd.DataFrame()
         return pd.DataFrame(data[1:], columns=data[0])
-    except Exception:
+    except Exception as e:
+        st.warning(f"⚠️ timeline_live read error: {e}")
         return pd.DataFrame()
 
 
@@ -1305,7 +1306,39 @@ def main_page():
                 st.session_state.last_scan = now_peru
                 st.sidebar.success(f"✅ {len(results)} stocks! (scan: {latest_time})")
             else:
-                st.sidebar.info("⏳ Waiting for next scan...")
+                # Fallback: read timeline_live directly without going through session_state.results
+                _tl_fallback = _cached_timeline_live()
+                if not _tl_fallback.empty:
+                    _today_fb = now_peru.strftime("%Y-%m-%d")
+                    _tl_today = _tl_fallback[_tl_fallback["Date"] == _today_fb]
+                    if not _tl_today.empty:
+                        _lt = _tl_today["ScanTime"].max()
+                        _latest = _tl_today[_tl_today["ScanTime"] == _lt]
+                        _fake = []
+                        for _, _r in _latest.iterrows():
+                            try:
+                                _fake.append({
+                                    "Ticker": _r["Ticker"],
+                                    "Score": float(_r.get("Score", 0) or 0),
+                                    "Price": float(_r.get("Price", 0) or 0),
+                                    "Change": 0, "MxV": float(_r.get("MxV", 0) or 0),
+                                    "PriceTo52WHigh": 0, "PriceToHigh": 0, "RSI": 0, "ATRX": 0,
+                                    "REL_VOL": float(_r.get("REL_VOL", 0) or 0),
+                                    "RunUp": float(_r.get("RunUp", 0) or 0),
+                                    "Float%": 0, "Gap": 0, "VWAP": 0,
+                                })
+                            except Exception:
+                                pass
+                        if _fake:
+                            st.session_state.results = _fake
+                            st.session_state.last_scan = now_peru
+                            st.sidebar.success(f"✅ {len(_fake)} stocks! (scan: {_lt})")
+                        else:
+                            st.sidebar.info("⏳ Waiting for next scan...")
+                    else:
+                        st.sidebar.info("⏳ Waiting for next scan...")
+                else:
+                    st.sidebar.info("⏳ Waiting for next scan...")
     else:
         if st.session_state.force_scan:
             should_scan = True
@@ -1384,20 +1417,25 @@ def main_page():
                 st.metric("Last Scan", _ls.astimezone(PERU_TZ).strftime("%H:%M:%S"))
         
         display_data = []
+        _has_change = any(r.get('Change', 0) != 0 for r in results)
+        _has_rsi    = any(r.get('RSI', 0) != 0 for r in results)
         for r in results:
-            display_data.append({
+            row_d = {
                 'Ticker': r['Ticker'],
                 'Score': f"{r['Score']:.2f}",
                 'Price': f"${r['Price']:.2f}",
-                'Change': f"{r['Change']:+.1f}%",
                 'MxV': f"{r['MxV']:.1f}%",
                 'RunUp': f"{r['RunUp']:+.1f}%",
                 'REL VOL': f"{r['REL_VOL']:.1f}x",
-                'RSI': f"{r['RSI']:.1f}",
-                'ATRX': f"{r['ATRX']:.1f}",
-                'Gap': f"{r['Gap']:+.1f}%",
-                'VWAP': f"{r['VWAP']:+.1f}%",
-            })
+            }
+            if _has_change:
+                row_d['Change'] = f"{r['Change']:+.1f}%"
+            if _has_rsi:
+                row_d['RSI']  = f"{r['RSI']:.1f}"
+                row_d['ATRX'] = f"{r['ATRX']:.1f}"
+                row_d['Gap']  = f"{r['Gap']:+.1f}%"
+                row_d['VWAP'] = f"{r['VWAP']:+.1f}%"
+            display_data.append(row_d)
         
         df = pd.DataFrame(display_data)
         
@@ -2196,6 +2234,12 @@ def post_analysis_page():
 
     for col in filtered[display_cols].select_dtypes(include="number").columns:
         filtered[col] = filtered[col].round(2)
+    # Replace None/NaN with "-" for display-only columns that may be missing
+    for _col in ["IntraHigh", "IntraLow", "PeakScoreTime", "PeakScorePrice"]:
+        if _col in filtered.columns:
+            filtered[_col] = filtered[_col].apply(
+                lambda v: "-" if (v is None or (isinstance(v, float) and pd.isna(v)) or str(v) in ("None", "nan", "")) else v
+            )
     styled = filtered[display_cols].style
     for col in ["TP10_Hit", "TP15_Hit", "TP20_Hit"]:
         if col in display_cols:
@@ -2625,20 +2669,72 @@ def score_tracker_page():
 
     today = datetime.now(PERU_TZ).strftime("%Y-%m-%d")
 
-    # Always show active stocks table
+    # Active stocks summary
     st.subheader(f"\U0001f4cb Active stocks today ({today})")
     if active_df.empty:
         st.info("No active portfolio stocks for tracking today.")
     else:
         st.dataframe(active_df, use_container_width=True, hide_index=True)
-        if tracker_df.empty:
-            st.warning(f"\u23f3 Waiting for market open (08:30 Peru) — {len(active_df)} stocks will be tracked")
-        else:
-            today_rows = tracker_df[tracker_df["Date"] == today]
-            st.success(f"\u2705 {len(today_rows)} rows collected today so far")
 
     if tracker_df.empty:
+        st.warning("\u23f3 No score_tracker data yet — sync runs every minute during market hours (08:30–15:00 Peru)")
         return
+
+    # ── Today's data table ───────────────────────────────────────────────────
+    today_rows = tracker_df[tracker_df["Date"] == today].copy()
+    if today_rows.empty:
+        st.info(f"No score_tracker rows for {today} yet.")
+    else:
+        st.success(f"\u2705 {len(today_rows)} scans collected today across {today_rows['Ticker'].nunique()} stocks")
+        st.divider()
+        st.subheader("📋 Today's minute-by-minute data")
+
+        # Merge TrackingDay from active_df if available
+        if not active_df.empty and "TrackingDay" in active_df.columns:
+            today_rows = today_rows.merge(
+                active_df[["Ticker","ScanDate","TrackingDay"]],
+                on=["Ticker","ScanDate"], how="left"
+            )
+        else:
+            today_rows["TrackingDay"] = ""
+
+        # Sort: Ticker, then time
+        today_rows = today_rows.sort_values(["Ticker","ScanTime"])
+
+        # Show table: Ticker | ScanDate | TrackingDay | ScanTime | Price | Score
+        show_cols = [c for c in ["Ticker","ScanDate","TrackingDay","ScanTime","Price","Score"] if c in today_rows.columns]
+        disp = today_rows[show_cols].copy()
+        for c in ["Price","Score"]:
+            if c in disp.columns:
+                disp[c] = pd.to_numeric(disp[c], errors="coerce").round(2)
+        st.dataframe(disp, use_container_width=True, hide_index=True, height=400)
+
+        # ── Multi-ticker Score chart for today ───────────────────────────────
+        st.subheader("📈 Score over time (today)")
+        import plotly.graph_objects as _go_st
+        COLORS = ["#00d4ff","#ff6b35","#7fff7f","#ff88cc","#ffd700","#c084fc","#f97316"]
+        fig_all = _go_st.Figure()
+        active_tickers = sorted(today_rows["Ticker"].unique())
+        for i, tk in enumerate(active_tickers):
+            tdf = today_rows[today_rows["Ticker"] == tk].sort_values("ScanTime")
+            fig_all.add_trace(_go_st.Scatter(
+                x=tdf["ScanTime"], y=tdf["Score"],
+                mode="lines+markers", name=tk,
+                line=dict(color=COLORS[i % len(COLORS)], width=2),
+                marker=dict(size=4),
+            ))
+        fig_all.add_hline(y=60, line_dash="dash", line_color="#ff4444",
+                          opacity=0.5, annotation_text="Score 60")
+        fig_all.update_layout(
+            height=400, paper_bgcolor="rgba(0,0,0,0)",
+            plot_bgcolor="rgba(0,0,0,0.1)", font=dict(color="#cccccc"),
+            legend=dict(orientation="h", yanchor="bottom", y=1.02),
+            margin=dict(l=40, r=40, t=40, b=40),
+            xaxis_title="Time", yaxis_title="Score",
+        )
+        fig_all.update_xaxes(showgrid=False, color="#888888")
+        fig_all.update_yaxes(showgrid=True, gridcolor="rgba(255,255,255,0.05)", color="#888888")
+        st.plotly_chart(fig_all, use_container_width=True)
 
     st.divider()
 

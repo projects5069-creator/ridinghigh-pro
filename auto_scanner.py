@@ -412,7 +412,14 @@ def run_scan():
         pass
 
     if not results:
-        print("❌ No results")
+        print("❌ No results — still running portfolio_live update")
+        # Even with no scan results, update portfolio_live (live prices for pending stocks)
+        try:
+            gc2 = get_gsheets_client()
+            if gc2:
+                update_portfolio_live(gc2, now_peru)
+        except Exception as e:
+            print(f"⚠️ portfolio_live (no-results path) error: {e}")
         return
 
     results = sorted(results, key=lambda x: x['Score'], reverse=True)
@@ -487,11 +494,16 @@ def run_scan():
 
         print(f"✅ Saved {len(results)} stocks at {scan_time}")
 
-        # ── Update RunningHigh/RunningLow for Pending stocks ─────────────────
-        update_portfolio_live(gc, now_peru)
-
     except Exception as e:
         print(f"❌ Google Sheets error: {e}")
+
+    # ── Update RunningHigh/RunningLow for Pending stocks (always runs) ────────
+    try:
+        _gc = locals().get("gc") or get_gsheets_client()
+        if _gc:
+            update_portfolio_live(_gc, now_peru)
+    except Exception as e:
+        print(f"⚠️ portfolio_live final update error: {e}")
 
 
 def _save_daily_summary(gc, today: str, ws_timeline):
