@@ -109,9 +109,10 @@ def get_trading_days_after(scan_date_str: str, n: int) -> list:
 
 
 def is_complete(existing_row: pd.Series, trading_days: list) -> bool:
-    today_dt = datetime.now()
+    # Only check days that are strictly before today in Peru TZ (market fully closed)
+    today_peru = datetime.now(PERU_TZ).date()
     for i, day in enumerate(trading_days, 1):
-        if datetime.strptime(day, "%Y-%m-%d") >= today_dt: break
+        if datetime.strptime(day, "%Y-%m-%d").date() >= today_peru: break
         val = existing_row.get(f"D{i}_Close", None)
         if val is None or str(val).strip() in ["", "nan", "None"]: return False
     return True
@@ -343,8 +344,10 @@ def run(target_date: str = None):
             continue
 
         print(f"[Collector] Processing {ticker} {scan_date}...")
-        today_dt = datetime.now()
-        available_days = [d for d in trading_days if datetime.strptime(d, "%Y-%m-%d") < today_dt]
+        # Only fetch OHLC for days strictly before today in Peru TZ (market fully closed)
+        today_peru = datetime.now(PERU_TZ).date()
+        available_days = [d for d in trading_days
+                          if datetime.strptime(d, "%Y-%m-%d").date() < today_peru]
         ohlc  = fetch_ohlc_for_days(ticker, available_days) if available_days and not is_today else {}
         stats = calculate_stats(scan_price, ohlc)
 
