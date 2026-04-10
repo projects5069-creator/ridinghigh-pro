@@ -73,10 +73,12 @@ def get_score_and_price(ticker):
         score += min(atrx/3,1)*10
         if gap<15: score += min((15-gap)/15,1)*5
         if vwap_dist>0: score += min(vwap_dist/15,1)*5
-        return round(price,2), round(score,2)
+        return (round(price,2), round(score,2),
+                round(mxv*100,2), round(run_up,2), round(rel_vol,2),
+                round(rsi,2), round(atrx,2))
     except Exception as e:
         print(f"  [!] {ticker}: {e}")
-        return None, None
+        return None, None, None, None, None, None, None
 
 def run():
     import sheets_manager
@@ -113,20 +115,30 @@ def run():
     if not active:
         print(f"[ScoreTracker] No active stocks for {today}"); return
     print(f"[ScoreTracker] Tracking {len(active)} stocks: {sorted(t for t,_ in active)}")
+    COLS = ["Date","ScanTime","Ticker","ScanDate","Price","Score","MxV","RunUp","REL_VOL","RSI","ATRX"]
     new_rows = []
     for ticker, scan_date in sorted(active):
-        price, score = get_score_and_price(ticker)
+        price, score, mxv, run_up, rel_vol, rsi, atrx = get_score_and_price(ticker)
         if price is None: continue
-        new_rows.append({"Date":today,"ScanTime":scan_time,"Ticker":ticker,"ScanDate":scan_date,"Price":price,"Score":score})
-        print(f"  ✅ {ticker} {score:.2f}")
+        new_rows.append({"Date":today,"ScanTime":scan_time,"Ticker":ticker,"ScanDate":scan_date,
+                         "Price":price,"Score":score,"MxV":mxv,"RunUp":run_up,
+                         "REL_VOL":rel_vol,"RSI":rsi,"ATRX":atrx})
+        print(f"  ✅ {ticker} Score={score:.2f} MxV={mxv:.1f}% RunUp={run_up:.1f}% REL_VOL={rel_vol:.2f}x")
     if not new_rows: return
-    new_df = pd.DataFrame(new_rows)[["Date","ScanTime","Ticker","ScanDate","Price","Score"]]
+    new_df = pd.DataFrame(new_rows)[COLS]
     ws_st = sheets_manager.get_worksheet("score_tracker", gc=gc)
     if ws_st:
-        if len(ws_st.get_all_values()) > 1:
-            ws_st.append_rows(new_df.astype(str).values.tolist())
+        existing = ws_st.get_all_values()
+        if len(existing) > 1:
+            # If sheet has old 6-col format, clear and rewrite with new header
+            if len(existing[0]) < len(COLS):
+                print("[ScoreTracker] Upgrading sheet to 11-column format")
+                ws_st.clear()
+                ws_st.update("A1", [COLS] + new_df.astype(str).values.tolist())
+            else:
+                ws_st.append_rows(new_df.astype(str).values.tolist())
         else:
-            ws_st.update([list(new_df.columns)] + new_df.astype(str).values.tolist())
+            ws_st.update("A1", [COLS] + new_df.astype(str).values.tolist())
         print(f"✅ Saved {len(new_rows)} rows")
 
 if __name__ == "__main__": run()
