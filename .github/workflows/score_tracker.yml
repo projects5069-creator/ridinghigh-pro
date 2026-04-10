@@ -15,8 +15,8 @@ jobs:
         with:
           python-version: '3.11'
       - name: Install dependencies
-        run: pip install gspread google-auth pandas yfinance ta requests beautifulsoup4 pytz
-      - name: Write credentials
-        run: echo '${ { secrets.GOOGLE_CREDENTIALS_JSON } }' > google_credentials.json
+        run: pip install gspread google-auth google-api-python-client pandas yfinance ta requests beautifulsoup4 pytz
       - name: Run Score Tracker
+        env:
+          GOOGLE_CREDENTIALS_JSON: ${{ secrets.GOOGLE_CREDENTIALS_JSON }}
         run: python score_tracker_sync.py

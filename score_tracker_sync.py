@@ -7,7 +7,6 @@ Saves: Date, ScanTime, Ticker, ScanDate, Price, Score
 """
 import sys, os, warnings
 warnings.filterwarnings("ignore")
-sys.path.insert(0, os.path.expanduser("~/RidingHighPro"))
 
 import pandas as pd
 from datetime import datetime, timedelta
@@ -80,20 +79,27 @@ def get_score_and_price(ticker):
         return None, None
 
 def run():
-    if not is_market_hours():
-        print("[ScoreTracker] Outside market hours"); return
     import sheets_manager
-    gc = sheets_manager._get_gc()
-    if gc is None: print("[no connection]"); return
     now = datetime.now(PERU_TZ)
     today = now.strftime("%Y-%m-%d")
     scan_time = now.strftime("%H:%M")
     print(f"[ScoreTracker] {today} {scan_time}")
 
+    if not is_market_hours():
+        print("[ScoreTracker] Outside market hours — skipping"); return
+
+    gc = sheets_manager._get_gc()
+    if gc is None:
+        print("[ScoreTracker] ❌ No Google credentials — GOOGLE_CREDENTIALS_JSON env var missing"); return
+    print("[ScoreTracker] ✅ Connected to Google Sheets")
+
     ws_port = sheets_manager.get_worksheet("portfolio", gc=gc)
     port_data = ws_port.get_all_values() if ws_port else []
-    if len(port_data) <= 1: print("no portfolio"); return
+    if len(port_data) <= 1:
+        print("[ScoreTracker] portfolio sheet is empty"); return
     port_df = pd.DataFrame(port_data[1:], columns=port_data[0])
+    print(f"[ScoreTracker] Portfolio: {len(port_df)} rows, dates: {sorted(port_df['Date'].unique())[-3:]}")
+
     active = set()
     for _, r in port_df.iterrows():
         sd = str(r.get("Date","")).strip()
@@ -102,9 +108,11 @@ def run():
             try:
                 if today in trading_days_after(sd, 3):
                     active.add((tk, sd))
-            except: pass
-    if not active: print(f"no active for {today}"); return
-    print(f"tracking: {[t for t,_ in active]}")
+            except Exception:
+                pass
+    if not active:
+        print(f"[ScoreTracker] No active stocks for {today}"); return
+    print(f"[ScoreTracker] Tracking {len(active)} stocks: {sorted(t for t,_ in active)}")
     new_rows = []
     for ticker, scan_date in sorted(active):
         price, score = get_score_and_price(ticker)
