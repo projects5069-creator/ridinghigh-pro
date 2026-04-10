@@ -2793,6 +2793,15 @@ def main():
     )
 
     st.sidebar.divider()
+    now_peru = datetime.now(PERU_TZ)
+    market_open = now_peru.weekday() < 5 and 8*60+30 <= now_peru.hour*60+now_peru.minute <= 15*60
+    market_icon = "🟢" if market_open else "🔴"
+    st.sidebar.markdown(
+        f"🕐 **{now_peru.strftime('%H:%M')} Peru**  \n"
+        f"📅 {now_peru.strftime('%Y-%m-%d')}  \n"
+        f"{market_icon} {'שוק פתוח' if market_open else 'שוק סגור'}"
+    )
+    st.sidebar.divider()
     if st.sidebar.button("🔄 Refresh data", help="Clear all caches and reload from Google Sheets"):
         st.cache_data.clear()
         st.rerun()
