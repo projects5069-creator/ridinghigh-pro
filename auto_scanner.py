@@ -281,7 +281,8 @@ def analyze_ticker(ticker, finviz_row):
                     shares_outstanding = info.get('sharesOutstanding', int(market_cap / price) if price > 0 else 0)
 
                 try:
-                    float_pct = (volume / shares_outstanding * 100) if shares_outstanding > 0 else 0
+                    fs = info.get('floatShares', 0) or 0
+                    float_pct = (fs / shares_outstanding * 100) if shares_outstanding > 0 and fs > 0 else 0
                 except: pass
 
         except: pass
@@ -707,15 +708,7 @@ def sync_score_tracker(gc, now_peru):
             return
         port_df = pd.DataFrame(port_raw[1:], columns=port_raw[0])
 
-        def _tdays_after(s, n=3):
-            from datetime import timedelta as _td
-            d = datetime.strptime(s, "%Y-%m-%d")
-            days = []
-            while len(days) < n:
-                d += _td(days=1)
-                if d.weekday() < 5:
-                    days.append(d.strftime("%Y-%m-%d"))
-            return days
+        _tdays_after = sheets_manager.trading_days_after
 
         active = set()
         for _, r in port_df.iterrows():

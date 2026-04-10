@@ -21,13 +21,8 @@ def is_market_hours():
     return time(8, 30) <= now.time() <= time(15, 0)
 
 def trading_days_after(s, n=3):
-    d = datetime.strptime(s, "%Y-%m-%d")
-    days = []
-    while len(days) < n:
-        d += timedelta(days=1)
-        if d.weekday() < 5:
-            days.append(d.strftime("%Y-%m-%d"))
-    return days
+    import sheets_manager
+    return sheets_manager.trading_days_after(s, n)
 
 def get_score_and_price(ticker):
     try:

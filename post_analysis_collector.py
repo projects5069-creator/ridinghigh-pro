@@ -99,13 +99,8 @@ def analyze_catalyst(ticker: str, scan_date: str) -> dict:
 
 # ── OHLC fetch ────────────────────────────────────────────────────────────────
 def get_trading_days_after(scan_date_str: str, n: int) -> list:
-    scan_date = datetime.strptime(scan_date_str, "%Y-%m-%d")
-    days, current = [], scan_date + timedelta(days=1)
-    while len(days) < n:
-        if current.weekday() < 5:
-            days.append(current.strftime("%Y-%m-%d"))
-        current += timedelta(days=1)
-    return days
+    import sheets_manager
+    return sheets_manager.trading_days_after(scan_date_str, n)
 
 
 def is_day_complete(date_str: str) -> bool:

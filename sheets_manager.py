@@ -286,3 +286,15 @@ def ensure_monthly_setup(month: str = None) -> dict:
     for name, sid in cfg.items():
         print(f"  {name}: {sid}")
     return cfg
+
+
+def trading_days_after(date_str: str, n: int = 3) -> list:
+    """Return the next n trading weekdays after date_str (YYYY-MM-DD)."""
+    from datetime import timedelta
+    d = datetime.strptime(date_str, "%Y-%m-%d")
+    days = []
+    while len(days) < n:
+        d += timedelta(days=1)
+        if d.weekday() < 5:
+            days.append(d.strftime("%Y-%m-%d"))
+    return days
