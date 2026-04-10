@@ -2675,10 +2675,11 @@ def score_tracker_page():
     stocks = [s for s in stocks if (s["Ticker"], s["ScanDate"]) not in seen
               and not seen.add((s["Ticker"], s["ScanDate"]))]
 
-    # Keep only stocks that have actual data in score_tracker
+    # Keep only stocks from today onwards with actual score_tracker data
     if not tracker_df.empty:
         tracked_keys = set(zip(tracker_df["Ticker"], tracker_df["ScanDate"]))
-        stocks = [s for s in stocks if (s["Ticker"], s["ScanDate"]) in tracked_keys]
+        stocks = [s for s in stocks
+                  if s["ScanDate"] >= today and (s["Ticker"], s["ScanDate"]) in tracked_keys]
 
     if not stocks:
         st.info("⏳ אין עדיין נתוני ציונים — הסינק מתחיל לתעד מהיום בשעות המסחר.")
