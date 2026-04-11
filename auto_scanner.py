@@ -153,16 +153,16 @@ def calculate_score(metrics):
     # MxV — 25% — cap 500
     try:
         if metrics['mxv'] < 0:
-            score += min(abs(metrics['mxv']) / 500, 1) * 25
+            score += min(abs(metrics['mxv']) / 200, 1) * 25
     except: pass
-    # RunUp — 25% — cap 100%
+    # RunUp — 25% — cap 30%
     try:
         if metrics['run_up'] > 0:
-            score += min(metrics['run_up'] / 100, 1) * 25
+            score += min(metrics['run_up'] / 30, 1) * 25
     except: pass
-    # ATRX — 20% — cap 7x
+    # ATRX — 20% — cap 5x
     try:
-        score += min(metrics['atrx'] / 7, 1) * 20
+        score += min(metrics['atrx'] / 5, 1) * 20
     except: pass
     # RSI — 10% — sweet spot 60-70
     try:
@@ -171,19 +171,19 @@ def calculate_score(metrics):
         elif rsi <= 70: score += 5 + ((rsi - 50) / 20) * 5
         else:           score += max(0, 10 - ((rsi - 70) / 30) * 5)
     except: pass
-    # VWAP — 10% — cap 20%
+    # VWAP — 10% — cap 8%
     try:
         if metrics['vwap_dist'] > 0:
-            score += min(metrics['vwap_dist'] / 20, 1) * 10
+            score += min(metrics['vwap_dist'] / 8, 1) * 10
     except: pass
-    # ScanChange% — 5% — cap 100%
+    # ScanChange% — 5% — cap 60%
     try:
         if metrics.get('change', 0) > 0:
-            score += min(metrics['change'] / 100, 1) * 5
+            score += min(metrics['change'] / 60, 1) * 5
     except: pass
-    # REL_VOL — 5% — cap 20x
+    # REL_VOL — 5% — cap 15x
     try:
-        score += min(metrics['rel_vol'] / 20, 1) * 5
+        score += min(metrics['rel_vol'] / 15, 1) * 5
     except: pass
     # Gap הוסר לחלוטין
     return round(score, 2)
