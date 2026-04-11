@@ -150,47 +150,42 @@ def calculate_mxv(market_cap, price, volume):
 
 def calculate_score(metrics):
     score = 0
-
-    # MxV — 30% — more negative = stronger pump signal
+    # MxV — 25% — cap 500
     try:
         if metrics['mxv'] < 0:
-            score += min(abs(metrics['mxv']) / 50, 1) * 30
+            score += min(abs(metrics['mxv']) / 500, 1) * 25
     except: pass
-
-    # RunUp — 20% — rose from open = pump in progress
+    # RunUp — 25% — cap 100%
     try:
         if metrics['run_up'] > 0:
-            score += min(metrics['run_up'] / 50, 1) * 20
+            score += min(metrics['run_up'] / 100, 1) * 25
     except: pass
-
-    # REL_VOL — 20% — higher relative volume = more unusual activity
+    # ATRX — 20% — cap 7x
     try:
-        score += min(metrics['rel_vol'] / 2, 1) * 20
+        score += min(metrics['atrx'] / 7, 1) * 20
     except: pass
-
-    # RSI — 10% — overbought = short candidate
+    # RSI — 10% — sweet spot 60-70
     try:
-        if metrics['rsi'] > 80: score += 10
-        else: score += (metrics['rsi'] / 80) * 10
+        rsi = metrics['rsi']
+        if rsi < 50:    score += (rsi / 50) * 5
+        elif rsi <= 70: score += 5 + ((rsi - 50) / 20) * 5
+        else:           score += max(0, 10 - ((rsi - 70) / 30) * 5)
     except: pass
-
-    # ATRX — 10% — today range / ATR = how many times bigger than normal
-    try:
-        score += min(metrics['atrx'] / 3, 1) * 10
-    except: pass
-
-    # Gap — 5% — small gap = no catalyst = better short
-    try:
-        if metrics['gap'] < 15:
-            score += min((15 - metrics['gap']) / 15, 1) * 5
-    except: pass
-
-    # VWAP — 5% — price above VWAP = extended
+    # VWAP — 10% — cap 20%
     try:
         if metrics['vwap_dist'] > 0:
-            score += min(metrics['vwap_dist'] / 15, 1) * 5
+            score += min(metrics['vwap_dist'] / 20, 1) * 10
     except: pass
-
+    # ScanChange% — 5% — cap 100%
+    try:
+        if metrics.get('change', 0) > 0:
+            score += min(metrics['change'] / 100, 1) * 5
+    except: pass
+    # REL_VOL — 5% — cap 20x
+    try:
+        score += min(metrics['rel_vol'] / 20, 1) * 5
+    except: pass
+    # Gap הוסר לחלוטין
     return round(score, 2)
 
 def analyze_ticker(ticker, finviz_row):
@@ -293,6 +288,7 @@ def analyze_ticker(ticker, finviz_row):
             'price_to_high': price_to_high, 'rel_vol': rel_vol,
             'rsi': rsi, 'atrx': atrx, 'run_up': run_up,
             'float_pct': float_pct, 'gap': gap, 'vwap_dist': vwap_dist,
+            'change': change,
         }
         score = calculate_score(metrics)
 
@@ -776,14 +772,12 @@ def sync_score_tracker(gc, now_peru):
                 except Exception: pass
 
                 mxv   = (mkt_cap - price * volume) / mkt_cap if mkt_cap > 0 else 0.0
-                score = 0.0
-                if mxv < 0:    score += min(abs(mxv)/50, 1) * 30
-                if run_up > 0: score += min(run_up/50, 1) * 20
-                score += min(rel_vol/2, 1) * 20
-                score += (rsi/80)*10 if rsi <= 80 else 10
-                score += min(atrx/3, 1) * 10
-                if gap < 15:       score += min((15-gap)/15, 1) * 5
-                if vwap_dist > 0:  score += min(vwap_dist/15, 1) * 5
+                change_pct = ((price - prev_close) / prev_close * 100) if prev_close > 0 else 0.0
+                score = calculate_score({
+                    'mxv': mxv, 'run_up': run_up, 'atrx': atrx,
+                    'rsi': rsi, 'vwap_dist': vwap_dist,
+                    'change': change_pct, 'rel_vol': rel_vol,
+                })
 
                 new_rows.append({
                     "Date": today, "ScanTime": scan_time,

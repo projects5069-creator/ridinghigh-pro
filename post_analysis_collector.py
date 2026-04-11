@@ -177,6 +177,8 @@ def calculate_stats(scan_price: float, ohlc: dict) -> dict:
         "TP15_Hit": 1 if min_low <= scan_price * 0.85 else 0,
         "TP20_Hit": 1 if min_low <= scan_price * 0.80 else 0,
         "D1_Gap%":  d1_gap,
+        "SL7_Hit_D1": 1 if ohlc.get("D1_High") and ohlc["D1_High"] >= scan_price * 1.07 else 0,
+        "IntraDay_SL": 1 if any(ohlc.get(f"D{i}_High", 0) and ohlc[f"D{i}_High"] >= scan_price * 1.07 for i in range(1,6)) else 0,
     }
 
 
