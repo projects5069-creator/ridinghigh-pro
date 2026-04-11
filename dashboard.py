@@ -1076,6 +1076,41 @@ def _cached_portfolio() -> pd.DataFrame:
         return pd.DataFrame()
 
 
+def calc_score_v2(row):
+    s = 0
+    try:
+        mxv = float(row.get('MxV_calc', 0) or 0)
+        if mxv < 0: s += min(abs(mxv)/200, 1) * 25
+    except: pass
+    try:
+        ru = float(row.get('RunUp_calc', 0) or 0)
+        if ru > 0: s += min(ru/30, 1) * 25
+    except: pass
+    try:
+        atrx = float(row.get('ATRX_calc', 0) or 0)
+        s += min(atrx/5, 1) * 20
+    except: pass
+    try:
+        rsi = float(row.get('RSI', 0) or 0)
+        if rsi < 50:    s += (rsi/50)*5
+        elif rsi <= 70: s += 5 + ((rsi-50)/20)*5
+        else:           s += max(0, 10 - ((rsi-70)/30)*5)
+    except: pass
+    try:
+        vwap = float(row.get('VWAP_calc', 0) or 0)
+        if vwap > 0: s += min(vwap/8, 1) * 10
+    except: pass
+    try:
+        sc = float(row.get('ScanChange%', 0) or 0)
+        if sc > 0: s += min(sc/60, 1) * 5
+    except: pass
+    try:
+        rv = float(row.get('REL_VOL_calc', 0) or 0)
+        s += min(rv/15, 1) * 5
+    except: pass
+    return round(s, 2)
+
+
 @st.cache_data(ttl=60)
 def _cached_post_analysis() -> pd.DataFrame:
     """post_analysis → DataFrame via gsheets_sync. Refreshes every 5 min."""
@@ -2148,10 +2183,10 @@ def post_analysis_page():
             else:
                 current_price = {t: round(float(prices[t].iloc[-1]), 2) for t in tickers if t in prices.columns}
             df["CurrentPrice"] = df["Ticker"].map(current_price)
-            df["EntryChange%"] = ((df["CurrentPrice"] - df["ScanPrice"]) / df["ScanPrice"] * 100).round(2)
+            df["CurrentChange%"] = ((df["CurrentPrice"] - df["ScanPrice"]) / df["ScanPrice"] * 100).round(2)
         except:
             df["CurrentPrice"] = None
-            df["EntryChange%"] = None
+            df["CurrentChange%"] = None
 
     if df.empty:
         st.info("📭 אין נתונים עדיין — הקולקטור יתחיל לאסוף לאחר 5 ימי מסחר מהסריקה הראשונה")
@@ -2199,11 +2234,13 @@ def post_analysis_page():
     if show_only_hits and "TP10_Hit" in filtered.columns:
         filtered = filtered[filtered["TP10_Hit"] == 1]
 
+    filtered["Score_v2"] = filtered.apply(calc_score_v2, axis=1)
+
     st.subheader(f"📋 תוצאות ({len(filtered)} מניות)")
 
-    display_cols = ["Ticker", "ScanDate", "Score", "ScanChange%", "ScanPrice",
+    display_cols = ["Ticker", "ScanDate", "Score", "Score_v2", "ScanChange%", "ScanPrice",
                     "IntraHigh", "IntraLow", "DayRunUp%", "PeakScoreTime", "PeakScorePrice",
-                    "CurrentPrice", "EntryChange%", "MaxDrop%", "BestDay", "TP10_Hit", "TP15_Hit", "TP20_Hit"]
+                    "CurrentPrice", "CurrentChange%", "MaxDrop%", "BestDay", "TP10_Hit", "TP15_Hit", "TP20_Hit"]
     display_cols = [c for c in display_cols if c in filtered.columns]
 
     def color_tp(val):
@@ -2266,8 +2303,8 @@ def post_analysis_page():
         styled = styled.map(color_drop, subset=["MaxDrop%"])
     if "ScanChange%" in display_cols:
         styled = styled.map(color_change, subset=["ScanChange%"])
-    if "EntryChange%" in display_cols:
-        styled = styled.map(color_change, subset=["EntryChange%"])
+    if "CurrentChange%" in display_cols:
+        styled = styled.map(color_change, subset=["CurrentChange%"])
     styled = styled.format(format_dict, na_rep="-")
     st.dataframe(styled, use_container_width=True, height=500, hide_index=True)
 

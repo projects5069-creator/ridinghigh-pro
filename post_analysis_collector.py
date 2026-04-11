@@ -53,13 +53,22 @@ def fetch_finviz_news(ticker: str, scan_date: str) -> list:
             html = urllib.request.urlopen(req, timeout=10).read().decode("utf-8")
             dates  = re.findall(r'width="130"[^>]*>\s*(.*?)\s*</td>', html)
             titles = re.findall(r'class="tab-link-news"[^>]*>\s*(.*?)\s*</a>', html)
+            print(f"[Catalyst] {ticker}: found {len(dates)} dates, {len(titles)} titles in HTML")
             relevant = []
             for date_str, title in zip(dates, titles):
                 try:
-                    pub_dt = datetime.strptime(date_str.strip()[:9], "%b-%d-%y")
+                    d = date_str.strip()
+                    # Finviz shows time (e.g. "06:15AM") for same-day news — treat as scan_date
+                    if re.match(r'^\d{1,2}:\d{2}', d):
+                        pub_dt = scan_dt
+                    else:
+                        pub_dt = datetime.strptime(d[:9], "%b-%d-%y")
                     if date_from <= pub_dt <= date_to:
                         relevant.append(title.strip().lower())
-                except: continue
+                except Exception as parse_err:
+                    print(f"[Catalyst] {ticker}: date parse failed '{date_str}' → {parse_err}")
+                    continue
+            print(f"[Catalyst] {ticker}: {len(relevant)} relevant headlines in window {date_from.date()}–{date_to.date()}")
             return relevant
         except Exception as e:
             print(f"[Collector] FINVIZ attempt {attempt}/3 failed: {e}")
