@@ -502,13 +502,16 @@ def run_scan():
     except Exception as e:
         print(f"⚠️ portfolio_live final update error: {e}")
 
-    # ── Score Tracker: record minute-by-minute metrics for portfolio stocks ───
-    try:
-        _gc2 = locals().get("gc") or get_gsheets_client()
-        if _gc2:
-            sync_score_tracker(_gc2, now_peru)
-    except Exception as e:
-        print(f"⚠️ score_tracker sync error: {e}")
+    # ── Score Tracker: record metrics every 5 minutes (minutes 00,05,10...) ───
+    if now_peru.minute % 5 == 0:
+        try:
+            _gc2 = locals().get("gc") or get_gsheets_client()
+            if _gc2:
+                sync_score_tracker(_gc2, now_peru)
+        except Exception as e:
+            print(f"⚠️ score_tracker sync error: {e}")
+    else:
+        print(f"⏭ score_tracker skipped (minute={now_peru.minute}, next at :{(now_peru.minute//5+1)*5:02d})")
 
 
 def _save_daily_summary(gc, today: str, ws_timeline):
