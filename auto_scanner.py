@@ -150,7 +150,7 @@ def calculate_mxv(market_cap, price, volume):
 
 def calculate_score(metrics):
     score = 0
-    # MxV — 25% — cap 500
+    # MxV — 25% — cap 200
     try:
         if metrics['mxv'] < 0:
             score += min(abs(metrics['mxv']) / 200, 1) * 25

@@ -178,7 +178,7 @@ def run(backfill: bool = False):
                 try:
                     peak_dt = pd.Timestamp(f"2000-01-01 {peak_time}")
                     close_dt = pd.Timestamp("2000-01-01 15:00")
-                    pa.at[idx, "MinToClose"] = max(0, int((close_dt - peak_dt).seconds / 60))
+                    pa.at[idx, "MinToClose"] = max(0, int((close_dt - peak_dt).total_seconds() / 60))
                 except:
                     pa.at[idx, "MinToClose"] = None
 
