@@ -687,8 +687,8 @@ def update_portfolio_live(gc, now_peru):
 
 def sync_score_tracker(gc, now_peru):
     """
-    Record minute-by-minute Score + metrics for portfolio stocks in D1/D2/D3 window.
-    Runs inside auto_scanner (every minute) instead of a separate workflow.
+    Record Score + metrics every 5 minutes for portfolio stocks in D1/D2/D3 window.
+    Runs inside auto_scanner (called only when now_peru.minute % 5 == 0).
     Columns: Date, ScanTime, Ticker, ScanDate, Price, Score, MxV, RunUp, REL_VOL, RSI, ATRX,
              Gap, VWAP_Dist, Volume, High, Low, Open, PrevClose
     """
