@@ -1,0 +1,33 @@
+name: Monthly Rotation
+
+on:
+  schedule:
+    - cron: '0 5 1 * *'  # 1st of each month at 00:00 Peru (UTC-5)
+  workflow_dispatch:
+
+jobs:
+  rotate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    permissions:
+      contents: write  # needed to push sheets_config.json back to repo
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          pip install gspread google-auth google-api-python-client pandas pytz
+
+      - name: Run monthly rotation
+        env:
+          GOOGLE_CREDENTIALS_JSON: ${{ secrets.GOOGLE_CREDENTIALS_JSON }}
+        run: |
+          python monthly_rotation.py
