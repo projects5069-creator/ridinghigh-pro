@@ -2703,6 +2703,8 @@ def score_tracker_page():
         if not sd or not tk:
             continue
         try:
+            if sd < "2026-04-10":   # תיעוד score_tracker רק מ-10/4
+                continue
             window      = _trading_days_after(sd, 3)   # [D1, D2, D3]
             trading_seq = [sd] + window                 # [D0, D1, D2, D3]
             d3          = trading_seq[-1]
