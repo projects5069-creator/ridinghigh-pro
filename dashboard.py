@@ -2693,19 +2693,30 @@ def score_tracker_page():
 
     today = datetime.now(PERU_TZ).strftime("%Y-%m-%d")
 
-    # Build stock list: only stocks entered today or in D1-D3 window from today's date
+    # Build stock list: stocks whose D0–D3 window spans today
+    # (includes weekends/holidays that fall between trading days)
+    DAY_LABELS = ["📅 D0 — יום כניסה", "📈 D1", "📈 D2", "📈 D3"]
     stocks = []
     for r in port_df.itertuples():
         sd = str(getattr(r, "Date", "")).strip()
         tk = str(getattr(r, "Ticker", "")).strip()
         if not sd or not tk:
             continue
-        # Only today's entries
-        if sd != today:
-            continue
         try:
-            window = _trading_days_after(sd, 3)
-            status = "📅 D0 — יום כניסה"
+            window      = _trading_days_after(sd, 3)   # [D1, D2, D3]
+            trading_seq = [sd] + window                 # [D0, D1, D2, D3]
+            d3          = trading_seq[-1]
+
+            # active if sd <= today <= D3
+            if not (sd <= today <= d3):
+                continue
+
+            # find which "slot" today falls in
+            day_idx = 0
+            for i, tday in enumerate(trading_seq):
+                if today >= tday:
+                    day_idx = i
+            status = DAY_LABELS[day_idx]
             stocks.append({"Ticker": tk, "ScanDate": sd, "Window": window, "Status": status})
         except Exception:
             pass
