@@ -398,7 +398,8 @@ def run(target_date: str = None):
 
         # Score metrics
         metric_fields = ["MxV", "RunUp", "RSI", "ATRX", "REL_VOL", "Gap", "VWAP",
-                         "PriceToHigh", "PriceTo52WHigh", "Float%"]
+                         "PriceToHigh", "PriceTo52WHigh", "Float%",
+                         "Score_I", "Score_B", "Score_C", "Score_D"]
         metrics = {f: round(pd.to_numeric(row.get(f, None), errors="coerce"), 2)
                    for f in metric_fields}
 

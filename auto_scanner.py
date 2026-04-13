@@ -211,6 +211,84 @@ def calculate_score_i(metrics):
     return round(score, 2)
 
 
+def calculate_score_b(metrics):
+    """Score_B: MxV=30%/cap300, RunUp=30%/cap40, ATRX=25%/cap6, VWAP=10%/cap10, Change=5%/cap80"""
+    score = 0
+    try:
+        mxv = float(metrics.get('mxv', 0) or 0)
+        if mxv < 0: score += min(abs(mxv)/300, 1) * 30
+    except: pass
+    try:
+        ru = float(metrics.get('run_up', 0) or 0)
+        if ru > 0: score += min(ru/40, 1) * 30
+    except: pass
+    try:
+        atrx = float(metrics.get('atrx', 0) or 0)
+        score += min(atrx/6, 1) * 25
+    except: pass
+    try:
+        vwap = float(metrics.get('vwap_dist', 0) or 0)
+        if vwap > 0: score += min(vwap/10, 1) * 10
+    except: pass
+    try:
+        change = float(metrics.get('change', 0) or 0)
+        if change > 0: score += min(change/80, 1) * 5
+    except: pass
+    return round(score, 2)
+
+
+def calculate_score_c(metrics):
+    """Score_C: ATRX=35%/cap8, Change=25%/cap100, RunUp=20%/cap50, VWAP=15%/cap12, MxV=5%/cap500"""
+    score = 0
+    try:
+        atrx = float(metrics.get('atrx', 0) or 0)
+        score += min(atrx/8, 1) * 35
+    except: pass
+    try:
+        change = float(metrics.get('change', 0) or 0)
+        if change > 0: score += min(change/100, 1) * 25
+    except: pass
+    try:
+        ru = float(metrics.get('run_up', 0) or 0)
+        if ru > 0: score += min(ru/50, 1) * 20
+    except: pass
+    try:
+        vwap = float(metrics.get('vwap_dist', 0) or 0)
+        if vwap > 0: score += min(vwap/12, 1) * 15
+    except: pass
+    try:
+        mxv = float(metrics.get('mxv', 0) or 0)
+        if mxv < 0: score += min(abs(mxv)/500, 1) * 5
+    except: pass
+    return round(score, 2)
+
+
+def calculate_score_d(metrics):
+    """Score_D: MxV=40%/cap150, RunUp=25%/cap25, Change=20%/cap60, ATRX=10%/cap4, VWAP=5%/cap8"""
+    score = 0
+    try:
+        mxv = float(metrics.get('mxv', 0) or 0)
+        if mxv < 0: score += min(abs(mxv)/150, 1) * 40
+    except: pass
+    try:
+        ru = float(metrics.get('run_up', 0) or 0)
+        if ru > 0: score += min(ru/25, 1) * 25
+    except: pass
+    try:
+        change = float(metrics.get('change', 0) or 0)
+        if change > 0: score += min(change/60, 1) * 20
+    except: pass
+    try:
+        atrx = float(metrics.get('atrx', 0) or 0)
+        score += min(atrx/4, 1) * 10
+    except: pass
+    try:
+        vwap = float(metrics.get('vwap_dist', 0) or 0)
+        if vwap > 0: score += min(vwap/8, 1) * 5
+    except: pass
+    return round(score, 2)
+
+
 def calculate_entry_score(current_price, intra_high, scan_price, vwap_price, now_peru):
     """
     Entry Score 0-100: how good is THIS MOMENT to enter a short.
@@ -367,6 +445,9 @@ def analyze_ticker(ticker, finviz_row):
         }
         score   = calculate_score(metrics)
         score_i = calculate_score_i(metrics)
+        score_b = calculate_score_b(metrics)
+        score_c = calculate_score_c(metrics)
+        score_d = calculate_score_d(metrics)
 
         # EntryScore — real-time short entry signal (only meaningful for Score >= 60)
         entry_score = 0
@@ -398,6 +479,9 @@ def analyze_ticker(ticker, finviz_row):
             # ── Computed score metrics ─────────────────────────────────────────
             'Score':         round(score, 2),
             'Score_I':       round(score_i, 2),
+            'Score_B':       round(score_b, 2),
+            'Score_C':       round(score_c, 2),
+            'Score_D':       round(score_d, 2),
             'EntryScore':    round(entry_score, 2),
             'MxV':           round(mxv, 2),
             'RunUp':         round(run_up, 2),
