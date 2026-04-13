@@ -188,6 +188,59 @@ def calculate_score(metrics):
     # Gap הוסר לחלוטין
     return round(score, 2)
 
+
+def calculate_entry_score(current_price, intra_high, scan_price, vwap_price, now_peru):
+    """
+    Entry Score 0-100: how good is THIS MOMENT to enter a short.
+    Run only on stocks with Score >= 60.
+
+    Components:
+    - PeakConfirm (40pts): stock has dropped from intraday high
+    - ReversalDepth (30pts): how far below the high is current price
+    - TimeToClose (20pts): closer to EOD = better (14:00-15:00 ideal)
+    - VWAPCross (10pts): price crossed below VWAP = confirmed reversal
+    """
+    score = 0
+
+    try:
+        if intra_high > 0 and current_price < intra_high:
+            # PeakConfirm: 40pts — dropped at least 1% from high
+            drop_from_high_pct = (intra_high - current_price) / intra_high * 100
+            if drop_from_high_pct >= 1:
+                score += min(drop_from_high_pct / 5, 1) * 40  # 5% drop = max
+    except: pass
+
+    try:
+        if intra_high > 0 and scan_price > 0:
+            # ReversalDepth: 30pts — how much of the pump has reversed
+            total_pump = intra_high - scan_price
+            reversal = intra_high - current_price
+            if total_pump > 0:
+                reversal_pct = reversal / total_pump  # 0-1 (1 = fully reversed)
+                score += max(0, min(reversal_pct, 1)) * 30
+    except: pass
+
+    try:
+        # TimeToClose: 20pts — ideal window 14:00-15:00
+        close_time = now_peru.replace(hour=15, minute=0, second=0, microsecond=0)
+        mins_to_close = (close_time - now_peru).total_seconds() / 60
+        if 0 <= mins_to_close <= 60:    # last hour = max
+            score += 20
+        elif 60 < mins_to_close <= 120: # 13:00-14:00 = half
+            score += 10
+        elif mins_to_close < 0:
+            score += 0  # after close
+    except: pass
+
+    try:
+        # VWAPCross: 10pts — current price below VWAP
+        if vwap_price > 0 and current_price < vwap_price:
+            score += 10
+    except: pass
+
+    return round(score, 2)
+
+
 def analyze_ticker(ticker, finviz_row):
     try:
         price = float(finviz_row.get('Price', None))
@@ -292,6 +345,17 @@ def analyze_ticker(ticker, finviz_row):
         }
         score = calculate_score(metrics)
 
+        # EntryScore — real-time short entry signal (only meaningful for Score >= 60)
+        entry_score = 0
+        if score >= 60:
+            entry_score = calculate_entry_score(
+                current_price=price,
+                intra_high=high_today,
+                scan_price=open_price,    # today's open = pump baseline
+                vwap_price=vwap_price,
+                now_peru=get_peru_time()
+            )
+
         # AvgVolume & FloatShares (already fetched above if available)
         avg_volume   = int(yf.Ticker(ticker).info.get('averageVolume',   0) or 0) if 'stock' not in dir() else 0
         float_shares = int(yf.Ticker(ticker).info.get('floatShares',     0) or 0) if 'stock' not in dir() else 0
@@ -310,6 +374,7 @@ def analyze_ticker(ticker, finviz_row):
             'MarketCap': int(market_cap),
             # ── Computed score metrics ─────────────────────────────────────────
             'Score':         round(score, 2),
+            'EntryScore':    round(entry_score, 2),
             'MxV':           round(mxv, 2),
             'RunUp':         round(run_up, 2),
             'RSI':           round(rsi, 2),

@@ -1168,7 +1168,7 @@ def load_latest_from_sheets():
         for _, row in df.iterrows():
             try:
                 def f(k): return float(row[k]) if row.get(k,"") not in ["nan","","None"] else 0
-                results.append({"Ticker":row["Ticker"],"Score":f("Score"),"Price":f("Price"),"Change":f("Change"),"MxV":f("MxV"),"PriceTo52WHigh":f("PriceTo52WHigh"),"PriceToHigh":f("PriceToHigh"),"RSI":f("RSI"),"ATRX":f("ATRX"),"REL_VOL":f("REL_VOL"),"RunUp":f("RunUp"),"Float%":f("Float%"),"Gap":f("Gap"),"VWAP":f("VWAP")})
+                results.append({"Ticker":row["Ticker"],"Score":f("Score"),"EntryScore":f("EntryScore"),"Price":f("Price"),"Change":f("Change"),"MxV":f("MxV"),"PriceTo52WHigh":f("PriceTo52WHigh"),"PriceToHigh":f("PriceToHigh"),"RSI":f("RSI"),"ATRX":f("ATRX"),"REL_VOL":f("REL_VOL"),"RunUp":f("RunUp"),"Float%":f("Float%"),"Gap":f("Gap"),"VWAP":f("VWAP")})
             except: continue
         return results, latest_time
     except Exception:
@@ -1355,6 +1355,7 @@ def main_page():
                                 _fake.append({
                                     "Ticker": _r["Ticker"],
                                     "Score": float(_r.get("Score", 0) or 0),
+                                    "EntryScore": float(_r.get("EntryScore", 0) or 0),
                                     "Price": float(_r.get("Price", 0) or 0),
                                     "Change": 0, "MxV": float(_r.get("MxV", 0) or 0),
                                     "PriceTo52WHigh": 0, "PriceToHigh": 0, "RSI": 0, "ATRX": 0,
@@ -1451,13 +1452,18 @@ def main_page():
                 if _ls.tzinfo is None: _ls = PERU_TZ.localize(_ls)
                 st.metric("Last Scan", _ls.astimezone(PERU_TZ).strftime("%H:%M:%S"))
         
+        # Sort by EntryScore desc (stocks ready for entry float to top)
+        results_sorted = sorted(results, key=lambda x: x.get('EntryScore', 0), reverse=True)
+
         display_data = []
-        _has_change = any(r.get('Change', 0) != 0 for r in results)
-        _has_rsi    = any(r.get('RSI', 0) != 0 for r in results)
-        for r in results:
+        _has_change = any(r.get('Change', 0) != 0 for r in results_sorted)
+        _has_rsi    = any(r.get('RSI', 0) != 0 for r in results_sorted)
+        for r in results_sorted:
+            entry_s = r.get('EntryScore', 0)
             row_d = {
                 'Ticker': r['Ticker'],
                 'Score': f"{r['Score']:.2f}",
+                'EntryScore': f"{entry_s:.0f}" if r['Score'] >= 60 else "—",
                 'Price': f"${r['Price']:.2f}",
                 'MxV': f"{r['MxV']:.1f}%",
                 'RunUp': f"{r['RunUp']:+.1f}%",
@@ -1471,9 +1477,9 @@ def main_page():
                 row_d['Gap']  = f"{r['Gap']:+.1f}%"
                 row_d['VWAP'] = f"{r['VWAP']:+.1f}%"
             display_data.append(row_d)
-        
+
         df = pd.DataFrame(display_data)
-        
+
         def highlight_score(row):
             score = float(row['Score'])
             if score >= 85:
@@ -1484,8 +1490,27 @@ def main_page():
                 return ['background-color: #ff6600; color: white'] * len(row)
             else:
                 return ['background-color: #ffcc00; color: black'] * len(row)
-        
+
+        def color_entry_score(val):
+            try:
+                if val == "—":
+                    return 'background-color: #444444; color: #aaaaaa'
+                v = float(val)
+                if v >= 60:
+                    return 'background-color: #006400; color: white; font-weight: bold'
+                elif v >= 40:
+                    return 'background-color: #808000; color: white'
+                else:
+                    return 'background-color: #555555; color: #cccccc'
+            except:
+                return ''
+
         styled_df = df.style.apply(highlight_score, axis=1)
+        if 'EntryScore' in df.columns:
+            try:
+                styled_df = styled_df.map(color_entry_score, subset=['EntryScore'])
+            except AttributeError:
+                styled_df = styled_df.applymap(color_entry_score, subset=['EntryScore'])
         
         table_height = min(600, len(df) * 40 + 50)
         
