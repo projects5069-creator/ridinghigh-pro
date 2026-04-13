@@ -231,7 +231,10 @@ def get_sheet_id(tab_name: str, month: str = None) -> str:
 
 def get_worksheet(tab_name: str, month: str = None, gc=None):
     """
-    Return the first gspread Worksheet for tab_name in the given month.
+    Return the gspread Worksheet for tab_name in the given month.
+    If the spreadsheet contains a tab whose title matches tab_name, that tab is
+    returned (allows multiple logical sheets to share one Spreadsheet file,
+    avoiding Drive quota exhaustion). Otherwise falls back to sheet1.
     Pass gc to reuse an existing authenticated client. Auto-creates if needed.
     """
     if month is None:
@@ -244,7 +247,12 @@ def get_worksheet(tab_name: str, month: str = None, gc=None):
     if gc is None:
         return None
 
-    return gc.open_by_key(sheet_id).sheet1
+    import gspread
+    spreadsheet = gc.open_by_key(sheet_id)
+    try:
+        return spreadsheet.worksheet(tab_name)
+    except gspread.exceptions.WorksheetNotFound:
+        return spreadsheet.sheet1
 
 
 def load_config() -> dict:
