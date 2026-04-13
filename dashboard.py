@@ -2861,10 +2861,144 @@ def score_tracker_page():
 
 
 
+def score_comparison_page():
+    SCORE_COLS = ["Score", "Score_B", "Score_C", "Score_D", "Score_E", "Score_F", "Score_G", "Score_H", "Score_I"]
+
+    st.title("📊 Score Comparison")
+    st.caption("השוואת ביצועים בין 9 נוסחות ציון — על בסיס נתוני Post Analysis")
+
+    with st.spinner("טוען נתונים..."):
+        df = _cached_post_analysis()
+
+    if df.empty:
+        st.info("📭 אין נתוני Post Analysis עדיין.")
+        return
+
+    # Numeric coercion for all score columns + outcome columns
+    for col in SCORE_COLS + ["TP10_Hit", "MaxDrop%"]:
+        if col in df.columns:
+            df[col] = pd.to_numeric(df[col], errors="coerce")
+
+    # Working set: rows with TP10_Hit resolved
+    has_outcome = df[df["TP10_Hit"].notna()].copy()
+
+    # ── Section 1: Performance table ──────────────────────────────────────────
+    st.subheader("📋 סקשן 1 — טבלת ביצועים")
+
+    perf_rows = []
+    for sc in SCORE_COLS:
+        if sc not in df.columns:
+            continue
+        subset = has_outcome[has_outcome[sc] >= 60]
+        n = len(subset)
+        if n == 0:
+            perf_rows.append({"Score": sc, "n (≥60)": 0, "Win Rate": None,
+                               "Avg MaxDrop% (winners)": None, "Best Bucket": "—"})
+            continue
+        win_rate = subset["TP10_Hit"].mean()
+        winners  = subset[subset["TP10_Hit"] == 1]
+        avg_drop = winners["MaxDrop%"].mean() if not winners.empty else None
+
+        # Best bucket: 10-point ranges that have the highest TP10 rate (min 3 samples)
+        subset2 = has_outcome[has_outcome[sc].notna()].copy()
+        subset2["_bucket"] = (subset2[sc] // 10 * 10).astype(int)
+        bkt = (subset2.groupby("_bucket")
+               .agg(n_bkt=("TP10_Hit", "count"), wr_bkt=("TP10_Hit", "mean"))
+               .reset_index())
+        bkt = bkt[bkt["n_bkt"] >= 3]
+        if not bkt.empty:
+            best = bkt.loc[bkt["wr_bkt"].idxmax()]
+            best_label = f"{int(best['_bucket'])}-{int(best['_bucket'])+10} ({best['wr_bkt']*100:.0f}%, n={int(best['n_bkt'])})"
+        else:
+            best_label = "—"
+
+        perf_rows.append({
+            "Score":                    sc,
+            "n (≥60)":                  n,
+            "Win Rate":                 round(win_rate * 100, 1),
+            "Avg MaxDrop% (winners)":   round(avg_drop, 1) if avg_drop is not None else None,
+            "Best Bucket":              best_label,
+        })
+
+    perf_df = pd.DataFrame(perf_rows).dropna(subset=["Win Rate"]).sort_values("Win Rate", ascending=False)
+    st.dataframe(perf_df.reset_index(drop=True), use_container_width=True)
+
+    st.divider()
+
+    # ── Section 2: Win Rate by bucket (line chart) ────────────────────────────
+    st.subheader("📈 סקשן 2 — Win Rate לפי Score Bucket")
+
+    bucket_data = {}
+    for sc in SCORE_COLS:
+        if sc not in has_outcome.columns:
+            continue
+        tmp = has_outcome[has_outcome[sc].notna()].copy()
+        tmp["_bucket"] = (tmp[sc] // 10 * 10).astype(int)
+        bkt = (tmp.groupby("_bucket")
+               .agg(wr=("TP10_Hit", "mean"), n=("TP10_Hit", "count"))
+               .reset_index())
+        bkt = bkt[bkt["n"] >= 3]
+        bucket_data[sc] = dict(zip(bkt["_bucket"], bkt["wr"] * 100))
+
+    all_buckets = sorted(set(b for v in bucket_data.values() for b in v))
+    if all_buckets:
+        chart_df = pd.DataFrame(
+            {sc: [bucket_data[sc].get(b, None) for b in all_buckets] for sc in bucket_data},
+            index=[f"{b}-{b+10}" for b in all_buckets]
+        )
+        st.line_chart(chart_df, use_container_width=True)
+    else:
+        st.info("אין מספיק נתונים לגרף (נדרשים לפחות 3 מניות לכל bucket).")
+
+    st.divider()
+
+    # ── Section 3: Full stock table ───────────────────────────────────────────
+    st.subheader("📄 סקשן 3 — טבלת מניות עם כל הציונים")
+
+    display_cols = ["Ticker", "ScanDate", "TP10_Hit", "MaxDrop%"] + \
+                   [c for c in SCORE_COLS if c in has_outcome.columns]
+    tbl = has_outcome[display_cols].copy()
+    if "ScanDate" in tbl.columns:
+        tbl = tbl.sort_values("ScanDate", ascending=False)
+
+    def _color_tp10(val):
+        if val == 1:   return "background-color: #1a4a1a; color: #80ff80"
+        if val == 0:   return "background-color: #4a1a1a; color: #ff8080"
+        return ""
+
+    styled = tbl.reset_index(drop=True).style.applymap(_color_tp10, subset=["TP10_Hit"])
+    st.dataframe(styled, use_container_width=True)
+
+    st.divider()
+
+    # ── Section 4: Who was most right ─────────────────────────────────────────
+    st.subheader("🏆 סקשן 4 — מי היה הכי צודק על כל מניה")
+    st.caption("לכל מניה עם TP10_Hit ידוע — איזה ציון נתן לה את הציון הגבוה ביותר?")
+
+    avail_scores = [c for c in SCORE_COLS if c in has_outcome.columns]
+    if avail_scores:
+        tmp = has_outcome[avail_scores + ["TP10_Hit"]].copy().dropna(subset=avail_scores, how="all")
+        tmp["_highest_score"] = tmp[avail_scores].idxmax(axis=1)
+
+        winners_sc = tmp[tmp["TP10_Hit"] == 1]["_highest_score"].value_counts().rename("Wins (TP10=1)")
+        losers_sc  = tmp[tmp["TP10_Hit"] == 0]["_highest_score"].value_counts().rename("Losses (TP10=0)")
+
+        rank_df = pd.concat([winners_sc, losers_sc], axis=1).fillna(0).astype(int)
+        rank_df["Total"] = rank_df.get("Wins (TP10=1)", 0) + rank_df.get("Losses (TP10=0)", 0)
+        rank_df["Win% when highest"] = (
+            rank_df.get("Wins (TP10=1)", 0) / rank_df["Total"] * 100
+        ).round(1)
+        rank_df = rank_df.sort_values("Wins (TP10=1)", ascending=False)
+        rank_df.index.name = "Score"
+        st.dataframe(rank_df, use_container_width=True)
+    else:
+        st.info("אין עמודות ציון זמינות.")
+
+
 def main():
     page = st.sidebar.radio(
         "🧭 Navigation",
-        ["📊 Live Tracker", "💼 Portfolio Tracker", "🎯 Portfolio Score Tracker", "📅 Daily Summary", "📦 Timeline Archive", "🔬 Post Analysis"]
+        ["📊 Live Tracker", "💼 Portfolio Tracker", "🎯 Portfolio Score Tracker", "📅 Daily Summary", "📦 Timeline Archive", "🔬 Post Analysis", "📊 Score Comparison"]
     )
 
     st.sidebar.divider()
@@ -2891,8 +3025,10 @@ def main():
         timeline_archive_page()
     elif page == "🎯 Portfolio Score Tracker":
         score_tracker_page()
-    else:
+    elif page == "🔬 Post Analysis":
         post_analysis_page()
+    else:
+        score_comparison_page()
 
 if __name__ == "__main__":
     main()
