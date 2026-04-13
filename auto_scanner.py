@@ -189,6 +189,28 @@ def calculate_score(metrics):
     return round(score, 2)
 
 
+def calculate_score_i(metrics):
+    """MxV dominant — 50% weight"""
+    score = 0
+    try:
+        mxv = float(metrics.get('mxv', 0) or 0)
+        if mxv < 0: score += min(abs(mxv)/150, 1) * 50
+    except: pass
+    try:
+        ru = float(metrics.get('run_up', 0) or 0)
+        if ru > 0: score += min(ru/30, 1) * 20
+    except: pass
+    try:
+        atrx = float(metrics.get('atrx', 0) or 0)
+        score += min(atrx/5, 1) * 20
+    except: pass
+    try:
+        change = float(metrics.get('change', 0) or 0)
+        if change > 0: score += min(change/60, 1) * 10
+    except: pass
+    return round(score, 2)
+
+
 def calculate_entry_score(current_price, intra_high, scan_price, vwap_price, now_peru):
     """
     Entry Score 0-100: how good is THIS MOMENT to enter a short.
@@ -343,7 +365,8 @@ def analyze_ticker(ticker, finviz_row):
             'float_pct': float_pct, 'gap': gap, 'vwap_dist': vwap_dist,
             'change': change,
         }
-        score = calculate_score(metrics)
+        score   = calculate_score(metrics)
+        score_i = calculate_score_i(metrics)
 
         # EntryScore — real-time short entry signal (only meaningful for Score >= 60)
         entry_score = 0
@@ -374,6 +397,7 @@ def analyze_ticker(ticker, finviz_row):
             'MarketCap': int(market_cap),
             # ── Computed score metrics ─────────────────────────────────────────
             'Score':         round(score, 2),
+            'Score_I':       round(score_i, 2),
             'EntryScore':    round(entry_score, 2),
             'MxV':           round(mxv, 2),
             'RunUp':         round(run_up, 2),
