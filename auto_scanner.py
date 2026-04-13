@@ -520,9 +520,20 @@ def analyze_ticker(ticker, finviz_row):
                     vwap_dist  = ((price / vwap_price) - 1) * 100 if vwap_price > 0 else 0
                 except: pass
 
+                # Fallback: if daily bar hasn't updated high yet (high <= price),
+                # fetch real intraday high from 1-day 1-min bars
+                if high_today <= price:
+                    try:
+                        intraday = stock.history(period='1d', interval='1m')
+                        if not intraday.empty:
+                            high_today = round(float(intraday['High'].max()), 4)
+                            low_today  = round(float(intraday['Low'].min()),  4)
+                            vwap_price = round((high_today + low_today + price) / 3, 4)
+                            vwap_dist  = ((price / vwap_price) - 1) * 100 if vwap_price > 0 else 0
+                    except: pass
+
                 try:
-                    high_today     = round(float(current['High']), 4) if high_today == 0 else high_today
-                    price_to_high  = ((price - current['High']) / current['High']) * 100
+                    price_to_high  = ((price - high_today) / high_today * 100) if high_today > 0 else 0
                 except: pass
 
                 try:
@@ -559,9 +570,12 @@ def analyze_ticker(ticker, finviz_row):
         score_g = calculate_score_g(metrics)
         score_h = calculate_score_h(metrics)
 
-        # EntryScore — real-time short entry signal (only meaningful for Score >= 60)
+        # EntryScore — real-time short entry signal
+        # Gate: any of the 9 scores >= 60 (avoids 0 when secondary score triggers entry)
         entry_score = 0
-        if score >= 60:
+        max_score_any = max(score, score_b, score_c, score_d, score_e,
+                            score_f, score_g, score_h, score_i)
+        if max_score_any >= 60:
             entry_score = calculate_entry_score(
                 current_price=price,
                 intra_high=high_today,
