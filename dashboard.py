@@ -2740,6 +2740,13 @@ def score_tracker_page():
         st.info("אין מניות בפורטפוליו.")
         return
 
+    # ── Download button ────────────────────────────────────────────────────────
+    if not tracker_df.empty:
+        _dl_csv  = tracker_df.to_csv(index=False).encode("utf-8")
+        _dl_name = f"score_tracker_{datetime.now(PERU_TZ).strftime('%Y-%m-%d')}.csv"
+        st.download_button("📥 Download CSV", data=_dl_csv,
+                           file_name=_dl_name, mime="text/csv")
+
     today = datetime.now(PERU_TZ).strftime("%Y-%m-%d")
 
     # Build stock list: stocks whose D0–D3 window spans today
@@ -2821,6 +2828,22 @@ def score_tracker_page():
                 st.info("⏳ אין עדיין נתונים עבור מניה זו.")
                 continue
 
+            # ── Price metrics row ────────────────────────────────────────────
+            scan_price = cur_price = tp_price = sl_price = None
+            if "Price" in sdf.columns:
+                _prices = pd.to_numeric(sdf["Price"], errors="coerce").dropna()
+                if not _prices.empty:
+                    scan_price = round(float(_prices.iloc[0]), 2)
+                    cur_price  = round(float(_prices.iloc[-1]), 2)
+                    tp_price   = round(scan_price * 0.90, 2)
+                    sl_price   = round(scan_price * 1.07, 2)
+                    _chg = (cur_price - scan_price) / scan_price * 100
+                    mc1, mc2, mc3, mc4 = st.columns(4)
+                    mc1.metric("📌 כניסה",      f"${scan_price:.2f}")
+                    mc2.metric("💵 כרגע",        f"${cur_price:.2f}",  f"{_chg:+.1f}%")
+                    mc3.metric("🎯 TP (−10%)",   f"${tp_price:.2f}")
+                    mc4.metric("🛑 SL (+7%)",    f"${sl_price:.2f}")
+
             gran = st.radio(
                 "רזולוציה",
                 ["דקות", "שעות"],
@@ -2828,6 +2851,7 @@ def score_tracker_page():
                 key=f"gran_{tk}_{sd}",
             )
 
+            # ── Score chart ──────────────────────────────────────────────────
             plot_df = sdf[["dt", "Score"]].copy()
             if gran == "שעות":
                 plot_df = (
@@ -2839,49 +2863,109 @@ def score_tracker_page():
                 )
 
             fig = _go.Figure()
-
-            # Score line
             fig.add_trace(_go.Scatter(
                 x=plot_df["dt"],
                 y=plot_df["Score"],
                 mode="lines+markers",
                 name="Score",
-                line=dict(color="#00bfff", width=2),
+                line=dict(color="#1d6fe8", width=2),
                 marker=dict(size=5 if gran == "שעות" else 3),
                 hovertemplate="%{x|%m/%d %H:%M}<br>Score: %{y:.1f}<extra></extra>",
             ))
 
-            # Day boundary lines (D1 / D2 / D3)
+            # Day boundary lines
             for i, day in enumerate(window):
                 day_open = pd.Timestamp(day + " 08:30")
                 if plot_df["dt"].min() <= day_open <= plot_df["dt"].max() + pd.Timedelta(hours=8):
                     fig.add_vline(
-                        x=day_open.value / 1e6,  # plotly expects ms
-                        line_dash="dash",
-                        line_color="#555",
-                        line_width=1,
+                        x=day_open.value / 1e6,
+                        line_dash="dash", line_color="#aaa", line_width=1,
                         annotation_text=f"D{i+1}",
-                        annotation_font_color="#aaa",
+                        annotation_font_color="#555",
                         annotation_position="top right",
                     )
 
-            # Score zone bands
-            fig.add_hrect(y0=80, y1=100, fillcolor="#4a0010", opacity=0.15, line_width=0)
-            fig.add_hrect(y0=60, y1=80, fillcolor="#1a3a1a", opacity=0.15, line_width=0)
-            fig.add_hrect(y0=40, y1=60, fillcolor="#3a2a00", opacity=0.15, line_width=0)
+            # Score zone bands (light-background friendly)
+            fig.add_hrect(y0=80, y1=100, fillcolor="#ffe0e0", opacity=0.35, line_width=0)
+            fig.add_hrect(y0=60, y1=80,  fillcolor="#e0f0e0", opacity=0.35, line_width=0)
+            fig.add_hrect(y0=40, y1=60,  fillcolor="#fff8e0", opacity=0.35, line_width=0)
 
             fig.update_layout(
-                height=320,
+                height=300,
                 margin=dict(l=10, r=10, t=25, b=10),
-                paper_bgcolor="#0e1117",
-                plot_bgcolor="#0e1117",
-                font=dict(color="#fafafa", size=12),
-                xaxis=dict(gridcolor="#222", tickformat="%m/%d\n%H:%M"),
-                yaxis=dict(gridcolor="#222", title="Score", range=[0, 100]),
+                paper_bgcolor="white",
+                plot_bgcolor="white",
+                font=dict(color="#222", size=12),
+                xaxis=dict(gridcolor="#e0e0e0", tickformat="%m/%d\n%H:%M"),
+                yaxis=dict(gridcolor="#e0e0e0", title="Score", range=[0, 100]),
                 showlegend=False,
             )
-
             st.plotly_chart(fig, use_container_width=True, key=f"chart_{tk}_{sd}")
+
+            # ── Price chart with TP / SL reference lines ─────────────────────
+            if scan_price and "Price" in sdf.columns:
+                _price_df = sdf[["dt", "Price"]].copy()
+                _price_df["Price"] = pd.to_numeric(_price_df["Price"], errors="coerce")
+                if gran == "שעות":
+                    _price_df = (
+                        _price_df.set_index("dt")
+                        .resample("1h")["Price"]
+                        .mean()
+                        .dropna()
+                        .reset_index()
+                    )
+
+                fig2 = _go.Figure()
+                fig2.add_trace(_go.Scatter(
+                    x=_price_df["dt"],
+                    y=_price_df["Price"],
+                    mode="lines+markers",
+                    name="Price",
+                    line=dict(color="#1d6fe8", width=2),
+                    marker=dict(size=5 if gran == "שעות" else 3),
+                    hovertemplate="%{x|%m/%d %H:%M}<br>$%{y:.2f}<extra></extra>",
+                ))
+
+                # Reference lines
+                fig2.add_hline(y=scan_price, line_dash="dot", line_color="gray",
+                               line_width=1.5,
+                               annotation_text=f"Entry ${scan_price:.2f}",
+                               annotation_position="bottom right",
+                               annotation_font_color="gray")
+                fig2.add_hline(y=tp_price, line_dash="dot", line_color="green",
+                               line_width=1.5,
+                               annotation_text=f"TP ${tp_price:.2f}",
+                               annotation_position="bottom right",
+                               annotation_font_color="green")
+                fig2.add_hline(y=sl_price, line_dash="dot", line_color="red",
+                               line_width=1.5,
+                               annotation_text=f"SL ${sl_price:.2f}",
+                               annotation_position="top right",
+                               annotation_font_color="red")
+
+                # Day boundaries
+                for i, day in enumerate(window):
+                    day_open = pd.Timestamp(day + " 08:30")
+                    if _price_df["dt"].min() <= day_open <= _price_df["dt"].max() + pd.Timedelta(hours=8):
+                        fig2.add_vline(
+                            x=day_open.value / 1e6,
+                            line_dash="dash", line_color="#aaa", line_width=1,
+                            annotation_text=f"D{i+1}",
+                            annotation_font_color="#555",
+                            annotation_position="top right",
+                        )
+
+                fig2.update_layout(
+                    height=280,
+                    margin=dict(l=10, r=10, t=25, b=10),
+                    paper_bgcolor="white",
+                    plot_bgcolor="white",
+                    font=dict(color="#222", size=12),
+                    xaxis=dict(gridcolor="#e0e0e0", tickformat="%m/%d\n%H:%M"),
+                    yaxis=dict(gridcolor="#e0e0e0", title="Price ($)"),
+                    showlegend=False,
+                )
+                st.plotly_chart(fig2, use_container_width=True, key=f"price_{tk}_{sd}")
 
 
 
