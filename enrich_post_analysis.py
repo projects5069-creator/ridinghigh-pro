@@ -168,19 +168,19 @@ def run(backfill: bool = False):
                 pa.at[idx, "PeakScore"]      = peak_score
                 pa.at[idx, "DayRunUp%"]      = run_up_pct
                 if scan_price > 0:
-                    pa.at[idx, "IntraDay_TP10"] = 1 if intra_low <= scan_price * 0.90 else 0
+                    pa.at[idx, "IntraDay_TP10"] = "1" if intra_low <= scan_price * 0.90 else "0"
 
                 # SL_Hit_D0: did price go UP 7%+ from scan price on scan day?
                 if scan_price > 0:
-                    pa.at[idx, "SL_Hit_D0"] = 1 if intra_high >= scan_price * 1.07 else 0
+                    pa.at[idx, "SL_Hit_D0"] = "1" if intra_high >= scan_price * 1.07 else "0"
 
                 # MinToClose: minutes between peak score time and 15:00 close
                 try:
                     peak_dt = pd.Timestamp(f"2000-01-01 {peak_time}")
                     close_dt = pd.Timestamp("2000-01-01 15:00")
-                    pa.at[idx, "MinToClose"] = max(0, int((close_dt - peak_dt).total_seconds() / 60))
+                    pa.at[idx, "MinToClose"] = str(max(0, int((close_dt - peak_dt).total_seconds() / 60)))
                 except:
-                    pa.at[idx, "MinToClose"] = None
+                    pa.at[idx, "MinToClose"] = ""
 
                 row_changed = True
             else:
