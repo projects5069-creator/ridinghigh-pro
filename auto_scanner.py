@@ -696,14 +696,14 @@ def run_scan():
         pass
 
     if not results:
-        print("❌ No results — still running portfolio_live update")
-        # Even with no scan results, update portfolio_live (live prices for pending stocks)
+        print("❌ No results — still running portfolio_live / live_trades update")
         try:
             gc2 = get_gsheets_client()
             if gc2:
                 update_portfolio_live(gc2, now_peru)
+                update_live_trades(gc2, now_peru, results=[])
         except Exception as e:
-            print(f"⚠️ portfolio_live (no-results path) error: {e}")
+            print(f"⚠️ no-results path error: {e}")
         return
 
     results = sorted(results, key=lambda x: x['Score'], reverse=True)
@@ -788,6 +788,14 @@ def run_scan():
             update_portfolio_live(_gc, now_peru)
     except Exception as e:
         print(f"⚠️ portfolio_live final update error: {e}")
+
+    # ── Live Trades: track intraday short entries (always runs) ───────────────
+    try:
+        _gc3 = locals().get("gc") or get_gsheets_client()
+        if _gc3:
+            update_live_trades(_gc3, now_peru, results=results)
+    except Exception as e:
+        print(f"⚠️ live_trades final update error: {e}")
 
     # ── Score Tracker: record metrics every 5 minutes (minutes 00,05,10...) ───
     if now_peru.minute % 5 == 0:
@@ -970,6 +978,150 @@ def update_portfolio_live(gc, now_peru):
 
     except Exception as e:
         print(f"⚠️ portfolio_live error: {e}")
+
+
+LIVE_TRADES_COLS = [
+    "EntryTime", "Ticker", "EntryPrice", "IntraHigh", "Score", "EntryScore",
+    "TP10_Price", "SL_Price", "CurrentPrice", "RunningHigh", "RunningLow",
+    "Status", "ExitTime", "PnL_pct",
+]
+
+def update_live_trades(gc, now_peru, results=None):
+    """
+    בכל ריצה (כל דקה):
+    1. קורא live_trades הקיים
+    2. לכל שורה Pending — מושך מחיר חי, מעדכן RunningHigh/RunningLow, בודק TP/SL
+    3. לכל מניה בתוצאות הסריקה עם Score>=70 AND EntryScore>=60 — מכניסה אם לא קיימת היום
+    קריטריון: Score >= 70 AND EntryScore >= 60 AND שוק פתוח
+    """
+    ENTRY_MIN_SCORE      = 70
+    ENTRY_MIN_ENTRY_SCORE = 60
+    TP_PCT = 0.10
+    SL_PCT = 0.07
+
+    try:
+        today     = now_peru.strftime("%Y-%m-%d")
+        scan_time = now_peru.strftime("%Y-%m-%d %H:%M")
+
+        ws = sheets_manager.get_worksheet("live_trades", gc=gc)
+        if ws is None:
+            print("⚠️ live_trades worksheet not found")
+            return
+
+        raw = ws.get_all_values()
+        if len(raw) > 1:
+            lt_df = pd.DataFrame(raw[1:], columns=raw[0])
+            for col in ["EntryPrice", "IntraHigh", "Score", "EntryScore",
+                        "TP10_Price", "SL_Price", "CurrentPrice",
+                        "RunningHigh", "RunningLow", "PnL_pct"]:
+                if col in lt_df.columns:
+                    lt_df[col] = pd.to_numeric(lt_df[col], errors="coerce")
+        else:
+            lt_df = pd.DataFrame(columns=LIVE_TRADES_COLS)
+
+        # ── Step 1: update existing Pending rows ──────────────────────────────
+        pending_mask = lt_df["Status"] == "Pending" if "Status" in lt_df.columns else pd.Series([], dtype=bool)
+        for idx in lt_df[pending_mask].index:
+            ticker     = str(lt_df.at[idx, "Ticker"])
+            entry_price = float(lt_df.at[idx, "EntryPrice"])
+            tp10_price  = float(lt_df.at[idx, "TP10_Price"])
+            sl_price    = float(lt_df.at[idx, "SL_Price"])
+            prev_high   = lt_df.at[idx, "RunningHigh"]
+            prev_low    = lt_df.at[idx, "RunningLow"]
+
+            try:
+                hist = yf.Ticker(ticker).history(period="1d")
+                if hist.empty:
+                    continue
+                live_price = round(float(hist.iloc[-1]["Close"]), 2)
+                intra_high = round(float(hist.iloc[-1]["High"]), 2)
+            except:
+                continue
+
+            prev_high = float(prev_high) if pd.notna(prev_high) else live_price
+            prev_low  = float(prev_low)  if pd.notna(prev_low)  else live_price
+            new_high  = max(prev_high, live_price, intra_high)
+            new_low   = min(prev_low,  live_price)
+
+            sl_hit = new_high >= sl_price
+            tp_hit = new_low  <= tp10_price
+
+            if sl_hit:
+                status     = "SL"
+                exit_time  = scan_time
+                pnl        = round((entry_price - sl_price) / entry_price * 100, 2)  # negative (loss for short)
+            elif tp_hit:
+                status     = "TP10"
+                exit_time  = scan_time
+                pnl        = round((entry_price - tp10_price) / entry_price * 100, 2)  # positive (profit for short)
+            else:
+                status     = "Pending"
+                exit_time  = ""
+                pnl        = round((entry_price - live_price) / entry_price * 100, 2)
+
+            lt_df.at[idx, "CurrentPrice"] = live_price
+            lt_df.at[idx, "IntraHigh"]    = intra_high
+            lt_df.at[idx, "RunningHigh"]  = new_high
+            lt_df.at[idx, "RunningLow"]   = new_low
+            lt_df.at[idx, "Status"]       = status
+            lt_df.at[idx, "ExitTime"]     = exit_time
+            lt_df.at[idx, "PnL_pct"]      = pnl
+
+        # ── Step 2: add new entries from current scan results ─────────────────
+        if results and is_market_hours():
+            today_tickers = set(
+                lt_df[lt_df["EntryTime"].str.startswith(today)]["Ticker"].tolist()
+            ) if "EntryTime" in lt_df.columns and not lt_df.empty else set()
+
+            for r in results:
+                ticker      = str(r.get("Ticker", ""))
+                score       = float(r.get("Score", 0) or 0)
+                entry_score = float(r.get("EntryScore", 0) or 0)
+                price       = float(r.get("Price", 0) or 0)
+                intra_high  = float(r.get("High_today", price) or price)
+
+                if score < ENTRY_MIN_SCORE or entry_score < ENTRY_MIN_ENTRY_SCORE:
+                    continue
+                if ticker in today_tickers:
+                    continue
+                if price <= 0:
+                    continue
+
+                tp10_price = round(price * (1 - TP_PCT), 4)
+                sl_price   = round(price * (1 + SL_PCT), 4)
+
+                new_trade = {
+                    "EntryTime":   scan_time,
+                    "Ticker":      ticker,
+                    "EntryPrice":  price,
+                    "IntraHigh":   intra_high,
+                    "Score":       round(score, 2),
+                    "EntryScore":  round(entry_score, 2),
+                    "TP10_Price":  tp10_price,
+                    "SL_Price":    sl_price,
+                    "CurrentPrice": price,
+                    "RunningHigh": intra_high,
+                    "RunningLow":  price,
+                    "Status":      "Pending",
+                    "ExitTime":    "",
+                    "PnL_pct":     0.0,
+                }
+                lt_df = pd.concat([lt_df, pd.DataFrame([new_trade])], ignore_index=True)
+                today_tickers.add(ticker)
+                print(f"⚡ live_trades: new entry {ticker} @ {price} (Score={score}, EntryScore={entry_score})")
+
+        # enforce column order, fill missing columns
+        for col in LIVE_TRADES_COLS:
+            if col not in lt_df.columns:
+                lt_df[col] = ""
+        lt_df = lt_df[LIVE_TRADES_COLS]
+
+        df_to_sheet(ws, lt_df)
+        n_pending = int((lt_df["Status"] == "Pending").sum()) if "Status" in lt_df.columns else 0
+        print(f"⚡ live_trades updated: {len(lt_df)} rows, {n_pending} pending")
+
+    except Exception as e:
+        print(f"⚠️ live_trades error: {e}")
 
 
 def sync_score_tracker(gc, now_peru):

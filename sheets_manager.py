@@ -39,6 +39,7 @@ SHEET_NAMES = [
     "portfolio",
     "portfolio_live",
     "score_tracker",
+    "live_trades",
 ]
 
 # timeline_live is slimmed to exactly these columns
