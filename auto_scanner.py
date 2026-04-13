@@ -520,17 +520,10 @@ def analyze_ticker(ticker, finviz_row):
                     vwap_dist  = ((price / vwap_price) - 1) * 100 if vwap_price > 0 else 0
                 except: pass
 
-                # Fallback: if daily bar hasn't updated high yet (high <= price),
-                # fetch real intraday high from 1-day 1-min bars
+                # Fallback: if daily bar hasn't updated high yet, use price as high.
+                # This means no reversal signal yet — EntryScore will be low intentionally.
                 if high_today <= price:
-                    try:
-                        intraday = stock.history(period='1d', interval='1m')
-                        if not intraday.empty:
-                            high_today = round(float(intraday['High'].max()), 4)
-                            low_today  = round(float(intraday['Low'].min()),  4)
-                            vwap_price = round((high_today + low_today + price) / 3, 4)
-                            vwap_dist  = ((price / vwap_price) - 1) * 100 if vwap_price > 0 else 0
-                    except: pass
+                    high_today = price
 
                 try:
                     price_to_high  = ((price - high_today) / high_today * 100) if high_today > 0 else 0
