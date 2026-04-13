@@ -2886,48 +2886,27 @@ def score_tracker_page():
 
 
 def live_trades_page():
+    _SCORE_TYPES = ["Score", "Score_B", "Score_C", "Score_D", "Score_E",
+                    "Score_F", "Score_G", "Score_H", "Score_I"]
+    _SCORE_DESC = {
+        "Score":   "Current — balanced weights",
+        "Score_B": "Pure pump — no RSI/RelVol",
+        "Score_C": "Volatility first — ATRX dominant",
+        "Score_D": "Micro-cap pump — MxV dominant",
+        "Score_E": "Momentum — how much already pumped",
+        "Score_F": "VWAP extension — overextended",
+        "Score_G": "RelVol sweet spot — penalizes real moves",
+        "Score_H": "RSI-free pure technicals",
+        "Score_I": "MxV dominant 50%",
+    }
+    ENTRY_AMOUNT = 1000.0
+
     st.title("⚡ Live Trades")
-    st.caption("מניות שנכנסו לשורט בזמן אמת — Score ≥70 & EntryScore ≥60 · TP 10% · SL 7%")
-
-    # Auto-refresh every 60s via a countdown placeholder
-    refresh_placeholder = st.empty()
-
-    # ── Load data ─────────────────────────────────────────────────────────────
-    with st.spinner("טוען עסקאות חיות..."):
-        df = _cached_live_trades()
+    st.caption("מניות שנכנסו לשורט בזמן אמת — Score ≥70 · TP 10% · SL 10% · כניסה $1,000 לעסקה")
 
     now_peru = datetime.now(PERU_TZ)
 
-    if df.empty:
-        st.info("📭 אין עסקאות עדיין — הסורק יכניס מניות שעומדות בקריטריון בזמן ריצה הבאה.")
-        refresh_placeholder.caption(f"⏱ עדכון אחרון: {now_peru.strftime('%H:%M:%S')} Peru · מתרענן כל 60 שניות")
-        st.markdown("""
-        **קריטריון כניסה אוטומטי** (מופעל ע"י auto_scanner כל דקה):
-        - Score ≥ 70
-        - EntryScore ≥ 60
-        - שוק פתוח (08:30–15:00 Peru)
-        """)
-        return
-
-    # ── Metrics bar ──────────────────────────────────────────────────────────
-    pending  = df[df["Status"] == "Pending"]
-    tp_hits  = df[df["Status"] == "TP10"]
-    sl_hits  = df[df["Status"] == "SL"]
-    closed   = df[df["Status"].isin(["TP10", "SL"])]
-    win_rate = len(tp_hits) / len(closed) * 100 if len(closed) > 0 else 0
-    total_pnl = df["PnL_pct"].sum() if "PnL_pct" in df.columns else 0
-
-    c1, c2, c3, c4, c5, c6 = st.columns(6)
-    c1.metric("⏳ Pending",  len(pending))
-    c2.metric("✅ TP10 Hits", len(tp_hits))
-    c3.metric("❌ SL Hits",   len(sl_hits))
-    c4.metric("📊 Total",     len(df))
-    c5.metric("🎯 Win Rate",  f"{win_rate:.0f}%" if closed.shape[0] > 0 else "—")
-    c6.metric("💰 Total PnL", f"{total_pnl:+.1f}%")
-
-    st.divider()
-
-    # ── Clear Closed button ───────────────────────────────────────────────────
+    # ── Buttons ───────────────────────────────────────────────────────────────
     col_btn1, col_btn2, _ = st.columns([1, 1, 5])
     with col_btn1:
         if st.button("🗑️ Clear Closed", help="מעביר עסקאות סגורות (TP/SL) לארכיון ב-Sheets"):
@@ -2941,33 +2920,26 @@ def live_trades_page():
                         open_df   = full_df[full_df["Status"] == "Pending"]
                         closed_df = full_df[full_df["Status"].isin(["TP10", "SL"])]
 
-                        # Archive closed trades to a separate sheet
                         if not closed_df.empty:
                             ws_arch = sheets_manager.get_worksheet("live_trades_archive", gc=gc)
-                            if ws_arch is None:
-                                # create via get_worksheet auto-create mechanism
-                                ws_arch = sheets_manager.get_worksheet("live_trades_archive", gc=gc)
                             if ws_arch:
                                 arch_raw = ws_arch.get_all_values()
                                 if len(arch_raw) > 1:
-                                    arch_df = pd.DataFrame(arch_raw[1:], columns=arch_raw[0])
+                                    arch_df  = pd.DataFrame(arch_raw[1:], columns=arch_raw[0])
                                     combined = pd.concat([arch_df, closed_df], ignore_index=True)
                                 else:
                                     combined = closed_df
-                                arch_df_out = [combined.columns.tolist()] + combined.astype(str).values.tolist()
                                 ws_arch.clear()
-                                ws_arch.update(arch_df_out)
+                                ws_arch.update([combined.columns.tolist()] + combined.astype(str).values.tolist())
 
-                        # Keep only open trades in live_trades
                         from auto_scanner import LIVE_TRADES_COLS
                         for col in LIVE_TRADES_COLS:
                             if col not in open_df.columns:
                                 open_df = open_df.copy()
                                 open_df[col] = ""
                         open_df = open_df[LIVE_TRADES_COLS]
-                        out = [open_df.columns.tolist()] + open_df.astype(str).values.tolist()
                         ws.clear()
-                        ws.update(out)
+                        ws.update([open_df.columns.tolist()] + open_df.astype(str).values.tolist())
                         st.cache_data.clear()
                         st.success(f"✅ {len(closed_df)} עסקאות הועברו לארכיון")
                         st.rerun()
@@ -2978,48 +2950,95 @@ def live_trades_page():
             st.cache_data.clear()
             st.rerun()
 
+    # ── Load data ─────────────────────────────────────────────────────────────
+    with st.spinner("טוען עסקאות חיות..."):
+        df = _cached_live_trades()
+
+    if df.empty:
+        st.info("📭 אין עסקאות עדיין — הסורק יכניס מניות שעומדות בקריטריון בזמן ריצה הבאה.")
+        st.caption(f"⏱ עדכון אחרון: {now_peru.strftime('%H:%M:%S')} Peru · מתרענן כל 60 שניות")
+        return
+
+    # Backward-compat: rows without ScoreType belong to "Score"
+    if "ScoreType" not in df.columns:
+        df["ScoreType"] = "Score"
+    else:
+        df["ScoreType"] = df["ScoreType"].fillna("Score").replace("", "Score")
+
+    for col in ["EntryPrice", "CurrentPrice", "TP10_Price", "SL_Price", "PnL_pct"]:
+        if col in df.columns:
+            df[col] = pd.to_numeric(df[col], errors="coerce")
+
+    df["Change%"] = ((df["CurrentPrice"] - df["EntryPrice"]) / df["EntryPrice"] * 100).round(2)
+    df["PnL_$"]   = (df["PnL_pct"].fillna(0) / 100 * ENTRY_AMOUNT).round(2)
+
+    # ── Global summary ────────────────────────────────────────────────────────
+    g_pending = int((df["Status"] == "Pending").sum())
+    g_tp      = int((df["Status"] == "TP10").sum())
+    g_sl      = int((df["Status"] == "SL").sum())
+    g_closed  = g_tp + g_sl
+    g_wr      = g_tp / g_closed * 100 if g_closed > 0 else 0
+    g_pnl     = df["PnL_$"].sum()
+
+    c1, c2, c3, c4, c5 = st.columns(5)
+    c1.metric("⏳ Pending",   g_pending)
+    c2.metric("✅ TP10 Hits", g_tp)
+    c3.metric("❌ SL Hits",   g_sl)
+    c4.metric("🎯 Win Rate",  f"{g_wr:.0f}%" if g_closed > 0 else "—")
+    c5.metric("💰 Total PnL", f"${g_pnl:+.0f}")
+
     st.divider()
 
-    # ── Build display table ───────────────────────────────────────────────────
-    display_cols = ["Ticker", "EntryTime", "EntryPrice", "CurrentPrice",
-                    "Change%", "RunningHigh", "RunningLow",
-                    "TP10_Price", "SL_Price", "Score", "EntryScore",
-                    "Status", "PnL_pct"]
-
-    tbl = df.copy()
-    if "EntryPrice" in tbl.columns and "CurrentPrice" in tbl.columns:
-        tbl["Change%"] = ((tbl["CurrentPrice"] - tbl["EntryPrice"]) / tbl["EntryPrice"] * 100).round(2)
-    else:
-        tbl["Change%"] = None
-
-    # Sort: Pending first, then TP10, then SL; within each group newest first
-    status_order = {"Pending": 0, "TP10": 1, "SL": 2}
-    tbl["_sort"] = tbl["Status"].map(status_order).fillna(9)
-    tbl = tbl.sort_values(["_sort", "EntryTime"], ascending=[True, False]).drop(columns=["_sort"])
-
-    avail_cols = [c for c in display_cols if c in tbl.columns]
-    tbl = tbl[avail_cols].reset_index(drop=True)
-
+    # ── Row-color helper ──────────────────────────────────────────────────────
     def _color_row(row):
-        status = row.get("Status", "")
-        if status == "TP10":
-            return ["background-color: #1a4a1a; color: #80ff80"] * len(row)
-        if status == "SL":
-            return ["background-color: #4a1a1a; color: #ff8080"] * len(row)
-        if status == "Pending":
-            return ["background-color: #3a3a10; color: #ffff80"] * len(row)
+        s = row.get("Status", "")
+        if s == "TP10":    return ["background-color: #1a4a1a; color: #80ff80"] * len(row)
+        if s == "SL":      return ["background-color: #4a1a1a; color: #ff8080"] * len(row)
+        if s == "Pending": return ["background-color: #3a3a10; color: #ffff80"] * len(row)
         return [""] * len(row)
 
-    styled = tbl.style.apply(_color_row, axis=1)
-    st.dataframe(styled, use_container_width=True, height=500)
+    DISPLAY_COLS = ["EntryTime", "Ticker", "EntryPrice", "CurrentPrice",
+                    "Change%", "TP10_Price", "SL_Price", "Status", "PnL_$"]
+    STATUS_ORDER = {"Pending": 0, "TP10": 1, "SL": 2}
 
-    refresh_placeholder.caption(f"⏱ עדכון אחרון: {now_peru.strftime('%H:%M:%S')} Peru · מתרענן כל 60 שניות")
+    # ── 9 collapsible tables ──────────────────────────────────────────────────
+    for score_type in _SCORE_TYPES:
+        sub = df[df["ScoreType"] == score_type].copy()
+        desc = _SCORE_DESC[score_type]
 
-    # ── Auto-refresh via meta tag ─────────────────────────────────────────────
-    st.markdown(
-        '<meta http-equiv="refresh" content="60">',
-        unsafe_allow_html=True
-    )
+        n_pending = int((sub["Status"] == "Pending").sum())
+        n_tp      = int((sub["Status"] == "TP10").sum())
+        n_sl      = int((sub["Status"] == "SL").sum())
+        n_closed  = n_tp + n_sl
+        wr        = n_tp / n_closed * 100 if n_closed > 0 else 0
+        pnl       = sub["PnL_$"].sum() if not sub.empty else 0.0
+        wr_label  = f"{wr:.0f}%" if n_closed > 0 else "—"
+
+        expander_label = (
+            f"**{score_type}** · {desc} · "
+            f"WR: {wr_label} · PnL: ${pnl:+.0f}"
+        )
+
+        with st.expander(expander_label, expanded=(score_type == "Score")):
+            if sub.empty:
+                st.info("אין עסקאות לציון זה עדיין.")
+                continue
+
+            m1, m2, m3, m4, m5 = st.columns(5)
+            m1.metric("⏳ Pending",   n_pending)
+            m2.metric("✅ TP",        n_tp)
+            m3.metric("❌ SL",        n_sl)
+            m4.metric("🎯 Win Rate",  wr_label)
+            m5.metric("💰 PnL",       f"${pnl:+.0f}")
+
+            sub["_sort"] = sub["Status"].map(STATUS_ORDER).fillna(9)
+            sub = sub.sort_values(["_sort", "EntryTime"], ascending=[True, False]).drop(columns=["_sort"])
+            avail = [c for c in DISPLAY_COLS if c in sub.columns]
+            tbl = sub[avail].reset_index(drop=True)
+            st.dataframe(tbl.style.apply(_color_row, axis=1), use_container_width=True)
+
+    st.caption(f"⏱ עדכון אחרון: {now_peru.strftime('%H:%M:%S')} Peru · מתרענן כל 60 שניות")
+    st.markdown('<meta http-equiv="refresh" content="60">', unsafe_allow_html=True)
 
 
 def score_comparison_page():

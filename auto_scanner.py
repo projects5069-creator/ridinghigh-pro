@@ -980,8 +980,10 @@ def update_portfolio_live(gc, now_peru):
         print(f"⚠️ portfolio_live error: {e}")
 
 
+SCORE_TYPES = ["Score", "Score_B", "Score_C", "Score_D", "Score_E", "Score_F", "Score_G", "Score_H", "Score_I"]
+
 LIVE_TRADES_COLS = [
-    "EntryTime", "Ticker", "EntryPrice", "IntraHigh", "Score", "EntryScore",
+    "EntryTime", "Ticker", "EntryPrice", "IntraHigh", "ScoreType", "Score", "EntryScore",
     "TP10_Price", "SL_Price", "CurrentPrice", "RunningHigh", "RunningLow",
     "Status", "ExitTime", "PnL_pct",
 ]
@@ -991,13 +993,13 @@ def update_live_trades(gc, now_peru, results=None):
     בכל ריצה (כל דקה):
     1. קורא live_trades הקיים
     2. לכל שורה Pending — מושך מחיר חי, מעדכן RunningHigh/RunningLow, בודק TP/SL
-    3. לכל מניה בתוצאות הסריקה עם Score>=70 AND EntryScore>=60 — מכניסה אם לא קיימת היום
-    קריטריון: Score >= 70 AND EntryScore >= 60 AND שוק פתוח
+    3. לכל מניה בתוצאות הסריקה — לכל ציון >= 70 מוסיף שורה נפרדת עם ScoreType
+       מניה יכולה להופיע עד 9 פעמים (פעם לכל ציון שעובר 70)
+    קריטריון: ScoreType >= 70 AND שוק פתוח
     """
-    ENTRY_MIN_SCORE      = 70
-    ENTRY_MIN_ENTRY_SCORE = 60
+    ENTRY_MIN_SCORE = 70
     TP_PCT = 0.10
-    SL_PCT = 0.07
+    SL_PCT = 0.10
 
     try:
         today     = now_peru.strftime("%Y-%m-%d")
@@ -1069,46 +1071,54 @@ def update_live_trades(gc, now_peru, results=None):
 
         # ── Step 2: add new entries from current scan results ─────────────────
         if results and is_market_hours():
-            today_tickers = set(
-                lt_df[lt_df["EntryTime"].str.startswith(today)]["Ticker"].tolist()
-            ) if "EntryTime" in lt_df.columns and not lt_df.empty else set()
+            # unique key: (Ticker, ScoreType) per day
+            today_keys = set()
+            if "EntryTime" in lt_df.columns and not lt_df.empty:
+                today_rows = lt_df[lt_df["EntryTime"].str.startswith(today)]
+                score_type_col = lt_df.get("ScoreType", pd.Series(["Score"] * len(lt_df)))
+                for _, row in today_rows.iterrows():
+                    st_val = str(row.get("ScoreType", "Score")) if "ScoreType" in lt_df.columns else "Score"
+                    today_keys.add((str(row["Ticker"]), st_val))
 
             for r in results:
-                ticker      = str(r.get("Ticker", ""))
-                score       = float(r.get("Score", 0) or 0)
+                ticker     = str(r.get("Ticker", ""))
+                price      = float(r.get("Price", 0) or 0)
                 entry_score = float(r.get("EntryScore", 0) or 0)
-                price       = float(r.get("Price", 0) or 0)
-                intra_high  = float(r.get("High_today", price) or price)
+                intra_high = float(r.get("High_today", price) or price)
 
-                if score < ENTRY_MIN_SCORE or entry_score < ENTRY_MIN_ENTRY_SCORE:
-                    continue
-                if ticker in today_tickers:
-                    continue
                 if price <= 0:
                     continue
 
-                tp10_price = round(price * (1 - TP_PCT), 4)
-                sl_price   = round(price * (1 + SL_PCT), 4)
+                for score_type in SCORE_TYPES:
+                    score_val = float(r.get(score_type, 0) or 0)
+                    if score_val < ENTRY_MIN_SCORE:
+                        continue
+                    if (ticker, score_type) in today_keys:
+                        continue
 
-                new_trade = {
-                    "EntryTime":   scan_time,
-                    "Ticker":      ticker,
-                    "EntryPrice":  price,
-                    "IntraHigh":   intra_high,
-                    "Score":       round(score, 2),
-                    "EntryScore":  round(entry_score, 2),
-                    "TP10_Price":  tp10_price,
-                    "SL_Price":    sl_price,
-                    "CurrentPrice": price,
-                    "RunningHigh": intra_high,
-                    "RunningLow":  price,
-                    "Status":      "Pending",
-                    "ExitTime":    "",
-                    "PnL_pct":     0.0,
-                }
-                lt_df = pd.concat([lt_df, pd.DataFrame([new_trade])], ignore_index=True)
-                today_tickers.add(ticker)
-                print(f"⚡ live_trades: new entry {ticker} @ {price} (Score={score}, EntryScore={entry_score})")
+                    tp10_price = round(price * (1 - TP_PCT), 4)
+                    sl_price   = round(price * (1 + SL_PCT), 4)
+
+                    new_trade = {
+                        "EntryTime":    scan_time,
+                        "Ticker":       ticker,
+                        "EntryPrice":   price,
+                        "IntraHigh":    intra_high,
+                        "ScoreType":    score_type,
+                        "Score":        round(score_val, 2),
+                        "EntryScore":   round(entry_score, 2),
+                        "TP10_Price":   tp10_price,
+                        "SL_Price":     sl_price,
+                        "CurrentPrice": price,
+                        "RunningHigh":  intra_high,
+                        "RunningLow":   price,
+                        "Status":       "Pending",
+                        "ExitTime":     "",
+                        "PnL_pct":      0.0,
+                    }
+                    lt_df = pd.concat([lt_df, pd.DataFrame([new_trade])], ignore_index=True)
+                    today_keys.add((ticker, score_type))
+                    print(f"⚡ live_trades: new entry {ticker}[{score_type}] @ {price} (Score={score_val})")
 
         # enforce column order, fill missing columns
         for col in LIVE_TRADES_COLS:
