@@ -2907,7 +2907,7 @@ def live_trades_page():
     now_peru = datetime.now(PERU_TZ)
 
     # ── Buttons ───────────────────────────────────────────────────────────────
-    col_btn1, col_btn2, _ = st.columns([1, 1, 5])
+    col_btn1, col_btn2, col_btn3, _ = st.columns([1, 1, 1, 4])
     with col_btn1:
         if st.button("🗑️ Clear Closed", help="מעביר עסקאות סגורות (TP/SL) לארכיון ב-Sheets"):
             try:
@@ -2969,8 +2969,23 @@ def live_trades_page():
         if col in df.columns:
             df[col] = pd.to_numeric(df[col], errors="coerce")
 
-    df["Change%"] = ((df["CurrentPrice"] - df["EntryPrice"]) / df["EntryPrice"] * 100).round(2)
+    df["Change%"] = ((df["CurrentPrice"] - df["EntryPrice"]) / df["EntryPrice"] * 100).round(1)
     df["PnL_$"]   = (df["PnL_pct"].fillna(0) / 100 * ENTRY_AMOUNT).round(2)
+
+    # Round price columns to 2 decimal places
+    for _col in ["EntryPrice", "CurrentPrice", "TP10_Price", "SL_Price"]:
+        if _col in df.columns:
+            df[_col] = df[_col].round(2)
+
+    # ── Download All button (placed in col_btn3 defined above) ───────────────
+    with col_btn3:
+        _dl_cols = ["ScoreType", "EntryTime", "Ticker", "EntryPrice", "CurrentPrice",
+                    "Change%", "TP10_Price", "SL_Price", "Status", "PnL_$"]
+        _dl_df = df[[c for c in _dl_cols if c in df.columns]].copy()
+        _dl_csv = _dl_df.to_csv(index=False).encode("utf-8")
+        _dl_fname = f"live_trades_{now_peru.strftime('%Y-%m-%d')}.csv"
+        st.download_button("📥 Download All", data=_dl_csv,
+                           file_name=_dl_fname, mime="text/csv")
 
     # ── Global summary ────────────────────────────────────────────────────────
     g_pending = int((df["Status"] == "Pending").sum())
@@ -3035,7 +3050,10 @@ def live_trades_page():
             sub = sub.sort_values(["_sort", "EntryTime"], ascending=[True, False]).drop(columns=["_sort"])
             avail = [c for c in DISPLAY_COLS if c in sub.columns]
             tbl = sub[avail].reset_index(drop=True)
-            st.dataframe(tbl.style.apply(_color_row, axis=1), use_container_width=True)
+            fmt = {c: "{:.2f}" for c in ["EntryPrice", "CurrentPrice", "TP10_Price", "SL_Price", "PnL_$"] if c in tbl.columns}
+            if "Change%" in tbl.columns:
+                fmt["Change%"] = "{:.1f}%"
+            st.dataframe(tbl.style.apply(_color_row, axis=1).format(fmt), use_container_width=True)
 
     st.caption(f"⏱ עדכון אחרון: {now_peru.strftime('%H:%M:%S')} Peru · מתרענן כל 60 שניות")
     st.markdown('<meta http-equiv="refresh" content="60">', unsafe_allow_html=True)
