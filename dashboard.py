@@ -2794,27 +2794,49 @@ def score_tracker_page():
             tracker_df["Date"] + " " + tracker_df["ScanTime"], errors="coerce"
         )
 
-    # ── Header row ──────────────────────────────────────────────────────────────
-    hc = st.columns([2, 2, 1, 1])
-    hc[0].markdown("**Ticker**")
-    hc[1].markdown("**תאריך כניסה**")
-    hc[2].markdown("**סטטוס**")
-    hc[3].markdown("**נקודות**")
-    st.divider()
-
     # ── One expander per stock ───────────────────────────────────────────────────
     for s in stocks:
         tk     = s["Ticker"]
         sd     = s["ScanDate"]
         window = s["Window"]
-        status = s["Status"]
 
-        # Count how many data points exist for this stock
-        n_pts = 0
-        if not tracker_df.empty:
-            n_pts = int(((tracker_df["Ticker"] == tk) & (tracker_df["ScanDate"] == sd)).sum())
+        # ── Precompute stats for expander label ──────────────────────────────
+        _entry_score = _cur_score = _scan_price = _cur_price = None
+        _tp_price = _sl_price = None
+        _trade_status = "⏳ Pending"
+        _n_pts = 0
 
-        label = f"**{tk}** &nbsp;&nbsp; {sd} &nbsp;&nbsp; {status} &nbsp;&nbsp; ({n_pts} נק')"
+        if not tracker_df.empty and "dt" in tracker_df.columns:
+            _sdf_pre = tracker_df[
+                (tracker_df["Ticker"] == tk) & (tracker_df["ScanDate"] == sd)
+            ].dropna(subset=["dt", "Score"]).sort_values("dt")
+            _n_pts = len(_sdf_pre)
+
+            if not _sdf_pre.empty:
+                _entry_score = float(_sdf_pre["Score"].iloc[0])
+                _cur_score   = float(_sdf_pre["Score"].iloc[-1])
+                if "Price" in _sdf_pre.columns:
+                    _pp = pd.to_numeric(_sdf_pre["Price"], errors="coerce").dropna()
+                    if not _pp.empty:
+                        _scan_price = round(float(_pp.iloc[0]), 2)
+                        _cur_price  = round(float(_pp.iloc[-1]), 2)
+                        _tp_price   = round(_scan_price * 0.90, 2)
+                        _sl_price   = round(_scan_price * 1.07, 2)
+                        if _pp.min() <= _tp_price:
+                            _trade_status = "✅ TP10"
+                        elif _pp.max() >= _sl_price:
+                            _trade_status = "❌ SL"
+
+        # Build rich label
+        _score_str = f" | Score: {_entry_score:.0f}" if _entry_score is not None else ""
+        if _scan_price and _cur_price:
+            _chg_lbl = (_cur_price - _scan_price) / _scan_price * 100
+            _dir     = "▼" if _chg_lbl < 0 else "▲"
+            _price_str = f" | ${_scan_price:.2f}→${_cur_price:.2f} {_dir}{abs(_chg_lbl):.1f}%"
+        else:
+            _price_str = ""
+        label = f"**{tk}** · {sd}{_score_str}{_price_str} · {_trade_status} · ({_n_pts} נק')"
+
         with st.expander(label, expanded=False):
             if tracker_df.empty:
                 st.info("⏳ אין נתוני score_tracker עדיין.")
@@ -2828,144 +2850,135 @@ def score_tracker_page():
                 st.info("⏳ אין עדיין נתונים עבור מניה זו.")
                 continue
 
-            # ── Price metrics row ────────────────────────────────────────────
-            scan_price = cur_price = tp_price = sl_price = None
             if "Price" in sdf.columns:
-                _prices = pd.to_numeric(sdf["Price"], errors="coerce").dropna()
-                if not _prices.empty:
-                    scan_price = round(float(_prices.iloc[0]), 2)
-                    cur_price  = round(float(_prices.iloc[-1]), 2)
-                    tp_price   = round(scan_price * 0.90, 2)
-                    sl_price   = round(scan_price * 1.07, 2)
-                    _chg = (cur_price - scan_price) / scan_price * 100
-                    mc1, mc2, mc3, mc4 = st.columns(4)
-                    mc1.metric("📌 כניסה",      f"${scan_price:.2f}")
-                    mc2.metric("💵 כרגע",        f"${cur_price:.2f}",  f"{_chg:+.1f}%")
-                    mc3.metric("🎯 TP (−10%)",   f"${tp_price:.2f}")
-                    mc4.metric("🛑 SL (+7%)",    f"${sl_price:.2f}")
+                sdf["Price"] = pd.to_numeric(sdf["Price"], errors="coerce")
 
-            gran = st.radio(
-                "רזולוציה",
-                ["דקות", "שעות"],
-                horizontal=True,
-                key=f"gran_{tk}_{sd}",
-            )
+            # Use precomputed price stats (already computed above)
+            scan_price = _scan_price
+            cur_price  = _cur_price
+            tp_price   = _tp_price
+            sl_price   = _sl_price
 
-            # ── Score chart ──────────────────────────────────────────────────
-            plot_df = sdf[["dt", "Score"]].copy()
-            if gran == "שעות":
-                plot_df = (
-                    plot_df.set_index("dt")
-                    .resample("1h")["Score"]
-                    .mean()
-                    .dropna()
-                    .reset_index()
-                )
+            gran = st.radio("רזולוציה", ["דקות", "שעות"], horizontal=True,
+                            key=f"gran_{tk}_{sd}")
 
-            fig = _go.Figure()
-            fig.add_trace(_go.Scatter(
-                x=plot_df["dt"],
-                y=plot_df["Score"],
-                mode="lines+markers",
-                name="Score",
-                line=dict(color="#1d6fe8", width=2),
-                marker=dict(size=5 if gran == "שעות" else 3),
-                hovertemplate="%{x|%m/%d %H:%M}<br>Score: %{y:.1f}<extra></extra>",
-            ))
-
-            # Day boundary lines
-            for i, day in enumerate(window):
-                day_open = pd.Timestamp(day + " 08:30")
-                if plot_df["dt"].min() <= day_open <= plot_df["dt"].max() + pd.Timedelta(hours=8):
-                    fig.add_vline(
-                        x=day_open.value / 1e6,
-                        line_dash="dash", line_color="#aaa", line_width=1,
-                        annotation_text=f"D{i+1}",
-                        annotation_font_color="#555",
-                        annotation_position="top right",
-                    )
-
-            # Score zone bands (light-background friendly)
-            fig.add_hrect(y0=80, y1=100, fillcolor="#ffe0e0", opacity=0.35, line_width=0)
-            fig.add_hrect(y0=60, y1=80,  fillcolor="#e0f0e0", opacity=0.35, line_width=0)
-            fig.add_hrect(y0=40, y1=60,  fillcolor="#fff8e0", opacity=0.35, line_width=0)
-
-            fig.update_layout(
-                height=300,
-                margin=dict(l=10, r=10, t=25, b=10),
-                paper_bgcolor="white",
-                plot_bgcolor="white",
-                font=dict(color="#222", size=12),
+            # ── Shared chart layout ───────────────────────────────────────
+            _BASE = dict(
+                height=290, margin=dict(l=10, r=10, t=35, b=10),
+                paper_bgcolor="white", plot_bgcolor="white",
+                font=dict(color="#222", size=11),
                 xaxis=dict(gridcolor="#e0e0e0", tickformat="%m/%d\n%H:%M"),
-                yaxis=dict(gridcolor="#e0e0e0", title="Score", range=[0, 100]),
                 showlegend=False,
             )
-            st.plotly_chart(fig, use_container_width=True, key=f"chart_{tk}_{sd}")
 
-            # ── Price chart with TP / SL reference lines ─────────────────────
-            if scan_price and "Price" in sdf.columns:
-                _price_df = sdf[["dt", "Price"]].copy()
-                _price_df["Price"] = pd.to_numeric(_price_df["Price"], errors="coerce")
-                if gran == "שעות":
-                    _price_df = (
-                        _price_df.set_index("dt")
-                        .resample("1h")["Price"]
-                        .mean()
-                        .dropna()
-                        .reset_index()
-                    )
-
-                fig2 = _go.Figure()
-                fig2.add_trace(_go.Scatter(
-                    x=_price_df["dt"],
-                    y=_price_df["Price"],
-                    mode="lines+markers",
-                    name="Price",
-                    line=dict(color="#1d6fe8", width=2),
-                    marker=dict(size=5 if gran == "שעות" else 3),
-                    hovertemplate="%{x|%m/%d %H:%M}<br>$%{y:.2f}<extra></extra>",
-                ))
-
-                # Reference lines
-                fig2.add_hline(y=scan_price, line_dash="dot", line_color="gray",
-                               line_width=1.5,
-                               annotation_text=f"Entry ${scan_price:.2f}",
-                               annotation_position="bottom right",
-                               annotation_font_color="gray")
-                fig2.add_hline(y=tp_price, line_dash="dot", line_color="green",
-                               line_width=1.5,
-                               annotation_text=f"TP ${tp_price:.2f}",
-                               annotation_position="bottom right",
-                               annotation_font_color="green")
-                fig2.add_hline(y=sl_price, line_dash="dot", line_color="red",
-                               line_width=1.5,
-                               annotation_text=f"SL ${sl_price:.2f}",
-                               annotation_position="top right",
-                               annotation_font_color="red")
-
-                # Day boundaries
+            def _add_day_vlines(fig, plot_dt_series):
                 for i, day in enumerate(window):
                     day_open = pd.Timestamp(day + " 08:30")
-                    if _price_df["dt"].min() <= day_open <= _price_df["dt"].max() + pd.Timedelta(hours=8):
-                        fig2.add_vline(
-                            x=day_open.value / 1e6,
-                            line_dash="dash", line_color="#aaa", line_width=1,
-                            annotation_text=f"D{i+1}",
-                            annotation_font_color="#555",
-                            annotation_position="top right",
-                        )
+                    if plot_dt_series.min() <= day_open <= plot_dt_series.max() + pd.Timedelta(hours=8):
+                        fig.add_vline(x=day_open.value / 1e6,
+                                      line_dash="dash", line_color="#aaa", line_width=1,
+                                      annotation_text=f"D{i+1}",
+                                      annotation_font_color="#555",
+                                      annotation_position="top right")
 
-                fig2.update_layout(
-                    height=280,
-                    margin=dict(l=10, r=10, t=25, b=10),
-                    paper_bgcolor="white",
-                    plot_bgcolor="white",
-                    font=dict(color="#222", size=12),
-                    xaxis=dict(gridcolor="#e0e0e0", tickformat="%m/%d\n%H:%M"),
-                    yaxis=dict(gridcolor="#e0e0e0", title="Price ($)"),
-                    showlegend=False,
+            col_score, col_price = st.columns(2)
+
+            # ── Left: Score Trajectory ────────────────────────────────────
+            with col_score:
+                ps = sdf[["dt", "Score"]].copy()
+                if gran == "שעות":
+                    ps = ps.set_index("dt").resample("1h")["Score"].mean().dropna().reset_index()
+
+                fig_s = _go.Figure()
+                fig_s.add_trace(_go.Scatter(
+                    x=ps["dt"], y=ps["Score"], mode="lines+markers",
+                    line=dict(color="#1d6fe8", width=2), marker=dict(size=3),
+                    hovertemplate="%{x|%m/%d %H:%M}<br>Score: %{y:.1f}<extra></extra>",
+                ))
+                # Entry star marker
+                fig_s.add_trace(_go.Scatter(
+                    x=[ps["dt"].iloc[0]], y=[ps["Score"].iloc[0]],
+                    mode="markers", marker=dict(color="orange", size=12, symbol="star"),
+                    hovertemplate=f"Entry Score: {ps['Score'].iloc[0]:.1f}<extra></extra>",
+                ))
+                # Entry score baseline
+                if _entry_score is not None:
+                    fig_s.add_hline(y=_entry_score, line_dash="dash", line_color="orange",
+                                    line_width=1.5,
+                                    annotation_text=f"Entry {_entry_score:.0f}",
+                                    annotation_position="bottom right",
+                                    annotation_font_color="darkorange")
+                # Zone bands
+                fig_s.add_hrect(y0=80, y1=100, fillcolor="#ffe0e0", opacity=0.3, line_width=0)
+                fig_s.add_hrect(y0=60, y1=80,  fillcolor="#e0f0e0", opacity=0.3, line_width=0)
+                fig_s.add_hrect(y0=40, y1=60,  fillcolor="#fff8e0", opacity=0.3, line_width=0)
+                _add_day_vlines(fig_s, ps["dt"])
+                fig_s.update_layout(**{**_BASE,
+                    "title": dict(text="Score Trajectory", font=dict(size=13)),
+                    "yaxis": dict(gridcolor="#e0e0e0", title="Score", range=[0, 100])})
+                st.plotly_chart(fig_s, use_container_width=True, key=f"chart_{tk}_{sd}")
+
+            # ── Right: Price vs TP/SL ─────────────────────────────────────
+            with col_price:
+                if scan_price and "Price" in sdf.columns:
+                    pp = sdf[["dt", "Price"]].dropna().copy()
+                    if gran == "שעות":
+                        pp = pp.set_index("dt").resample("1h")["Price"].mean().dropna().reset_index()
+
+                    fig_p = _go.Figure()
+                    fig_p.add_trace(_go.Scatter(
+                        x=pp["dt"], y=pp["Price"], mode="lines+markers",
+                        line=dict(color="#1d6fe8", width=2), marker=dict(size=3),
+                        hovertemplate="%{x|%m/%d %H:%M}<br>$%{y:.2f}<extra></extra>",
+                    ))
+                    fig_p.add_hline(y=scan_price, line_dash="dot", line_color="#888",
+                                    line_width=1.5,
+                                    annotation_text=f"Entry ${scan_price:.2f}",
+                                    annotation_position="bottom right",
+                                    annotation_font_color="#555")
+                    fig_p.add_hline(y=tp_price, line_dash="dot", line_color="green",
+                                    line_width=1.5,
+                                    annotation_text=f"TP ${tp_price:.2f}",
+                                    annotation_position="bottom right",
+                                    annotation_font_color="green")
+                    fig_p.add_hline(y=sl_price, line_dash="dot", line_color="red",
+                                    line_width=1.5,
+                                    annotation_text=f"SL ${sl_price:.2f}",
+                                    annotation_position="top right",
+                                    annotation_font_color="red")
+                    _add_day_vlines(fig_p, pp["dt"])
+                    fig_p.update_layout(**{**_BASE,
+                        "title": dict(text="Price vs TP/SL", font=dict(size=13)),
+                        "yaxis": dict(gridcolor="#e0e0e0", title="Price ($)")})
+                    st.plotly_chart(fig_p, use_container_width=True, key=f"price_{tk}_{sd}")
+                else:
+                    st.info("אין נתוני מחיר.")
+
+            # ── Summary text ──────────────────────────────────────────────
+            peak_score  = sdf["Score"].max()
+            peak_dt     = sdf.loc[sdf["Score"].idxmax(), "dt"]
+            final_score = float(sdf["Score"].iloc[-1])
+            drop_pct    = (final_score - peak_score) / peak_score * 100 if peak_score else 0
+            days_since  = (datetime.now(PERU_TZ).date()
+                           - datetime.strptime(sd, "%Y-%m-%d").date()).days
+
+            st.markdown(
+                f"📈 **Peak Score:** {peak_score:.0f} ב-{peak_dt.strftime('%m/%d %H:%M')}"
+                f" &nbsp;|&nbsp; 📉 **Current Score:** {final_score:.0f}"
+                f" &nbsp;|&nbsp; 🔻 {abs(drop_pct):.0f}% מהשיא"
+            )
+            if scan_price and cur_price:
+                _chg_sum = (cur_price - scan_price) / scan_price * 100
+                st.markdown(
+                    f"💰 **Entry:** ${scan_price:.2f}"
+                    f" &nbsp;|&nbsp; **Current:** ${cur_price:.2f}"
+                    f" &nbsp;|&nbsp; **Change:** {_chg_sum:+.1f}%"
                 )
-                st.plotly_chart(fig2, use_container_width=True, key=f"price_{tk}_{sd}")
+                st.markdown(
+                    f"🎯 **TP10 at** ${tp_price:.2f}"
+                    f" &nbsp;|&nbsp; 🛑 **SL at** ${sl_price:.2f}"
+                    f" &nbsp;|&nbsp; 📅 **Days since entry:** {days_since}"
+                )
 
 
 
