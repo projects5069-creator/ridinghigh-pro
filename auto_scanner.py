@@ -51,9 +51,9 @@ def is_trading_day(date=None):
             end_date=date.strftime("%Y-%m-%d")
         )
         return not schedule.empty
-    except ImportError:
+    except Exception:
         # Fallback: weekday only (no holiday detection)
-        print("[Scanner] ⚠️ pandas_market_calendars not installed — using weekday-only check")
+        print("[Scanner] ⚠️ pandas_market_calendars unavailable — using weekday-only check")
         return date.weekday() < 5
 
 # ── Google Sheets client ─────────────────────────────────────────────────────
@@ -1021,7 +1021,8 @@ def update_live_trades(gc, now_peru, results=None):
 
         ws = sheets_manager.get_worksheet("live_trades", gc=gc)
         if ws is None:
-            print("⚠️ live_trades worksheet not found")
+            print("⚠️ live_trades worksheet not found — check Drive quota or sheets_config.json")
+            print(f"   Hint: run 'python3 monthly_rotation.py' or free Drive storage and retry")
             return
 
         raw = ws.get_all_values()
