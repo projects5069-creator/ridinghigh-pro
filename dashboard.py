@@ -1534,7 +1534,7 @@ def main_page():
             try:
                 styled_df = styled_df.map(color_entry_score, subset=['EntryScore'])
             except AttributeError:
-                styled_df = styled_df.applymap(color_entry_score, subset=['EntryScore'])
+                styled_df = styled_df.map(color_entry_score, subset=['EntryScore'])
         
         table_height = min(600, len(df) * 40 + 50)
         
@@ -3164,7 +3164,7 @@ def score_comparison_page():
         if val == 0:   return "background-color: #4a1a1a; color: #ff8080"
         return ""
 
-    styled = tbl.reset_index(drop=True).style.applymap(_color_tp10, subset=["TP10_Hit"])
+    styled = tbl.reset_index(drop=True).style.map(_color_tp10, subset=["TP10_Hit"])
     st.dataframe(styled, use_container_width=True)
 
     st.divider()
