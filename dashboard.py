@@ -3395,29 +3395,72 @@ def score_comparison_page():
 
     st.divider()
 
-    # ── Section 3: Full stock table ───────────────────────────────────────────
+    # ── Section 3: Full stock table (all stocks) ──────────────────────────────
     st.subheader("📄 סקשן 3 — טבלת מניות עם כל הציונים")
 
-    display_cols = ["Ticker", "ScanDate", "TP10_Hit", "MaxDrop%"] + \
-                   [c for c in SCORE_COLS if c in has_outcome.columns]
-    tbl = has_outcome[display_cols].copy()
-    if "ScanDate" in tbl.columns:
-        tbl = tbl.sort_values("ScanDate", ascending=False)
+    # Build Status column from the full df (not just has_outcome)
+    sc3_all = df.copy()
+    for col in SCORE_COLS + ["TP10_Hit", "SL7_Hit_D1", "MaxDrop%"]:
+        if col in sc3_all.columns:
+            sc3_all[col] = pd.to_numeric(sc3_all[col], errors="coerce")
 
-    # Round score columns to 2 decimal places
-    for col in [c for c in SCORE_COLS if c in tbl.columns]:
-        tbl[col] = pd.to_numeric(tbl[col], errors="coerce").round(2)
+    def _get_status(row):
+        if row.get("TP10_Hit") == 1:                           return "✅ TP10"
+        if row.get("SL7_Hit_D1") == 1:                        return "❌ SL"
+        return "⏳ Pending"
 
-    def _color_tp10(val):
-        if val == 1:   return "background-color: #1a4a1a; color: #80ff80"
-        if val == 0:   return "background-color: #4a1a1a; color: #ff8080"
-        return ""
+    sc3_all["Status"] = sc3_all.apply(_get_status, axis=1)
 
-    sc3_cols = [c for c in SCORE_COLS if c in tbl.columns]
-    fmt_sc3  = {c: "{:.2f}" for c in sc3_cols}
-    tbl_reset = tbl.reset_index(drop=True)
-    styled = tbl_reset.style.map(_color_tp10, subset=["TP10_Hit"]).format(fmt_sc3, na_rep="-")
-    st.dataframe(styled, use_container_width=True)
+    # Summary line
+    n_total   = len(sc3_all)
+    n_tp10    = int((sc3_all["Status"] == "✅ TP10").sum())
+    n_sl      = int((sc3_all["Status"] == "❌ SL").sum())
+    n_pending = int((sc3_all["Status"] == "⏳ Pending").sum())
+    n_closed  = n_tp10 + n_sl
+    win_rate  = round(n_tp10 / n_closed * 100, 1) if n_closed > 0 else 0
+    st.markdown(
+        f"**סה\"כ {n_total} מניות** | ✅ {n_tp10} TP10 | ❌ {n_sl} SL | "
+        f"⏳ {n_pending} Pending | **Win Rate: {win_rate}%**"
+    )
+
+    sc3_cols   = [c for c in SCORE_COLS if c in sc3_all.columns]
+    disp_cols  = ["Ticker", "ScanDate", "Status"] + sc3_cols + ["MaxDrop%", "TP10_Hit"]
+    disp_cols  = [c for c in disp_cols if c in sc3_all.columns]
+    tbl3 = sc3_all[disp_cols].sort_values("ScanDate", ascending=False).reset_index(drop=True)
+
+    # Round scores
+    for col in sc3_cols:
+        tbl3[col] = tbl3[col].round(2)
+
+    # Row color (non-score columns only — scores get their own cell color)
+    def _row_style(row):
+        status = str(row.get("Status", ""))
+        if "✅" in status:  bg, fg = "#1a4a1a", "#80ff80"
+        elif "❌" in status: bg, fg = "#4a1a1a", "#ff8080"
+        elif "⏳" in status: bg, fg = "#3a3a10", "#ffff99"
+        else:               bg, fg = "", ""
+        style = f"background-color: {bg}; color: {fg}" if bg else ""
+        return [style if c not in sc3_cols else "" for c in row.index]
+
+    # Score cell color by value
+    def _score_cell(val):
+        try:
+            v = float(val)
+        except (TypeError, ValueError):
+            return "color: #888888"
+        if v >= 80:  return "background-color: #5a1a1a; color: #ffaaaa"
+        if v >= 60:  return "background-color: #5a3a00; color: #ffcc80"
+        if v >= 45:  return "background-color: #4a4a00; color: #ffff80"
+        return "background-color: #2a2a2a; color: #888888"
+
+    fmt_sc3 = {c: "{:.2f}" for c in sc3_cols}
+    styled3 = (
+        tbl3.style
+        .apply(_row_style, axis=1)
+        .map(_score_cell, subset=sc3_cols)
+        .format(fmt_sc3, na_rep="-")
+    )
+    st.dataframe(styled3, use_container_width=True)
 
     st.divider()
 
