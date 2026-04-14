@@ -3456,13 +3456,21 @@ def score_comparison_page():
              .sort_values("ScanDate", ascending=False)
              .reset_index(drop=True))
     for col in sc3_score_cols:
-        tbl3a[col] = tbl3a[col].round(2)
+        tbl3a[col] = pd.to_numeric(tbl3a[col], errors="coerce").round(2)
+    if "MaxDrop%" in tbl3a.columns:
+        tbl3a["MaxDrop%"] = pd.to_numeric(tbl3a["MaxDrop%"], errors="coerce").round(1)
+    if "TP10_Hit" in tbl3a.columns:
+        tbl3a["TP10_Hit"] = pd.to_numeric(tbl3a["TP10_Hit"], errors="coerce").round(0).astype("Int64")
 
+    _fmt3a = {**fmt_sc3, **({
+        "MaxDrop%": "{:.1f}",
+        "TP10_Hit": "{:.0f}",
+    })}
     st.dataframe(
         tbl3a.style
              .apply(_row_style, axis=1)
              .map(_score_cell, subset=sc3_score_cols)
-             .format(fmt_sc3, na_rep="-"),
+             .format(_fmt3a, na_rep="-"),
         use_container_width=True
     )
 
@@ -3510,13 +3518,21 @@ def score_comparison_page():
                  .sort_values(["TP10_Hit", "ScanDate"], ascending=[False, False])
                  .reset_index(drop=True))
         for col in sc3_score_cols:
-            tbl3b[col] = tbl3b[col].round(2)
+            tbl3b[col] = pd.to_numeric(tbl3b[col], errors="coerce").round(2)
+        if "MaxDrop%" in tbl3b.columns:
+            tbl3b["MaxDrop%"] = pd.to_numeric(tbl3b["MaxDrop%"], errors="coerce").round(1)
+        if "TP10_Hit" in tbl3b.columns:
+            tbl3b["TP10_Hit"] = pd.to_numeric(tbl3b["TP10_Hit"], errors="coerce").round(0).astype("Int64")
 
+        _fmt3b = {**fmt_sc3, **({
+            "MaxDrop%": "{:.1f}",
+            "TP10_Hit": "{:.0f}",
+        })}
         st.dataframe(
             tbl3b.style
                  .apply(_row_style, axis=1)
                  .map(_score_cell, subset=sc3_score_cols)
-                 .format(fmt_sc3, na_rep="-"),
+                 .format(_fmt3b, na_rep="-"),
             use_container_width=True
         )
 
