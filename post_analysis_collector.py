@@ -305,7 +305,8 @@ def run(target_date: str = None):
         return
     print("[Collector] ✅ Google Sheets connected")
 
-    today_str = target_date if target_date else run_start.strftime("%Y-%m-%d")
+    today_str  = run_start.strftime("%Y-%m-%d")          # always the real calendar date
+    target_str = target_date if target_date else today_str  # date being processed
 
     # Load snapshots
     ws = sheets_manager.get_worksheet("daily_snapshots", gc=gc)
@@ -319,24 +320,28 @@ def run(target_date: str = None):
     print(f"[Collector] daily_snapshots: {len(snapshots_df)} rows")
 
     # ── Fallback: if daily_snapshots has no rows for today, use timeline_live ──
-    has_today_in_snap = (not snapshots_df.empty and
-                         not snapshots_df[snapshots_df.get("Date", pd.Series(dtype=str)) == today_str].empty)
-    if not has_today_in_snap:
-        print(f"[Collector] ⚠️ No rows for {today_str} in daily_snapshots — falling back to timeline_live")
+    has_target_in_snap = (not snapshots_df.empty and
+                          not snapshots_df[snapshots_df.get("Date", pd.Series(dtype=str)) == target_str].empty)
+    if not has_target_in_snap:
+        print(f"[Collector] ⚠️ No rows for {target_str} in daily_snapshots — falling back to timeline_live")
         ws_tl_fb = sheets_manager.get_worksheet("timeline_live", gc=gc)
         tl_raw_fb = ws_tl_fb.get_all_values() if ws_tl_fb else []
         if len(tl_raw_fb) > 1:
             tl_fb = pd.DataFrame(tl_raw_fb[1:], columns=tl_raw_fb[0])
             tl_fb["Score"] = pd.to_numeric(tl_fb["Score"], errors="coerce")
-            tl_today = tl_fb[tl_fb["Date"] == today_str].copy()
-            if not tl_today.empty:
+            tl_target = tl_fb[tl_fb["Date"] == target_str].copy()
+            if not tl_target.empty:
                 # Peak-score row per ticker from timeline_live
-                peak = tl_today.sort_values("Score", ascending=False).drop_duplicates("Ticker")
-                peak = peak.rename(columns={"Date": "Date"})  # keep Date column as-is
-                snapshots_df = pd.concat([snapshots_df, peak], ignore_index=True)
+                peak = tl_target.sort_values("Score", ascending=False).drop_duplicates("Ticker").reset_index(drop=True)
+                # When backfilling a specific date, use peak rows directly (don't concat
+                # with today's daily_snapshots which has different columns / shape).
+                if target_date:
+                    snapshots_df = peak
+                else:
+                    snapshots_df = pd.concat([snapshots_df, peak], ignore_index=True)
                 print(f"[Collector] ✅ Added {len(peak)} tickers from timeline_live fallback")
             else:
-                print(f"[Collector] ❌ timeline_live also has no rows for {today_str}")
+                print(f"[Collector] ❌ timeline_live also has no rows for {target_str}")
         else:
             print("[Collector] ❌ timeline_live is empty")
 
@@ -345,8 +350,8 @@ def run(target_date: str = None):
         return
 
     if target_date:
-        snapshots_df = snapshots_df[snapshots_df.get("Date", pd.Series(dtype=str)) == target_date]
-        print(f"[Collector] Filtered to {len(snapshots_df)} rows for {target_date}")
+        snapshots_df = snapshots_df[snapshots_df.get("Date", pd.Series(dtype=str)) == target_str]
+        print(f"[Collector] Filtered to {len(snapshots_df)} rows for {target_str}")
     else:
         today_rows = snapshots_df[snapshots_df.get("Date", pd.Series(dtype=str)) == today_str]
         print(f"[Collector] Today ({today_str}) rows available: {len(today_rows)}")
@@ -373,7 +378,7 @@ def run(target_date: str = None):
         scan_price = pd.to_numeric(row.get("Price", 0), errors="coerce") or 0
 
         if not ticker or not scan_date: continue
-        is_today = (scan_date == today_str)
+        is_today = (scan_date == today_str)   # True only for the real calendar today
 
         trading_days = get_trading_days_after(scan_date, DAYS_FORWARD)
         existing_match = pd.DataFrame()

@@ -1292,10 +1292,41 @@ def _build_timeline_summary(arch_df):
     return pd.DataFrame(rows)
 
 
+def health_check_section():
+    """Collapsible health check panel at the top of the main page."""
+    with st.expander("🔍 System Health Check", expanded=False):
+        col_btn, col_quiet, _ = st.columns([1, 1, 4])
+        run_full   = col_btn.button("▶ Run Full Check", key="hc_run_full")
+        run_quiet  = col_quiet.button("▶ Errors Only",   key="hc_run_quiet")
+
+        if run_full or run_quiet:
+            with st.spinner("בודק מערכת..."):
+                try:
+                    import health_check
+                    lines = health_check.run(quiet=run_quiet)
+                    st.session_state["hc_result"] = lines
+                except Exception as e:
+                    st.session_state["hc_result"] = [f"❌ Health check נכשל: {e}"]
+
+        if "hc_result" in st.session_state:
+            report = "\n".join(st.session_state["hc_result"])
+            # Colour the output: errors red, warnings orange, ok green
+            has_critical = any("❌" in l for l in st.session_state["hc_result"])
+            has_warn     = any("⚠️" in l for l in st.session_state["hc_result"])
+            border = "#e74c3c" if has_critical else ("#f39c12" if has_warn else "#27ae60")
+            st.markdown(
+                f"<pre style='background:#111;color:#eee;padding:12px;border-radius:6px;"
+                f"border-left:4px solid {border};font-size:0.82rem;white-space:pre-wrap'>"
+                f"{report}</pre>",
+                unsafe_allow_html=True,
+            )
+
+
 def main_page():
     st.title("🚀 RidingHigh Pro v14.6")
     st.caption("Portfolio Tracker - Auto-saves stocks with score 60+ at 14:59")
     system_health_bar()
+    health_check_section()
 
     if 'dashboard' not in st.session_state:
         st.session_state.dashboard = Dashboard()
