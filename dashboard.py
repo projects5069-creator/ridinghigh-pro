@@ -1537,9 +1537,9 @@ def main_page():
             row_d = {
                 'Ticker': r['Ticker'],
                 'Score': f"{r['Score']:.2f}",
-                'EntryScore': f"{entry_s:.0f}" if r['Score'] >= 60 else "—",
+                'EntryScore': f"{entry_s:.2f}" if r['Score'] >= 60 else "—",
                 'Price': f"${r['Price']:.2f}",
-                'MxV': f"{r['MxV']:.1f}%",
+                'MxV': f"{r['MxV']:.0f}%",
                 'RunUp': f"{r['RunUp']:+.1f}%",
                 'REL VOL': f"{r['REL_VOL']:.1f}x",
             }
@@ -1709,17 +1709,20 @@ def daily_summary_page():
 
     df = df.sort_values("Score", ascending=False, ignore_index=True) if "Score" in df.columns else df
 
-    def fmt(val):
-        try:
-            v = float(val)
-            if abs(v) >= 1000 and v == int(v):
-                return f"{int(v):,}"
-            return f"{v:.2f}"
-        except:
-            return val
-
+    # Column-specific format dict (rules: Score=2dp, MxV=0dp int, %=1dp, REL_VOL=1dp, others=2dp)
+    _fmt_map = {
+        "Score":   "{:.2f}",
+        "MxV":     "{:.0f}",
+        "RunUp":   "{:.1f}",
+        "REL_VOL": "{:.1f}",
+        "RSI":     "{:.1f}",
+        "ATRX":    "{:.1f}",
+        "Gap":     "{:.1f}",
+        "VWAP":    "{:.1f}",
+    }
+    fmt_dict = {c: _fmt_map.get(c, "{:.2f}") for c in df.columns if c != "Ticker"}
     numeric_cols = [c for c in df.columns if c != "Ticker" and df[c].dtype in ['float64','float32','int64','int32']]
-    styled_df = df.style.apply(highlight_score, axis=1).format(fmt, subset=numeric_cols)
+    styled_df = df.style.apply(highlight_score, axis=1).format(fmt_dict, subset=numeric_cols)
     st.dataframe(styled_df, use_container_width=True, hide_index=True, height=table_height)
     
     csv = df.to_csv(index=False)
@@ -2390,7 +2393,7 @@ def post_analysis_page():
         if col in ["TP10_Hit", "TP15_Hit", "TP20_Hit", "BestDay"]:
             format_dict[col] = "{:.0f}"
         elif "%" in col:
-            format_dict[col] = "{:.2f}%"
+            format_dict[col] = "{:.1f}%"
         else:
             format_dict[col] = "{:.2f}"
 
@@ -2474,7 +2477,7 @@ def post_analysis_page():
             "מניות": len(t),
             "הגיע ל-10%": f"{tp10_t}/{len(t)} ({tp10_t/len(t)*100:.0f}%)",
             "הגיע ל-15%": f"{tp15_t}/{len(t)} ({tp15_t/len(t)*100:.0f}%)",
-            "ירידה ממוצעת": f"{avg_drop_t:.2f}%"
+            "ירידה ממוצעת": f"{avg_drop_t:.1f}%"
         })
     if tier_rows:
         st.dataframe(pd.DataFrame(tier_rows), use_container_width=True, hide_index=True)
@@ -2491,7 +2494,7 @@ def post_analysis_page():
         for col in available_metrics:
             try:
                 corr = df[col].corr(df["MaxDrop%"])
-                corr_data.append({"מדד": col, "קורלציה עם הירידה": round(corr, 3)})
+                corr_data.append({"מדד": col, "קורלציה עם הירידה": round(corr, 2)})
             except:
                 pass
         if corr_data:
@@ -3364,7 +3367,11 @@ def score_comparison_page():
         })
 
     perf_df = pd.DataFrame(perf_rows).dropna(subset=["Win Rate"]).sort_values("Win Rate", ascending=False)
-    st.dataframe(perf_df.reset_index(drop=True), use_container_width=True)
+    _perf_fmt = {"Win Rate": "{:.1f}", "Avg MaxDrop% (winners)": "{:.1f}", "n (≥60)": "{:.0f}"}
+    st.dataframe(
+        perf_df.reset_index(drop=True).style.format(_perf_fmt, na_rep="-"),
+        use_container_width=True
+    )
 
     st.divider()
 
@@ -3534,7 +3541,10 @@ def score_comparison_page():
         ).round(1)
         rank_df = rank_df.sort_values("Wins (TP10=1)", ascending=False)
         rank_df.index.name = "Score"
-        st.dataframe(rank_df, use_container_width=True)
+        st.dataframe(
+            rank_df.style.format({"Win% when highest": "{:.1f}"}, na_rep="-"),
+            use_container_width=True
+        )
     else:
         st.info("אין עמודות ציון זמינות.")
 
