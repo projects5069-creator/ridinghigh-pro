@@ -3296,13 +3296,15 @@ def score_comparison_page():
                 if v >= 45:   return "background-color: #4a4a00; color: #ffff80"
                 return ""
 
-            # Round scores and numeric display columns to 2 decimal places
-            for col in avail_sc + ["Price", "RunUp", "REL_VOL"]:
+            # Round all numeric display columns
+            cols_2dp       = avail_sc + ["Price"]
+            cols_2dp_extra = ["RunUp", "REL_VOL"]
+            for col in cols_2dp + cols_2dp_extra:
                 if col in live_tbl.columns:
                     live_tbl[col] = pd.to_numeric(live_tbl[col], errors="coerce").round(2)
 
             score_subset = [c for c in avail_sc if c in live_tbl.columns]
-            fmt_live = {c: "{:.2f}" for c in score_subset}
+            fmt_live = {c: "{:.2f}" for c in cols_2dp + cols_2dp_extra if c in live_tbl.columns}
             styled_live = live_tbl.style.map(_color_score, subset=score_subset).format(fmt_live, na_rep="-")
             st.dataframe(styled_live, use_container_width=True)
             st.caption(f"סה\"כ {len(live_tbl)} מניות היום • ממוין לפי ציון מקסימלי ↓")
