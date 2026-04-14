@@ -869,98 +869,107 @@ def _save_daily_summary(gc, today: str, ws_timeline):
 
 def update_portfolio_live(gc, now_peru):
     """
-    בכל ריצה (כל דקה) — מעדכן RunningHigh/RunningLow למניות Pending.
-    RunningHigh = מקסימום מחיר שנראה מאז הכניסה
-    RunningLow  = מינימום מחיר שנראה מאז הכניסה
+    בכל ריצה — מעדכן RunningHigh/RunningLow לכל מניה עם Status=Open ב-portfolio.
+    מקור: portfolio sheet (לא post_analysis) — עוקב גם אחרי מניות שלא נסרקות היום.
+    RunningHigh כולל את ה-High של הנר היומי (לא רק Close).
     אם RunningHigh >= SL  → SL ❌
     אם RunningLow  <= TP10 → TP10 ✅
-    אם שניהם נגעו → Pending (לא יודעים הסדר, ממתינים לנתון יומי)
+    אם שניהם נגעו → SL גובר (שורט)
     """
     TP_PCT = 0.10
     SL_PCT = 0.07
 
     try:
-        # טעון post_analysis
-        ws_pa  = sheets_manager.get_worksheet("post_analysis", gc=gc)
-        if ws_pa is None:
+        # ── Source of truth: portfolio sheet, Status=Open, last 7 days ──────────
+        ws_port = sheets_manager.get_worksheet("portfolio", gc=gc)
+        if ws_port is None:
             return
-        pa_raw = ws_pa.get_all_values()
-        if len(pa_raw) <= 1:
+        port_raw = ws_port.get_all_values()
+        if len(port_raw) <= 1:
             return
 
-        pa_df = pd.DataFrame(pa_raw[1:], columns=pa_raw[0])
-        pa_df["ScanPrice"] = pd.to_numeric(pa_df.get("ScanPrice", 0), errors="coerce")
-        pa_df["D1_High"]   = pd.to_numeric(pa_df.get("D1_High",  ""), errors="coerce")
+        port_df = pd.DataFrame(port_raw[1:], columns=port_raw[0])
+        port_df["BuyPrice"] = pd.to_numeric(port_df.get("BuyPrice", 0), errors="coerce")
 
-        # Only track stocks within last 7 calendar days (avoids scanning 90+ historical rows)
         cutoff = (now_peru - pd.Timedelta(days=7)).strftime("%Y-%m-%d")
-        pa_df  = pa_df[pa_df.get("ScanDate", pd.Series(dtype=str)) >= cutoff]
+        if "Date" in port_df.columns:
+            port_df = port_df[port_df["Date"] >= cutoff]
 
-        # מניות Pending = אין D1_High עדיין
-        pending = pa_df[pa_df["D1_High"].isna() & pa_df["ScanPrice"].notna()].copy()
-        if pending.empty:
-            print("📈 No pending stocks to track")
+        open_pos = port_df[port_df.get("Status", pd.Series(dtype=str)) == "Open"].copy() \
+            if "Status" in port_df.columns else port_df.copy()
+
+        if open_pos.empty:
+            print("📈 No open portfolio positions to track")
             return
 
-        # טעון portfolio_live הקיים
+        # ── Load existing portfolio_live ─────────────────────────────────────
         ws_pl  = sheets_manager.get_worksheet("portfolio_live", gc=gc)
         pl_raw = ws_pl.get_all_values() if ws_pl else []
+        PL_COLS = ["Ticker", "ScanDate", "EntryPrice", "TP10_Price", "SL_Price",
+                   "RunningHigh", "RunningLow", "CurrentPrice", "Status", "LastUpdated"]
         if len(pl_raw) > 1:
             pl_df = pd.DataFrame(pl_raw[1:], columns=pl_raw[0])
-            for col in ["EntryPrice","RunningHigh","RunningLow","TP10_Price","SL_Price"]:
+            for col in ["EntryPrice", "RunningHigh", "RunningLow",
+                        "TP10_Price", "SL_Price", "CurrentPrice"]:
                 if col in pl_df.columns:
                     pl_df[col] = pd.to_numeric(pl_df[col], errors="coerce")
         else:
-            pl_df = pd.DataFrame(columns=[
-                "Ticker","ScanDate","EntryPrice","TP10_Price","SL_Price",
-                "RunningHigh","RunningLow","CurrentPrice","Status","LastUpdated"
-            ])
+            pl_df = pd.DataFrame(columns=PL_COLS)
 
-        scan_time = now_peru.strftime('%Y-%m-%d %H:%M')
+        scan_time = now_peru.strftime("%Y-%m-%d %H:%M")
 
-        for _, row in pending.iterrows():
-            ticker     = str(row.get("Ticker", ""))
-            scan_date  = str(row.get("ScanDate", ""))
-            scan_price = float(row["ScanPrice"])
+        for _, row in open_pos.iterrows():
+            ticker     = str(row.get("Ticker", "")).strip()
+            scan_date  = str(row.get("Date", "")).strip()
+            scan_price = float(row.get("BuyPrice", 0) or 0)
+
+            if not ticker or scan_price <= 0:
+                continue
+
             tp10_price = round(scan_price * (1 - TP_PCT), 4)
             sl_price   = round(scan_price * (1 + SL_PCT), 4)
 
-            # מחיר חי
+            # Find existing row in portfolio_live
+            mask = (
+                (pl_df["Ticker"] == ticker) & (pl_df["ScanDate"] == scan_date)
+                if not pl_df.empty and "Ticker" in pl_df.columns and "ScanDate" in pl_df.columns
+                else pd.Series([False] * len(pl_df), dtype=bool)
+            )
+
+            # Skip already-closed positions
+            if mask.any():
+                cur_status = str(pl_df.at[pl_df[mask].index[0], "Status"])
+                if "TP10" in cur_status or "SL" in cur_status:
+                    continue
+
+            # Fetch live price + intraday high (catches SL even if price pulled back)
             try:
                 hist = yf.Ticker(ticker).history(period="1d")
                 if hist.empty:
                     continue
-                live_price = round(float(hist.iloc[-1]["Close"]), 2)
-            except:
+                live_price  = round(float(hist.iloc[-1]["Close"]), 2)
+                intra_high  = round(float(hist.iloc[-1]["High"]),  2)
+            except Exception:
                 continue
 
-            # מצא שורה קיימת
-            mask = (pl_df["Ticker"] == ticker) & (pl_df["ScanDate"] == scan_date)
-
+            # Update running high/low
             if mask.any():
-                idx = pl_df[mask].index[0]
-                # לא לעדכן מניות שכבר יצאו
-                cur_status = str(pl_df.at[idx, "Status"])
-                if "TP10" in cur_status or "SL" in cur_status:
-                    continue
+                idx       = pl_df[mask].index[0]
                 prev_high = pl_df.at[idx, "RunningHigh"]
                 prev_low  = pl_df.at[idx, "RunningLow"]
                 prev_high = float(prev_high) if pd.notna(prev_high) else live_price
                 prev_low  = float(prev_low)  if pd.notna(prev_low)  else live_price
-                new_high  = max(prev_high, live_price)
+                new_high  = max(prev_high, live_price, intra_high)
                 new_low   = min(prev_low,  live_price)
             else:
-                new_high = live_price
+                new_high = max(live_price, intra_high)
                 new_low  = live_price
 
-            # קבע סטטוס
             sl_hit = new_high >= sl_price
             tp_hit = new_low  <= tp10_price
 
-            if sl_hit and tp_hit:
-                status = "SL ❌"   # בשורט — SL גובר (המחיר עלה קודם או באותו הרגע)
-            elif sl_hit:
-                status = "SL ❌"
+            if sl_hit:
+                status = "SL ❌"     # short: SL always takes priority
             elif tp_hit:
                 status = "TP10 ✅"
             else:
@@ -970,7 +979,7 @@ def update_portfolio_live(gc, now_peru):
                 "Ticker": ticker, "ScanDate": scan_date,
                 "EntryPrice": scan_price, "TP10_Price": tp10_price, "SL_Price": sl_price,
                 "RunningHigh": new_high, "RunningLow": new_low,
-                "CurrentPrice": live_price, "Status": status, "LastUpdated": scan_time
+                "CurrentPrice": live_price, "Status": status, "LastUpdated": scan_time,
             }
 
             if mask.any():
@@ -980,8 +989,14 @@ def update_portfolio_live(gc, now_peru):
             else:
                 pl_df = pd.concat([pl_df, pd.DataFrame([new_row])], ignore_index=True)
 
+        # Ensure column order
+        for col in PL_COLS:
+            if col not in pl_df.columns:
+                pl_df[col] = ""
+        pl_df = pl_df[PL_COLS]
+
         df_to_sheet(ws_pl, pl_df)
-        print(f"📈 portfolio_live updated: {len(pending)} pending stocks")
+        print(f"📈 portfolio_live updated: {len(open_pos)} open positions tracked")
 
     except Exception as e:
         print(f"⚠️ portfolio_live error: {e}")
