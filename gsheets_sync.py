@@ -97,12 +97,23 @@ def get_or_create_sheet(spreadsheet, tab_name):
 
 
 def _df_to_sheet(ws, df, include_index=False):
-    """Write a DataFrame to a worksheet (full overwrite)."""
+    """
+    Write a DataFrame to a worksheet (full overwrite).
+    Safe pattern: write data first, then trim excess rows — never clears before writing.
+    """
     if include_index:
         df = df.reset_index()
     data = [df.columns.tolist()] + df.astype(str).values.tolist()
-    ws.clear()
-    ws.update(data)
+    # Write data starting from A1 (overwrites existing content)
+    ws.update("A1", data)
+    # Trim stale rows below the new data (handles shrinking datasets)
+    try:
+        total_rows = ws.row_count
+        new_last   = len(data)
+        if total_rows > new_last:
+            ws.delete_rows(new_last + 1, total_rows)
+    except Exception:
+        pass  # trim failure is non-critical; data is already written correctly
 
 
 # ── Snapshot ──────────────────────────────────────────────────────────────────
@@ -271,6 +282,19 @@ def save_post_analysis_to_sheets(df: pd.DataFrame) -> bool:
             existing_df = pd.DataFrame(raw[1:], columns=raw[0])
         else:
             existing_df = pd.DataFrame()
+
+        # Safety: if the sheet returned empty but has row_count > 50, something
+        # is wrong (quota blip / wrong tab). Abort rather than overwrite history.
+        try:
+            if existing_df.empty and ws.row_count > 50:
+                raise RuntimeError(
+                    f"[GSheets] ⚠️ post_analysis sheet has {ws.row_count} rows but "
+                    f"get_all_values() returned empty — aborting to protect history."
+                )
+        except Exception as _row_count_err:
+            # row_count unavailable (API error) — re-raise only if it's our RuntimeError
+            if "aborting to protect history" in str(_row_count_err):
+                raise
 
         # ── Step 2: seed from legacy if current sheet is empty ────────────
         if existing_df.empty:
