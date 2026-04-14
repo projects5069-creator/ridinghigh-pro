@@ -3563,27 +3563,52 @@ def score_comparison_page():
 
 
 def dashboard_home_page():
-    now_peru = datetime.now(PERU_TZ)
+    now_peru  = datetime.now(PERU_TZ)
     today_str = now_peru.strftime("%Y-%m-%d")
     market_open = now_peru.weekday() < 5 and 8*60+30 <= now_peru.hour*60+now_peru.minute <= 15*60
 
     st.title("🏠 RidingHigh Pro")
-    st.caption(f"📅 {today_str}  |  {'🟢 שוק פתוח' if market_open else '🔴 שוק סגור'}")
+
+    # ── Load data early (all cached — no extra Sheets hits) ───────────────────
+    tl = _cached_tl_today()
+    lt = _cached_live_trades()
+
+    today_tl = pd.DataFrame()
+    if not tl.empty and "Date" in tl.columns:
+        today_tl = tl[tl["Date"] == today_str].copy()
+        for col in ["Score", "Score_B", "Score_C", "Score_D",
+                    "Score_E", "Score_F", "Score_G", "Score_H", "Score_I", "RunUp"]:
+            if col in today_tl.columns:
+                today_tl[col] = pd.to_numeric(today_tl[col], errors="coerce")
+
+    today_lt = pd.DataFrame()
+    if not lt.empty and "EntryTime" in lt.columns:
+        today_lt = lt[lt["EntryTime"].astype(str).str.startswith(today_str)].copy()
 
     # ── Section 1: System Status ───────────────────────────────────────────────
+    st.subheader("🖥️ סטטוס מערכת")
+
+    # Last Scan: session_state → timeline_live fallback → "—"
+    ls_str = "—"
+    for key in ("last_scan_time", "last_scan"):
+        val = st.session_state.get(key)
+        if val is not None:
+            try:
+                ls_str = val.strftime("%H:%M")
+            except Exception:
+                ls_str = str(val)[:5]
+            break
+    if ls_str == "—" and not today_tl.empty and "ScanTime" in today_tl.columns:
+        last_tl = today_tl["ScanTime"].dropna().iloc[-1] if len(today_tl) > 0 else None
+        if last_tl:
+            ls_str = str(last_tl)[:5]   # "HH:MM"
+
     col_time, col_market, col_scan = st.columns(3)
-    col_time.metric("🕐 שעה (Peru)", now_peru.strftime("%H:%M"))
-    col_market.metric("📈 שוק", "פתוח" if market_open else "סגור",
-                      delta="NYSE/NASDAQ 08:30-15:00" if not market_open else None)
-    last_scan = st.session_state.get("last_scan")
-    if last_scan:
-        try:
-            delta_s = (datetime.now(PERU_TZ) - last_scan).total_seconds()
-            ls_str = f"{int(delta_s // 60)}m ago" if delta_s < 3600 else last_scan.strftime("%H:%M")
-        except Exception:
-            ls_str = "—"
+    col_time.metric("🕐 שעה (Peru)", now_peru.strftime("%H:%M"), delta=today_str)
+    if market_open:
+        col_market.success("🟢 שוק פתוח")
     else:
-        ls_str = "—"
+        col_market.error("🔴 שוק סגור")
     col_scan.metric("🔍 Last Scan", ls_str)
 
     with st.expander("🔍 Quick Health Check", expanded=False):
@@ -3597,22 +3622,7 @@ def dashboard_home_page():
     st.divider()
 
     # ── Section 2: Today ──────────────────────────────────────────────────────
-    st.markdown("### 📡 היום")
-
-    tl = _cached_tl_today()
-    lt = _cached_live_trades()
-
-    today_tl = pd.DataFrame()
-    if not tl.empty and "Date" in tl.columns:
-        today_tl = tl[tl["Date"] == today_str].copy()
-        for col in ["Score", "Score_B", "Score_C", "Score_D",
-                    "Score_E", "Score_F", "Score_G", "Score_H", "Score_I"]:
-            if col in today_tl.columns:
-                today_tl[col] = pd.to_numeric(today_tl[col], errors="coerce")
-
-    today_lt = pd.DataFrame()
-    if not lt.empty and "EntryTime" in lt.columns:
-        today_lt = lt[lt["EntryTime"].astype(str).str.startswith(today_str)].copy()
+    st.subheader("📡 היום")
 
     col1, col2, col3 = st.columns(3)
 
@@ -3622,26 +3632,33 @@ def dashboard_home_page():
             n_tickers = today_tl["Ticker"].nunique()
             peak = (today_tl.sort_values("Score", ascending=False)
                             .drop_duplicates("Ticker")) if "Score" in today_tl.columns else today_tl
-            critical = int((pd.to_numeric(peak.get("Score", pd.Series()), errors="coerce") >= 85).sum())
-            high     = int((pd.to_numeric(peak.get("Score", pd.Series()), errors="coerce") >= 70).sum())
+            scores = pd.to_numeric(peak.get("Score", pd.Series(dtype=float)), errors="coerce")
+            critical = int((scores >= 85).sum())
+            high     = int((scores >= 70).sum())
             st.metric("מניות שנסרקו", n_tickers)
-            st.metric("Critical (≥85)", critical, delta=f"High (≥70): {high}")
+            st.metric("Critical ≥85", critical, delta=f"High ≥70: {high}")
         else:
             st.info("אין נתוני סריקה להיום")
 
     with col2:
         st.markdown("**⚡ Live Trades**")
-        source = today_lt if not today_lt.empty else lt
-        label_suffix = " (כולל)" if today_lt.empty else ""
-        if not source.empty and "Status" in source.columns:
-            pending  = int((source["Status"] == "Pending").sum())
-            tp10     = int((source["Status"] == "TP10").sum())
-            sl       = int((source["Status"] == "SL").sum())
-            total_cl = tp10 + sl
-            win_rate = f"{tp10/total_cl*100:.0f}%" if total_cl > 0 else "—"
-            st.metric(f"Win Rate{label_suffix}", win_rate, delta=f"TP:{tp10}  SL:{sl}")
-            if pending:
-                st.metric("Pending", pending)
+        if not lt.empty and "Status" in lt.columns:
+            # All-time
+            tp_all = int((lt["Status"] == "TP10").sum())
+            sl_all = int((lt["Status"] == "SL").sum())
+            cl_all = tp_all + sl_all
+            wr_all = f"{tp_all/cl_all*100:.0f}%" if cl_all > 0 else "—"
+            # Today
+            if not today_lt.empty and "Status" in today_lt.columns:
+                tp_td = int((today_lt["Status"] == "TP10").sum())
+                sl_td = int((today_lt["Status"] == "SL").sum())
+                cl_td = tp_td + sl_td
+                today_str_disp = f"היום: {tp_td}/{cl_td}" if cl_td > 0 else "היום: אין"
+            else:
+                today_str_disp = "היום: אין"
+            pending = int((lt["Status"] == "Pending").sum())
+            st.metric("Win Rate (כולל)", wr_all, delta=f"TP:{tp_all}  SL:{sl_all}")
+            st.caption(f"{today_str_disp}  |  Pending: {pending}")
         else:
             st.info("אין trades")
 
@@ -3651,38 +3668,42 @@ def dashboard_home_page():
             peak_all = (today_tl.sort_values("Score", ascending=False)
                                 .drop_duplicates("Ticker"))
             if not peak_all.empty:
-                top = peak_all.iloc[0]
+                top    = peak_all.iloc[0]
                 ticker = str(top.get("Ticker", "—"))
-                score  = pd.to_numeric(top.get("Score", 0), errors="coerce")
-                price  = pd.to_numeric(top.get("Price", None), errors="coerce")
-                price_str = f"${price:.2f}" if pd.notna(price) else ""
-                st.metric(ticker, f"{score:.1f}", delta=price_str or None)
+                score  = pd.to_numeric(top.get("Score",  0),    errors="coerce")
+                price  = pd.to_numeric(top.get("Price",  None), errors="coerce")
+                runup  = pd.to_numeric(top.get("RunUp",  None), errors="coerce")
+                price_str = f"${price:.2f}" if pd.notna(price) else None
+                runup_str = f"RunUp: {runup:.1f}%" if pd.notna(runup) else None
+                st.metric(ticker, f"Score {score:.1f}", delta=price_str)
+                if runup_str:
+                    st.caption(runup_str)
         else:
             st.info("אין נתונים")
 
     st.divider()
 
     # ── Section 3: Historical Summary ─────────────────────────────────────────
-    st.markdown("### 📊 סיכום היסטורי")
+    st.subheader("📊 סיכום היסטורי")
 
     df = _cached_post_analysis()
     if not df.empty:
         for col in ["TP10_Hit", "MaxDrop%", "Score"]:
             if col in df.columns:
                 df[col] = pd.to_numeric(df[col], errors="coerce")
-        total_stocks = len(df)
-        has_outcome = df[df["TP10_Hit"].notna()] if "TP10_Hit" in df.columns else pd.DataFrame()
+        total_stocks  = len(df)
+        has_outcome   = df[df["TP10_Hit"].notna()] if "TP10_Hit" in df.columns else pd.DataFrame()
         win_rate_hist = f"{has_outcome['TP10_Hit'].mean()*100:.0f}%" if not has_outcome.empty else "—"
-        winners = has_outcome[has_outcome["TP10_Hit"] == 1] if not has_outcome.empty else pd.DataFrame()
-        avg_drop = winners["MaxDrop%"].mean() if not winners.empty and "MaxDrop%" in winners.columns else None
-        avg_drop_str = f"{avg_drop:.1f}%" if avg_drop is not None and pd.notna(avg_drop) else "—"
-        best_score = df["Score"].max() if "Score" in df.columns else None
+        winners       = has_outcome[has_outcome["TP10_Hit"] == 1] if not has_outcome.empty else pd.DataFrame()
+        avg_drop      = winners["MaxDrop%"].mean() if not winners.empty and "MaxDrop%" in winners.columns else None
+        avg_drop_str  = f"{avg_drop:.1f}%" if avg_drop is not None and pd.notna(avg_drop) else "—"
+        best_score    = df["Score"].max() if "Score" in df.columns else None
         best_score_str = f"{best_score:.1f}" if best_score is not None and pd.notna(best_score) else "—"
-        n_days = df["ScanDate"].nunique() if "ScanDate" in df.columns else "?"
+        n_days        = df["ScanDate"].nunique() if "ScanDate" in df.columns else "?"
 
         m1, m2, m3, m4 = st.columns(4)
-        m1.metric("🎯 Win Rate", win_rate_hist,    delta=f"{len(has_outcome)} עם תוצאה")
-        m2.metric("📋 מניות",    total_stocks,      delta=f"{n_days} ימים")
+        m1.metric("🎯 Win Rate",           win_rate_hist, delta=f"{len(has_outcome)} עם תוצאה")
+        m2.metric("📋 מניות",              total_stocks,  delta=f"{n_days} ימים")
         m3.metric("📉 Avg Drop (winners)", avg_drop_str)
         m4.metric("🏆 Best Score",         best_score_str)
     else:
@@ -3691,7 +3712,7 @@ def dashboard_home_page():
     st.divider()
 
     # ── Section 4: Quick Navigation ───────────────────────────────────────────
-    st.markdown("### 🧭 ניווט מהיר")
+    st.subheader("🧭 ניווט מהיר")
     nav_targets = [
         ("📊 Live Tracker",     "📊 Live Tracker"),
         ("💼 Portfolio",        "💼 Portfolio Tracker"),
