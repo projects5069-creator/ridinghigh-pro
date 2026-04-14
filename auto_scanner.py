@@ -1079,54 +1079,61 @@ def update_live_trades(gc, now_peru, results=None):
 
         # ── Step 2: add new entries from current scan results ─────────────────
         if results and is_market_hours():
-            # unique key: (Ticker, ScoreType) per day
-            today_keys = set()
+            # Build dedup sets: one entry per (Ticker, day)
+            pending_today = set()   # tickers currently Pending — don't double-enter
+            closed_today  = set()   # tickers already TP10/SL today — no re-entry
             if "EntryTime" in lt_df.columns and not lt_df.empty:
                 today_rows = lt_df[lt_df["EntryTime"].str.startswith(today)]
-                score_type_col = lt_df.get("ScoreType", pd.Series(["Score"] * len(lt_df)))
-                for _, row in today_rows.iterrows():
-                    st_val = str(row.get("ScoreType", "Score")) if "ScoreType" in lt_df.columns else "Score"
-                    today_keys.add((str(row["Ticker"]), st_val))
+                if not today_rows.empty:
+                    pending_today = set(
+                        today_rows[today_rows["Status"] == "Pending"]["Ticker"].astype(str)
+                    )
+                    closed_today = set(
+                        today_rows[today_rows["Status"].isin(["TP10", "SL"])]["Ticker"].astype(str)
+                    )
 
             for r in results:
-                ticker     = str(r.get("Ticker", ""))
-                price      = float(r.get("Price", 0) or 0)
+                ticker      = str(r.get("Ticker", ""))
+                price       = float(r.get("Price", 0) or 0)
                 entry_score = float(r.get("EntryScore", 0) or 0)
-                intra_high = float(r.get("High_today", price) or price)
+                intra_high  = float(r.get("High_today", price) or price)
 
                 if price <= 0:
                     continue
+                if ticker in pending_today:
+                    continue  # already has an open trade
+                if ticker in closed_today:
+                    continue  # already closed TP10/SL today — no re-entry
 
-                for score_type in SCORE_TYPES:
-                    score_val = float(r.get(score_type, 0) or 0)
-                    if score_val < ENTRY_MIN_SCORE:
-                        continue
-                    if (ticker, score_type) in today_keys:
-                        continue
+                # pick the single ScoreType with the highest value
+                best_type = max(SCORE_TYPES, key=lambda st: float(r.get(st, 0) or 0))
+                best_val  = float(r.get(best_type, 0) or 0)
+                if best_val < ENTRY_MIN_SCORE:
+                    continue
 
-                    tp10_price = round(price * (1 - TP_PCT), 4)
-                    sl_price   = round(price * (1 + SL_PCT), 4)
+                tp10_price = round(price * (1 - TP_PCT), 4)
+                sl_price   = round(price * (1 + SL_PCT), 4)
 
-                    new_trade = {
-                        "EntryTime":    scan_time,
-                        "Ticker":       ticker,
-                        "EntryPrice":   price,
-                        "IntraHigh":    intra_high,
-                        "ScoreType":    score_type,
-                        "Score":        round(score_val, 2),
-                        "EntryScore":   round(entry_score, 2),
-                        "TP10_Price":   tp10_price,
-                        "SL_Price":     sl_price,
-                        "CurrentPrice": price,
-                        "RunningHigh":  intra_high,
-                        "RunningLow":   price,
-                        "Status":       "Pending",
-                        "ExitTime":     "",
-                        "PnL_pct":      0.0,
-                    }
-                    lt_df = pd.concat([lt_df, pd.DataFrame([new_trade])], ignore_index=True)
-                    today_keys.add((ticker, score_type))
-                    print(f"⚡ live_trades: new entry {ticker}[{score_type}] @ {price} (Score={score_val})")
+                new_trade = {
+                    "EntryTime":    scan_time,
+                    "Ticker":       ticker,
+                    "EntryPrice":   price,
+                    "IntraHigh":    intra_high,
+                    "ScoreType":    best_type,
+                    "Score":        round(best_val, 2),
+                    "EntryScore":   round(entry_score, 2),
+                    "TP10_Price":   tp10_price,
+                    "SL_Price":     sl_price,
+                    "CurrentPrice": price,
+                    "RunningHigh":  intra_high,
+                    "RunningLow":   price,
+                    "Status":       "Pending",
+                    "ExitTime":     "",
+                    "PnL_pct":      0.0,
+                }
+                lt_df = pd.concat([lt_df, pd.DataFrame([new_trade])], ignore_index=True)
+                pending_today.add(ticker)
+                print(f"⚡ live_trades: new entry {ticker}[{best_type}] @ {price} (Score={best_val})")
 
         # enforce column order, fill missing columns
         for col in LIVE_TRADES_COLS:
