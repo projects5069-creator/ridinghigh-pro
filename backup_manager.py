@@ -26,18 +26,18 @@ list_backups()
 import os
 import sys
 import io
-from datetime import datetime, timedelta
+from datetime import datetime
 
 import pandas as pd
 import pytz
 
 sys.path.insert(0, os.path.dirname(__file__))
 
-PERU_TZ     = pytz.timezone("America/Lima")
-BACKUP_DIR  = os.path.join(os.path.dirname(__file__), "backups")
-FOLDER_NAME = "RidingHigh-Backups"
-FILE_PREFIX = "Backup_post_analysis_"
-KEEP_DAYS   = 30
+PERU_TZ      = pytz.timezone("America/Lima")
+BACKUP_DIR   = os.path.join(os.path.dirname(__file__), "backups")
+FOLDER_NAME  = "RidingHigh-Backups"
+FILE_PREFIX  = "Backup_post_analysis_"
+KEEP_BACKUPS = 48   # keep last 48 local CSV files (~2 days of hourly backups)
 
 
 # ── Drive helpers ──────────────────────────────────────────────────────────────
@@ -138,11 +138,13 @@ def daily_backup(date_str: str = None) -> bool:
     """
     from gsheets_sync import load_post_analysis_from_sheets
 
-    today      = date_str or datetime.now(PERU_TZ).strftime("%Y-%m-%d")
+    now_peru   = datetime.now(PERU_TZ)
+    today      = date_str or now_peru.strftime("%Y-%m-%d")
+    hhmm       = now_peru.strftime("%H-%M")
     sheet_name = f"{FILE_PREFIX}{today}"
-    local_path = os.path.join(BACKUP_DIR, f"post_analysis_{today}.csv")
+    local_path = os.path.join(BACKUP_DIR, f"post_analysis_{today}_{hhmm}.csv")
 
-    print(f"[Backup] Starting daily backup for {today}...")
+    print(f"[Backup] Starting daily backup for {today} {hhmm}...")
 
     # ── 1. Load from Sheets ───────────────────────────────────────────────────
     df = load_post_analysis_from_sheets()
@@ -156,6 +158,7 @@ def daily_backup(date_str: str = None) -> bool:
     df.to_csv(local_path, index=False)
     size_kb = os.path.getsize(local_path) / 1024
     print(f"[Backup] Saved local: {local_path} ({size_kb:.1f} KB)")
+    print(f"[Backup] ✅ Backup saved: {len(df)} rows at {now_peru.strftime('%H:%M')} Peru")
 
     # ── 3. Write to Drive as Google Sheet (best-effort — SA quota may be full) ─
     drive_ok = False
@@ -181,33 +184,31 @@ def daily_backup(date_str: str = None) -> bool:
             print(f"[Backup] ⚠️ Drive upload failed: {e}")
         print(f"[Backup]    Local backup saved at: {local_path}")
 
-    # ── 4. Prune old backups ──────────────────────────────────────────────────
-    cutoff = datetime.now(PERU_TZ) - timedelta(days=KEEP_DAYS)
-
-    # Local prune
+    # ── 4. Prune old backups — keep newest KEEP_BACKUPS files ─────────────────
+    # Local prune (count-based, newest KEEP_BACKUPS files survive)
     local_deleted = 0
     if os.path.isdir(BACKUP_DIR):
-        for fname in os.listdir(BACKUP_DIR):
-            if not fname.startswith("post_analysis_") or not fname.endswith(".csv"):
-                continue
-            fpath = os.path.join(BACKUP_DIR, fname)
-            mtime = datetime.fromtimestamp(os.path.getmtime(fpath), tz=PERU_TZ)
-            if mtime < cutoff:
-                os.remove(fpath)
-                local_deleted += 1
+        csvs = [
+            os.path.join(BACKUP_DIR, f)
+            for f in os.listdir(BACKUP_DIR)
+            if f.startswith("post_analysis_") and f.endswith(".csv")
+        ]
+        csvs.sort(key=os.path.getmtime, reverse=True)   # newest first
+        for old_path in csvs[KEEP_BACKUPS:]:
+            os.remove(old_path)
+            local_deleted += 1
 
-    # Drive prune (only if Drive is accessible)
+    # Drive prune — keep newest KEEP_BACKUPS sheets
     drive_deleted = 0
     remaining     = 0
     if drive_ok:
         try:
-            for f in _list_backup_files(drive_svc, folder_id):
-                created = datetime.fromisoformat(f["createdTime"].replace("Z", "+00:00"))
-                if created.astimezone(PERU_TZ) < cutoff:
-                    drive_svc.files().delete(fileId=f["id"]).execute()
-                    drive_deleted += 1
-                    print(f"[Backup] Pruned old: {f['name']}")
-            remaining = len(_list_backup_files(drive_svc, folder_id))
+            all_drive = _list_backup_files(drive_svc, folder_id)  # newest first
+            for f in all_drive[KEEP_BACKUPS:]:
+                drive_svc.files().delete(fileId=f["id"]).execute()
+                drive_deleted += 1
+                print(f"[Backup] Pruned old: {f['name']}")
+            remaining = min(len(all_drive), KEEP_BACKUPS)
         except Exception:
             pass
 
@@ -232,7 +233,17 @@ def restore_from_backup(date_str: str) -> bool:
     from gsheets_sync import save_post_analysis_to_sheets
 
     sheet_name = f"{FILE_PREFIX}{date_str}"
-    local_path = os.path.join(BACKUP_DIR, f"post_analysis_{date_str}.csv")
+    # Find newest timestamped CSV for date_str (e.g. post_analysis_2026-04-14_15-30.csv)
+    # Falls back to legacy un-timestamped name too.
+    local_path = None
+    if os.path.isdir(BACKUP_DIR):
+        candidates = [
+            os.path.join(BACKUP_DIR, f)
+            for f in os.listdir(BACKUP_DIR)
+            if f.startswith(f"post_analysis_{date_str}") and f.endswith(".csv")
+        ]
+        if candidates:
+            local_path = max(candidates, key=os.path.getmtime)
     print(f"[Restore] Looking for backup: {date_str} ...")
 
     df = None
@@ -255,7 +266,7 @@ def restore_from_backup(date_str: str) -> bool:
 
     # ── Fallback: local CSV ───────────────────────────────────────────────────
     if df is None:
-        if os.path.isfile(local_path):
+        if local_path and os.path.isfile(local_path):
             df = pd.read_csv(local_path)
             print(f"[Restore] Using local CSV: {local_path} — {len(df)} rows")
         else:
