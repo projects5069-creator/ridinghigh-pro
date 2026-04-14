@@ -1,0 +1,37 @@
+name: Daily Backup — post_analysis
+
+on:
+  schedule:
+    - cron: '30 21 * * 1-5'   # 16:30 Peru (UTC-5), Mon-Fri — after collector (16:00)
+  workflow_dispatch:
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          pip install gspread google-auth google-api-python-client pandas pytz
+
+      - name: Run daily backup (local CSV + Drive if quota available)
+        env:
+          GOOGLE_CREDENTIALS_JSON: ${{ secrets.GOOGLE_CREDENTIALS_JSON }}
+        run: |
+          mkdir -p backups
+          python backup_manager.py
+
+      - name: Upload CSV as GitHub artifact (90-day retention, no Drive quota)
+        uses: actions/upload-artifact@v4
+        with:
+          name: post_analysis_${{ github.run_id }}
+          path: backups/post_analysis_*.csv
+          retention-days: 90
+          if-no-files-found: warn

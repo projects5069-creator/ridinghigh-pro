@@ -2665,6 +2665,45 @@ def post_analysis_page():
                 except Exception as e:
                     st.error(f"שגיאה: {e}")
 
+    # ── Admin: Restore from Backup ────────────────────────────────────────────
+    with st.expander("🔧 Admin — Restore from Backup", expanded=False):
+        st.caption("שחזור post_analysis מגיבוי — קודם Drive, fallback ל-CSV מקומי")
+        available_local = []
+        backup_dir = os.path.join(os.path.dirname(__file__), "backups")
+        if os.path.isdir(backup_dir):
+            available_local = sorted(
+                [f.replace("post_analysis_", "").replace(".csv", "")
+                 for f in os.listdir(backup_dir)
+                 if f.startswith("post_analysis_") and f.endswith(".csv")],
+                reverse=True
+            )
+
+        if available_local:
+            st.markdown(f"**גיבויים מקומיים זמינים:** {', '.join(available_local[:5])}")
+        else:
+            st.info("אין גיבויים מקומיים ב-backups/")
+
+        restore_date = st.text_input(
+            "תאריך לשחזור (YYYY-MM-DD)",
+            value=available_local[0] if available_local else "",
+            key="restore_date_input"
+        )
+        if st.button("📦 Restore from Backup", key="restore_btn"):
+            if not restore_date or len(restore_date) != 10:
+                st.error("הכנס תאריך בפורמט YYYY-MM-DD")
+            else:
+                with st.spinner(f"משחזר מגיבוי {restore_date}..."):
+                    try:
+                        from backup_manager import restore_from_backup
+                        ok = restore_from_backup(restore_date)
+                        if ok:
+                            st.success(f"✅ שוחזר בהצלחה מגיבוי {restore_date}")
+                            st.cache_data.clear()
+                        else:
+                            st.error(f"❌ שחזור נכשל — בדוק logs")
+                    except Exception as e:
+                        st.error(f"❌ שגיאה: {e}")
+
 
 def _fetch_health_data():
     """Return last scan timestamp and last collector date using cached loaders."""

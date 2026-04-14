@@ -31,3 +31,4 @@ data/
 *.pyes
 *.pyrtyhc
 google_credentials.json
+backups/*.csv
