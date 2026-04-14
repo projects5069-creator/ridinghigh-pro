@@ -110,6 +110,16 @@ def run(backfill: bool = False):
 
     # ── Load post_analysis ──────────────────────────────────────────────────
     pa = load_post_analysis_from_sheets()
+
+    # Fix dtype: cast numeric cols from str to float after loading from Sheets
+    numeric_cols = [
+        "D0_Open","D0_Close","D1_Open","D1_High","D1_Low",
+        "D1_Close","D2_Close","D3_Close","D5_Close",
+        "D0_Vol","MaxDrop"
+    ]
+    for col in numeric_cols:
+        if col in pa.columns:
+            pa[col] = pd.to_numeric(pa[col], errors="coerce")
     print(f"[Enrich] Post analysis rows: {len(pa)}")
     if pa.empty:
         print("[Enrich] No post analysis data — nothing to enrich")
