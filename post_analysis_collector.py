@@ -36,6 +36,8 @@ CATALYST_CATEGORIES = [
 MIN_SCORE   = 60
 DAYS_FORWARD = 5
 
+SCORE_SUBTYPES = ["Score_B", "Score_C", "Score_D", "Score_E", "Score_F", "Score_G", "Score_H", "Score_I"]
+
 
 # ── Catalyst analysis (unchanged from v4) ────────────────────────────────────
 def fetch_finviz_news(ticker: str, scan_date: str) -> list:
@@ -270,6 +272,13 @@ def fetch_timeline_stats(ticker: str, scan_date: str, tl_df: pd.DataFrame) -> di
         result["ScoreMax"]     = round(day["Score"].max(), 2)
         result["ScoreMin"]     = round(day["Score"].min(), 2)
         result["ScoreStd"]     = round(day["Score"].std(), 2)
+        # Score_B-I from the peak-score row
+        peak_row = day.loc[day["Score"].idxmax()]
+        for st in SCORE_SUBTYPES:
+            if st in peak_row.index:
+                val = pd.to_numeric(peak_row[st], errors="coerce")
+                if pd.notna(val):
+                    result[st] = round(float(val), 2)
     except Exception as e:
         print(f"[Collector] Timeline error for {ticker} {scan_date}: {e}")
     return result
@@ -328,6 +337,9 @@ def run(target_date: str = None):
         tl_raw_fb = ws_tl_fb.get_all_values() if ws_tl_fb else []
         if len(tl_raw_fb) > 1:
             tl_fb = pd.DataFrame(tl_raw_fb[1:], columns=tl_raw_fb[0])
+            # Sheet header may be stale — enforce canonical column names
+            if len(tl_fb.columns) == len(sheets_manager.TIMELINE_LIVE_COLS):
+                tl_fb.columns = sheets_manager.TIMELINE_LIVE_COLS
             tl_fb["Score"] = pd.to_numeric(tl_fb["Score"], errors="coerce")
             tl_target = tl_fb[tl_fb["Date"] == target_str].copy()
             if not tl_target.empty:
@@ -367,6 +379,9 @@ def run(target_date: str = None):
     ws_tl   = sheets_manager.get_worksheet("timeline_live", gc=gc)
     tl_data = ws_tl.get_all_values() if ws_tl else []
     tl_df   = pd.DataFrame(tl_data[1:], columns=tl_data[0]) if len(tl_data) > 1 else pd.DataFrame()
+    # Sheet header may be stale — enforce canonical column names so Score_B-I are accessible
+    if not tl_df.empty and len(tl_df.columns) == len(sheets_manager.TIMELINE_LIVE_COLS):
+        tl_df.columns = sheets_manager.TIMELINE_LIVE_COLS
 
     existing_df = load_post_analysis_from_sheets()
     new_rows    = []
@@ -470,8 +485,13 @@ def run(target_date: str = None):
         # D0 + fundamental (לא למניות של היום — עוד לא יש נתונים)
         d0_fund = fetch_d0_and_fundamental(ticker, scan_date) if not is_today else {}
 
-        # Timeline stats
+        # Timeline stats (also populates Score_B-I from peak row)
         tl_stats = fetch_timeline_stats(ticker, scan_date, tl_df) if not tl_df.empty else {}
+
+        # Enrich metrics with Score_B-I from timeline peak row (overrides NaN from daily_snapshots)
+        for st in SCORE_SUBTYPES:
+            if st in tl_stats:
+                metrics[st] = tl_stats.pop(st)
 
         # Catalyst (לא למניות של היום — חוסך זמן)
         if existing_match.empty and not is_today:
