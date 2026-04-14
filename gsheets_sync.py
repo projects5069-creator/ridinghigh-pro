@@ -49,6 +49,41 @@ def _get_ws(tab_name: str, gc=None, month: str = None):
     return sheets_manager.get_worksheet(tab_name, month=month, gc=gc)
 
 
+def _get_post_analysis_ws(gc=None):
+    """
+    Return the post_analysis worksheet with explicit tab fallback.
+    Priority: tab "post_analysis" → tab "גיליון1" → sheet1.
+    Handles spreadsheets created with default Hebrew tab names.
+    """
+    if gc is None:
+        gc = _get_client()
+    ws = sheets_manager.get_worksheet(TAB_POST_ANALYSIS, gc=gc)
+    if ws is None:
+        return None
+    # If sheet1 is empty but a named tab might exist, try "גיליון1" explicitly
+    try:
+        data = ws.get_all_values()
+        if len(data) <= 1:
+            # sheet1 is empty — check if a "גיליון1" tab actually has data
+            import gspread
+            config = sheets_manager._load_config()
+            month = datetime.now().strftime("%Y-%m")
+            pa_id = config.get(month, {}).get(TAB_POST_ANALYSIS)
+            if pa_id:
+                sp = gc.open_by_key(pa_id)
+                for candidate in ["post_analysis", "גיליון1"]:
+                    try:
+                        cws = sp.worksheet(candidate)
+                        cdata = cws.get_all_values()
+                        if len(cdata) > 1:
+                            return cws
+                    except gspread.exceptions.WorksheetNotFound:
+                        pass
+    except Exception:
+        pass
+    return ws
+
+
 def _get_or_create_sheet(spreadsheet, tab_name):
     """Legacy helper — used only when a raw spreadsheet object is already open."""
     try:
@@ -219,7 +254,7 @@ def save_post_analysis_to_sheets(df: pd.DataFrame) -> bool:
     """
     try:
         gc = _get_client()
-        ws = sheets_manager.get_worksheet(TAB_POST_ANALYSIS, gc=gc)
+        ws = _get_post_analysis_ws(gc=gc)
         if ws is None:
             return False
 
@@ -271,7 +306,7 @@ def save_post_analysis_to_sheets(df: pd.DataFrame) -> bool:
 def load_post_analysis_from_sheets() -> pd.DataFrame:
     try:
         gc = _get_client()
-        ws = sheets_manager.get_worksheet(TAB_POST_ANALYSIS, gc=gc)
+        ws = _get_post_analysis_ws(gc=gc)
         if ws is None:
             return pd.DataFrame()
 
