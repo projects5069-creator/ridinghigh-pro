@@ -3254,8 +3254,14 @@ def score_comparison_page():
                 if v >= 45:   return "background-color: #4a4a00; color: #ffff80"
                 return ""
 
+            # Round scores and numeric display columns to 2 decimal places
+            for col in avail_sc + ["Price", "RunUp", "REL_VOL"]:
+                if col in live_tbl.columns:
+                    live_tbl[col] = pd.to_numeric(live_tbl[col], errors="coerce").round(2)
+
             score_subset = [c for c in avail_sc if c in live_tbl.columns]
-            styled_live = live_tbl.style.map(_color_score, subset=score_subset)
+            fmt_live = {c: "{:.2f}" for c in score_subset}
+            styled_live = live_tbl.style.map(_color_score, subset=score_subset).format(fmt_live, na_rep="-")
             st.dataframe(styled_live, use_container_width=True)
             st.caption(f"סה\"כ {len(live_tbl)} מניות היום • ממוין לפי ציון מקסימלי ↓")
     else:
@@ -3359,12 +3365,19 @@ def score_comparison_page():
     if "ScanDate" in tbl.columns:
         tbl = tbl.sort_values("ScanDate", ascending=False)
 
+    # Round score columns to 2 decimal places
+    for col in [c for c in SCORE_COLS if c in tbl.columns]:
+        tbl[col] = pd.to_numeric(tbl[col], errors="coerce").round(2)
+
     def _color_tp10(val):
         if val == 1:   return "background-color: #1a4a1a; color: #80ff80"
         if val == 0:   return "background-color: #4a1a1a; color: #ff8080"
         return ""
 
-    styled = tbl.reset_index(drop=True).style.map(_color_tp10, subset=["TP10_Hit"])
+    sc3_cols = [c for c in SCORE_COLS if c in tbl.columns]
+    fmt_sc3  = {c: "{:.2f}" for c in sc3_cols}
+    tbl_reset = tbl.reset_index(drop=True)
+    styled = tbl_reset.style.map(_color_tp10, subset=["TP10_Hit"]).format(fmt_sc3, na_rep="-")
     st.dataframe(styled, use_container_width=True)
 
     st.divider()
