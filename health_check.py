@@ -168,13 +168,13 @@ def check_timeline_live(gc) -> tuple:
         else:
             lines.append(f"  ✅ היום ({today}): {len(today_rows)} שורות")
 
-    # EntryScore check for Score>=70
-    high_score = tl[tl["Score"] >= 70]
-    if not high_score.empty and "EntryScore" in tl.columns:
-        entry_missing = high_score["EntryScore"].apply(_is_missing).sum()
+    # EntryScore check — only today's data (historical rows predate the feature)
+    today_high = tl[(tl["Date"] == today) & (tl["Score"] >= 70)]
+    if not today_high.empty and "EntryScore" in tl.columns:
+        entry_missing = today_high["EntryScore"].apply(_is_missing).sum()
         if entry_missing:
-            pct = entry_missing / len(high_score) * 100
-            msg = f"  ⚠️  EntryScore חסר ל-{entry_missing}/{len(high_score)} מניות עם Score≥70 ({pct:.0f}%)"
+            pct = entry_missing / len(today_high) * 100
+            msg = f"  ⚠️  EntryScore חסר ל-{entry_missing}/{len(today_high)} מניות Score≥70 היום ({pct:.0f}%)"
             if pct > 50:
                 lines.append(msg.replace("⚠️", "❌"))
                 critical += 1
@@ -182,7 +182,7 @@ def check_timeline_live(gc) -> tuple:
                 lines.append(msg)
                 warnings += 1
         else:
-            lines.append(f"  ✅ EntryScore: קיים לכל {len(high_score)} מניות Score≥70")
+            lines.append(f"  ✅ EntryScore: קיים לכל {len(today_high)} מניות Score≥70 היום")
 
     return lines, critical, warnings, set(dates)
 

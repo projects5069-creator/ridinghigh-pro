@@ -272,13 +272,17 @@ def fetch_timeline_stats(ticker: str, scan_date: str, tl_df: pd.DataFrame) -> di
         result["ScoreMax"]     = round(day["Score"].max(), 2)
         result["ScoreMin"]     = round(day["Score"].min(), 2)
         result["ScoreStd"]     = round(day["Score"].std(), 2)
-        # Score_B-I from the peak-score row
+        # Score_B-I and EntryScore from the peak-score row
         peak_row = day.loc[day["Score"].idxmax()]
         for st in SCORE_SUBTYPES:
             if st in peak_row.index:
                 val = pd.to_numeric(peak_row[st], errors="coerce")
                 if pd.notna(val):
                     result[st] = round(float(val), 2)
+        if "EntryScore" in peak_row.index:
+            es = pd.to_numeric(peak_row["EntryScore"], errors="coerce")
+            if pd.notna(es) and es > 0:
+                result["EntryScore"] = round(float(es), 2)
     except Exception as e:
         print(f"[Collector] Timeline error for {ticker} {scan_date}: {e}")
     return result
