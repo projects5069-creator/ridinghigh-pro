@@ -249,52 +249,72 @@ def load_portfolio_from_sheets():
 
 def save_post_analysis_to_sheets(df: pd.DataFrame) -> bool:
     """
-    Safe upsert — never deletes rows not in the incoming df.
+    Append-only upsert — NEVER overwrites historical data.
     Key: Ticker + ScanDate.
+    Logic:
+      1. Read existing rows from current sheet.
+      2. If current sheet is empty, seed from legacy RidingHigh-Data spreadsheet.
+      3. Upsert: rows whose (Ticker, ScanDate) match incoming are replaced;
+         all other existing rows are preserved unchanged.
+      4. Write combined result (sort by ScanDate, Ticker).
     """
+    KEY = ["Ticker", "ScanDate"]
     try:
         gc = _get_client()
         ws = _get_post_analysis_ws(gc=gc)
         if ws is None:
             return False
 
-        existing = ws.get_all_values()
+        # ── Step 1: load existing ─────────────────────────────────────────
+        raw = ws.get_all_values()
+        if len(raw) > 1 and raw[0]:
+            existing_df = pd.DataFrame(raw[1:], columns=raw[0])
+        else:
+            existing_df = pd.DataFrame()
 
-        if len(existing) <= 1:
-            _df_to_sheet(ws, df)
-            print("[GSheets] ✅ Post analysis saved (fresh)")
-            return True
+        # ── Step 2: seed from legacy if current sheet is empty ────────────
+        if existing_df.empty:
+            try:
+                legacy_ws = gc.open_by_key(LEGACY_SPREADSHEET_ID).worksheet("post_analysis")
+                legacy_raw = legacy_ws.get_all_values()
+                if len(legacy_raw) > 1:
+                    existing_df = pd.DataFrame(legacy_raw[1:], columns=legacy_raw[0])
+                    print(f"[GSheets] Seeded {len(existing_df)} rows from legacy spreadsheet")
+            except Exception as seed_err:
+                print(f"[GSheets] Legacy seed skipped: {seed_err}")
 
-        existing_df = pd.DataFrame(existing[1:], columns=existing[0])
-        key = ["Ticker", "ScanDate"]
+        # ── Step 3: upsert ────────────────────────────────────────────────
+        if existing_df.empty or not all(k in existing_df.columns for k in KEY) \
+                              or not all(k in df.columns for k in KEY):
+            # No existing history — safe to write incoming as-is
+            combined = df.copy()
+            preserved = 0
+        else:
+            all_cols = list(existing_df.columns)
+            for col in df.columns:
+                if col not in all_cols:
+                    all_cols.append(col)
 
-        if not all(k in existing_df.columns for k in key) or not all(k in df.columns for k in key):
-            _df_to_sheet(ws, df)
-            print("[GSheets] ✅ Post analysis saved (no key, full overwrite)")
-            return True
+            existing_df  = existing_df.reindex(columns=all_cols)
+            df_reindexed = df.reindex(columns=all_cols)
 
-        all_cols = list(existing_df.columns)
-        for col in df.columns:
-            if col not in all_cols:
-                all_cols.append(col)
+            incoming_keys = set(zip(df["Ticker"], df["ScanDate"]))
+            existing_keep = existing_df[
+                ~existing_df.apply(
+                    lambda r: (r["Ticker"], r["ScanDate"]) in incoming_keys, axis=1
+                )
+            ]
+            combined  = pd.concat([existing_keep, df_reindexed], ignore_index=True)
+            preserved = len(existing_keep)
 
-        existing_df   = existing_df.reindex(columns=all_cols)
-        df_reindexed  = df.reindex(columns=all_cols)
-
-        incoming_keys = set(zip(df[key[0]], df[key[1]]))
-        existing_keep = existing_df[
-            ~existing_df.apply(lambda r: (r[key[0]], r[key[1]]) in incoming_keys, axis=1)
-        ]
-
-        combined = pd.concat([existing_keep, df_reindexed], ignore_index=True)
-
+        # ── Step 4: sort and write ────────────────────────────────────────
         if "ScanDate" in combined.columns:
             combined = combined.sort_values(["ScanDate", "Ticker"], ignore_index=True)
 
         _df_to_sheet(ws, combined)
         print(
             f"[GSheets] ✅ Post analysis saved "
-            f"({len(df)} upserted, {len(existing_keep)} preserved, {len(combined)} total)"
+            f"({len(df)} upserted, {preserved} preserved, {len(combined)} total)"
         )
         return True
 
