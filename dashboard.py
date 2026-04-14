@@ -1370,11 +1370,11 @@ def main_page():
     if st.sidebar.button("🔄 Scan Now", type="primary"):
         st.session_state.force_scan = True
     
-    if st.sidebar.button("🗑️ Clear Timeline"):
+    if st.sidebar.button("🗑️ Clear Local Cache", help="מוחק קובץ cache מקומי בלבד — נתוני Sheets לא נפגעים"):
         tracker = LiveTracker()
         if os.path.exists(tracker.today_file):
             os.remove(tracker.today_file)
-            st.sidebar.success("✅ Cleared!")
+            st.sidebar.success("✅ Cleared local cache!")
             st.rerun()
     
     if check_snapshot_time() and not st.session_state.snapshot_done_today:
@@ -3098,42 +3098,37 @@ def live_trades_page():
     # ── Buttons ───────────────────────────────────────────────────────────────
     col_btn1, col_btn2, col_btn3, _ = st.columns([1, 1, 1, 4])
     with col_btn1:
-        if st.button("🗑️ Clear Closed", help="מעביר עסקאות סגורות (TP/SL) לארכיון ב-Sheets"):
+        if st.button("🗑️ Clear Closed", help="מעביר עסקאות סגורות (TP/SL) לארכיון — לא נמחק לצמיתות"):
             try:
                 gc = _get_gc()
-                if gc:
+                if not gc:
+                    st.error("❌ אין חיבור ל-Google Sheets")
+                else:
                     ws = sheets_manager.get_worksheet("live_trades", gc=gc)
                     raw = ws.get_all_values() if ws else []
                     if len(raw) > 1:
-                        full_df = pd.DataFrame(raw[1:], columns=raw[0])
+                        full_df   = pd.DataFrame(raw[1:], columns=raw[0])
                         open_df   = full_df[full_df["Status"] == "Pending"]
                         closed_df = full_df[full_df["Status"].isin(["TP10", "SL"])]
 
-                        if not closed_df.empty:
-                            ws_arch = sheets_manager.get_worksheet("live_trades_archive", gc=gc)
-                            if ws_arch:
-                                arch_raw = ws_arch.get_all_values()
-                                if len(arch_raw) > 1:
-                                    arch_df  = pd.DataFrame(arch_raw[1:], columns=arch_raw[0])
-                                    combined = pd.concat([arch_df, closed_df], ignore_index=True)
-                                else:
-                                    combined = closed_df
-                                ws_arch.clear()
-                                ws_arch.update([combined.columns.tolist()] + combined.astype(str).values.tolist())
+                        if closed_df.empty:
+                            st.info("אין עסקאות סגורות")
+                        else:
+                            # ── ARCHIVE FIRST — only delete if archive succeeds ──
+                            n = sheets_manager.archive_live_trades(gc, closed_df)
 
-                        from auto_scanner import LIVE_TRADES_COLS
-                        for col in LIVE_TRADES_COLS:
-                            if col not in open_df.columns:
-                                open_df = open_df.copy()
-                                open_df[col] = ""
-                        open_df = open_df[LIVE_TRADES_COLS]
-                        ws.clear()
-                        ws.update([open_df.columns.tolist()] + open_df.astype(str).values.tolist())
-                        st.cache_data.clear()
-                        st.success(f"✅ {len(closed_df)} עסקאות הועברו לארכיון")
-                        st.rerun()
+                            # Write only open (Pending) trades back to live_trades
+                            from auto_scanner import LIVE_TRADES_COLS
+                            open_clean = open_df.reindex(columns=LIVE_TRADES_COLS, fill_value="")
+                            ws.clear()
+                            ws.update("A1", [LIVE_TRADES_COLS] + open_clean.astype(str).values.tolist())
+                            st.cache_data.clear()
+                            st.success(f"✅ {n} עסקאות הועברו לארכיון (live_trades_archive)")
+                            st.rerun()
+                    else:
+                        st.info("live_trades ריק")
             except Exception as e:
-                st.error(f"שגיאה: {e}")
+                st.error(f"❌ שגיאה — נתונים לא נמחקו: {e}")
     with col_btn2:
         if st.button("🔄 Refresh Now"):
             st.cache_data.clear()

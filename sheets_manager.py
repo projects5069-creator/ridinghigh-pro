@@ -307,3 +307,48 @@ def trading_days_after(date_str: str, n: int = 3) -> list:
         if d.weekday() < 5:
             days.append(d.strftime("%Y-%m-%d"))
     return days
+
+
+def archive_live_trades(gc, closed_df) -> int:
+    """
+    Archive closed live_trades rows (Status TP10/SL) into the 'live_trades_archive'
+    tab within the same spreadsheet as live_trades. Creates the tab if needed.
+
+    Safety contract: RAISES on any failure — caller must NOT delete from live_trades
+    unless this returns successfully.  Never silently drops data.
+
+    Returns: number of rows archived.
+    """
+    import pandas as pd
+    import pytz
+
+    peru = pytz.timezone("America/Lima")
+    archived_at = datetime.now(peru).strftime("%Y-%m-%d %H:%M")
+
+    # Resolve the live_trades spreadsheet
+    sheet_id   = get_sheet_id("live_trades")
+    spreadsheet = gc.open_by_key(sheet_id)
+
+    # Get or create the archive tab (adding a tab costs no Drive storage quota)
+    try:
+        ws_arch = spreadsheet.worksheet("live_trades_archive")
+    except Exception:
+        ws_arch = spreadsheet.add_worksheet(
+            title="live_trades_archive", rows=5000, cols=20
+        )
+        print("[SheetsManager] Created tab 'live_trades_archive'")
+
+    # Stamp each row with archive timestamp
+    df = closed_df.copy()
+    df["ArchivedAt"] = archived_at
+
+    existing = ws_arch.get_all_values()
+    if len(existing) <= 1:
+        # Empty or header-only — write header + data
+        ws_arch.update("A1", [df.columns.tolist()] + df.astype(str).values.tolist())
+    else:
+        # Header already present — append data rows only
+        ws_arch.append_rows(df.astype(str).values.tolist())
+
+    print(f"[SheetsManager] Archived {len(df)} rows to live_trades_archive (ArchivedAt={archived_at})")
+    return len(df)
