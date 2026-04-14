@@ -1118,6 +1118,25 @@ def _cached_post_analysis() -> pd.DataFrame:
     return load_post_analysis_from_sheets()
 
 
+@st.cache_data(ttl=60)
+def _cached_tl_today() -> pd.DataFrame:
+    """Today's timeline_live rows with canonical column names. Refreshes every 60s."""
+    try:
+        gc = _get_gc() or sheets_manager._get_gc()
+        if not gc: return pd.DataFrame()
+        ws = sheets_manager.get_worksheet("timeline_live", gc=gc)
+        if not ws: return pd.DataFrame()
+        data = ws.get_all_values()
+        if len(data) <= 1: return pd.DataFrame()
+        df = pd.DataFrame(data[1:], columns=data[0])
+        # Sheet header may be stale — enforce canonical column names
+        if len(df.columns) == len(sheets_manager.TIMELINE_LIVE_COLS):
+            df.columns = sheets_manager.TIMELINE_LIVE_COLS
+        return df
+    except Exception:
+        return pd.DataFrame()
+
+
 @st.cache_data(ttl=30)
 def _cached_live_trades() -> pd.DataFrame:
     """live_trades sheet → DataFrame. Refreshes every 30s."""
@@ -3192,6 +3211,59 @@ def score_comparison_page():
 
     st.title("📊 Score Comparison")
     st.caption("השוואת ביצועים בין 9 נוסחות ציון — על בסיס נתוני Post Analysis")
+
+    # ── 📡 Live section — today's data from timeline_live ─────────────────────
+    st.markdown("## 📡 נתונים חיים (היום)")
+    st.caption("מניות שנסרקו היום — נתונים מ-timeline_live, מתרענן כל 60 שניות")
+
+    tl_raw = _cached_tl_today()
+    today_str = datetime.now(PERU_TZ).strftime("%Y-%m-%d")
+
+    if not tl_raw.empty and "Date" in tl_raw.columns and "Ticker" in tl_raw.columns:
+        today_tl = tl_raw[tl_raw["Date"] == today_str].copy()
+        if today_tl.empty:
+            st.info("📭 אין נתוני timeline_live להיום עדיין.")
+        else:
+            # Numeric coerce for all score columns + display columns
+            for col in SCORE_COLS + ["Price", "RunUp", "REL_VOL"]:
+                if col in today_tl.columns:
+                    today_tl[col] = pd.to_numeric(today_tl[col], errors="coerce")
+
+            # Peak row per ticker = row with highest Score
+            peak_tl = (today_tl.sort_values("Score", ascending=False)
+                                .drop_duplicates("Ticker")
+                                .reset_index(drop=True))
+
+            # Compute max across all 9 score columns for sorting
+            avail_sc = [c for c in SCORE_COLS if c in peak_tl.columns]
+            peak_tl["_MaxScore"] = peak_tl[avail_sc].max(axis=1)
+            peak_tl = peak_tl.sort_values("_MaxScore", ascending=False).reset_index(drop=True)
+
+            # Display columns
+            live_disp_cols = ["Ticker", "Price", "RunUp", "REL_VOL"] + avail_sc
+            live_disp_cols = [c for c in live_disp_cols if c in peak_tl.columns]
+            live_tbl = peak_tl[live_disp_cols].copy()
+
+            def _color_score(val):
+                try:
+                    v = float(val)
+                except (TypeError, ValueError):
+                    return ""
+                if v >= 80:   return "background-color: #5a1a1a; color: #ffaaaa"
+                if v >= 60:   return "background-color: #5a3a00; color: #ffcc80"
+                if v >= 45:   return "background-color: #4a4a00; color: #ffff80"
+                return ""
+
+            score_subset = [c for c in avail_sc if c in live_tbl.columns]
+            styled_live = live_tbl.style.map(_color_score, subset=score_subset)
+            st.dataframe(styled_live, use_container_width=True)
+            st.caption(f"סה\"כ {len(live_tbl)} מניות היום • ממוין לפי ציון מקסימלי ↓")
+    else:
+        st.info("📭 timeline_live לא זמין.")
+
+    st.divider()
+    st.markdown("## 📊 ניתוח היסטורי")
+    st.caption("על בסיס נתוני Post Analysis — מניות עם תוצאה ידועה (TP10_Hit)")
 
     with st.spinner("טוען נתונים..."):
         df = _cached_post_analysis()
