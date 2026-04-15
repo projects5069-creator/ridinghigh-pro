@@ -115,7 +115,7 @@ def run(backfill: bool = False):
     numeric_cols = [
         "D0_Open","D0_Close","D1_Open","D1_High","D1_Low",
         "D1_Close","D2_Close","D3_Close","D5_Close",
-        "D0_Vol","D0_Volume","MaxDrop"
+        "D0_Vol","D0_Volume","MaxDrop","D0_Drop%","D1_Drop%","D2_Drop%","D3_Drop%","D5_Drop%","D1_High%","TP10_Price","SL_Price"
     ]
     for col in numeric_cols:
         if col in pa.columns:
