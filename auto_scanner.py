@@ -505,6 +505,9 @@ def analyze_ticker(ticker, finviz_row):
                 try:
                     avg_vol = info.get('averageVolume', volume)
                     rel_vol = volume / avg_vol if avg_vol > 0 else 1.0
+                    if rel_vol > 100:
+                        print(f"  ⚠ REL_VOL capped: {rel_vol:.1f} -> 100 for {ticker}")
+                        rel_vol = 100
                 except: pass
 
                 try:
@@ -1244,6 +1247,9 @@ def sync_score_tracker(gc, now_peru):
                 try:
                     avg_vol = info.get("averageVolume", volume)
                     rel_vol = volume / avg_vol if avg_vol > 0 else 1.0
+                    if rel_vol > 100:
+                        print(f"  ⚠ REL_VOL capped: {rel_vol:.1f} -> 100 for {ticker}")
+                        rel_vol = 100
                 except Exception: pass
                 try:
                     run_up = ((price - open_price) / open_price) * 100
@@ -1260,7 +1266,7 @@ def sync_score_tracker(gc, now_peru):
                     vwap_dist = ((price / vwap) - 1) * 100 if vwap > 0 else 0.0
                 except Exception: pass
 
-                mxv   = (mkt_cap - price * volume) / mkt_cap if mkt_cap > 0 else 0.0
+                mxv   = ((mkt_cap - price * volume) / mkt_cap * 100) if mkt_cap > 0 else 0.0
                 change_pct = ((price - prev_close) / prev_close * 100) if prev_close > 0 else 0.0
                 score = calculate_score({
                     'mxv': mxv, 'run_up': run_up, 'atrx': atrx,
@@ -1273,7 +1279,7 @@ def sync_score_tracker(gc, now_peru):
                     "Ticker": ticker, "ScanDate": scan_date,
                     "Price":     price,
                     "Score":     round(score,     2),
-                    "MxV":       round(mxv*100,   2),
+                    "MxV":       round(mxv,        2),
                     "RunUp":     round(run_up,     2),
                     "REL_VOL":   round(rel_vol,    2),
                     "RSI":       round(rsi,        2),
