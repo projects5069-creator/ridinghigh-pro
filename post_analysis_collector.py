@@ -32,8 +32,13 @@ from formulas import (
     calculate_vwap_dist,
     calculate_rel_vol,
 )
-
-PERU_TZ = pytz.timezone("America/Lima")
+from utils import (
+    is_trading_day,
+    is_day_complete,
+    get_trading_days_after,
+    calculate_stats,
+    PERU_TZ,
+)
 
 CATALYST_CATEGORIES = [
     "merger_acquisition", "fda_approval", "clinical_trial",
@@ -117,28 +122,8 @@ def analyze_catalyst(ticker: str, scan_date: str) -> dict:
 
 
 # ── OHLC fetch ────────────────────────────────────────────────────────────────
-def get_trading_days_after(scan_date_str: str, n: int) -> list:
-    import sheets_manager
-    return sheets_manager.trading_days_after(scan_date_str, n)
-
-
-def is_day_complete(date_str: str) -> bool:
-    """
-    True when the full trading day for date_str has closed (market close = 15:00 Peru).
-    - Past weekdays: always complete.
-    - Today: complete only after 15:00 Peru.
-    - Future or weekends: never complete.
-    """
-    now_peru  = datetime.now(PERU_TZ)
-    today     = now_peru.date()
-    day       = datetime.strptime(date_str, "%Y-%m-%d").date()
-    if day.weekday() >= 5:
-        return False
-    if day < today:
-        return True
-    if day == today:
-        return now_peru.hour >= 15   # after market close
-    return False
+# get_trading_days_after imported from utils
+# is_day_complete imported from utils
 
 
 def is_complete(existing_row: pd.Series, trading_days: list) -> bool:
@@ -182,23 +167,7 @@ def fetch_ohlc_for_days(ticker: str, trading_days: list) -> dict:
     return {}
 
 
-def calculate_stats(scan_price: float, ohlc: dict) -> dict:
-    lows = [(i, ohlc[f"D{i}_Low"]) for i in range(1,6) if ohlc.get(f"D{i}_Low") is not None]
-    if not lows or scan_price <= 0:
-        return {"MaxDrop%": None, "BestDay": None, "TP10_Hit": None, "TP15_Hit": None, "TP20_Hit": None, "D1_Gap%": None}
-    best_day, min_low = min(lows, key=lambda x: x[1])
-    max_drop = round((min_low - scan_price) / scan_price * 100, 2)
-    d1_open  = ohlc.get("D1_Open")
-    d1_gap   = round((d1_open - scan_price) / scan_price * 100, 2) if d1_open and scan_price > 0 else None
-    return {
-        "MaxDrop%": max_drop, "BestDay": best_day,
-        "TP10_Hit": 1 if min_low <= scan_price * 0.90 else 0,
-        "TP15_Hit": 1 if min_low <= scan_price * 0.85 else 0,
-        "TP20_Hit": 1 if min_low <= scan_price * 0.80 else 0,
-        "D1_Gap%":  d1_gap,
-        "SL7_Hit_D1": 1 if ohlc.get("D1_High") and ohlc["D1_High"] >= scan_price * 1.07 else 0,
-        "IntraDay_SL": 1 if any(ohlc.get(f"D{i}_High", 0) and ohlc[f"D{i}_High"] >= scan_price * 1.07 for i in range(1,6)) else 0,
-    }
+# calculate_stats imported from utils
 
 
 # ── NEW: D0 OHLC + fundamental data ──────────────────────────────────────────
@@ -296,15 +265,7 @@ def fetch_timeline_stats(ticker: str, scan_date: str, tl_df: pd.DataFrame) -> di
     return result
 
 
-def is_trading_day(date=None):
-    if date is None: date = datetime.now(PERU_TZ).date()
-    try:
-        import pandas_market_calendars as mcal
-        nyse = mcal.get_calendar("NASDAQ")
-        return not nyse.schedule(start_date=date.strftime("%Y-%m-%d"),
-                                  end_date=date.strftime("%Y-%m-%d")).empty
-    except Exception:
-        return date.weekday() < 5
+# is_trading_day imported from utils
 
 
 # ── Main ──────────────────────────────────────────────────────────────────────

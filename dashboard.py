@@ -35,6 +35,10 @@ from formulas import (
     calculate_float_pct,
 )
 from auto_scanner import calculate_score
+from utils import (
+    parse_market_cap,
+    parse_volume,
+)
 
 st.set_page_config(
     page_title="RidingHigh Pro v14.6",
@@ -164,38 +168,8 @@ class Dashboard:
         except Exception as e:
             return None
     
-    def parse_market_cap(self, market_cap_str):
-        try:
-            if pd.isna(market_cap_str) or market_cap_str == '-':
-                return None
-            
-            market_cap_str = str(market_cap_str).replace(',', '')
-            
-            if 'B' in market_cap_str:
-                return float(market_cap_str.replace('B', '')) * 1_000_000_000
-            elif 'M' in market_cap_str:
-                return float(market_cap_str.replace('M', '')) * 1_000_000
-            else:
-                return float(market_cap_str)
-        except:
-            return None
-    
-    def parse_volume(self, volume_str):
-        try:
-            if pd.isna(volume_str) or volume_str == '-':
-                return None
-            
-            volume_str = str(volume_str).replace(',', '')
-            
-            if 'M' in volume_str:
-                return int(float(volume_str.replace('M', '')) * 1_000_000)
-            elif 'K' in volume_str:
-                return int(float(volume_str.replace('K', '')) * 1_000)
-            else:
-                return int(float(volume_str))
-        except:
-            return None
-    
+    # parse_market_cap and parse_volume imported from utils
+
     def get_market_cap_smart(self, ticker, price, finviz_mc=None):
         market_cap = None
         
@@ -269,7 +243,7 @@ class Dashboard:
             if progress_callback:
                 progress_callback(idx + 1, total, ticker)
             
-            finviz_mc = self.parse_market_cap(row.get('Market Cap', None))
+            finviz_mc = parse_market_cap(row.get('Market Cap', None))
             price = float(row.get('Price', 0))
             
             market_cap = self.get_market_cap_smart(ticker, price, finviz_mc)
@@ -456,11 +430,11 @@ class Dashboard:
                 return None
             change = float(change) * 100
             
-            volume = self.parse_volume(finviz_row.get('Volume', None))
+            volume = parse_volume(finviz_row.get('Volume', None))
             if volume is None or volume == 0:
                 return None
             
-            finviz_mc = self.parse_market_cap(finviz_row.get('Market Cap', None))
+            finviz_mc = parse_market_cap(finviz_row.get('Market Cap', None))
             market_cap = self.get_market_cap_smart(ticker, price, finviz_mc)
             
             if market_cap is None or market_cap == 0:

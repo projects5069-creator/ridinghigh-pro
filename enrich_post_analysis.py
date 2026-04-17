@@ -14,6 +14,7 @@ from datetime import datetime, timedelta
 import time
 import sheets_manager
 from gsheets_sync import load_post_analysis_from_sheets, save_post_analysis_to_sheets
+from utils import is_trading_day
 
 
 def _is_missing(val):
@@ -62,19 +63,7 @@ def fetch_d0_data(ticker: str, scan_date: str) -> dict:
     return {}
 
 
-def is_trading_day(date=None):
-    import pytz
-    if date is None:
-        date = datetime.now(pytz.timezone("America/Lima")).date()
-    try:
-        import pandas_market_calendars as mcal
-        nyse = mcal.get_calendar("NASDAQ")
-        return not nyse.schedule(
-            start_date=date.strftime("%Y-%m-%d"),
-            end_date=date.strftime("%Y-%m-%d")
-        ).empty
-    except Exception:
-        return date.weekday() < 5
+# is_trading_day imported from utils
 
 
 def run(backfill: bool = False):

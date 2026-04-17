@@ -16,22 +16,15 @@ import pytz
 
 from gsheets_sync import load_post_analysis_from_sheets, save_post_analysis_to_sheets
 import sheets_manager
-
-PERU_TZ = pytz.timezone("America/Lima")
+from utils import (
+    is_day_complete,
+    get_trading_days_after,
+    calculate_stats,
+    PERU_TZ,
+)
 
 # ── helpers (same logic as collector) ────────────────────────────────────────
-
-def get_trading_days_after(scan_date_str, n=5):
-    return sheets_manager.trading_days_after(scan_date_str, n)
-
-def is_day_complete(date_str):
-    now_peru = datetime.now(PERU_TZ)
-    today    = now_peru.date()
-    day      = datetime.strptime(date_str, "%Y-%m-%d").date()
-    if day.weekday() >= 5: return False
-    if day < today:        return True
-    if day == today:       return now_peru.hour >= 15
-    return False
+# get_trading_days_after, is_day_complete, calculate_stats imported from utils
 
 def fetch_ohlc(ticker, trading_days):
     available = [d for d in trading_days if is_day_complete(d)]
@@ -64,28 +57,6 @@ def fetch_ohlc(ticker, trading_days):
             print(f"  ⚠️ attempt {attempt} error: {e}")
             time.sleep(2)
     return {}
-
-def calculate_stats(scan_price, ohlc):
-    lows = [(i, ohlc[f"D{i}_Low"]) for i in range(1,6)
-            if ohlc.get(f"D{i}_Low") is not None]
-    if not lows or scan_price <= 0:
-        return {}
-    best_day, min_low = min(lows, key=lambda x: x[1])
-    max_drop = round((min_low - scan_price) / scan_price * 100, 2)
-    d1_open  = ohlc.get("D1_Open")
-    d1_gap   = round((d1_open - scan_price) / scan_price * 100, 2) if d1_open and scan_price > 0 else None
-    return {
-        "MaxDrop%": max_drop,
-        "BestDay":  best_day,
-        "TP10_Hit": 1 if min_low <= scan_price * 0.90 else 0,
-        "TP15_Hit": 1 if min_low <= scan_price * 0.85 else 0,
-        "TP20_Hit": 1 if min_low <= scan_price * 0.80 else 0,
-        "D1_Gap%":  d1_gap,
-        "SL7_Hit_D1":    1 if ohlc.get("D1_High") and ohlc["D1_High"] >= scan_price * 1.07 else 0,
-        "IntraDay_SL":   1 if any(ohlc.get(f"D{i}_High", 0) and
-                                   ohlc[f"D{i}_High"] >= scan_price * 1.07
-                                   for i in range(1,6)) else 0,
-    }
 
 # ── main ──────────────────────────────────────────────────────────────────────
 
