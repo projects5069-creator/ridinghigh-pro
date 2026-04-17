@@ -24,6 +24,14 @@ import time
 
 sys.path.insert(0, os.path.expanduser("~/RidingHighPro"))
 from gsheets_sync import load_post_analysis_from_sheets, save_post_analysis_to_sheets
+from formulas import (
+    calculate_mxv,
+    calculate_runup,
+    calculate_atrx,
+    calculate_gap,
+    calculate_vwap_dist,
+    calculate_rel_vol,
+)
 
 PERU_TZ = pytz.timezone("America/Lima")
 
@@ -455,34 +463,35 @@ def run(target_date: str = None):
             vol = raw_inputs.get("Volume_raw") or 0
             pr  = float(row.get("Price", 0) or 0)
             if mc > 0:
-                raw_inputs["MxV_calc"] = round(((mc - (pr * vol)) / mc) * 100, 2)
+                raw_inputs["MxV_calc"] = round(calculate_mxv(mc, pr, vol), 2)
         except: pass
         try:
             avg_vol = raw_inputs.get("AvgVolume_raw") or 0
             if avg_vol > 0 and vol > 0:
-                raw_inputs["REL_VOL_calc"] = round(vol / avg_vol, 2)
+                raw_inputs["REL_VOL_calc"] = round(calculate_rel_vol(vol, avg_vol), 2)
         except: pass
         try:
             op = raw_inputs.get("Open_price_raw") or 0
             if op > 0 and pr > 0:
-                raw_inputs["RunUp_calc"] = round(((pr - op) / op) * 100, 2)
+                raw_inputs["RunUp_calc"] = round(calculate_runup(pr, op), 2)
         except: pass
         try:
             pc = raw_inputs.get("PrevClose_raw") or 0
             op = raw_inputs.get("Open_price_raw") or 0
             if pc > 0 and op > 0:
-                raw_inputs["Gap_calc"] = round(((op - pc) / pc) * 100, 2)
+                raw_inputs["Gap_calc"] = round(calculate_gap(op, pc), 2)
         except: pass
         try:
             h   = raw_inputs.get("High_today_raw") or 0
             l   = raw_inputs.get("Low_today_raw") or 0
             atr = raw_inputs.get("ATR14_raw") or 0
             if atr > 0 and h > 0 and l > 0:
-                raw_inputs["ATRX_calc"] = round((h - l) / atr, 2)
+                raw_inputs["ATRX_calc"] = round(calculate_atrx(h, l, atr), 2)
         except: pass
         try:
             vp = raw_inputs.get("VWAP_price_raw") or 0
             if vp > 0 and pr > 0:
+                # Note: uses pre-calculated VWAP_price_raw, different from formulas.calculate_vwap_dist
                 raw_inputs["VWAP_calc"] = round(((pr / vp) - 1) * 100, 2)
         except: pass
 
