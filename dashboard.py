@@ -39,6 +39,10 @@ from utils import (
     parse_market_cap,
     parse_volume,
 )
+from config import (
+    MIN_SCORE_DISPLAY,
+    CRITICAL_SCORE,
+)
 
 st.set_page_config(
     page_title="RidingHigh Pro v14.6",
@@ -795,7 +799,7 @@ class PortfolioTracker:
         if not results:
             return 0
         
-        high_score_stocks = [r for r in results if r['Score'] >= 60]
+        high_score_stocks = [r for r in results if r['Score'] >= MIN_SCORE_DISPLAY]
         
         if not high_score_stocks:
             return 0
@@ -1429,7 +1433,7 @@ def main_page():
             st.metric("Total", len(results))
         
         with col2:
-            critical = len([r for r in results if r['Score'] >= 85])
+            critical = len([r for r in results if r['Score'] >= CRITICAL_SCORE])
             st.metric("🔥 Critical", critical)
         
         with col3:
@@ -1453,7 +1457,7 @@ def main_page():
             row_d = {
                 'Ticker': r['Ticker'],
                 'Score': f"{r['Score']:.2f}",
-                'EntryScore': f"{entry_s:.2f}" if r['Score'] >= 60 else "—",
+                'EntryScore': f"{entry_s:.2f}" if r['Score'] >= MIN_SCORE_DISPLAY else "—",
                 'Price': f"${r['Price']:.2f}",
                 'MxV': f"{r['MxV']:.0f}%",
                 'RunUp': f"{r['RunUp']:+.1f}%",
@@ -1472,9 +1476,9 @@ def main_page():
 
         def highlight_score(row):
             score = float(row['Score'])
-            if score >= 85:
+            if score >= CRITICAL_SCORE:
                 return ['background-color: #800020; color: white; font-weight: bold'] * len(row)
-            elif score >= 60:
+            elif score >= MIN_SCORE_DISPLAY:
                 return ['background-color: #cc0000; color: white'] * len(row)
             elif score >= 40:
                 return ['background-color: #ff6600; color: white'] * len(row)
@@ -1540,9 +1544,9 @@ def main_page():
         def color_score(val):
             try:
                 score = float(val)
-                if score >= 85:
+                if score >= CRITICAL_SCORE:
                     return 'background-color: #800020; color: white; font-weight: bold'
-                elif score >= 60:
+                elif score >= MIN_SCORE_DISPLAY:
                     return 'background-color: #cc0000; color: white'
                 elif score >= 50:
                     return 'background-color: #ff6600; color: white'
@@ -1604,9 +1608,9 @@ def daily_summary_page():
     def highlight_score(row):
         try:
             score = float(row['Score'])
-            if score >= 85:
+            if score >= CRITICAL_SCORE:
                 return ['background-color: #800020; color: white; font-weight: bold'] * len(row)
-            elif score >= 60:
+            elif score >= MIN_SCORE_DISPLAY:
                 return ['background-color: #cc0000; color: white'] * len(row)
             elif score >= 40:
                 return ['background-color: #ff6600; color: white'] * len(row)
@@ -1703,9 +1707,9 @@ def timeline_archive_page():
     def color_score(val):
         try:
             score = float(val)
-            if score >= 85:
+            if score >= CRITICAL_SCORE:
                 return 'background-color: #800020; color: white; font-weight: bold'
-            elif score >= 60:
+            elif score >= MIN_SCORE_DISPLAY:
                 return 'background-color: #cc0000; color: white'
             elif score >= 50:
                 return 'background-color: #ff6600; color: white'
