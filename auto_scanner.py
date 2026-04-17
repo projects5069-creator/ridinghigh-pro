@@ -495,6 +495,10 @@ def analyze_ticker(ticker, finviz_row):
                         ).average_true_range()
                         atr = atr_vals.iloc[-1] if not atr_vals.empty else current['High'] - current['Low']
                         atrx = (current["High"] - current["Low"]) / atr if atr > 0 else 0
+                        # Validation: בזמן סריקה yfinance עלול להחזיר ATR שגוי
+                        if atr < 0.005 * price and atrx > 5:
+                            atrx = 0
+                            atr = 0
                         atr14_raw = round(float(atr), 4)  # raw ATR14
                     except: pass
 
@@ -1233,6 +1237,9 @@ def sync_score_tracker(gc, now_peru):
                 try:
                     atr  = float(AverageTrueRange(hist["High"],hist["Low"],hist["Close"],14).average_true_range().iloc[-1])
                     atrx = (high - low) / atr if atr > 0 else 0.0
+                    # Validation: בזמן סריקה yfinance עלול להחזיר ATR שגוי
+                    if atr < 0.005 * price and atrx > 5:
+                        atrx = 0.0
                 except Exception: pass
                 try:
                     avg_vol = info.get("averageVolume", volume)
