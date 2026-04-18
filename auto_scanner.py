@@ -29,6 +29,12 @@ from formulas import (
     calculate_vwap_dist,
     calculate_rel_vol,
     calculate_float_pct,
+    calculate_scan_change,
+)
+from config import (
+    TP_THRESHOLD_FRAC,
+    SL_THRESHOLD_FRAC,
+    SCANNER_MIN_SCORE,
 )
 
 SCOPES = [
@@ -853,8 +859,8 @@ def update_portfolio_live(gc, now_peru):
     אם RunningLow  <= TP10 → TP10 ✅
     אם שניהם נגעו → SL גובר (שורט)
     """
-    TP_PCT = 0.10
-    SL_PCT = 0.07
+    TP_PCT = TP_THRESHOLD_FRAC
+    SL_PCT = SL_THRESHOLD_FRAC
 
     try:
         # ── Source of truth: portfolio sheet, Status=Open, last 7 days ──────────
@@ -996,9 +1002,9 @@ def update_live_trades(gc, now_peru, results=None):
        מניה יכולה להופיע עד 9 פעמים (פעם לכל ציון שעובר 70)
     קריטריון: ScoreType >= 70 AND שוק פתוח
     """
-    ENTRY_MIN_SCORE = 70
-    TP_PCT = 0.10
-    SL_PCT = 0.10
+    ENTRY_MIN_SCORE = SCANNER_MIN_SCORE
+    TP_PCT = TP_THRESHOLD_FRAC
+    SL_PCT = SL_THRESHOLD_FRAC
 
     try:
         today     = now_peru.strftime("%Y-%m-%d")
@@ -1234,7 +1240,7 @@ def sync_score_tracker(gc, now_peru):
                 except Exception: pass
 
                 mxv   = calculate_mxv(mkt_cap, price, volume)
-                change_pct = ((price - prev_close) / prev_close * 100) if prev_close > 0 else 0.0
+                change_pct = calculate_scan_change(price, prev_close)
                 score = calculate_score({
                     'mxv': mxv, 'run_up': run_up, 'atrx': atrx,
                     'rsi': rsi, 'vwap_dist': vwap_dist,

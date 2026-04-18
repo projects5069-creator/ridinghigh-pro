@@ -48,6 +48,7 @@ from config import (
     POSITION_SIZE_USD,
     TP_THRESHOLD_FRAC,
     SL_THRESHOLD_FRAC,
+    DATA_CUTOFF_DATE,
 )
 
 st.set_page_config(
@@ -2162,7 +2163,7 @@ def portfolio_tracker_page():
     all_dates  = sorted(pa["ScanDate"].dropna().unique().tolist(), reverse=True)
     sel_dates  = all_dates
     sel_status = ["TP10 ✅", "SL ❌", "Open ⏳", "Pending ⏳"]
-    min_score  = 60
+    min_score  = MIN_SCORE_DISPLAY
 
     # Filter source data
     pa_filtered = pa.copy()
@@ -2778,7 +2779,7 @@ def score_tracker_page():
         if not sd or not tk:
             continue
         try:
-            if sd < "2026-04-10":   # תיעוד score_tracker רק מ-10/4
+            if sd < DATA_CUTOFF_DATE:   # תיעוד score_tracker רק מ-DATA_CUTOFF_DATE
                 continue
             window      = _trading_days_after(sd, 3)   # [D1, D2, D3]
             trading_seq = [sd] + window                 # [D0, D1, D2, D3]
@@ -2839,7 +2840,7 @@ def score_tracker_page():
                     if not _pp.empty:
                         _scan_price = round(float(_pp.iloc[0]), 2)
                         _cur_price  = round(float(_pp.iloc[-1]), 2)
-                        _tp_price   = round(_scan_price * 0.90, 2)
+                        _tp_price   = round(_scan_price * (1 - TP_THRESHOLD_FRAC), 2)
                         _sl_price   = round(_scan_price * (1 + SL_THRESHOLD_FRAC), 2)
                         if _pp.min() <= _tp_price:
                             _trade_status = "✅ TP10"
