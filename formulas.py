@@ -327,6 +327,47 @@ def calculate_pnl_pct(entry_price, exit_price, is_short=True):
 
 
 # ═══════════════════════════════════════════════════════════════════════
+# ═══════════════════════════════════════════════════════════════════════
+# Dynamic Score (v2.0 - experimental, based on empirical correlations)
+# ═══════════════════════════════════════════════════════════════════════
+
+def normalize_mxv(mxv, min_val=-5000, max_val=0):
+    """Normalize MxV to 0-100 scale. More negative MxV = higher score."""
+    try:
+        if mxv is None:
+            return 0.0
+        clipped = max(min(mxv, max_val), min_val)
+        return float(((clipped - max_val) / (min_val - max_val)) * 100)
+    except (TypeError, ValueError, ZeroDivisionError):
+        return 0.0
+
+
+def normalize_atrx(atrx, min_val=0, max_val=50):
+    """Normalize ATRX to 0-100 scale. Higher ATRX = higher score."""
+    try:
+        if atrx is None:
+            return 0.0
+        clipped = max(min(atrx, max_val), min_val)
+        return float((clipped - min_val) / (max_val - min_val) * 100)
+    except (TypeError, ValueError, ZeroDivisionError):
+        return 0.0
+
+
+def calculate_dynamic_score(mxv, atrx, mxv_weight=0.6, atrx_weight=0.4,
+                             mxv_min=-5000, mxv_max=0,
+                             atrx_min=0, atrx_max=50):
+    """DynamicScore - Based ONLY on MxV and ATRX (proven correlations).
+
+    Returns: Score from 0-100
+    """
+    try:
+        mxv_norm = normalize_mxv(mxv, mxv_min, mxv_max)
+        atrx_norm = normalize_atrx(atrx, atrx_min, atrx_max)
+        return round(float(mxv_norm * mxv_weight + atrx_norm * atrx_weight), 2)
+    except (TypeError, ValueError, ZeroDivisionError):
+        return 0.0
+
+
 # Module self-test when run directly
 # ═══════════════════════════════════════════════════════════════════════
 

@@ -33,6 +33,9 @@ from formulas import (
     calculate_vwap_dist,
     calculate_rel_vol,
     calculate_float_pct,
+    calculate_dynamic_score,
+    normalize_mxv,
+    normalize_atrx,
 )
 from auto_scanner import calculate_score
 from utils import (
@@ -2352,13 +2355,14 @@ def post_analysis_page():
 
     if "MxV" in df.columns and "ATRX" in df.columns:
         df_dyn = df.copy()
-        mxv_min, mxv_max = -5000, 0
         df_dyn["MxV"] = pd.to_numeric(df_dyn["MxV"], errors="coerce").fillna(0)
         df_dyn["ATRX"] = pd.to_numeric(df_dyn["ATRX"], errors="coerce").fillna(0)
-        df_dyn["MxV_norm"] = ((df_dyn["MxV"].clip(mxv_min, mxv_max) - mxv_max) / (mxv_min - mxv_max) * 100).clip(0, 100)
-        atrx_min, atrx_max = 0, 50
-        df_dyn["ATRX_norm"] = ((df_dyn["ATRX"].clip(atrx_min, atrx_max) - atrx_min) / (atrx_max - atrx_min) * 100).clip(0, 100)
-        df_dyn["DynamicScore"] = (df_dyn["MxV_norm"] * 0.6 + df_dyn["ATRX_norm"] * 0.4).round(2)
+        # Use formulas.py functions (v2.0 2026-04-18)
+        df_dyn["MxV_norm"] = df_dyn["MxV"].apply(normalize_mxv)
+        df_dyn["ATRX_norm"] = df_dyn["ATRX"].apply(normalize_atrx)
+        df_dyn["DynamicScore"] = df_dyn.apply(
+            lambda r: calculate_dynamic_score(r["MxV"], r["ATRX"]), axis=1
+        )
 
         dyn_display = df_dyn[["Ticker","ScanDate","Score","DynamicScore","MxV","ATRX","TP10_Hit","MaxDrop%"]].copy()
         dyn_display["הפרש"] = (dyn_display["DynamicScore"] - dyn_display["Score"]).round(2)
