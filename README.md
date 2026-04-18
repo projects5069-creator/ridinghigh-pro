@@ -1,3 +1,5 @@
+> ⚠️ **OUTDATED** - see PROJECT_KB.md for current system state ⚠️
+
 # 🚀 RidingHigh Pro v14.1
 
 **Advanced Stock Scanner for Short-Selling Opportunities**

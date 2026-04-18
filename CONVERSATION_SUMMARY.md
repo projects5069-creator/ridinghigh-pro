@@ -1,3 +1,5 @@
+> ⚠️ **OUTDATED** - from 17/3/2026, describes old scoring system. See PROJECT_KB.md for current state.
+
 # Conversation Summary - March 17, 2026
 
 ## Key Decisions Made:

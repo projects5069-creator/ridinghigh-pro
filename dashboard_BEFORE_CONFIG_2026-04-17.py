@@ -39,13 +39,6 @@ from utils import (
     parse_market_cap,
     parse_volume,
 )
-from config import (
-    MIN_SCORE_DISPLAY,
-    CRITICAL_SCORE,
-    POSITION_SIZE_USD,
-    TP_THRESHOLD_FRAC,
-    SL_THRESHOLD_FRAC,
-)
 
 st.set_page_config(
     page_title="RidingHigh Pro v14.6",
@@ -802,7 +795,7 @@ class PortfolioTracker:
         if not results:
             return 0
         
-        high_score_stocks = [r for r in results if r['Score'] >= MIN_SCORE_DISPLAY]
+        high_score_stocks = [r for r in results if r['Score'] >= 60]
         
         if not high_score_stocks:
             return 0
@@ -1436,7 +1429,7 @@ def main_page():
             st.metric("Total", len(results))
         
         with col2:
-            critical = len([r for r in results if r['Score'] >= CRITICAL_SCORE])
+            critical = len([r for r in results if r['Score'] >= 85])
             st.metric("🔥 Critical", critical)
         
         with col3:
@@ -1460,7 +1453,7 @@ def main_page():
             row_d = {
                 'Ticker': r['Ticker'],
                 'Score': f"{r['Score']:.2f}",
-                'EntryScore': f"{entry_s:.2f}" if r['Score'] >= MIN_SCORE_DISPLAY else "—",
+                'EntryScore': f"{entry_s:.2f}" if r['Score'] >= 60 else "—",
                 'Price': f"${r['Price']:.2f}",
                 'MxV': f"{r['MxV']:.0f}%",
                 'RunUp': f"{r['RunUp']:+.1f}%",
@@ -1479,9 +1472,9 @@ def main_page():
 
         def highlight_score(row):
             score = float(row['Score'])
-            if score >= CRITICAL_SCORE:
+            if score >= 85:
                 return ['background-color: #800020; color: white; font-weight: bold'] * len(row)
-            elif score >= MIN_SCORE_DISPLAY:
+            elif score >= 60:
                 return ['background-color: #cc0000; color: white'] * len(row)
             elif score >= 40:
                 return ['background-color: #ff6600; color: white'] * len(row)
@@ -1547,9 +1540,9 @@ def main_page():
         def color_score(val):
             try:
                 score = float(val)
-                if score >= CRITICAL_SCORE:
+                if score >= 85:
                     return 'background-color: #800020; color: white; font-weight: bold'
-                elif score >= MIN_SCORE_DISPLAY:
+                elif score >= 60:
                     return 'background-color: #cc0000; color: white'
                 elif score >= 50:
                     return 'background-color: #ff6600; color: white'
@@ -1611,9 +1604,9 @@ def daily_summary_page():
     def highlight_score(row):
         try:
             score = float(row['Score'])
-            if score >= CRITICAL_SCORE:
+            if score >= 85:
                 return ['background-color: #800020; color: white; font-weight: bold'] * len(row)
-            elif score >= MIN_SCORE_DISPLAY:
+            elif score >= 60:
                 return ['background-color: #cc0000; color: white'] * len(row)
             elif score >= 40:
                 return ['background-color: #ff6600; color: white'] * len(row)
@@ -1710,9 +1703,9 @@ def timeline_archive_page():
     def color_score(val):
         try:
             score = float(val)
-            if score >= CRITICAL_SCORE:
+            if score >= 85:
                 return 'background-color: #800020; color: white; font-weight: bold'
-            elif score >= MIN_SCORE_DISPLAY:
+            elif score >= 60:
                 return 'background-color: #cc0000; color: white'
             elif score >= 50:
                 return 'background-color: #ff6600; color: white'
@@ -1836,9 +1829,9 @@ def _simulate_short_trades(pa_df: pd.DataFrame):
     closed (strictly before today in Peru TZ). Pre-market / intraday data
     can never trigger an exit.
     """
-    POSITION = POSITION_SIZE_USD
-    TP_PCT   = TP_THRESHOLD_FRAC   # from config.py
-    SL_PCT   = SL_THRESHOLD_FRAC   # from config.py
+    POSITION = 1000.0
+    TP_PCT   = 0.10   # 10% take-profit (short: price drops)
+    SL_PCT   = 0.07   # 7%  stop-loss   (short: price rises)
     TP15_PCT = 0.15   # 15% stretch target — mark only
 
     # ── טעון portfolio_live (RunningHigh/RunningLow מה-scanner) ─────────────
@@ -2836,7 +2829,7 @@ def score_tracker_page():
                         _scan_price = round(float(_pp.iloc[0]), 2)
                         _cur_price  = round(float(_pp.iloc[-1]), 2)
                         _tp_price   = round(_scan_price * 0.90, 2)
-                        _sl_price   = round(_scan_price * (1 + SL_THRESHOLD_FRAC), 2)
+                        _sl_price   = round(_scan_price * 1.07, 2)
                         if _pp.min() <= _tp_price:
                             _trade_status = "✅ TP10"
                         elif _pp.max() >= _sl_price:
@@ -3011,7 +3004,7 @@ def live_trades_page():
         "Score_H": "RSI-free pure technicals",
         "Score_I": "MxV dominant 50%",
     }
-    ENTRY_AMOUNT = POSITION_SIZE_USD
+    ENTRY_AMOUNT = 1000.0
 
     st.title("⚡ Live Trades")
     st.caption("מניות שנכנסו לשורט בזמן אמת — Score ≥70 · TP 10% · SL 10% · כניסה $1,000 לעסקה")

@@ -1,3 +1,13 @@
+> ⚠️ **OUTDATED - DO NOT USE** ⚠️
+> This document is from 17/3/2026 and describes
+> Score v1 (10 metrics). System now runs Score v2
+> (7 metrics, from 11/4/2026).
+> **For current documentation see: PROJECT_KB.md**
+>
+> Keeping this file for historical reference only.
+>
+> ---
+
 # RidingHigh Pro - תיעוד מלא של הפרויקט
 
 **תאריך יצירה:** 17 מרץ 2026  

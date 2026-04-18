@@ -14,30 +14,16 @@ from datetime import datetime, time as dt_time
 
 sys.path.insert(0, os.path.expanduser("~/RidingHighPro"))
 import sheets_manager
-from utils import (
-    get_peru_time,
-    is_trading_day,
-    parse_market_cap,
-    parse_volume,
-)
-from formulas import (
-    calculate_mxv,
-    calculate_runup,
-    calculate_atrx,
-    validate_atrx,
-    calculate_gap,
-    calculate_vwap_dist,
-    calculate_rel_vol,
-    calculate_float_pct,
-)
 
 SCOPES = [
     "https://spreadsheets.google.com/feeds",
     "https://www.googleapis.com/auth/drive"
 ]
 
-PERU_TZ = pytz.timezone("America/Lima")  # kept for backward compat
-# get_peru_time imported from utils
+PERU_TZ = pytz.timezone("America/Lima")
+
+def get_peru_time():
+    return datetime.now(PERU_TZ)
 
 def is_market_hours():
     now = get_peru_time()
@@ -49,7 +35,26 @@ def is_snapshot_time():
     now = get_peru_time()
     return dt_time(14, 55) <= now.time() < dt_time(15, 5)
 
-# is_trading_day imported from utils
+def is_trading_day(date=None):
+    """
+    Returns True if the given date (default: today Peru time) is a NASDAQ trading day.
+    Checks weekends + US market holidays via pandas_market_calendars.
+    Falls back to weekday-only check if library unavailable.
+    """
+    if date is None:
+        date = get_peru_time().date()
+    try:
+        import pandas_market_calendars as mcal
+        nyse = mcal.get_calendar("NASDAQ")
+        schedule = nyse.schedule(
+            start_date=date.strftime("%Y-%m-%d"),
+            end_date=date.strftime("%Y-%m-%d")
+        )
+        return not schedule.empty
+    except Exception:
+        # Fallback: weekday only (no holiday detection)
+        print("[Scanner] ⚠️ pandas_market_calendars unavailable — using weekday-only check")
+        return date.weekday() < 5
 
 # ── Google Sheets client ─────────────────────────────────────────────────────
 def get_gsheets_client():
@@ -90,7 +95,23 @@ from ta.volatility import AverageTrueRange
 
 _shares_cache = {}
 
-# parse_market_cap and parse_volume imported from utils
+def parse_market_cap(s):
+    try:
+        if pd.isna(s) or s == '-': return None
+        s = str(s).replace(',', '')
+        if 'B' in s: return float(s.replace('B','')) * 1_000_000_000
+        if 'M' in s: return float(s.replace('M','')) * 1_000_000
+        return float(s)
+    except: return None
+
+def parse_volume(s):
+    try:
+        if pd.isna(s) or s == '-': return None
+        s = str(s).replace(',', '')
+        if 'M' in s: return int(float(s.replace('M','')) * 1_000_000)
+        if 'K' in s: return int(float(s.replace('K','')) * 1_000)
+        return int(float(s))
+    except: return None
 
 def get_market_cap_smart(ticker, price, finviz_mc=None):
     if finviz_mc and finviz_mc > 0:
@@ -120,6 +141,12 @@ def get_market_cap_smart(ticker, price, finviz_mc=None):
         return _mc_cache[ticker]
 
     return None
+
+def calculate_mxv(market_cap, price, volume):
+    try:
+        if market_cap == 0: return 0
+        return ((market_cap - (price * volume)) / market_cap) * 100
+    except: return 0
 
 def calculate_score(metrics):
     score = 0
@@ -467,14 +494,17 @@ def analyze_ticker(ticker, finviz_row):
                             close=hist['Close'], window=14
                         ).average_true_range()
                         atr = atr_vals.iloc[-1] if not atr_vals.empty else current['High'] - current['Low']
-                        atrx = calculate_atrx(current["High"], current["Low"], atr)
-                        atrx = validate_atrx(atrx, atr, price)
+                        atrx = (current["High"] - current["Low"]) / atr if atr > 0 else 0
+                        # Validation: בזמן סריקה yfinance עלול להחזיר ATR שגוי
+                        if atr < 0.005 * price and atrx > 5:
+                            atrx = 0
+                            atr = 0
                         atr14_raw = round(float(atr), 4)  # raw ATR14
                     except: pass
 
                 try:
                     avg_vol = info.get('averageVolume', volume)
-                    rel_vol = calculate_rel_vol(volume, avg_vol)
+                    rel_vol = volume / avg_vol if avg_vol > 0 else 1.0
                     if rel_vol > 100:
                         print(f"  ⚠ REL_VOL capped: {rel_vol:.1f} -> 100 for {ticker}")
                         rel_vol = 100
@@ -482,19 +512,19 @@ def analyze_ticker(ticker, finviz_row):
 
                 try:
                     open_price = round(float(current['Open']), 4)
-                    run_up = calculate_runup(price, current['Open'])
+                    run_up = ((price - current['Open']) / current['Open']) * 100
                 except: pass
 
                 try:
                     prev_close = round(float(previous['Close']), 4)
-                    gap = calculate_gap(current['Open'], previous['Close'])
+                    gap = ((current['Open'] - previous['Close']) / previous['Close']) * 100
                 except: pass
 
                 try:
                     high_today = round(float(current['High']), 4)
                     low_today  = round(float(current['Low']), 4)
                     vwap_price = round((current['High'] + current['Low'] + price) / 3, 4)
-                    vwap_dist  = calculate_vwap_dist(price, current['High'], current['Low'])
+                    vwap_dist  = ((price / vwap_price) - 1) * 100 if vwap_price > 0 else 0
                 except: pass
 
                 # Fallback: if daily bar hasn't updated high yet, use price as high.
@@ -517,7 +547,7 @@ def analyze_ticker(ticker, finviz_row):
 
                 try:
                     fs = info.get('floatShares', 0) or 0
-                    float_pct = calculate_float_pct(fs, shares_outstanding)
+                    float_pct = (fs / shares_outstanding * 100) if shares_outstanding > 0 and fs > 0 else 0
                 except: pass
 
         except: pass
@@ -1209,31 +1239,34 @@ def sync_score_tracker(gc, now_peru):
                 except Exception: pass
                 try:
                     atr  = float(AverageTrueRange(hist["High"],hist["Low"],hist["Close"],14).average_true_range().iloc[-1])
-                    atrx = calculate_atrx(high, low, atr)
-                    atrx = validate_atrx(atrx, atr, price)
+                    atrx = (high - low) / atr if atr > 0 else 0.0
+                    # Validation: בזמן סריקה yfinance עלול להחזיר ATR שגוי
+                    if atr < 0.005 * price and atrx > 5:
+                        atrx = 0.0
                 except Exception: pass
                 try:
                     avg_vol = info.get("averageVolume", volume)
-                    rel_vol = calculate_rel_vol(volume, avg_vol)
+                    rel_vol = volume / avg_vol if avg_vol > 0 else 1.0
                     if rel_vol > 100:
                         print(f"  ⚠ REL_VOL capped: {rel_vol:.1f} -> 100 for {ticker}")
                         rel_vol = 100
                 except Exception: pass
                 try:
-                    run_up = calculate_runup(price, open_price)
+                    run_up = ((price - open_price) / open_price) * 100
                 except Exception: pass
 
                 gap = 0.0
                 try:
-                    gap = calculate_gap(open_price, prev_close)
+                    gap = ((open_price - prev_close) / prev_close) * 100
                 except Exception: pass
 
                 vwap_dist = 0.0
                 try:
-                    vwap_dist = calculate_vwap_dist(price, high, low)
+                    vwap      = (high + low + price) / 3
+                    vwap_dist = ((price / vwap) - 1) * 100 if vwap > 0 else 0.0
                 except Exception: pass
 
-                mxv   = calculate_mxv(mkt_cap, price, volume)
+                mxv   = ((mkt_cap - price * volume) / mkt_cap * 100) if mkt_cap > 0 else 0.0
                 change_pct = ((price - prev_close) / prev_close * 100) if prev_close > 0 else 0.0
                 score = calculate_score({
                     'mxv': mxv, 'run_up': run_up, 'atrx': atrx,

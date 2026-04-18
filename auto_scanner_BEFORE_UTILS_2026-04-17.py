@@ -14,12 +14,6 @@ from datetime import datetime, time as dt_time
 
 sys.path.insert(0, os.path.expanduser("~/RidingHighPro"))
 import sheets_manager
-from utils import (
-    get_peru_time,
-    is_trading_day,
-    parse_market_cap,
-    parse_volume,
-)
 from formulas import (
     calculate_mxv,
     calculate_runup,
@@ -36,8 +30,10 @@ SCOPES = [
     "https://www.googleapis.com/auth/drive"
 ]
 
-PERU_TZ = pytz.timezone("America/Lima")  # kept for backward compat
-# get_peru_time imported from utils
+PERU_TZ = pytz.timezone("America/Lima")
+
+def get_peru_time():
+    return datetime.now(PERU_TZ)
 
 def is_market_hours():
     now = get_peru_time()
@@ -49,7 +45,26 @@ def is_snapshot_time():
     now = get_peru_time()
     return dt_time(14, 55) <= now.time() < dt_time(15, 5)
 
-# is_trading_day imported from utils
+def is_trading_day(date=None):
+    """
+    Returns True if the given date (default: today Peru time) is a NASDAQ trading day.
+    Checks weekends + US market holidays via pandas_market_calendars.
+    Falls back to weekday-only check if library unavailable.
+    """
+    if date is None:
+        date = get_peru_time().date()
+    try:
+        import pandas_market_calendars as mcal
+        nyse = mcal.get_calendar("NASDAQ")
+        schedule = nyse.schedule(
+            start_date=date.strftime("%Y-%m-%d"),
+            end_date=date.strftime("%Y-%m-%d")
+        )
+        return not schedule.empty
+    except Exception:
+        # Fallback: weekday only (no holiday detection)
+        print("[Scanner] ⚠️ pandas_market_calendars unavailable — using weekday-only check")
+        return date.weekday() < 5
 
 # ── Google Sheets client ─────────────────────────────────────────────────────
 def get_gsheets_client():
@@ -90,7 +105,23 @@ from ta.volatility import AverageTrueRange
 
 _shares_cache = {}
 
-# parse_market_cap and parse_volume imported from utils
+def parse_market_cap(s):
+    try:
+        if pd.isna(s) or s == '-': return None
+        s = str(s).replace(',', '')
+        if 'B' in s: return float(s.replace('B','')) * 1_000_000_000
+        if 'M' in s: return float(s.replace('M','')) * 1_000_000
+        return float(s)
+    except: return None
+
+def parse_volume(s):
+    try:
+        if pd.isna(s) or s == '-': return None
+        s = str(s).replace(',', '')
+        if 'M' in s: return int(float(s.replace('M','')) * 1_000_000)
+        if 'K' in s: return int(float(s.replace('K','')) * 1_000)
+        return int(float(s))
+    except: return None
 
 def get_market_cap_smart(ticker, price, finviz_mc=None):
     if finviz_mc and finviz_mc > 0:
@@ -1230,6 +1261,7 @@ def sync_score_tracker(gc, now_peru):
 
                 vwap_dist = 0.0
                 try:
+                    vwap      = (high + low + price) / 3
                     vwap_dist = calculate_vwap_dist(price, high, low)
                 except Exception: pass
 

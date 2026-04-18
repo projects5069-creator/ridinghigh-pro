@@ -24,28 +24,6 @@ import shutil
 from gsheets_sync import save_snapshot_to_sheets, save_timeline_to_sheets, save_portfolio_to_sheets, load_portfolio_from_sheets, load_timeline_dates_from_sheets, load_timeline_from_sheets
 import sheets_manager
 import json
-from formulas import (
-    calculate_mxv,
-    calculate_runup,
-    calculate_atrx,
-    validate_atrx,
-    calculate_gap,
-    calculate_vwap_dist,
-    calculate_rel_vol,
-    calculate_float_pct,
-)
-from auto_scanner import calculate_score
-from utils import (
-    parse_market_cap,
-    parse_volume,
-)
-from config import (
-    MIN_SCORE_DISPLAY,
-    CRITICAL_SCORE,
-    POSITION_SIZE_USD,
-    TP_THRESHOLD_FRAC,
-    SL_THRESHOLD_FRAC,
-)
 
 st.set_page_config(
     page_title="RidingHigh Pro v14.6",
@@ -175,8 +153,38 @@ class Dashboard:
         except Exception as e:
             return None
     
-    # parse_market_cap and parse_volume imported from utils
-
+    def parse_market_cap(self, market_cap_str):
+        try:
+            if pd.isna(market_cap_str) or market_cap_str == '-':
+                return None
+            
+            market_cap_str = str(market_cap_str).replace(',', '')
+            
+            if 'B' in market_cap_str:
+                return float(market_cap_str.replace('B', '')) * 1_000_000_000
+            elif 'M' in market_cap_str:
+                return float(market_cap_str.replace('M', '')) * 1_000_000
+            else:
+                return float(market_cap_str)
+        except:
+            return None
+    
+    def parse_volume(self, volume_str):
+        try:
+            if pd.isna(volume_str) or volume_str == '-':
+                return None
+            
+            volume_str = str(volume_str).replace(',', '')
+            
+            if 'M' in volume_str:
+                return int(float(volume_str.replace('M', '')) * 1_000_000)
+            elif 'K' in volume_str:
+                return int(float(volume_str.replace('K', '')) * 1_000)
+            else:
+                return int(float(volume_str))
+        except:
+            return None
+    
     def get_market_cap_smart(self, ticker, price, finviz_mc=None):
         market_cap = None
         
@@ -250,7 +258,7 @@ class Dashboard:
             if progress_callback:
                 progress_callback(idx + 1, total, ticker)
             
-            finviz_mc = parse_market_cap(row.get('Market Cap', None))
+            finviz_mc = self.parse_market_cap(row.get('Market Cap', None))
             price = float(row.get('Price', 0))
             
             market_cap = self.get_market_cap_smart(ticker, price, finviz_mc)
@@ -317,7 +325,7 @@ class Dashboard:
                             atr = current['High'] - current['Low']
                     else:
                         atr = current['High'] - current['Low']
-                    atrx = validate_atrx(calculate_atrx(current["High"], current["Low"], atr), atr, price)
+                    atrx = (atr / price) * 100 if price > 0 else 0
                 except:
                     atr = 0
                     atrx = 0
@@ -325,29 +333,30 @@ class Dashboard:
                 try:
                     avg_volume = info.get('averageVolume', volume)
                     if avg_volume > 0:
-                        rel_vol = calculate_rel_vol(volume, avg_volume)
+                        rel_vol = volume / avg_volume
                     else:
                         if len(full_hist) >= 20:
                             avg_vol_20 = full_hist['Volume'].tail(20).mean()
                         else:
                             avg_vol_20 = full_hist['Volume'].mean()
-                        rel_vol = calculate_rel_vol(volume, avg_vol_20)
+                        rel_vol = volume / avg_vol_20 if avg_vol_20 > 0 else 1.0
                 except:
                     rel_vol = 1.0
                 
                 try:
                     if current['Open'] > 0:
-                        run_up = calculate_runup(price, current['Open'])
+                        run_up = ((price - current['Open']) / current['Open']) * 100
                 except:
                     run_up = 0
                 
                 try:
-                    gap = calculate_gap(current['Open'], previous['Close'])
+                    gap = ((current['Open'] - previous['Close']) / previous['Close']) * 100
                 except:
                     gap = 0
                 
                 try:
-                    vwap_dist = calculate_vwap_dist(price, current['High'], current['Low'])
+                    vwap = (current['High'] + current['Low'] + price) / 3
+                    vwap_dist = ((price / vwap) - 1) * 100 if vwap > 0 else 0
                 except:
                     vwap_dist = 0
                 
@@ -372,17 +381,12 @@ class Dashboard:
                         shares_outstanding = int(market_cap / price) if price > 0 else 0
                 
                 try:
-                    float_shares = info.get('floatShares', 0) or 0
-                    float_pct = calculate_float_pct(float_shares, shares_outstanding)
+                    float_pct = (volume / shares_outstanding * 100) if shares_outstanding > 0 else 0
                 except:
                     float_pct = 0
             
-            mxv = calculate_mxv(market_cap, price, volume)
-
-            try:
-                change = ((price - previous['Close']) / previous['Close']) * 100 if previous['Close'] > 0 else 0
-            except:
-                change = 0
+            mxv = self.calculate_mxv(market_cap, price, volume)
+            
             metrics = {
                 'mxv': mxv,
                 'price_to_52w_high': price_to_52w_high,
@@ -394,10 +398,9 @@ class Dashboard:
                 'float_pct': float_pct,
                 'gap': gap,
                 'vwap_dist': vwap_dist,
-                'change': change,
             }
-
-            score = calculate_score(metrics)
+            
+            score = self.calculate_score(metrics)
             
             return {
                 'Ticker': ticker,
@@ -437,11 +440,11 @@ class Dashboard:
                 return None
             change = float(change) * 100
             
-            volume = parse_volume(finviz_row.get('Volume', None))
+            volume = self.parse_volume(finviz_row.get('Volume', None))
             if volume is None or volume == 0:
                 return None
             
-            finviz_mc = parse_market_cap(finviz_row.get('Market Cap', None))
+            finviz_mc = self.parse_market_cap(finviz_row.get('Market Cap', None))
             market_cap = self.get_market_cap_smart(ticker, price, finviz_mc)
             
             if market_cap is None or market_cap == 0:
@@ -492,7 +495,7 @@ class Dashboard:
                                 atr = current['High'] - current['Low']
                         else:
                             atr = current['High'] - current['Low']
-                        atrx = validate_atrx(calculate_atrx(current["High"], current["Low"], atr), atr, price)
+                        atrx = (atr / price) * 100 if price > 0 else 0
                     except:
                         atr = 0
                         atrx = 0
@@ -500,29 +503,30 @@ class Dashboard:
                     try:
                         avg_volume = info.get('averageVolume', volume)
                         if avg_volume > 0:
-                            rel_vol = calculate_rel_vol(volume, avg_volume)
+                            rel_vol = volume / avg_volume
                         else:
                             if len(hist) >= 20:
                                 avg_vol_20 = hist['Volume'].tail(20).mean()
                             else:
                                 avg_vol_20 = hist['Volume'].mean()
-                            rel_vol = calculate_rel_vol(volume, avg_vol_20)
+                            rel_vol = volume / avg_vol_20 if avg_vol_20 > 0 else 1.0
                     except:
                         rel_vol = 1.0
                     
                     try:
                         if current['Open'] > 0:
-                            run_up = calculate_runup(price, current['Open'])
+                            run_up = ((price - current['Open']) / current['Open']) * 100
                     except:
                         run_up = 0
                     
                     try:
-                        gap = calculate_gap(current['Open'], previous['Close'])
+                        gap = ((current['Open'] - previous['Close']) / previous['Close']) * 100
                     except:
                         gap = 0
                     
                     try:
-                        vwap_dist = calculate_vwap_dist(price, current['High'], current['Low'])
+                        vwap = (current['High'] + current['Low'] + price) / 3
+                        vwap_dist = ((price / vwap) - 1) * 100 if vwap > 0 else 0
                     except:
                         vwap_dist = 0
                     
@@ -547,8 +551,7 @@ class Dashboard:
                             shares_outstanding = int(market_cap / price) if price > 0 else 0
                     
                     try:
-                        float_shares = info.get('floatShares', 0) or 0
-                        float_pct = calculate_float_pct(float_shares, shares_outstanding)
+                        float_pct = (volume / shares_outstanding * 100) if shares_outstanding > 0 else 0
                     except:
                         float_pct = 0
             
@@ -556,12 +559,8 @@ class Dashboard:
                 if shares_outstanding == 0:
                     shares_outstanding = int(market_cap / price) if price > 0 else 0
             
-            mxv = calculate_mxv(market_cap, price, volume)
-
-            try:
-                change = ((price - previous['Close']) / previous['Close']) * 100 if previous['Close'] > 0 else 0
-            except:
-                change = 0
+            mxv = self.calculate_mxv(market_cap, price, volume)
+            
             metrics = {
                 'mxv': mxv,
                 'price_to_52w_high': price_to_52w_high,
@@ -573,10 +572,9 @@ class Dashboard:
                 'float_pct': float_pct,
                 'gap': gap,
                 'vwap_dist': vwap_dist,
-                'change': change,
             }
-
-            score = calculate_score(metrics)
+            
+            score = self.calculate_score(metrics)
             
             return {
                 'Ticker': ticker,
@@ -634,6 +632,85 @@ class Dashboard:
         
         return sorted(results, key=lambda x: x['Score'], reverse=True)
     
+    def calculate_mxv(self, market_cap, price, volume):
+        try:
+            if market_cap == 0:
+                return 0
+            return ((market_cap - (price * volume)) / market_cap) * 100
+        except:
+            return 0
+    
+    def calculate_score(self, metrics):
+        score = 0
+        
+        try:
+            if metrics['mxv'] < 0:
+                mxv_ratio = min(abs(metrics['mxv']) / 50, 1)
+                score += mxv_ratio * 20
+        except:
+            pass
+        
+        try:
+            if metrics['price_to_52w_high'] > 0:
+                p52w_ratio = min(metrics['price_to_52w_high'] / 100, 1)
+                score += p52w_ratio * 10
+        except:
+            pass
+        
+        try:
+            if metrics['price_to_high'] < 0:
+                pth_ratio = min(abs(metrics['price_to_high']) / 10, 1)
+                score += pth_ratio * 15
+        except:
+            pass
+        
+        try:
+            rel_vol_ratio = min(metrics['rel_vol'] / 2, 1)
+            score += rel_vol_ratio * 15
+        except:
+            pass
+        
+        try:
+            if metrics['rsi'] > 80:
+                score += 15
+            else:
+                score += (metrics['rsi'] / 80) * 15
+        except:
+            pass
+        
+        try:
+            atrx_ratio = min(metrics['atrx'] / 15, 1)
+            score += atrx_ratio * 10
+        except:
+            pass
+        
+        try:
+            if metrics['run_up'] < 0:
+                runup_ratio = min(abs(metrics['run_up']) / 5, 1)
+                score += runup_ratio * 5
+        except:
+            pass
+        
+        try:
+            float_ratio = min(metrics['float_pct'] / 10, 1)
+            score += float_ratio * 5
+        except:
+            pass
+        
+        try:
+            gap_ratio = min(abs(metrics['gap']) / 20, 1)
+            score += gap_ratio * 3
+        except:
+            pass
+        
+        try:
+            vwap_ratio = min(abs(metrics['vwap_dist']) / 15, 1)
+            score += vwap_ratio * 2
+        except:
+            pass
+        
+        return round(score, 2)
+
 class LiveTracker:
     
     def __init__(self):
@@ -802,7 +879,7 @@ class PortfolioTracker:
         if not results:
             return 0
         
-        high_score_stocks = [r for r in results if r['Score'] >= MIN_SCORE_DISPLAY]
+        high_score_stocks = [r for r in results if r['Score'] >= 60]
         
         if not high_score_stocks:
             return 0
@@ -1436,7 +1513,7 @@ def main_page():
             st.metric("Total", len(results))
         
         with col2:
-            critical = len([r for r in results if r['Score'] >= CRITICAL_SCORE])
+            critical = len([r for r in results if r['Score'] >= 85])
             st.metric("🔥 Critical", critical)
         
         with col3:
@@ -1460,7 +1537,7 @@ def main_page():
             row_d = {
                 'Ticker': r['Ticker'],
                 'Score': f"{r['Score']:.2f}",
-                'EntryScore': f"{entry_s:.2f}" if r['Score'] >= MIN_SCORE_DISPLAY else "—",
+                'EntryScore': f"{entry_s:.2f}" if r['Score'] >= 60 else "—",
                 'Price': f"${r['Price']:.2f}",
                 'MxV': f"{r['MxV']:.0f}%",
                 'RunUp': f"{r['RunUp']:+.1f}%",
@@ -1479,9 +1556,9 @@ def main_page():
 
         def highlight_score(row):
             score = float(row['Score'])
-            if score >= CRITICAL_SCORE:
+            if score >= 85:
                 return ['background-color: #800020; color: white; font-weight: bold'] * len(row)
-            elif score >= MIN_SCORE_DISPLAY:
+            elif score >= 60:
                 return ['background-color: #cc0000; color: white'] * len(row)
             elif score >= 40:
                 return ['background-color: #ff6600; color: white'] * len(row)
@@ -1547,9 +1624,9 @@ def main_page():
         def color_score(val):
             try:
                 score = float(val)
-                if score >= CRITICAL_SCORE:
+                if score >= 85:
                     return 'background-color: #800020; color: white; font-weight: bold'
-                elif score >= MIN_SCORE_DISPLAY:
+                elif score >= 60:
                     return 'background-color: #cc0000; color: white'
                 elif score >= 50:
                     return 'background-color: #ff6600; color: white'
@@ -1611,9 +1688,9 @@ def daily_summary_page():
     def highlight_score(row):
         try:
             score = float(row['Score'])
-            if score >= CRITICAL_SCORE:
+            if score >= 85:
                 return ['background-color: #800020; color: white; font-weight: bold'] * len(row)
-            elif score >= MIN_SCORE_DISPLAY:
+            elif score >= 60:
                 return ['background-color: #cc0000; color: white'] * len(row)
             elif score >= 40:
                 return ['background-color: #ff6600; color: white'] * len(row)
@@ -1710,9 +1787,9 @@ def timeline_archive_page():
     def color_score(val):
         try:
             score = float(val)
-            if score >= CRITICAL_SCORE:
+            if score >= 85:
                 return 'background-color: #800020; color: white; font-weight: bold'
-            elif score >= MIN_SCORE_DISPLAY:
+            elif score >= 60:
                 return 'background-color: #cc0000; color: white'
             elif score >= 50:
                 return 'background-color: #ff6600; color: white'
@@ -1836,9 +1913,9 @@ def _simulate_short_trades(pa_df: pd.DataFrame):
     closed (strictly before today in Peru TZ). Pre-market / intraday data
     can never trigger an exit.
     """
-    POSITION = POSITION_SIZE_USD
-    TP_PCT   = TP_THRESHOLD_FRAC   # from config.py
-    SL_PCT   = SL_THRESHOLD_FRAC   # from config.py
+    POSITION = 1000.0
+    TP_PCT   = 0.10   # 10% take-profit (short: price drops)
+    SL_PCT   = 0.07   # 7%  stop-loss   (short: price rises)
     TP15_PCT = 0.15   # 15% stretch target — mark only
 
     # ── טעון portfolio_live (RunningHigh/RunningLow מה-scanner) ─────────────
@@ -2836,7 +2913,7 @@ def score_tracker_page():
                         _scan_price = round(float(_pp.iloc[0]), 2)
                         _cur_price  = round(float(_pp.iloc[-1]), 2)
                         _tp_price   = round(_scan_price * 0.90, 2)
-                        _sl_price   = round(_scan_price * (1 + SL_THRESHOLD_FRAC), 2)
+                        _sl_price   = round(_scan_price * 1.07, 2)
                         if _pp.min() <= _tp_price:
                             _trade_status = "✅ TP10"
                         elif _pp.max() >= _sl_price:
@@ -3011,7 +3088,7 @@ def live_trades_page():
         "Score_H": "RSI-free pure technicals",
         "Score_I": "MxV dominant 50%",
     }
-    ENTRY_AMOUNT = POSITION_SIZE_USD
+    ENTRY_AMOUNT = 1000.0
 
     st.title("⚡ Live Trades")
     st.caption("מניות שנכנסו לשורט בזמן אמת — Score ≥70 · TP 10% · SL 10% · כניסה $1,000 לעסקה")
