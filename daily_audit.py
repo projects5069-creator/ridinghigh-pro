@@ -148,20 +148,7 @@ def read_file_safe(filepath):
         return None
 
 
-def strip_comments(line):
-    """Strip # comments (basic - ignores # inside strings)."""
-    in_string = False
-    quote = None
-    for i, c in enumerate(line):
-        if c in ('"', "'") and (i == 0 or line[i-1] != '\\'):
-            if not in_string:
-                in_string = True
-                quote = c
-            elif c == quote:
-                in_string = False
-        elif c == '#' and not in_string:
-            return line[:i]
-    return line
+from utils import strip_comments
 
 
 def get_core_files():

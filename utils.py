@@ -202,6 +202,26 @@ def _is_missing(val) -> bool:
     return str(val).strip() in ("", "nan", "None", "NaN")
 
 
+def strip_comments(line):
+    """Strip # comments from a Python code line.
+
+    Basic implementation — ignores # inside strings.
+    Used by code_auditor and daily_audit for scanning code.
+    """
+    in_string = False
+    quote = None
+    for i, c in enumerate(line):
+        if c in ('"', "'") and (i == 0 or line[i-1] != '\\'):
+            if not in_string:
+                in_string = True
+                quote = c
+            elif c == quote:
+                in_string = False
+        elif c == '#' and not in_string:
+            return line[:i]
+    return line
+
+
 # ═══════════════════════════════════════════════════════════════════════
 # FINVIZ Parsing
 # ═══════════════════════════════════════════════════════════════════════

@@ -134,23 +134,7 @@ def read_file(filepath):
         return None
 
 
-def strip_comments(line):
-    """Strip Python comments from line."""
-    # Simple: strip everything after # (not perfect but good enough)
-    if '#' in line:
-        # Don't strip # inside strings (basic check)
-        in_string = False
-        quote = None
-        for i, c in enumerate(line):
-            if c in ('"', "'") and (i == 0 or line[i-1] != '\\'):
-                if not in_string:
-                    in_string = True
-                    quote = c
-                elif c == quote:
-                    in_string = False
-            elif c == '#' and not in_string:
-                return line[:i]
-    return line
+from utils import strip_comments
 
 
 # ═══════════════════════════════════════════════════════════════════════

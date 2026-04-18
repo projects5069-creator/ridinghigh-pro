@@ -930,9 +930,7 @@ def is_cloud():
     except:
         return False
 
-# _get_gc: use sheets_manager._get_gc() (supports st.secrets + env var + local file)
-def _get_gc():
-    return sheets_manager._get_gc()
+# _get_gc removed — use sheets_manager._get_gc() directly
 
 SHEET_ID = "1oyefUPV52SMeAlC4UejECYoPRNRudJJS42rukNGYx5k"  # legacy backup
 PERU_TZ = pytz.timezone("America/Lima")
@@ -944,7 +942,7 @@ PERU_TZ = pytz.timezone("America/Lima")
 def _cached_timeline_live() -> pd.DataFrame:
     """timeline_live → raw DataFrame. Refreshes every 2 min."""
     try:
-        gc = _get_gc() or sheets_manager._get_gc()
+        gc = sheets_manager._get_gc()
         if not gc: return pd.DataFrame()
         ws = sheets_manager.get_worksheet("timeline_live", gc=gc)
         if not ws: return pd.DataFrame()
@@ -960,7 +958,7 @@ def _cached_timeline_live() -> pd.DataFrame:
 def _cached_daily_snapshots() -> pd.DataFrame:
     """daily_snapshots → raw DataFrame. Refreshes every 5 min."""
     try:
-        gc = _get_gc()
+        gc = sheets_manager._get_gc()
         if not gc: return pd.DataFrame()
         ws = sheets_manager.get_worksheet("daily_snapshots", gc=gc)
         if not ws: return pd.DataFrame()
@@ -975,7 +973,7 @@ def _cached_daily_snapshots() -> pd.DataFrame:
 def _cached_portfolio() -> pd.DataFrame:
     """portfolio → DataFrame with numeric cols. Refreshes every 60 min."""
     try:
-        gc = _get_gc()
+        gc = sheets_manager._get_gc()
         if not gc: return pd.DataFrame()
         ws = sheets_manager.get_worksheet("portfolio", gc=gc)
         if not ws: return pd.DataFrame()
@@ -1036,7 +1034,7 @@ def _cached_post_analysis() -> pd.DataFrame:
 def _cached_tl_today() -> pd.DataFrame:
     """Today's timeline_live rows with canonical column names. Refreshes every 60s."""
     try:
-        gc = _get_gc() or sheets_manager._get_gc()
+        gc = sheets_manager._get_gc()
         if not gc: return pd.DataFrame()
         ws = sheets_manager.get_worksheet("timeline_live", gc=gc)
         if not ws: return pd.DataFrame()
@@ -1055,7 +1053,7 @@ def _cached_tl_today() -> pd.DataFrame:
 def _cached_live_trades() -> pd.DataFrame:
     """live_trades sheet → DataFrame. Refreshes every 30s."""
     try:
-        gc = _get_gc()
+        gc = sheets_manager._get_gc()
         if gc is None:
             return pd.DataFrame()
         ws = sheets_manager.get_worksheet("live_trades", gc=gc)
@@ -1079,7 +1077,7 @@ def _cached_live_trades() -> pd.DataFrame:
 def _cached_portfolio_live() -> pd.DataFrame:
     """portfolio_live tab — RunningHigh/RunningLow per pending stock. Refreshes every 60s."""
     try:
-        gc = _get_gc()
+        gc = sheets_manager._get_gc()
         if not gc:
             return pd.DataFrame()
         ws = sheets_manager.get_worksheet("portfolio_live", gc=gc)
@@ -1101,7 +1099,7 @@ def _cached_portfolio_live() -> pd.DataFrame:
 def _cached_daily_summary() -> pd.DataFrame:
     """daily_summary → raw DataFrame. Refreshes every 5 min."""
     try:
-        gc = _get_gc()
+        gc = sheets_manager._get_gc()
         if not gc: return pd.DataFrame()
         ws = sheets_manager.get_worksheet("daily_summary", gc=gc)
         if not ws: return pd.DataFrame()
@@ -3008,7 +3006,7 @@ def live_trades_page():
     with col_btn1:
         if st.button("🗑️ Clear Closed", help="מעביר עסקאות סגורות (TP/SL) לארכיון — לא נמחק לצמיתות"):
             try:
-                gc = _get_gc()
+                gc = sheets_manager._get_gc()
                 if not gc:
                     st.error("❌ אין חיבור ל-Google Sheets")
                 else:
