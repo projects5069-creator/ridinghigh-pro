@@ -36,17 +36,13 @@ import pandas as pd
 from datetime import datetime, timedelta
 
 sys.path.insert(0, os.path.expanduser("~/RidingHighPro"))
+import sheets_manager
 
 SPREADSHEET_ID = "1oyefUPV52SMeAlC4UejECYoPRNRudJJS42rukNGYx5k"
 SCOPES = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
 
-
-def get_gsheets_client():
-    import gspread
-    from google.oauth2.service_account import Credentials
-    creds_path = os.path.expanduser("~/RidingHighPro/google_credentials.json")
-    creds = Credentials.from_service_account_file(creds_path, scopes=SCOPES)
-    return gspread.authorize(creds)
+# get_gsheets_client removed — use sheets_manager._get_gc()
+get_gsheets_client = sheets_manager._get_gc  # alias for backward compat
 
 
 def get_yahoo_data(ticker: str, scan_date: str) -> dict:

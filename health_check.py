@@ -29,10 +29,7 @@ def _trading_days_before(date_str: str, n: int = 5) -> list:
     return sheets_manager.trading_days_after(date_str, n)
 
 
-def _is_missing(val) -> bool:
-    if val is None:
-        return True
-    return str(val).strip() in ("", "nan", "None", "NaN")
+from utils import _is_missing
 
 
 def _is_market_open(now=None) -> bool:

@@ -20,6 +20,7 @@ from utils import (
     is_market_hours,
     parse_market_cap,
     parse_volume,
+    get_market_cap_smart,
 )
 from formulas import (
     calculate_mxv,
@@ -55,8 +56,8 @@ def is_snapshot_time():
 # is_trading_day imported from utils
 
 # ── Google Sheets client ─────────────────────────────────────────────────────
-def get_gsheets_client():
-    return sheets_manager._get_gc()
+# get_gsheets_client removed — use sheets_manager._get_gc() directly
+get_gsheets_client = sheets_manager._get_gc  # alias for backward compat
 
 def df_to_sheet(ws, df):
     data = [df.columns.tolist()] + df.astype(str).values.tolist()
@@ -95,34 +96,7 @@ _shares_cache = {}
 
 # parse_market_cap and parse_volume imported from utils
 
-def get_market_cap_smart(ticker, price, finviz_mc=None):
-    if finviz_mc and finviz_mc > 0:
-        _mc_cache[ticker] = int(finviz_mc)
-        return int(finviz_mc)
-
-    try:
-        stock = yf.Ticker(ticker)
-        mc = stock.info.get('marketCap', None)
-        if mc and mc > 0:
-            _mc_cache[ticker] = int(mc)
-            return int(mc)
-    except: pass
-
-    try:
-        if ticker not in _shares_cache:
-            shares = yf.Ticker(ticker).info.get('sharesOutstanding', None)
-            if shares and shares > 0:
-                _shares_cache[ticker] = int(shares)
-        if ticker in _shares_cache and price > 0:
-            mc = int(_shares_cache[ticker] * price)
-            _mc_cache[ticker] = mc
-            return mc
-    except: pass
-
-    if ticker in _mc_cache:
-        return _mc_cache[ticker]
-
-    return None
+# get_market_cap_smart imported from utils
 
 def calculate_score(metrics):
     score = 0
@@ -436,7 +410,18 @@ def analyze_ticker(ticker, finviz_row):
         if not volume or volume == 0: return None
 
         finviz_mc = parse_market_cap(finviz_row.get('Market Cap', None))
-        market_cap = get_market_cap_smart(ticker, price, finviz_mc)
+        market_cap, shares = get_market_cap_smart(
+            ticker, finviz_mc=finviz_mc, shares_cache=_shares_cache
+        )
+        if market_cap and market_cap > 0:
+            _mc_cache[ticker] = int(market_cap)
+        if shares and shares > 0 and ticker not in _shares_cache:
+            _shares_cache[ticker] = int(shares)
+        if market_cap is None and ticker in _mc_cache:
+            market_cap = _mc_cache[ticker]
+        if market_cap is None and ticker in _shares_cache and price > 0:
+            market_cap = int(_shares_cache[ticker] * price)
+            _mc_cache[ticker] = market_cap
         if not market_cap or market_cap == 0: return None
 
         rsi = 50; atrx = 0; rel_vol = 1.0; run_up = 0

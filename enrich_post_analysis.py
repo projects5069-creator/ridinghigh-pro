@@ -18,17 +18,7 @@ from utils import is_trading_day
 from config import TP_THRESHOLD_FRAC, SL_THRESHOLD_FRAC
 
 
-def _is_missing(val):
-    """True if value is None, NaN, empty string, or the literal string 'nan'/'None'."""
-    if val is None:
-        return True
-    try:
-        import math
-        if math.isnan(float(val)):
-            return True
-    except (TypeError, ValueError):
-        pass
-    return str(val).strip() in ("", "nan", "None")
+from utils import _is_missing
 
 
 def fetch_d0_data(ticker: str, scan_date: str) -> dict:

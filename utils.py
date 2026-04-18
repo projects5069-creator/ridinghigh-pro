@@ -180,6 +180,28 @@ def get_trading_days_after(scan_date_str, n=5):
     return sheets_manager.trading_days_after(scan_date_str, n)
 
 
+def _is_missing(val) -> bool:
+    """True if value is None, NaN, empty string, or literal 'nan'/'None'/'NaN'.
+
+    Used across backfill/enrich/health_check modules to detect missing data.
+    """
+    if val is None:
+        return True
+    try:
+        import math
+        if isinstance(val, float) and math.isnan(val):
+            return True
+    except (TypeError, ValueError):
+        pass
+    try:
+        import pandas as pd
+        if isinstance(val, float) and pd.isna(val):
+            return True
+    except (ImportError, TypeError, ValueError):
+        pass
+    return str(val).strip() in ("", "nan", "None", "NaN")
+
+
 # ═══════════════════════════════════════════════════════════════════════
 # FINVIZ Parsing
 # ═══════════════════════════════════════════════════════════════════════

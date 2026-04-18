@@ -17,10 +17,7 @@ FUND_COLS = ["Sector", "Industry", "RealFloat", "RealFloat_M",
              "Price_vs_SMA20", "Consecutive_Up", "DaysSinceIPO", "MarketCapCategory"]
 
 
-def _is_missing(v):
-    if v is None: return True
-    if isinstance(v, float) and pd.isna(v): return True
-    return str(v).strip() in ("", "nan", "None")
+from utils import _is_missing
 
 
 def main():
