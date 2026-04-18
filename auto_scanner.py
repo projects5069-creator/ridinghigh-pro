@@ -17,6 +17,7 @@ import sheets_manager
 from utils import (
     get_peru_time,
     is_trading_day,
+    is_market_hours,
     parse_market_cap,
     parse_volume,
 )
@@ -45,11 +46,7 @@ SCOPES = [
 PERU_TZ = pytz.timezone("America/Lima")  # kept for backward compat
 # get_peru_time imported from utils
 
-def is_market_hours():
-    now = get_peru_time()
-    market_open  = dt_time(8, 30)
-    market_close = dt_time(15, 0)
-    return is_trading_day(now.date()) and market_open <= now.time() <= market_close
+# is_market_hours imported from utils
 
 def is_snapshot_time():
     now = get_peru_time()

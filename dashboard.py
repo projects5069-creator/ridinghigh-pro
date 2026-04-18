@@ -41,6 +41,7 @@ from auto_scanner import calculate_score
 from utils import (
     parse_market_cap,
     parse_volume,
+    is_market_hours,
 )
 from config import (
     MIN_SCORE_DISPLAY,
@@ -929,23 +930,9 @@ def is_cloud():
     except:
         return False
 
+# _get_gc: use sheets_manager._get_gc() (supports st.secrets + env var + local file)
 def _get_gc():
-    import gspread
-    from google.oauth2.service_account import Credentials
-    scopes = ["https://spreadsheets.google.com/feeds","https://www.googleapis.com/auth/drive"]
-    try:
-        import streamlit as st
-        if "gcp_service_account" in st.secrets:
-            creds = Credentials.from_service_account_info(dict(st.secrets["gcp_service_account"]), scopes=scopes)
-            return gspread.authorize(creds)
-    except: pass
-    import os
-    path = os.path.expanduser("~/RidingHighPro/google_credentials.json")
-    if os.path.exists(path):
-        from google.oauth2.service_account import Credentials
-        creds = Credentials.from_service_account_file(path, scopes=scopes)
-        return gspread.authorize(creds)
-    return None
+    return sheets_manager._get_gc()
 
 SHEET_ID = "1oyefUPV52SMeAlC4UejECYoPRNRudJJS42rukNGYx5k"  # legacy backup
 PERU_TZ = pytz.timezone("America/Lima")
@@ -1156,14 +1143,7 @@ def load_timeline_today_from_sheets():
         return pivot[sorted(pivot.columns, reverse=True)].round(2)
     except: return None
 
-def is_market_hours():
-    peru_tz = pytz.timezone("America/Lima")
-    now = datetime.now(peru_tz)
-    market_open = dt_time(8, 30)
-    market_close = dt_time(15, 0)
-    current_time = now.time()
-    is_weekday = now.weekday() < 5
-    return is_weekday and market_open <= current_time <= market_close
+# is_market_hours imported from utils
 
 def check_snapshot_time():
     peru_tz = pytz.timezone("America/Lima")

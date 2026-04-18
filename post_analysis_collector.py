@@ -39,6 +39,7 @@ from utils import (
     calculate_stats,
     PERU_TZ,
 )
+from config import MIN_SCORE_DISPLAY
 
 CATALYST_CATEGORIES = [
     "merger_acquisition", "fda_approval", "clinical_trial",
@@ -46,7 +47,7 @@ CATALYST_CATEGORIES = [
     "lawsuit", "share_dilution", "reverse_split", "no_clear_reason"
 ]
 
-MIN_SCORE   = 60
+MIN_SCORE   = MIN_SCORE_DISPLAY
 DAYS_FORWARD = 5
 
 SCORE_SUBTYPES = ["Score_B", "Score_C", "Score_D", "Score_E", "Score_F", "Score_G", "Score_H", "Score_I"]

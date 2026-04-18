@@ -15,6 +15,7 @@ import time
 import sheets_manager
 from gsheets_sync import load_post_analysis_from_sheets, save_post_analysis_to_sheets
 from utils import is_trading_day
+from config import TP_THRESHOLD_FRAC, SL_THRESHOLD_FRAC
 
 
 def _is_missing(val):
@@ -167,11 +168,11 @@ def run(backfill: bool = False):
                 pa.at[idx, "PeakScore"]      = peak_score
                 pa.at[idx, "DayRunUp%"]      = run_up_pct
                 if scan_price > 0:
-                    pa.at[idx, "IntraDay_TP10"] = "1" if intra_low <= scan_price * 0.90 else "0"
+                    pa.at[idx, "IntraDay_TP10"] = "1" if intra_low <= scan_price * (1 - TP_THRESHOLD_FRAC) else "0"
 
                 # SL_Hit_D0: did price go UP 7%+ from scan price on scan day?
                 if scan_price > 0:
-                    pa.at[idx, "SL_Hit_D0"] = "1" if intra_high >= scan_price * 1.07 else "0"
+                    pa.at[idx, "SL_Hit_D0"] = "1" if intra_high >= scan_price * (1 + SL_THRESHOLD_FRAC) else "0"
 
                 # MinToClose: minutes between peak score time and 15:00 close
                 try:

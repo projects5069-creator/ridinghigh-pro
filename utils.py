@@ -45,6 +45,7 @@ Dependencies:
 """
 import pytz
 from datetime import datetime, timedelta
+from config import TP_THRESHOLD_FRAC, SL_THRESHOLD_FRAC
 
 
 # ═══════════════════════════════════════════════════════════════════════
@@ -104,6 +105,21 @@ def is_trading_day(date=None):
     except Exception:
         # Fallback: weekday only (no holiday detection)
         return date.weekday() < 5
+
+
+def is_market_hours():
+    """True if NYSE market is currently open (Peru time).
+
+    Takes into account trading days (weekdays + non-holidays) via is_trading_day().
+
+    Returns:
+        bool: True if market is open NOW in Peru time
+    """
+    from datetime import time as dt_time
+    now = get_peru_time()
+    market_open  = dt_time(8, 30)
+    market_close = dt_time(15, 0)
+    return is_trading_day(now.date()) and market_open <= now.time() <= market_close
 
 
 def is_day_complete(date_str):
@@ -339,19 +355,19 @@ def calculate_stats(scan_price, ohlc):
     
     # SL checks (short position loses when price RISES)
     d1_high = ohlc.get("D1_High", 0) or 0
-    sl7_hit_d1 = 1 if d1_high >= scan_price * 1.07 else 0
+    sl7_hit_d1 = 1 if d1_high >= scan_price * (1 + SL_THRESHOLD_FRAC) else 0
     
     intra_sl = 0
     for i in range(1, 6):
         high = ohlc.get(f"D{i}_High", 0) or 0
-        if high >= scan_price * 1.07:
+        if high >= scan_price * (1 + SL_THRESHOLD_FRAC):
             intra_sl = 1
             break
     
     return {
         "MaxDrop%": max_drop,
         "BestDay": best_day,
-        "TP10_Hit": 1 if min_low <= scan_price * 0.90 else 0,
+        "TP10_Hit": 1 if min_low <= scan_price * (1 - TP_THRESHOLD_FRAC) else 0,
         "TP15_Hit": 1 if min_low <= scan_price * 0.85 else 0,
         "TP20_Hit": 1 if min_low <= scan_price * 0.80 else 0,
         "D1_Gap%": d1_gap,
