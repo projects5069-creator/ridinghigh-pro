@@ -101,7 +101,7 @@ def run():
         stats = calculate_stats(scan_price, ohlc)
 
         for k, v in {**ohlc, **stats}.items():
-            df.at[idx, k] = str(v) if v is not None else None
+            df[k] = df[k].astype(object); df.at[idx, k] = str(v) if v is not None else None
 
         updated += 1
         time.sleep(0.4)  # rate limit
