@@ -107,6 +107,16 @@ MAX_HOLDING_DAYS = 5
 TP_THRESHOLD_FRAC = TP_THRESHOLD_PCT / 100.0  # 0.10
 SL_THRESHOLD_FRAC = SL_THRESHOLD_PCT / 100.0  # 0.07
 
+# Stretch targets — used only for labeling/metrics, not active trading
+TP15_THRESHOLD_PCT = 15
+"""TP15 stretch target: mark when price drops ≥15% (informational only)."""
+
+TP20_THRESHOLD_PCT = 20
+"""TP20 stretch target: mark when price drops ≥20% (informational only)."""
+
+TP15_THRESHOLD_FRAC = TP15_THRESHOLD_PCT / 100.0  # 0.15
+TP20_THRESHOLD_FRAC = TP20_THRESHOLD_PCT / 100.0  # 0.20
+
 
 # ═══════════════════════════════════════════════════════════════════════
 # Data & Timing
@@ -233,6 +243,8 @@ if __name__ == "__main__":
     print(f"  POSITION_SIZE_USD     = ${POSITION_SIZE_USD}")
     print(f"  TP_THRESHOLD_PCT      = {TP_THRESHOLD_PCT}%  (= {TP_THRESHOLD_FRAC} frac)")
     print(f"  SL_THRESHOLD_PCT      = {SL_THRESHOLD_PCT}%  (= {SL_THRESHOLD_FRAC} frac)")
+    print(f"  TP15_THRESHOLD_PCT    = {TP15_THRESHOLD_PCT}%  (= {TP15_THRESHOLD_FRAC} frac)")
+    print(f"  TP20_THRESHOLD_PCT    = {TP20_THRESHOLD_PCT}%  (= {TP20_THRESHOLD_FRAC} frac)")
     print(f"  MAX_HOLDING_DAYS      = {MAX_HOLDING_DAYS}")
     
     print("\n── System Timing ──")

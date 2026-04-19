@@ -45,7 +45,7 @@ Dependencies:
 """
 import pytz
 from datetime import datetime, timedelta
-from config import TP_THRESHOLD_FRAC, SL_THRESHOLD_FRAC
+from config import TP_THRESHOLD_FRAC, SL_THRESHOLD_FRAC, TP15_THRESHOLD_FRAC, TP20_THRESHOLD_FRAC
 
 
 # ═══════════════════════════════════════════════════════════════════════
@@ -410,8 +410,8 @@ def calculate_stats(scan_price, ohlc):
         "MaxDrop%": max_drop,
         "BestDay": best_day,
         "TP10_Hit": 1 if min_low <= scan_price * (1 - TP_THRESHOLD_FRAC) else 0,
-        "TP15_Hit": 1 if min_low <= scan_price * 0.85 else 0,
-        "TP20_Hit": 1 if min_low <= scan_price * 0.80 else 0,
+        "TP15_Hit": 1 if min_low <= scan_price * (1 - TP15_THRESHOLD_FRAC) else 0,
+        "TP20_Hit": 1 if min_low <= scan_price * (1 - TP20_THRESHOLD_FRAC) else 0,
         "D1_Gap%": d1_gap,
         "SL7_Hit_D1": sl7_hit_d1,
         "IntraDay_SL": intra_sl,

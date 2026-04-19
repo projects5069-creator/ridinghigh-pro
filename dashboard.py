@@ -50,6 +50,7 @@ from config import (
     POSITION_SIZE_USD,
     TP_THRESHOLD_FRAC,
     SL_THRESHOLD_FRAC,
+    TP15_THRESHOLD_FRAC,
     DATA_CUTOFF_DATE,
 )
 
@@ -1822,7 +1823,7 @@ def _simulate_short_trades(pa_df: pd.DataFrame):
     POSITION = POSITION_SIZE_USD
     TP_PCT   = TP_THRESHOLD_FRAC   # from config.py
     SL_PCT   = SL_THRESHOLD_FRAC   # from config.py
-    TP15_PCT = 0.15   # 15% stretch target — mark only
+    TP15_PCT = TP15_THRESHOLD_FRAC   # stretch target — mark only
 
     # ── טעון portfolio_live (RunningHigh/RunningLow מה-scanner) ─────────────
     pl_df = _cached_portfolio_live()
