@@ -37,6 +37,7 @@ from config import (
     TP_THRESHOLD_FRAC,
     SL_THRESHOLD_FRAC,
     SCANNER_MIN_SCORE,
+    MIN_SCORE_DISPLAY,
 )
 
 SCOPES = [
@@ -529,11 +530,11 @@ def analyze_ticker(ticker, finviz_row):
         score_h = calculate_score_h(metrics)
 
         # EntryScore — real-time short entry signal
-        # Gate: any of the 9 scores >= 60 (avoids 0 when secondary score triggers entry)
+        # Gate: any of the 9 scores >= MIN_SCORE_DISPLAY
         entry_score = 0
         max_score_any = max(score, score_b, score_c, score_d, score_e,
                             score_f, score_g, score_h, score_i)
-        if max_score_any >= 60:
+        if max_score_any >= MIN_SCORE_DISPLAY:
             entry_score = calculate_entry_score(
                 current_price=price,
                 intra_high=high_today,
@@ -720,9 +721,9 @@ def run_scan():
                 df_to_sheet(ws_snap, combined_snap)
             print("📸 Daily snapshot saved!")
 
-            # ── Portfolio: add Score>=60 positions ───────────────────────────
+            # ── Portfolio: add Score>=MIN_SCORE_DISPLAY positions ───────────
             ws_port = sheets_manager.get_worksheet("portfolio", gc=gc)
-            high_score = results_df[results_df['Score'].astype(float) >= 60].copy()
+            high_score = results_df[results_df['Score'].astype(float) >= MIN_SCORE_DISPLAY].copy()
             if not high_score.empty:
                 existing_port = ws_port.get_all_values()
                 ex_port = pd.DataFrame()
@@ -1307,10 +1308,10 @@ def run_eod():
 
     print(f"📊 {len(today_tl)} timeline rows for today, {today_tl['Ticker'].nunique()} tickers")
 
-    # ── Portfolio: save Score>=60 stocks (skip if already saved) ─────────────
+    # ── Portfolio: save Score>=MIN_SCORE_DISPLAY stocks (skip if already saved)
     try:
         ws_port = sheets_manager.get_worksheet("portfolio", gc=gc)
-        high_score = today_tl[today_tl["Score"] >= 60].copy()
+        high_score = today_tl[today_tl["Score"] >= MIN_SCORE_DISPLAY].copy()
 
         # Use peak score per ticker
         best = (high_score.sort_values("Score", ascending=False)

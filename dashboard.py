@@ -45,6 +45,7 @@ from utils import (
 )
 from config import (
     MIN_SCORE_DISPLAY,
+    SCANNER_MIN_SCORE,
     CRITICAL_SCORE,
     POSITION_SIZE_USD,
     TP_THRESHOLD_FRAC,
@@ -1198,7 +1199,7 @@ def _build_timeline_summary(arch_df):
         else:
             trend = "Stable"
 
-        time_above_60 = int((scores >= 60).sum())
+        time_above_60 = int((scores >= MIN_SCORE_DISPLAY).sum())
 
         rows.append({
             "Date":         date,
@@ -3238,7 +3239,7 @@ def score_comparison_page():
     for sc in SCORE_COLS:
         if sc not in df.columns:
             continue
-        subset = has_outcome[has_outcome[sc] >= 60]
+        subset = has_outcome[has_outcome[sc] >= MIN_SCORE_DISPLAY]
         n = len(subset)
         if n == 0:
             perf_rows.append({"Score": sc, "n (≥60)": 0, "Win Rate": None,
@@ -3391,7 +3392,7 @@ def score_comparison_page():
         wr_rows = []
         for sc in SCORE_COLS:
             if sc not in closed.columns: continue
-            sub = closed[closed[sc].notna() & (closed[sc] >= 60)]
+            sub = closed[closed[sc].notna() & (closed[sc] >= MIN_SCORE_DISPLAY)]
             if sub.empty: continue
             wr = sub["TP10_Hit"].mean()
             wr_rows.append({
@@ -3539,10 +3540,10 @@ def dashboard_home_page():
             peak = (today_tl.sort_values("Score", ascending=False)
                             .drop_duplicates("Ticker")) if "Score" in today_tl.columns else today_tl
             scores = pd.to_numeric(peak.get("Score", pd.Series(dtype=float)), errors="coerce")
-            critical = int((scores >= 85).sum())
-            high     = int((scores >= 70).sum())
+            critical = int((scores >= CRITICAL_SCORE).sum())
+            high     = int((scores >= SCANNER_MIN_SCORE).sum())
             st.metric("מניות שנסרקו", n_tickers)
-            st.metric("Critical ≥85", critical, delta=f"High ≥70: {high}")
+            st.metric(f"Critical ≥{CRITICAL_SCORE}", critical, delta=f"High ≥{SCANNER_MIN_SCORE}: {high}")
         else:
             st.info("אין נתוני סריקה להיום")
 
