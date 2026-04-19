@@ -41,3 +41,4 @@ get_oauth_token.py
 project_sync_*.zip
 project_sync_*/
 MIGRATION_STATUS_*.md
+TASKS_*.md
