@@ -21,7 +21,7 @@ import os
 import json
 from datetime import datetime
 
-ROOT_FOLDER_ID = "1LKJwf4ryvGa1Cvgs6ZC8JIfuQdgZE4_p"
+ROOT_FOLDER_ID = "1yB_uWRBJOv8_411TTXVJYCfqDaAYA86K"
 LEGACY_SPREADSHEET_ID = "1oyefUPV52SMeAlC4UejECYoPRNRudJJS42rukNGYx5k"
 
 # Config is looked up in two places:
