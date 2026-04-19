@@ -65,6 +65,8 @@ Design Principles:
 5. Validated caps where applicable (e.g., REL_VOL max 100)
 """
 
+from config import SCORE_WEIGHTS_V2, SCORE_CAPS_V2, SCORE_RSI_PARAMS
+
 
 # ═══════════════════════════════════════════════════════════════════════
 # Constants - Validation Thresholds
@@ -374,43 +376,59 @@ def calculate_dynamic_score(mxv, atrx, mxv_weight=0.6, atrx_weight=0.4,
 # ═══════════════════════════════════════════════════════════════════════
 
 def calculate_score(metrics):
+    """
+    Main Score v2 calculation. Reads weights and caps from config.py.
+
+    Weights (must sum to 100):
+        MxV=25, RunUp=25, ATRX=20, RSI=10, VWAP=10, ScanChange=5, REL_VOL=5
+    Caps (thresholds for max contribution per metric):
+        MxV=200 (|mxv|), RunUp=30%, ATRX=5x, VWAP=8%, ScanChange=60%, REL_VOL=15x
+    RSI: bell curve centered at 50-70 sweet spot.
+    """
+    W = SCORE_WEIGHTS_V2
+    C = SCORE_CAPS_V2
+    R = SCORE_RSI_PARAMS
     score = 0
-    # MxV — 25% — cap 200
+    # MxV — negative values only (pump signal)
     try:
         if metrics['mxv'] < 0:
-            score += min(abs(metrics['mxv']) / 200, 1) * 25
+            score += min(abs(metrics['mxv']) / C["MxV"], 1) * W["MxV"]
     except: pass
-    # RunUp — 25% — cap 30%
+    # RunUp — positive only
     try:
         if metrics['run_up'] > 0:
-            score += min(metrics['run_up'] / 30, 1) * 25
+            score += min(metrics['run_up'] / C["RunUp"], 1) * W["RunUp"]
     except: pass
-    # ATRX — 20% — cap 5x
+    # ATRX — always scored
     try:
-        score += min(metrics['atrx'] / 5, 1) * 20
+        score += min(metrics['atrx'] / C["ATRX"], 1) * W["ATRX"]
     except: pass
-    # RSI — 10% — sweet spot 60-70
+    # RSI — bell curve (linear up to 50, peak 50-70, decay 70+)
     try:
         rsi = metrics['rsi']
-        if rsi < 50:    score += (rsi / 50) * 5
-        elif rsi <= 70: score += 5 + ((rsi - 50) / 20) * 5
-        else:           score += max(0, 10 - ((rsi - 70) / 30) * 5)
+        half = W["RSI"] / 2  # e.g., 5 when weight=10
+        if rsi < R["CENTER_LOW"]:
+            score += (rsi / R["CENTER_LOW"]) * half
+        elif rsi <= R["SWEET_HIGH"]:
+            score += half + ((rsi - R["CENTER_LOW"]) / R["HALF_POINT"]) * half
+        else:
+            score += max(0, W["RSI"] - ((rsi - R["SWEET_HIGH"]) / R["OVER_DECAY"]) * half)
     except: pass
-    # VWAP — 10% — cap 8%
+    # VWAP — positive distance above VWAP
     try:
         if metrics['vwap_dist'] > 0:
-            score += min(metrics['vwap_dist'] / 8, 1) * 10
+            score += min(metrics['vwap_dist'] / C["VWAP"], 1) * W["VWAP"]
     except: pass
-    # ScanChange% — 5% — cap 60%
+    # ScanChange — positive only
     try:
         if metrics.get('change', 0) > 0:
-            score += min(metrics['change'] / 60, 1) * 5
+            score += min(metrics['change'] / C["ScanChange"], 1) * W["ScanChange"]
     except: pass
-    # REL_VOL — 5% — cap 15x
+    # REL_VOL — always scored
     try:
-        score += min(metrics['rel_vol'] / 15, 1) * 5
+        score += min(metrics['rel_vol'] / C["REL_VOL"], 1) * W["REL_VOL"]
     except: pass
-    # Gap הוסר לחלוטין
+    # Gap removed from v2 entirely
     return round(score, 2)
 
 

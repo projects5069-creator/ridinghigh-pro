@@ -65,6 +65,20 @@ SCORE_CAPS_V2 = {
 }
 """Score v2 caps - thresholds for max contribution per metric."""
 
+SCORE_RSI_PARAMS = {
+    "CENTER_LOW":   50,   # RSI below this → linear ramp up
+    "CENTER_HIGH":  50,   # (alias of CENTER_LOW for clarity in formula)
+    "SWEET_HIGH":   70,   # RSI 50-70 → peak zone
+    "OVER_DECAY":   30,   # RSI above 70 decays over this range (70-100)
+    "HALF_POINT":   20,   # midpoint weight transition (50 → 70 spans 20)
+}
+"""RSI bell curve parameters for calculate_score.
+Formula:
+  if rsi < CENTER_LOW (50):   linear ramp to SWEET_HIGH
+  if CENTER_LOW <= rsi <= SWEET_HIGH (50-70): peak zone
+  if rsi > SWEET_HIGH (70):   linear decay over OVER_DECAY (30) to zero
+"""
+
 
 # ═══════════════════════════════════════════════════════════════════════
 # Display Thresholds
