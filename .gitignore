@@ -32,3 +32,12 @@ data/
 *.pyrtyhc
 google_credentials.json
 backups/*.csv
+oauth_client.json
+oauth_token.json
+
+# Migration scripts (one-time use)
+migrate_ridinghigh*.py
+get_oauth_token.py
+project_sync_*.zip
+project_sync_*/
+MIGRATION_STATUS_*.md

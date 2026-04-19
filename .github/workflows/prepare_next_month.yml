@@ -1,0 +1,44 @@
+name: Prepare Next Month
+
+on:
+  schedule:
+    # 1 בכל חודש, 00:02 Peru = 05:02 UTC
+    - cron: '2 5 1 * *'
+  workflow_dispatch:  # אפשר להריץ ידנית לבדיקות
+
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write  # נדרש כדי לדחוף commit של sheets_config.json
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      
+      - name: Install dependencies
+        run: |
+          pip install gspread google-auth google-auth-oauthlib google-api-python-client
+      
+      - name: Run prepare_next_month
+        env:
+          GOOGLE_OAUTH_TOKEN_JSON: ${{ secrets.GOOGLE_OAUTH_TOKEN_JSON }}
+          GOOGLE_CREDENTIALS_JSON: ${{ secrets.GOOGLE_CREDENTIALS_JSON }}
+        run: python3 prepare_next_month.py
+      
+      - name: Commit and push config
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add sheets_config.json
+          if git diff --staged --quiet; then
+            echo "No changes to config"
+          else
+            git commit -m "Auto: Add sheets_config for new month"
+            git push
+          fi
