@@ -368,6 +368,310 @@ def calculate_dynamic_score(mxv, atrx, mxv_weight=0.6, atrx_weight=0.4,
         return 0.0
 
 
+# ═══════════════════════════════════════════════════════════════════════
+# Score Functions (9 variants + entry score)
+# Migrated from auto_scanner.py — Issue #7.1
+# ═══════════════════════════════════════════════════════════════════════
+
+def calculate_score(metrics):
+    score = 0
+    # MxV — 25% — cap 200
+    try:
+        if metrics['mxv'] < 0:
+            score += min(abs(metrics['mxv']) / 200, 1) * 25
+    except: pass
+    # RunUp — 25% — cap 30%
+    try:
+        if metrics['run_up'] > 0:
+            score += min(metrics['run_up'] / 30, 1) * 25
+    except: pass
+    # ATRX — 20% — cap 5x
+    try:
+        score += min(metrics['atrx'] / 5, 1) * 20
+    except: pass
+    # RSI — 10% — sweet spot 60-70
+    try:
+        rsi = metrics['rsi']
+        if rsi < 50:    score += (rsi / 50) * 5
+        elif rsi <= 70: score += 5 + ((rsi - 50) / 20) * 5
+        else:           score += max(0, 10 - ((rsi - 70) / 30) * 5)
+    except: pass
+    # VWAP — 10% — cap 8%
+    try:
+        if metrics['vwap_dist'] > 0:
+            score += min(metrics['vwap_dist'] / 8, 1) * 10
+    except: pass
+    # ScanChange% — 5% — cap 60%
+    try:
+        if metrics.get('change', 0) > 0:
+            score += min(metrics['change'] / 60, 1) * 5
+    except: pass
+    # REL_VOL — 5% — cap 15x
+    try:
+        score += min(metrics['rel_vol'] / 15, 1) * 5
+    except: pass
+    # Gap הוסר לחלוטין
+    return round(score, 2)
+
+
+def calculate_score_i(metrics):
+    """MxV dominant — 50% weight"""
+    score = 0
+    try:
+        mxv = float(metrics.get('mxv', 0) or 0)
+        if mxv < 0: score += min(abs(mxv)/150, 1) * 50
+    except: pass
+    try:
+        ru = float(metrics.get('run_up', 0) or 0)
+        if ru > 0: score += min(ru/30, 1) * 20
+    except: pass
+    try:
+        atrx = float(metrics.get('atrx', 0) or 0)
+        score += min(atrx/5, 1) * 20
+    except: pass
+    try:
+        change = float(metrics.get('change', 0) or 0)
+        if change > 0: score += min(change/60, 1) * 10
+    except: pass
+    return round(score, 2)
+
+
+def calculate_score_b(metrics):
+    """Score_B: MxV=30%/cap300, RunUp=30%/cap40, ATRX=25%/cap6, VWAP=10%/cap10, Change=5%/cap80"""
+    score = 0
+    try:
+        mxv = float(metrics.get('mxv', 0) or 0)
+        if mxv < 0: score += min(abs(mxv)/300, 1) * 30
+    except: pass
+    try:
+        ru = float(metrics.get('run_up', 0) or 0)
+        if ru > 0: score += min(ru/40, 1) * 30
+    except: pass
+    try:
+        atrx = float(metrics.get('atrx', 0) or 0)
+        score += min(atrx/6, 1) * 25
+    except: pass
+    try:
+        vwap = float(metrics.get('vwap_dist', 0) or 0)
+        if vwap > 0: score += min(vwap/10, 1) * 10
+    except: pass
+    try:
+        change = float(metrics.get('change', 0) or 0)
+        if change > 0: score += min(change/80, 1) * 5
+    except: pass
+    return round(score, 2)
+
+
+def calculate_score_c(metrics):
+    """Score_C: ATRX=35%/cap8, Change=25%/cap100, RunUp=20%/cap50, VWAP=15%/cap12, MxV=5%/cap500"""
+    score = 0
+    try:
+        atrx = float(metrics.get('atrx', 0) or 0)
+        score += min(atrx/8, 1) * 35
+    except: pass
+    try:
+        change = float(metrics.get('change', 0) or 0)
+        if change > 0: score += min(change/100, 1) * 25
+    except: pass
+    try:
+        ru = float(metrics.get('run_up', 0) or 0)
+        if ru > 0: score += min(ru/50, 1) * 20
+    except: pass
+    try:
+        vwap = float(metrics.get('vwap_dist', 0) or 0)
+        if vwap > 0: score += min(vwap/12, 1) * 15
+    except: pass
+    try:
+        mxv = float(metrics.get('mxv', 0) or 0)
+        if mxv < 0: score += min(abs(mxv)/500, 1) * 5
+    except: pass
+    return round(score, 2)
+
+
+def calculate_score_d(metrics):
+    """Score_D: MxV=40%/cap150, RunUp=25%/cap25, Change=20%/cap60, ATRX=10%/cap4, VWAP=5%/cap8"""
+    score = 0
+    try:
+        mxv = float(metrics.get('mxv', 0) or 0)
+        if mxv < 0: score += min(abs(mxv)/150, 1) * 40
+    except: pass
+    try:
+        ru = float(metrics.get('run_up', 0) or 0)
+        if ru > 0: score += min(ru/25, 1) * 25
+    except: pass
+    try:
+        change = float(metrics.get('change', 0) or 0)
+        if change > 0: score += min(change/60, 1) * 20
+    except: pass
+    try:
+        atrx = float(metrics.get('atrx', 0) or 0)
+        score += min(atrx/4, 1) * 10
+    except: pass
+    try:
+        vwap = float(metrics.get('vwap_dist', 0) or 0)
+        if vwap > 0: score += min(vwap/8, 1) * 5
+    except: pass
+    return round(score, 2)
+
+
+def calculate_score_e(metrics):
+    """Score_E: Change=35%/cap150, RunUp=30%/cap60, MxV=20%/cap400, ATRX=15%/cap5"""
+    score = 0
+    try:
+        change = float(metrics.get('change', 0) or 0)
+        if change > 0: score += min(change/150, 1) * 35
+    except: pass
+    try:
+        ru = float(metrics.get('run_up', 0) or 0)
+        if ru > 0: score += min(ru/60, 1) * 30
+    except: pass
+    try:
+        mxv = float(metrics.get('mxv', 0) or 0)
+        if mxv < 0: score += min(abs(mxv)/400, 1) * 20
+    except: pass
+    try:
+        atrx = float(metrics.get('atrx', 0) or 0)
+        score += min(atrx/5, 1) * 15
+    except: pass
+    return round(score, 2)
+
+
+def calculate_score_f(metrics):
+    """Score_F: VWAP=40%/cap20, RunUp=25%/cap35, ATRX=20%/cap5, MxV=10%/cap200, Change=5%/cap50"""
+    score = 0
+    try:
+        vwap = float(metrics.get('vwap_dist', 0) or 0)
+        if vwap > 0: score += min(vwap/20, 1) * 40
+    except: pass
+    try:
+        ru = float(metrics.get('run_up', 0) or 0)
+        if ru > 0: score += min(ru/35, 1) * 25
+    except: pass
+    try:
+        atrx = float(metrics.get('atrx', 0) or 0)
+        score += min(atrx/5, 1) * 20
+    except: pass
+    try:
+        mxv = float(metrics.get('mxv', 0) or 0)
+        if mxv < 0: score += min(abs(mxv)/200, 1) * 10
+    except: pass
+    try:
+        change = float(metrics.get('change', 0) or 0)
+        if change > 0: score += min(change/50, 1) * 5
+    except: pass
+    return round(score, 2)
+
+
+def calculate_score_g(metrics):
+    """Score_G: MxV=25%/cap250, RunUp=25%/cap30, ATRX=20%/cap5, RelVol sweet spot 10-100x=20pts (penalty above 200x), Change=10%/cap60"""
+    score = 0
+    try:
+        mxv = float(metrics.get('mxv', 0) or 0)
+        if mxv < 0: score += min(abs(mxv)/250, 1) * 25
+    except: pass
+    try:
+        ru = float(metrics.get('run_up', 0) or 0)
+        if ru > 0: score += min(ru/30, 1) * 25
+    except: pass
+    try:
+        atrx = float(metrics.get('atrx', 0) or 0)
+        score += min(atrx/5, 1) * 20
+    except: pass
+    try:
+        rel_vol = float(metrics.get('rel_vol', 0) or 0)
+        if 10 <= rel_vol <= 100:
+            score += 20
+        elif rel_vol > 100:
+            penalty = min((rel_vol - 100) / 100, 1) * 20
+            score += max(0, 20 - penalty)
+        elif rel_vol > 0:
+            score += min(rel_vol / 10, 1) * 20
+    except: pass
+    try:
+        change = float(metrics.get('change', 0) or 0)
+        if change > 0: score += min(change/60, 1) * 10
+    except: pass
+    return round(score, 2)
+
+
+def calculate_score_h(metrics):
+    """Score_H: MxV=25%/cap200, RunUp=25%/cap30, ATRX=25%/cap5, VWAP=15%/cap8, Change=10%/cap60"""
+    score = 0
+    try:
+        mxv = float(metrics.get('mxv', 0) or 0)
+        if mxv < 0: score += min(abs(mxv)/200, 1) * 25
+    except: pass
+    try:
+        ru = float(metrics.get('run_up', 0) or 0)
+        if ru > 0: score += min(ru/30, 1) * 25
+    except: pass
+    try:
+        atrx = float(metrics.get('atrx', 0) or 0)
+        score += min(atrx/5, 1) * 25
+    except: pass
+    try:
+        vwap = float(metrics.get('vwap_dist', 0) or 0)
+        if vwap > 0: score += min(vwap/8, 1) * 15
+    except: pass
+    try:
+        change = float(metrics.get('change', 0) or 0)
+        if change > 0: score += min(change/60, 1) * 10
+    except: pass
+    return round(score, 2)
+
+
+def calculate_entry_score(current_price, intra_high, scan_price, vwap_price, now_peru):
+    """
+    Entry Score 0-100: how good is THIS MOMENT to enter a short.
+    Run only on stocks with Score >= 60.
+
+    Components:
+    - PeakConfirm (40pts): stock has dropped from intraday high
+    - ReversalDepth (30pts): how far below the high is current price
+    - TimeToClose (20pts): closer to EOD = better (14:00-15:00 ideal)
+    - VWAPCross (10pts): price crossed below VWAP = confirmed reversal
+    """
+    score = 0
+
+    try:
+        if intra_high > 0 and current_price < intra_high:
+            # PeakConfirm: 40pts — dropped at least 1% from high
+            drop_from_high_pct = (intra_high - current_price) / intra_high * 100
+            if drop_from_high_pct >= 1:
+                score += min(drop_from_high_pct / 5, 1) * 40  # 5% drop = max
+    except: pass
+
+    try:
+        if intra_high > 0 and scan_price > 0:
+            # ReversalDepth: 30pts — how much of the pump has reversed
+            total_pump = intra_high - scan_price
+            reversal = intra_high - current_price
+            if total_pump > 0:
+                reversal_pct = reversal / total_pump  # 0-1 (1 = fully reversed)
+                score += max(0, min(reversal_pct, 1)) * 30
+    except: pass
+
+    try:
+        # TimeToClose: 20pts — ideal window 14:00-15:00
+        close_time = now_peru.replace(hour=15, minute=0, second=0, microsecond=0)
+        mins_to_close = (close_time - now_peru).total_seconds() / 60
+        if 0 <= mins_to_close <= 60:    # last hour = max
+            score += 20
+        elif 60 < mins_to_close <= 120: # 13:00-14:00 = half
+            score += 10
+        elif mins_to_close < 0:
+            score += 0  # after close
+    except: pass
+
+    try:
+        # VWAPCross: 10pts — current price below VWAP
+        if vwap_price > 0 and current_price < vwap_price:
+            score += 10
+    except: pass
+
+    return round(score, 2)
+
+
 # Module self-test when run directly
 # ═══════════════════════════════════════════════════════════════════════
 

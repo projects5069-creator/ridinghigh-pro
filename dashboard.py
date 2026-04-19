@@ -37,7 +37,7 @@ from formulas import (
     normalize_mxv,
     normalize_atrx,
 )
-from auto_scanner import calculate_score
+from formulas import calculate_score
 from utils import (
     parse_market_cap,
     parse_volume,
