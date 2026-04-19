@@ -174,10 +174,8 @@ def analyze_ticker(ticker, finviz_row):
 
                 try:
                     avg_vol = info.get('averageVolume', volume)
+                    # calculate_rel_vol already caps at config.REL_VOL_CAP
                     rel_vol = calculate_rel_vol(volume, avg_vol)
-                    if rel_vol > 100:
-                        print(f"  ⚠ REL_VOL capped: {rel_vol:.1f} -> 100 for {ticker}")
-                        rel_vol = 100
                 except: pass
 
                 try:
@@ -914,10 +912,8 @@ def sync_score_tracker(gc, now_peru):
                 except Exception: pass
                 try:
                     avg_vol = info.get("averageVolume", volume)
+                    # calculate_rel_vol already caps at config.REL_VOL_CAP
                     rel_vol = calculate_rel_vol(volume, avg_vol)
-                    if rel_vol > 100:
-                        print(f"  ⚠ REL_VOL capped: {rel_vol:.1f} -> 100 for {ticker}")
-                        rel_vol = 100
                 except Exception: pass
                 try:
                     run_up = calculate_runup(price, open_price)

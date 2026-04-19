@@ -44,7 +44,6 @@ CORE_FILES = [
     "monthly_rotation.py",
     "data_logger.py",
     "health_check.py",
-    "score_tracker_sync.py",  # should be in quarantine
     "config.py",
 ]
 

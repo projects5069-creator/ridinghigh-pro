@@ -17,7 +17,7 @@ Why this module exists:
 Before this file was created, the same formulas existed in multiple places:
 - calculate_mxv() in auto_scanner.py AND dashboard.py (copy-paste duplicate)
 - ATRX calculated 2 different ways in auto_scanner (ratio) vs dashboard (percentage)
-- REL_VOL capped in auto_scanner but not in dashboard
+- REL_VOL cap centralized in config.REL_VOL_CAP (applied in calculate_rel_vol)
 - Float% measured Turnover in dashboard but actual Float in auto_scanner
 
 This created risk of divergence: a fix in one place would leave the other broken.
@@ -65,14 +65,13 @@ Design Principles:
 5. Validated caps where applicable (e.g., REL_VOL max 100)
 """
 
-from config import SCORE_WEIGHTS_V2, SCORE_CAPS_V2, SCORE_RSI_PARAMS
+from config import SCORE_WEIGHTS_V2, SCORE_CAPS_V2, SCORE_RSI_PARAMS, REL_VOL_CAP
 
 
 # ═══════════════════════════════════════════════════════════════════════
 # Constants - Validation Thresholds
 # ═══════════════════════════════════════════════════════════════════════
 
-REL_VOL_CAP = 100.0
 ATRX_VALIDATION_THRESHOLD = 5.0
 ATRX_VALIDATION_ATR_RATIO = 0.005
 

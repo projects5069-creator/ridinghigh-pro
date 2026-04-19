@@ -29,9 +29,9 @@ from formulas import (
     calculate_d1_gap,
     calculate_pnl_pct,
     # Constants
-    REL_VOL_CAP,
     ATRX_VALIDATION_THRESHOLD,
 )
+from config import REL_VOL_CAP
 
 
 class TestResult:

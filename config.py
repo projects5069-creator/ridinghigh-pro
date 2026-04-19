@@ -81,6 +81,19 @@ Formula:
 
 
 # ═══════════════════════════════════════════════════════════════════════
+# Metric-Level Caps (absolute limits applied before any scoring)
+# ═══════════════════════════════════════════════════════════════════════
+# These caps protect against yfinance data outliers — applied in formulas.py
+# BEFORE scoring logic sees them. Different from SCORE_CAPS_V2 which are
+# "max contribution per metric" thresholds for the score formula.
+
+REL_VOL_CAP = 100.0
+"""Hard cap on REL_VOL (volume / avg_volume) to prevent yfinance outliers.
+   Values above this (e.g., 26794x seen in past data) are clipped to 100.
+   Applied in formulas.calculate_rel_vol() before any downstream use."""
+
+
+# ═══════════════════════════════════════════════════════════════════════
 # Display Thresholds
 # ═══════════════════════════════════════════════════════════════════════
 
