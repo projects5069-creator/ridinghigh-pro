@@ -28,6 +28,7 @@ from formulas import (
     calculate_atrx,
     validate_atrx,
     calculate_gap,
+    calculate_typical_price_dist,
     calculate_vwap_dist,
     calculate_rel_vol,
     calculate_float_pct,
@@ -137,7 +138,7 @@ def analyze_ticker(ticker, finviz_row):
         if not market_cap or market_cap == 0: return None
 
         rsi = 50; atrx = 0; rel_vol = 1.0; run_up = 0
-        gap = 0; vwap_dist = 0; price_to_high = 0
+        gap = 0; typical_price_dist = 0; price_to_high = 0
         price_to_52w_high = 0; float_pct = 0
         shares_outstanding = _shares_cache.get(ticker, 0)
         # Raw variables for metric validation
@@ -192,7 +193,7 @@ def analyze_ticker(ticker, finviz_row):
                     high_today = round(float(current['High']), 4)
                     low_today  = round(float(current['Low']), 4)
                     vwap_price = round((current['High'] + current['Low'] + price) / 3, 4)
-                    vwap_dist  = calculate_vwap_dist(price, current['High'], current['Low'])
+                    typical_price_dist = calculate_typical_price_dist(price, current['High'], current['Low'])
                 except: pass
 
                 # Fallback: if daily bar hasn't updated high yet, use price as high.
@@ -225,7 +226,7 @@ def analyze_ticker(ticker, finviz_row):
             'mxv': mxv, 'price_to_52w_high': price_to_52w_high,
             'price_to_high': price_to_high, 'rel_vol': rel_vol,
             'rsi': rsi, 'atrx': atrx, 'run_up': run_up,
-            'float_pct': float_pct, 'gap': gap, 'vwap_dist': vwap_dist,
+            'float_pct': float_pct, 'gap': gap, 'typical_price_dist': typical_price_dist,
             'change': change,
         }
         score   = calculate_score(metrics)
@@ -285,7 +286,7 @@ def analyze_ticker(ticker, finviz_row):
             'ATRX':          round(atrx, 2),
             'REL_VOL':       round(rel_vol, 2),
             'Gap':           round(gap, 2),
-            'VWAP':          round(vwap_dist, 2),
+            'VWAP':          round(typical_price_dist, 2),
             'PriceToHigh':   round(price_to_high, 2),
             'PriceTo52WHigh':round(price_to_52w_high, 2),
             'Float%':        round(float_pct, 2),
@@ -924,16 +925,16 @@ def sync_score_tracker(gc, now_peru):
                     gap = calculate_gap(open_price, prev_close)
                 except Exception: pass
 
-                vwap_dist = 0.0
+                typical_price_dist = 0.0
                 try:
-                    vwap_dist = calculate_vwap_dist(price, high, low)
+                    typical_price_dist = calculate_typical_price_dist(price, high, low)
                 except Exception: pass
 
                 mxv   = calculate_mxv(mkt_cap, price, volume)
                 change_pct = calculate_scan_change(price, prev_close)
                 score = calculate_score({
                     'mxv': mxv, 'run_up': run_up, 'atrx': atrx,
-                    'rsi': rsi, 'vwap_dist': vwap_dist,
+                    'rsi': rsi, 'typical_price_dist': typical_price_dist,
                     'change': change_pct, 'rel_vol': rel_vol,
                 })
 
@@ -948,7 +949,7 @@ def sync_score_tracker(gc, now_peru):
                     "RSI":       round(rsi,        2),
                     "ATRX":      round(atrx,       2),
                     "Gap":       round(gap,         2),
-                    "VWAP_Dist": round(vwap_dist,   2),
+                    "VWAP_Dist": round(typical_price_dist,   2),
                     "Volume":    volume,
                     "High":      high,
                     "Low":       low,

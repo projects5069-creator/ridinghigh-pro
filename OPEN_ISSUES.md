@@ -104,6 +104,22 @@
 - **Alternatives:** Polygon.io ($29/mo), FMP ($14/mo)
 - **Decision needed:** switch providers?
 
+#### #23: timeline_live silently drops VWAP (and other fields) due to header mismatch
+- **Discovered:** 2026-04-20 during #11 investigation
+- **Root cause:** auto_scanner.analyze_ticker returns dict with 'VWAP' key, but sheets_manager writes values matching only the existing 17-column header in timeline_live. VWAP (+ other keys not in header) are silently discarded.
+- **Impact:** Every scan (every minute) computes VWAP but doesn't persist it in timeline_live. Historical analysis of VWAP over time is impossible from this source.
+- **Workaround:** daily_snapshots and score_tracker DO persist VWAP correctly.
+- **Effort:** 30 min — add column to timeline_live header OR investigate why it was removed originally + decide whether to restore
+- **Priority:** Medium — doesn't break anything, but limits future analysis
+
+#### #24: "VWAP_price" column in daily_snapshots is also misnamed
+- **Discovered:** 2026-04-20 during #11 migration planning
+- **Location:** daily_snapshots column 30 ("VWAP_price")
+- **Content:** Holds the absolute Typical Price value (H+L+C)/3, not real VWAP price
+- **Dependency:** Should be renamed together with #11 for consistency, to "TypicalPrice"
+- **Effort:** Similar migration pattern as #11 — 20 min
+- **Priority:** Medium — cosmetic but compounds the VWAP naming confusion
+
 ### 🟢 Low Priority
 
 #### #12: backfill_weeks13_14.py — one-time script still in project
@@ -149,11 +165,11 @@
 
 ## 📊 Stats
 
-- **Total issues tracked:** 22
-- **Closed:** 8 (36%) — 7 new in 2026-04-19 + 1 previously
+- **Total issues tracked:** 24
+- **Closed:** 8 (33%) — 7 new in 2026-04-19 + 1 previously
 - **Open critical:** 0 🎉
 - **Open high:** 1 (#15)
-- **Open medium:** 6
+- **Open medium:** 8
 - **Open low:** 7
 - **Deferred:** 1
 

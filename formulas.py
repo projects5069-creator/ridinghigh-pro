@@ -43,6 +43,7 @@ Usage:
         calculate_atrx,
         validate_atrx,
         calculate_gap,
+        calculate_typical_price_dist,
         calculate_vwap_dist,
         calculate_rel_vol,
         calculate_float_pct,
@@ -142,10 +143,15 @@ def calculate_gap(open_price, prev_close):
         return 0.0
 
 
-def calculate_vwap_dist(price, high, low):
-    """VWAP Distance - Price vs Typical Price. Returns percentage.
-    NOTE: Despite the name, this is distance from Typical Price (H+L+C)/3,
-    not true volume-weighted VWAP.
+def calculate_typical_price_dist(price, high, low):
+    """TypicalPriceDist - Distance (%) from Typical Price = (H+L+C)/3.
+
+    This was previously (incorrectly) named 'VWAP distance'. True VWAP
+    requires intraday tick-by-tick volume data, which we don't have.
+    Typical Price is a standard TA indicator used as a VWAP proxy for
+    daily bars.
+
+    Returns: percentage. Positive = close above daily midpoint.
     """
     try:
         if price is None or high is None or low is None:
@@ -156,6 +162,17 @@ def calculate_vwap_dist(price, high, low):
         return float((price / typical_price - 1) * 100)
     except (TypeError, ValueError, ZeroDivisionError):
         return 0.0
+
+
+def calculate_vwap_dist(price, high, low):
+    """DEPRECATED — use calculate_typical_price_dist() instead.
+
+    This name is misleading: the calculation is Typical Price = (H+L+C)/3,
+    NOT true volume-weighted average price. Kept as alias for backward
+    compatibility during rename migration (#11).
+    Will be removed in issue #11 step D.
+    """
+    return calculate_typical_price_dist(price, high, low)
 
 
 def calculate_rel_vol(volume, avg_volume):
@@ -413,10 +430,11 @@ def calculate_score(metrics):
         else:
             score += max(0, W["RSI"] - ((rsi - R["SWEET_HIGH"]) / R["OVER_DECAY"]) * half)
     except: pass
-    # VWAP — positive distance above VWAP
+    # TypicalPriceDist — positive distance above typical price
     try:
-        if metrics['vwap_dist'] > 0:
-            score += min(metrics['vwap_dist'] / C["VWAP"], 1) * W["VWAP"]
+        tpd = metrics.get('typical_price_dist', metrics.get('vwap_dist', 0))
+        if tpd > 0:
+            score += min(tpd / C["VWAP"], 1) * W["VWAP"]
     except: pass
     # ScanChange — positive only
     try:
@@ -469,7 +487,7 @@ def calculate_score_b(metrics):
         score += min(atrx/6, 1) * 25
     except: pass
     try:
-        vwap = float(metrics.get('vwap_dist', 0) or 0)
+        vwap = float(metrics.get('typical_price_dist', metrics.get('vwap_dist', 0)) or 0)
         if vwap > 0: score += min(vwap/10, 1) * 10
     except: pass
     try:
@@ -495,7 +513,7 @@ def calculate_score_c(metrics):
         if ru > 0: score += min(ru/50, 1) * 20
     except: pass
     try:
-        vwap = float(metrics.get('vwap_dist', 0) or 0)
+        vwap = float(metrics.get('typical_price_dist', metrics.get('vwap_dist', 0)) or 0)
         if vwap > 0: score += min(vwap/12, 1) * 15
     except: pass
     try:
@@ -525,7 +543,7 @@ def calculate_score_d(metrics):
         score += min(atrx/4, 1) * 10
     except: pass
     try:
-        vwap = float(metrics.get('vwap_dist', 0) or 0)
+        vwap = float(metrics.get('typical_price_dist', metrics.get('vwap_dist', 0)) or 0)
         if vwap > 0: score += min(vwap/8, 1) * 5
     except: pass
     return round(score, 2)
@@ -557,7 +575,7 @@ def calculate_score_f(metrics):
     """Score_F: VWAP=40%/cap20, RunUp=25%/cap35, ATRX=20%/cap5, MxV=10%/cap200, Change=5%/cap50"""
     score = 0
     try:
-        vwap = float(metrics.get('vwap_dist', 0) or 0)
+        vwap = float(metrics.get('typical_price_dist', metrics.get('vwap_dist', 0)) or 0)
         if vwap > 0: score += min(vwap/20, 1) * 40
     except: pass
     try:
@@ -627,7 +645,7 @@ def calculate_score_h(metrics):
         score += min(atrx/5, 1) * 25
     except: pass
     try:
-        vwap = float(metrics.get('vwap_dist', 0) or 0)
+        vwap = float(metrics.get('typical_price_dist', metrics.get('vwap_dist', 0)) or 0)
         if vwap > 0: score += min(vwap/8, 1) * 15
     except: pass
     try:
@@ -704,7 +722,8 @@ if __name__ == "__main__":
     print(f"calculate_atrx(high=10, low=8, atr=1) = {calculate_atrx(10, 8, 1):.2f}")
     print(f"validate_atrx(atrx=25, atr=0.02, price=10) = {validate_atrx(25, 0.02, 10):.2f}")
     print(f"calculate_gap(open=12, prev_close=10) = {calculate_gap(12, 10):.2f}")
-    print(f"calculate_vwap_dist(price=11, high=12, low=9) = {calculate_vwap_dist(11, 12, 9):.2f}")
+    print(f"calculate_typical_price_dist(price=11, high=12, low=9) = {calculate_typical_price_dist(11, 12, 9):.2f}")
+    print(f"calculate_vwap_dist (deprecated alias) = {calculate_vwap_dist(11, 12, 9):.2f}")
     print(f"calculate_rel_vol(vol=1M, avg=500K) = {calculate_rel_vol(1_000_000, 500_000):.2f}")
     print(f"calculate_rel_vol(vol=5B, avg=10K) = {calculate_rel_vol(5_000_000_000, 10_000):.2f} (CAPPED)")
     print(f"calculate_float_pct(float=8M, out=10M) = {calculate_float_pct(8_000_000, 10_000_000):.2f}")

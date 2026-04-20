@@ -30,6 +30,7 @@ from formulas import (
     calculate_atrx,
     validate_atrx,
     calculate_gap,
+    calculate_typical_price_dist,
     calculate_vwap_dist,
     calculate_rel_vol,
     calculate_float_pct,
@@ -290,7 +291,7 @@ class Dashboard:
             rel_vol = 1.0
             run_up = 0
             gap = 0
-            vwap_dist = 0
+            typical_price_dist = 0
             price_to_high = 0
             price_to_52w_high = 0
             shares_outstanding = self.shares_cache.get(ticker, 0)
@@ -353,9 +354,9 @@ class Dashboard:
                     gap = 0
                 
                 try:
-                    vwap_dist = calculate_vwap_dist(price, current['High'], current['Low'])
+                    typical_price_dist = calculate_typical_price_dist(price, current['High'], current['Low'])
                 except:
-                    vwap_dist = 0
+                    typical_price_dist = 0
                 
                 try:
                     high_today = current['High']
@@ -399,7 +400,7 @@ class Dashboard:
                 'run_up': run_up,
                 'float_pct': float_pct,
                 'gap': gap,
-                'vwap_dist': vwap_dist,
+                'typical_price_dist': typical_price_dist,
                 'change': change,
             }
 
@@ -420,7 +421,7 @@ class Dashboard:
                 'ATRX': round(atrx, 2),
                 'REL_VOL': round(rel_vol, 2),
                 'Gap': round(gap, 2),
-                'VWAP': round(vwap_dist, 2),
+                'VWAP': round(typical_price_dist, 2),
                 'Float%': round(float_pct, 2),
                 'Score': round(score, 2),
             }
@@ -459,7 +460,7 @@ class Dashboard:
             rel_vol = 1.0
             run_up = 0
             gap = 0
-            vwap_dist = 0
+            typical_price_dist = 0
             price_to_high = 0
             price_to_52w_high = 0
             shares_outstanding = self.shares_cache.get(ticker, 0)
@@ -578,7 +579,7 @@ class Dashboard:
                 'run_up': run_up,
                 'float_pct': float_pct,
                 'gap': gap,
-                'vwap_dist': vwap_dist,
+                'typical_price_dist': typical_price_dist,
                 'change': change,
             }
 
@@ -599,7 +600,7 @@ class Dashboard:
                 'ATRX': round(atrx, 2),
                 'REL_VOL': round(rel_vol, 2),
                 'Gap': round(gap, 2),
-                'VWAP': round(vwap_dist, 2),
+                'VWAP': round(typical_price_dist, 2),
                 'Float%': round(float_pct, 2),
                 'Score': round(score, 2),
             }
