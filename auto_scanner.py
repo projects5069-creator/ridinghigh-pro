@@ -286,7 +286,7 @@ def analyze_ticker(ticker, finviz_row):
             'ATRX':          round(atrx, 2),
             'REL_VOL':       round(rel_vol, 2),
             'Gap':           round(gap, 2),
-            'VWAP':          round(typical_price_dist, 2),
+            'TypicalPriceDist': round(typical_price_dist, 2),
             'PriceToHigh':   round(price_to_high, 2),
             'PriceTo52WHigh':round(price_to_52w_high, 2),
             'Float%':        round(float_pct, 2),
@@ -881,7 +881,7 @@ def sync_score_tracker(gc, now_peru):
 
         COLS = ["Date","ScanTime","Ticker","ScanDate","Price","Score",
                 "MxV","RunUp","REL_VOL","RSI","ATRX",
-                "Gap","VWAP_Dist","Volume","High","Low","Open","PrevClose"]
+                "Gap","TypicalPriceDist","Volume","High","Low","Open","PrevClose"]
         new_rows = []
         for ticker, scan_date in sorted(active):
             try:
@@ -949,7 +949,7 @@ def sync_score_tracker(gc, now_peru):
                     "RSI":       round(rsi,        2),
                     "ATRX":      round(atrx,       2),
                     "Gap":       round(gap,         2),
-                    "VWAP_Dist": round(typical_price_dist,   2),
+                    "TypicalPriceDist": round(typical_price_dist, 2),
                     "Volume":    volume,
                     "High":      high,
                     "Low":       low,

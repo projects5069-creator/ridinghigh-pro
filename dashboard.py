@@ -421,7 +421,7 @@ class Dashboard:
                 'ATRX': round(atrx, 2),
                 'REL_VOL': round(rel_vol, 2),
                 'Gap': round(gap, 2),
-                'VWAP': round(typical_price_dist, 2),
+                'TypicalPriceDist': round(typical_price_dist, 2),
                 'Float%': round(float_pct, 2),
                 'Score': round(score, 2),
             }
@@ -600,7 +600,7 @@ class Dashboard:
                 'ATRX': round(atrx, 2),
                 'REL_VOL': round(rel_vol, 2),
                 'Gap': round(gap, 2),
-                'VWAP': round(typical_price_dist, 2),
+                'TypicalPriceDist': round(typical_price_dist, 2),
                 'Float%': round(float_pct, 2),
                 'Score': round(score, 2),
             }
@@ -1125,7 +1125,7 @@ def load_latest_from_sheets():
         for _, row in df.iterrows():
             try:
                 def f(k): return float(row[k]) if row.get(k,"") not in ["nan","","None"] else 0
-                results.append({"Ticker":row["Ticker"],"Score":f("Score"),"EntryScore":f("EntryScore"),"Price":f("Price"),"Change":f("Change"),"MxV":f("MxV"),"PriceTo52WHigh":f("PriceTo52WHigh"),"PriceToHigh":f("PriceToHigh"),"RSI":f("RSI"),"ATRX":f("ATRX"),"REL_VOL":f("REL_VOL"),"RunUp":f("RunUp"),"Float%":f("Float%"),"Gap":f("Gap"),"VWAP":f("VWAP")})
+                results.append({"Ticker":row["Ticker"],"Score":f("Score"),"EntryScore":f("EntryScore"),"Price":f("Price"),"Change":f("Change"),"MxV":f("MxV"),"PriceTo52WHigh":f("PriceTo52WHigh"),"PriceToHigh":f("PriceToHigh"),"RSI":f("RSI"),"ATRX":f("ATRX"),"REL_VOL":f("REL_VOL"),"RunUp":f("RunUp"),"Float%":f("Float%"),"Gap":f("Gap"),"TypicalPriceDist":f("TypicalPriceDist")})
             except: continue
         return results, latest_time
     except Exception:
@@ -1342,7 +1342,7 @@ def main_page():
                                     "PriceTo52WHigh": 0, "PriceToHigh": 0, "RSI": 0, "ATRX": 0,
                                     "REL_VOL": float(_r.get("REL_VOL", 0) or 0),
                                     "RunUp": float(_r.get("RunUp", 0) or 0),
-                                    "Float%": 0, "Gap": 0, "VWAP": 0,
+                                    "Float%": 0, "Gap": 0, "TypicalPriceDist": 0,
                                 })
                             except Exception:
                                 pass
@@ -1456,7 +1456,7 @@ def main_page():
                 row_d['RSI']  = f"{r['RSI']:.1f}"
                 row_d['ATRX'] = f"{r['ATRX']:.1f}"
                 row_d['Gap']  = f"{r['Gap']:+.1f}%"
-                row_d['VWAP'] = f"{r['VWAP']:+.1f}%"
+                row_d['TypicalPriceDist'] = f"{r['TypicalPriceDist']:+.1f}%"
             display_data.append(row_d)
 
         df = pd.DataFrame(display_data)
@@ -1606,7 +1606,7 @@ def daily_summary_page():
         except:
             return [''] * len(row)
     
-    METRIC_COLS = ["Ticker", "Score", "MxV", "RunUp", "REL_VOL", "RSI", "ATRX", "Gap", "VWAP"]
+    METRIC_COLS = ["Ticker", "Score", "MxV", "RunUp", "REL_VOL", "RSI", "ATRX", "Gap", "TypicalPriceDist"]
     display_cols = [c for c in METRIC_COLS if c in df.columns]
     df = df[display_cols].copy()
 
@@ -1625,7 +1625,7 @@ def daily_summary_page():
         "RSI":     "{:.1f}",
         "ATRX":    "{:.1f}",
         "Gap":     "{:.1f}",
-        "VWAP":    "{:.1f}",
+        "TypicalPriceDist": "{:.1f}",
     }
     fmt_dict = {c: _fmt_map.get(c, "{:.2f}") for c in df.columns if c != "Ticker"}
     numeric_cols = [c for c in df.columns if c != "Ticker" and df[c].dtype in ['float64','float32','int64','int32']]

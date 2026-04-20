@@ -51,7 +51,7 @@ TECHNICAL = {
     "RunUp": "Intraday rise %",
     "ATRX": "Volatility ratio",
     "RSI": "Relative Strength Index",
-    "VWAP": "Distance from VWAP",
+    "TypicalPriceDist": "Distance from Typical Price (H+L+C)/3",
     "ScanChange%": "Change % vs prev close",
     "REL_VOL": "Volume relative to avg",
     "Gap": "Opening gap %",

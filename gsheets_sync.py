@@ -362,7 +362,7 @@ def load_post_analysis_from_sheets() -> pd.DataFrame:
 
         numeric_cols = [
             "Score", "ScanPrice", "ScanChange%",
-            "MxV", "RunUp", "RSI", "ATRX", "REL_VOL", "Gap", "VWAP", "Float%",
+            "MxV", "RunUp", "RSI", "ATRX", "REL_VOL", "Gap", "TypicalPriceDist", "Float%",
             "PriceToHigh", "PriceTo52WHigh",
             "D1_Open", "D1_High", "D1_Low", "D1_Close",
             "D2_Open", "D2_High", "D2_Low", "D2_Close",

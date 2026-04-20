@@ -140,7 +140,7 @@ def main():
 
     # ── Prepare numeric columns ──────────────────────────────────────
     metric_cols = ["MxV", "RunUp", "REL_VOL", "RSI", "ATRX", "Gap",
-                   "VWAP", "ScanChange%", "MaxDrop%"]
+                   "TypicalPriceDist", "ScanChange%", "MaxDrop%"]
     for col in metric_cols:
         if col in df.columns:
             df[col] = pd.to_numeric(df[col], errors="coerce")
@@ -156,7 +156,7 @@ def main():
     valid["RSI"]          = valid["RSI"].fillna(50)
     valid["ATRX"]         = valid["ATRX"].fillna(0)
     valid["Gap"]          = valid["Gap"].fillna(0)
-    valid["VWAP"]         = valid["VWAP"].fillna(0)
+    valid["TypicalPriceDist"] = valid["TypicalPriceDist"].fillna(0)
     valid["ScanChange%"]  = valid["ScanChange%"].fillna(0)
 
     # ── Compute scores ───────────────────────────────────────────────
@@ -167,7 +167,7 @@ def main():
         rsi = row["RSI"]
         ax  = row["ATRX"]
         g   = row["Gap"]
-        vw  = row["VWAP"]
+        vw  = row["TypicalPriceDist"]
         ch  = row["ScanChange%"]
 
         valid.at[i, "Score_v1"] = score_v1(m, ru, rv, rsi, ax, g, vw, ch)

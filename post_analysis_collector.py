@@ -391,7 +391,7 @@ def run(target_date: str = None):
         stats = calculate_stats(scan_price, ohlc)
 
         # Score metrics
-        metric_fields = ["MxV", "RunUp", "RSI", "ATRX", "REL_VOL", "Gap", "VWAP",
+        metric_fields = ["MxV", "RunUp", "RSI", "ATRX", "REL_VOL", "Gap", "TypicalPriceDist",
                          "PriceToHigh", "PriceTo52WHigh", "Float%",
                          "Score_I", "Score_B", "Score_C", "Score_D",
                          "Score_E", "Score_F", "Score_G", "Score_H"]
