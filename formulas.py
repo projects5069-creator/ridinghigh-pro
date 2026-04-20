@@ -655,7 +655,7 @@ def calculate_score_h(metrics):
     return round(score, 2)
 
 
-def calculate_entry_score(current_price, intra_high, scan_price, vwap_price, now_peru):
+def calculate_entry_score(current_price, intra_high, scan_price, typical_price, now_peru):
     """
     Entry Score 0-100: how good is THIS MOMENT to enter a short.
     Run only on stocks with Score >= 60.
@@ -700,7 +700,7 @@ def calculate_entry_score(current_price, intra_high, scan_price, vwap_price, now
 
     try:
         # VWAPCross: 10pts — current price below VWAP
-        if vwap_price > 0 and current_price < vwap_price:
+        if typical_price > 0 and current_price < typical_price:
             score += 10
     except: pass
 

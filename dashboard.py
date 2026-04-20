@@ -1011,7 +1011,7 @@ def calc_score_v2(row):
         else:           s += max(0, 10 - ((rsi-70)/30)*5)
     except: pass
     try:
-        vwap = float(row.get('VWAP_calc', 0) or 0)
+        vwap = float(row.get('TypicalPriceDist_calc', 0) or 0)
         if vwap > 0: s += min(vwap/8, 1) * 10
     except: pass
     try:

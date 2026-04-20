@@ -143,7 +143,7 @@ def analyze_ticker(ticker, finviz_row):
         shares_outstanding = _shares_cache.get(ticker, 0)
         # Raw variables for metric validation
         open_price = 0; prev_close = 0; atr14_raw = 0
-        high_today = 0; low_today = 0; vwap_price = 0
+        high_today = 0; low_today = 0; typical_price = 0
         week52_high = 0
 
         try:
@@ -192,7 +192,7 @@ def analyze_ticker(ticker, finviz_row):
                 try:
                     high_today = round(float(current['High']), 4)
                     low_today  = round(float(current['Low']), 4)
-                    vwap_price = round((current['High'] + current['Low'] + price) / 3, 4)
+                    typical_price = round((current['High'] + current['Low'] + price) / 3, 4)
                     typical_price_dist = calculate_typical_price_dist(price, current['High'], current['Low'])
                 except: pass
 
@@ -249,7 +249,7 @@ def analyze_ticker(ticker, finviz_row):
                 current_price=price,
                 intra_high=high_today,
                 scan_price=open_price,    # today's open = pump baseline
-                vwap_price=vwap_price,
+                typical_price=typical_price,
                 now_peru=get_peru_time()
             )
 
@@ -295,7 +295,7 @@ def analyze_ticker(ticker, finviz_row):
             'PrevClose':        prev_close,
             'High_today':       high_today,
             'Low_today':        low_today,
-            'VWAP_price':       vwap_price,
+            'TypicalPrice':     typical_price,
             'ATR14_raw':        atr14_raw,
             'Week52High':       round(week52_high, 4),
             'SharesOutstanding':int(shares_outstanding),

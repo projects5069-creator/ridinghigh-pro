@@ -413,7 +413,7 @@ def run(target_date: str = None):
                            ("PrevClose_raw",  "PrevClose"),
                            ("High_today_raw", "High_today"),
                            ("Low_today_raw",  "Low_today"),
-                           ("VWAP_price_raw", "VWAP_price"),
+                           ("TypicalPrice_raw", "TypicalPrice"),
                            ("ATR14_raw",      "ATR14_raw"),
                            ("Week52High_raw", "Week52High")]:
             val = pd.to_numeric(row.get(col, None), errors="coerce")
@@ -451,10 +451,10 @@ def run(target_date: str = None):
                 raw_inputs["ATRX_calc"] = round(calculate_atrx(h, l, atr), 2)
         except: pass
         try:
-            vp = raw_inputs.get("VWAP_price_raw") or 0
+            vp = raw_inputs.get("TypicalPrice_raw") or 0
             if vp > 0 and pr > 0:
-                # Note: uses pre-calculated VWAP_price_raw, different from formulas.calculate_vwap_dist
-                raw_inputs["VWAP_calc"] = round(((pr / vp) - 1) * 100, 2)
+                # Note: uses pre-calculated TypicalPrice_raw, different from formulas.calculate_typical_price_dist
+                raw_inputs["TypicalPriceDist_calc"] = round(((pr / vp) - 1) * 100, 2)
         except: pass
 
         # D0 + fundamental (לא למניות של היום — עוד לא יש נתונים)
