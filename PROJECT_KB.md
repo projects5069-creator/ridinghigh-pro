@@ -415,15 +415,15 @@ Config: `~/RidingHighPro/sheets_config.json`
 
 | קובץ | שורות | תפקיד |
 |------|-------|-------|
-| `auto_scanner.py` | 1,395 | Scanner ראשי: FINVIZ scrape, 9 Score calc, Sheets write |
+| `auto_scanner.py` | 1,395 | Scanner ראשי: FINVIZ scrape, Sheets write. Score functions הועברו ל-formulas.py (commits acbf0ad+0fb1484) |
 | `dashboard.py` | 3,778 | Streamlit app, 9 דפים, 161KB — **רגיש!** |
 | `post_analysis_collector.py` | 539 | EOD collector: D1-D5 OHLC, TP/SL check |
 | `sheets_manager.py` | 354 | Multi-sheet architecture, monthly rotation |
 | `gsheets_sync.py` | - | Load/save post_analysis ל/מ-Sheets |
 | `enrich_post_analysis.py` | - | אינטראדיי enrichment |
 | `backfill_ohlc.py` | - | ממלא D1-D5 חסרים |
-| `config.py` | 32 | **⚠️ משקלים ישנים (v1)!** לא בשימוש בפועל, calculate_score ב-auto_scanner hardcoded |
-| `score_tracker_sync.py` | - | Score every 5 min |
+| `config.py` | 32 | **✅ Source of truth (v2)** — SCORE_WEIGHTS_V2, SCORE_CAPS_V2, SCORE_RSI_PARAMS, REL_VOL_CAP. calculate_score ב-formulas.py קורא משם |
+| `formulas.py` | 675+ | **כל פונקציות החישוב**: metrics + 9 Score variants + calculate_entry_score. Source of truth לחישובים |
 | `health_check.py` | - | System health button |
 
 ### Scripts מה-16/4/2026
