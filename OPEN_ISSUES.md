@@ -1,147 +1,167 @@
 # RidingHigh Pro - Open Issues Log
-*Last updated: 2026-04-17*
+*Last updated: 2026-04-20*
+*Single source of truth for open issues and fix history.*
 
-## ✅ CLOSED (2026-04-17) - תוקנו היום
+---
+
+## ✅ CLOSED — 2026-04-19 Architecture Cleanup Session
 
 ### 🔴 Critical Fixes
-- ✅ **ATRX formula mismatch** - dashboard had (atr/price)*100, auto_scanner had (high-low)/atr
-  - Fixed in: formulas.py calculate_atrx() - now used everywhere
-  - Commit: 4b11686
-  
-- ✅ **Float% measured Turnover, not Float** - dashboard used volume/shares instead of float_shares/shares
-  - Fixed in: formulas.py calculate_float_pct() + added floatShares lookup
-  - Commit: 4b11686
 
-- ✅ **Score v1 still in dashboard** - local runs used old scoring
-  - Fixed: dashboard imports calculate_score from auto_scanner (v2)
-  - Commit: 4b11686
+- ✅ **#2 Min Score threshold hardcoded (60/70/85)** — Commit `6bf67a5`
+  - 9 locations in auto_scanner.py + dashboard.py replaced with config constants
+  - Now reads from: `MIN_SCORE_DISPLAY`, `SCANNER_MIN_SCORE`, `CRITICAL_SCORE`
+  - No behavior change
 
-- ✅ **REL_VOL no cap in dashboard** - could reach 26,000+ from yfinance outliers
-  - Fixed in: formulas.py calculate_rel_vol() with cap=100
-  - Commit: 4b11686
+- ✅ **#4 TP15/TP20 stretch targets hardcoded** — Commit `8657cad`
+  - Added `TP15_THRESHOLD_PCT=15` + `TP20_THRESHOLD_PCT=20` + FRAC variants to config.py
+  - utils.calculate_ohlc_stats + dashboard._simulate_short_trades now read from config
+  - Main TP10/SL7 were already centralized
 
-### 🟠 Code Quality
-- ✅ **calculate_mxv duplicate** - was in 3 places, now centralized
-- ✅ **14 duplicate functions removed** - parse_market_cap, parse_volume, 
-  is_trading_day, is_day_complete, get_trading_days_after, calculate_stats
-  - Fixed: moved to utils.py
-  - Commit: 55adc6e
+- ✅ **#5 DynamicScore location unclear** — Verified, no bug
+  - Confirmed: computed on-the-fly in dashboard page 8 only
+  - Never saved to Sheets, so no stale ATRX risk
+  - Uses current formulas.py at every page load
 
-- ✅ **Hardcoded values scattered** - moved to config.py v2.0
-  - POSITION_SIZE_USD, TP/SL thresholds, SCORE_WEIGHTS_V2
-  - Commit: 55adc6e
+- ✅ **#6 MxV missing *100 multiplier** — Verified on 85K+ rows, no bug
+  - formulas.calculate_mxv line 89 has `*100` included
+  - All 4 sheets (timeline_live, daily_snapshots, score_tracker, post_analysis) show values in percentage range
+  - Cross-check between timeline_live ↔ score_tracker: ratio median = 0.9994 (consistent)
 
----
+- ✅ **#3 score_tracker_sync.py replace + #10 REL_VOL cap** — Commit `afde95e`
+  - File score_tracker_sync.py does not exist (stale reference in code_auditor.py — removed)
+  - Active function is `sync_score_tracker` in auto_scanner.py (works correctly)
+  - REL_VOL_CAP centralized to config.py (was hardcoded in formulas.py)
+  - 2 duplicate `if rel_vol > 100` blocks removed from auto_scanner.py
+  - formulas.calculate_rel_vol already caps via config.REL_VOL_CAP
 
-## 🔴 STILL OPEN - Critical
+### 🟠 Architecture Refactoring
 
-### #1: 3 different SL definitions across dashboard pages
-- Portfolio Tracker (page 3): SL=7%, within 5 days
-- Live Trades (page 4): SL=10%, within 5 days
-- Score Comparison (page 9): SL=7%, ONLY D1 (SL7_Hit_D1)
-- **Impact:** Win rate inconsistency across pages
-- **Effort:** 45 min (strategic decision + implementation)
+- ✅ **#7.1 9 score functions + entry score migrated to formulas.py** — Commit `acbf0ad`
+  - calculate_score, calculate_score_b..i, calculate_entry_score
+  - ~300 lines moved from auto_scanner.py → formulas.py
+  - Verified via baseline JSON: 3 inputs × 9 variants + 3 entry_scores IDENTICAL output
 
-### #2: Min Score threshold different across pages
-- Page 3: >=60 | Page 4: >=70 | Page 9: >=60
-- **Impact:** Inconsistent filtering
-- **Effort:** 15 min
-
-### #3: ~13K broken Score VARIANTS in timeline_live (NOT critical)
-- Investigated 2026-04-17: Score (main) is CLEAN (0 broken rows out of 125K)
-- Only Score_B (7002), Score_I (4475), Score_C (1563) are broken
-- Variants are INFORMATIONAL only - not used for trading decisions
-- All from before today's formulas.py fixes
-- **Impact:** NONE on trading. Ignore variants in analysis.
-- **Decision:** Leave as-is. Use only 'Score' column for analysis.
-
-### ~~#4: live_trades with broken Score_D~~ - CLOSED 2026-04-17
-- Investigated: live_trades has only 14 rows
-- Score column is CLEAN (70-100)
-- No Score_D column exists at all
-- Was confusion - Score_D=19,000 was in timeline_live variants (not trades)
-- **Status:** Nothing to fix
-
-### #5: DynamicScore - unclear if saved anywhere
-- Calculated on-the-fly in dashboard page 8
-- If saved somewhere with old ATRX - needs recalc
-- **Effort:** 15 min (investigation)
+- ✅ **#7.2 calculate_score reads weights from config** — Commit `0fb1484`
+  - SCORE_WEIGHTS_V2 + SCORE_CAPS_V2 + SCORE_RSI_PARAMS now source of truth
+  - Verified: changing weight in config propagates to score (smoke test)
+  - 8 score variants (B-I) intentionally left with hardcoded weights — they are research experiments
 
 ---
 
-## 🟠 STILL OPEN - Important
+## ✅ CLOSED — 2026-04-17 (Previous Session)
 
-### #6: Gap removed from Score v2 despite r=-0.256 (strong correlation)
-- Removed 11/4 (commit f3d96ca) without documented reason
-- **Impact:** Score weaker than possible
-- **Decision needed:** Add back to Score v3?
+- ✅ ATRX formula mismatch dashboard vs auto_scanner — `4b11686`
+- ✅ Float% was measuring Turnover not Float — `4b11686`
+- ✅ Score v1 still in dashboard — `4b11686`
+- ✅ REL_VOL no cap in dashboard (26K+ outliers) — `4b11686`
+- ✅ calculate_mxv duplicate in 3 places → centralized — `55adc6e`
+- ✅ 14 duplicate utility functions → utils.py — `55adc6e`
+- ✅ Hardcoded values scattered → config.py v2.0 — `55adc6e`
 
-### #7: 124 rows in post_analysis - run again with new formulas?
-- After formulas.py fixes, some calculated values may differ
-- **Effort:** 20 min recalc
+---
 
-### #8: Section 5 on page 9 is biased
-- Score tends to high values, "wins" without normalization
-- **Effort:** 25 min
+## 🔴 STILL OPEN
 
-### #9: yfinance data reliability
-- 3 BROKEN rows, 21 NO_DATA
-- **Alternatives:** Polygon.io (\$29/mo), FMP (\$14/mo)
+### 🟠 High Priority
+
+#### #15: DataLogger vs LiveTracker consistency
+- **Description:** Inconsistency between DataLogger and LiveTracker components — different data showing on different pages
+- **Status:** Not yet investigated
+- **Impact:** Different numbers for the same metric across pages
+- **Effort:** 1-2 hours investigation + fix
+
+### 🟡 Medium Priority
+
+#### #8: Hardcoded cutoff date 2026-04-10 in page 7
+- **Location:** dashboard.py (Portfolio Score Tracker)
+- **Value:** `DATA_CUTOFF_DATE = "2026-04-10"` in config.py
+- **Impact:** From May 1st, page will show partial/wrong data
+- **Effort:** 15 min — make dynamic (e.g., "last 60 days")
+
+#### #9: Gap removed from Score v2 despite r=-0.256 correlation
+- **Removed:** 2026-04-11 commit f3d96ca, without documented reason
+- **Impact:** Score weaker than possible — strong signal lost
+- **Decision needed:** Add Gap back to Score as v3?
+- **Effort:** 30 min implementation + backtest
+
+#### #11: VWAP column name is actually Typical Price (H+L+C)/3
+- **Location:** formulas.calculate_vwap_dist + Sheets column
+- **Misleading:** Not real volume-weighted VWAP
+- **Impact:** Analytical confusion, not functional
+- **Effort:** 20 min rename + column migration
+
+#### #17: post_analysis 124 rows — recalc with new formulas
+- **After #7.2 refactor, some calculated values may differ**
+- **Effort:** 20 min recalc script
+
+#### #18: Section 5 page 9 biased
+- **Description:** Score tends to high values, "wins" without normalization
+- **Effort:** 25 min investigation + fix
+
+#### #19: yfinance data reliability
+- **Current:** 3 BROKEN rows, 21 NO_DATA in post_analysis
+- **Alternatives:** Polygon.io ($29/mo), FMP ($14/mo)
 - **Decision needed:** switch providers?
 
----
+### 🟢 Low Priority
 
-## 🟡 STILL OPEN - Medium
+#### #12: backfill_weeks13_14.py — one-time script still in project
+- **Action:** Move to archive folder
+- **Effort:** 2 min
 
-### #10: Hardcoded cutoff 2026-04-10 in page 7
-- dashboard.py:2854
-- **Effort:** 10 min (move to config.py)
+#### #13: 4 old scripts to archive
+- fix_atrx.py, recalculate_scores_v2.py, quick_audit.py, backfill_raw_fields_v1.py
+- **Effort:** 5 min
 
-### #11: VWAP is actually Typical Price (H+L+C)/3
-- Misleading name, not real volume-weighted VWAP
-- **Effort:** 15 min rename
-
-### #12: Score_v2 duplicate in page 8
-- After recalc, Score and Score_v2 are identical
+#### #14: VWAP inline redundancy
+- **Duplicate computation — formulas.py + inline**
 - **Effort:** 10 min cleanup
 
----
+#### #16: Score_v2 duplicate in page 8
+- **After recalc, Score and Score_v2 are identical**
+- **Effort:** 10 min cleanup
 
-## 🟢 STILL OPEN - Low
+#### #20: ~13K broken Score variants in timeline_live
+- **Only affects Score_B, Score_I, Score_C variants (informational)**
+- **Impact:** NONE on trading. Main `Score` column clean.
+- **Decision:** Leave as-is
 
-### #13: Update documentation
-- PROJECT_DOCUMENTATION.md marked OUTDATED - needs rewrite
+#### #21: Documentation outdated
+- PROJECT_DOCUMENTATION.md marked OUTDATED
 - CONVERSATION_SUMMARY.md marked OUTDATED
+- PROJECT_KB.md still mentions Score v1 in places
 
-### #14: Cleanup backup files  
-- 12 *_BEFORE_*.py files in project dir
-- Should move to גיבוי זמני/
+#### #22: 12 backup *_BEFORE_*.py files in project root (historical)
+- **May have been resolved 2026-04-19 — verify clean**
 
-### #15: config.py v1 legacy weights
-- Kept for reference - eventually can remove
+### ⏸️ DEFERRED
+
+#### #1: 3 different SL definitions across dashboard pages
+- **Portfolio Tracker:** SL=7% within 5 days
+- **Live Trades:** SL=7% intraday (but display text says 10%)
+- **Score Comparison:** SL=7% D1 only (SL7_Hit_D1)
+- **Status:** DEFERRED — user will rebuild pages from scratch
+- **Actual finding from 2026-04-19:** All pages use 7% from config. Difference is in TIME WINDOW, not in value.
+  Text "SL 10%" in live_trades_page caption (dashboard.py line 3002) is incorrect display text.
 
 ---
 
+## 📊 Stats
 
-## 📊 Observed Stats (2026-04-17)
-
-### Live Trades Performance (14 trades total)
-- TP10 Wins: 2 (14.3%)
-- SL Hits: 12 (85.7%)
-- Open: 0
-- **Note:** Small sample. This is simulated data. Real confirmation
-  of system requires more trades + post_analysis 124-row data (r=-0.336).
-
-## 📅 Daily Maintenance
-
-### Daily Audit (when email setup complete)
-- 06:00 Peru: daily_audit.py pre-market check
-- 19:00 Peru: daily_audit.py post-market check (after post_analysis)
+- **Total issues tracked:** 22
+- **Closed:** 8 (36%) — 7 new in 2026-04-19 + 1 previously
+- **Open critical:** 0 🎉
+- **Open high:** 1 (#15)
+- **Open medium:** 6
+- **Open low:** 7
+- **Deferred:** 1
 
 ---
 
 ## Legend
-- 🔴 Critical - affects data accuracy or trading decisions
-- 🟠 Important - system works but suboptimal
-- 🟡 Medium - nice to fix
-- 🟢 Low - cosmetic/documentation
+- 🔴 Critical — affects data accuracy or trading decisions
+- 🟠 Important — system works but suboptimal
+- 🟡 Medium — nice to fix
+- 🟢 Low — cosmetic/documentation
+- ⏸️ Deferred — intentionally postponed
