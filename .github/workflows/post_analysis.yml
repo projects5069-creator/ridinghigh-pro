@@ -2,7 +2,7 @@ name: Post Analysis Collector
 
 on:
   schedule:
-    - cron: '0 21 * * 1-5'   # 16:00 Peru (UTC-5), Mon-Fri
+    - cron: '5 21 * * 1-5'   # 16:05 Peru (UTC-5), Mon-Fri — offset from hour boundary to avoid GH Actions cron drift
   workflow_dispatch:
 
 jobs:
