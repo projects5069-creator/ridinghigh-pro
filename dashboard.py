@@ -51,7 +51,6 @@ from config import (
     TP_THRESHOLD_FRAC,
     SL_THRESHOLD_FRAC,
     TP15_THRESHOLD_FRAC,
-    DATA_CUTOFF_DATE,
 )
 
 st.set_page_config(
