@@ -2,9 +2,9 @@ name: Daily Backup — post_analysis
 
 on:
   schedule:
-    - cron: '0 13-21 * * 1-5'  # every hour 08:00-16:00 Peru (13:00-21:00 UTC), Mon-Fri
-    - cron: '0 20 * * 1-5'     # 15:00 Peru EOD snapshot (20:00 UTC)
-    - cron: '30 21 * * 1-5'    # 16:30 Peru after collector (21:30 UTC)
+    - cron: '7 13-21 * * 1-5'   # Offset from :00 to :07 to avoid GH Actions hour-boundary drift
+    - cron: '7 20 * * 1-5'      # Offset from :00 to :07
+    - cron: '30 21 * * 1-5'     # Already offset, kept as-is
   workflow_dispatch:
 
 jobs:

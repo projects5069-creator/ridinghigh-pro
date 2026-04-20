@@ -2,8 +2,7 @@ name: Prepare Next Month
 
 on:
   schedule:
-    # 1 בכל חודש, 00:02 Peru = 05:02 UTC
-    - cron: '2 5 1 * *'
+    - cron: '5 5 1 * *'   # 05:05 UTC (00:05 Peru), runs AFTER monthly_rotation at 05:01
   workflow_dispatch:  # אפשר להריץ ידנית לבדיקות
 
 jobs:

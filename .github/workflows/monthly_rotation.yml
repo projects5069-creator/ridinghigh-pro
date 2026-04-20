@@ -2,7 +2,7 @@ name: Monthly Rotation
 
 on:
   schedule:
-    - cron: '0 5 1 * *'  # 1st of each month at 00:00 Peru (UTC-5)
+    - cron: '1 5 1 * *'   # 05:01 UTC (00:01 Peru), runs BEFORE prepare_next_month at 05:05
   workflow_dispatch:
 
 jobs:
