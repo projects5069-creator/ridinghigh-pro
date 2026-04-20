@@ -2759,8 +2759,6 @@ def score_tracker_page():
         if not sd or not tk:
             continue
         try:
-            if sd < DATA_CUTOFF_DATE:   # תיעוד score_tracker רק מ-DATA_CUTOFF_DATE
-                continue
             window      = _trading_days_after(sd, 3)   # [D1, D2, D3]
             trading_seq = [sd] + window                 # [D0, D1, D2, D3]
             d3          = trading_seq[-1]
