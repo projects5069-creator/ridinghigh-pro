@@ -15,7 +15,7 @@ from finvizfinance.screener.overview import Overview
 from datetime import datetime, time as dt_time, timedelta
 import pytz
 import pytz
-from data_logger import DataLogger
+
 import yfinance as yf
 from ta.momentum import RSIIndicator
 from ta.volatility import AverageTrueRange
@@ -83,10 +83,38 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
+def get_historical_market_cap_from_sheets(ticker):
+    """Fallback for when FINVIZ returns 0 MarketCap — fetch last known value from daily_snapshots."""
+    try:
+        gc = sheets_manager._get_gc()
+        if gc is None:
+            return 0
+        ws = sheets_manager.get_worksheet("daily_snapshots", gc=gc)
+        if ws is None:
+            return 0
+        vals = ws.get_all_values()
+        if len(vals) < 2:
+            return 0
+        header = vals[0]
+        if "Ticker" not in header or "MarketCap" not in header:
+            return 0
+        ticker_idx = header.index("Ticker")
+        mc_idx     = header.index("MarketCap")
+        for row in reversed(vals[1:]):
+            if len(row) > max(ticker_idx, mc_idx) and row[ticker_idx] == ticker:
+                try:
+                    mc = int(float(row[mc_idx]))
+                    if mc > 0:
+                        return mc
+                except (ValueError, TypeError):
+                    continue
+        return 0
+    except Exception:
+        return 0
+
 class Dashboard:
-    
+
     def __init__(self):
-        self.logger = DataLogger()
         self.today = datetime.now().strftime('%Y-%m-%d')
         self.finviz_df = None
         
@@ -126,39 +154,6 @@ class Dashboard:
             return True
         except:
             return False
-    
-    def get_from_history_all_days(self, ticker, field):
-        try:
-            dates = self.logger.get_all_dates()
-            
-            if not dates:
-                return None
-            
-            for date in dates:
-                try:
-                    df = self.logger.load_date(date)
-                    
-                    if df is None or df.empty:
-                        continue
-                    
-                    if 'Ticker' not in df.columns:
-                        continue
-                    
-                    matching_rows = df[df['Ticker'] == ticker]
-                    
-                    if matching_rows.empty:
-                        continue
-                    
-                    row = matching_rows.iloc[-1]
-                    
-                    if field in row and pd.notna(row[field]) and row[field] != 0:
-                        return row[field]
-                except:
-                    continue
-            
-            return None
-        except:
-            return None
     
     def fetch_finviz_data(self):
         try:
@@ -225,7 +220,7 @@ class Dashboard:
             pass
         
         try:
-            hist_mc = self.get_from_history_all_days(ticker, 'MarketCap')
+            hist_mc = get_historical_market_cap_from_sheets(ticker)
             if hist_mc and hist_mc > 0:
                 market_cap = int(hist_mc)
                 self.market_cap_cache[ticker] = market_cap
@@ -641,290 +636,6 @@ class Dashboard:
         
         return sorted(results, key=lambda x: x['Score'], reverse=True)
     
-class LiveTracker:
-    
-    def __init__(self):
-        self.tracker_dir = os.path.expanduser("~/RidingHighPro/data/live_tracker")
-        self.archive_dir = os.path.expanduser("~/RidingHighPro/data/timeline_archive")
-        self.snapshot_dir = os.path.expanduser("~/RidingHighPro/data/daily_snapshots")
-        
-        os.makedirs(self.tracker_dir, exist_ok=True)
-        os.makedirs(self.archive_dir, exist_ok=True)
-        os.makedirs(self.snapshot_dir, exist_ok=True)
-        
-        self.today_file = os.path.join(
-            self.tracker_dir,
-            f"tracker_{datetime.now().strftime('%Y-%m-%d')}.csv"
-        )
-    
-    def get_tracked_tickers(self):
-        if not os.path.exists(self.today_file):
-            return set()
-        
-        try:
-            df = pd.read_csv(self.today_file, index_col=0)
-            return set(df.index.tolist())
-        except:
-            return set()
-    
-    def add_minute_data(self, results, scan_time):
-        if not results:
-            return 0
-        
-        filtered = []
-        for r in results:
-            try:
-                score = float(r['Score'])
-                if not pd.isna(score):
-                    filtered.append(r)
-            except:
-                continue
-        
-        if not filtered:
-            return 0
-        
-        current_time = scan_time.strftime('%H:%M')
-        
-        if os.path.exists(self.today_file):
-            try:
-                df = pd.read_csv(self.today_file, index_col=0)
-                if df.index.name == 'index':
-                    df.index.name = 'Ticker'
-            except:
-                df = pd.DataFrame()
-                df.index.name = 'Ticker'
-        else:
-            df = pd.DataFrame()
-            df.index.name = 'Ticker'
-        
-        for r in filtered:
-            ticker = r['Ticker']
-            score = round(r['Score'], 2)
-            df.loc[ticker, current_time] = score
-        
-        df.to_csv(self.today_file)
-        
-        return len(filtered)
-    
-    def save_daily_snapshot(self, results):
-        if not results:
-            return False
-        
-        try:
-            today = datetime.now().strftime('%Y-%m-%d')
-            snapshot_file = os.path.join(self.snapshot_dir, f"snapshot_{today}.csv")
-            
-            df = pd.DataFrame(results)
-            df.to_csv(snapshot_file, index=False)
-            save_snapshot_to_sheets(df)
-            
-            return True
-        except:
-            return False
-    
-    def get_today_grid(self):
-        if not os.path.exists(self.today_file):
-            return None
-        
-        try:
-            df = pd.read_csv(self.today_file, index_col=0)
-            
-            if df.empty:
-                return None
-            
-            if df.index.name == 'index':
-                df.index.name = 'Ticker'
-            
-            columns = sorted(df.columns, reverse=True)
-            df = df[columns]
-            
-            df = df.round(2)
-            
-            return df
-        except Exception as e:
-            return None
-    
-    def archive_today(self):
-        if not os.path.exists(self.today_file):
-            return False
-        
-        try:
-            today = datetime.now().strftime('%Y-%m-%d')
-            archive_file = os.path.join(self.archive_dir, f"timeline_{today}.csv")
-            
-            shutil.copy2(self.today_file, archive_file)
-            archive_df = pd.read_csv(self.today_file, index_col=0)
-            save_timeline_to_sheets(archive_df, today)
-            return True
-        except:
-            return False
-    
-    def get_archive_dates(self):
-        try:
-            files = os.listdir(self.archive_dir)
-            dates = []
-            
-            for f in files:
-                if f.startswith('timeline_') and f.endswith('.csv'):
-                    date_str = f.replace('timeline_', '').replace('.csv', '')
-                    dates.append(date_str)
-            
-            return sorted(dates, reverse=True)
-        except:
-            return []
-    
-    def load_archive(self, date):
-        try:
-            archive_file = os.path.join(self.archive_dir, f"timeline_{date}.csv")
-            
-            if not os.path.exists(archive_file):
-                return None
-            
-            df = pd.read_csv(archive_file, index_col=0)
-            
-            if df.empty:
-                return None
-            
-            if df.index.name == 'index':
-                df.index.name = 'Ticker'
-            
-            columns = sorted(df.columns, reverse=True)
-            df = df[columns]
-            
-            df = df.round(2)
-            
-            return df
-        except:
-            return None
-
-class PortfolioTracker:
-    
-    def __init__(self):
-        self.portfolio_dir = os.path.expanduser("~/RidingHighPro/data/portfolio")
-        os.makedirs(self.portfolio_dir, exist_ok=True)
-        
-        self.portfolio_file = os.path.join(self.portfolio_dir, "portfolio.csv")
-    
-    def add_positions(self, results, date):
-        if not results:
-            return 0
-        
-        high_score_stocks = [r for r in results if r['Score'] >= MIN_SCORE_DISPLAY]
-        
-        if not high_score_stocks:
-            return 0
-        
-        if os.path.exists(self.portfolio_file):
-            try:
-                existing_df = pd.read_csv(self.portfolio_file)
-            except:
-                existing_df = pd.DataFrame()
-        else:
-            existing_df = pd.DataFrame()
-        
-        if is_cloud():
-            try:
-                from gsheets_sync import load_portfolio_from_sheets
-                sheets_df = load_portfolio_from_sheets()
-                if sheets_df is not None and not sheets_df.empty:
-                    existing_df = sheets_df
-            except:
-                pass
-        
-        new_positions = []
-        for stock in high_score_stocks:
-            position_key = f"{stock['Ticker']}_{date}"
-            
-            if not existing_df.empty and position_key in existing_df['PositionKey'].values:
-                continue
-            
-            new_positions.append({
-                'PositionKey': position_key,
-                'Date': date,
-                'Ticker': stock['Ticker'],
-                'Score': round(stock['Score'], 2),
-                'BuyPrice': round(stock['Price'], 2),
-                'Status': 'Open'
-            })
-        
-        if new_positions:
-            new_df = pd.DataFrame(new_positions)
-            combined_df = pd.concat([existing_df, new_df], ignore_index=True)
-            combined_df.to_csv(self.portfolio_file, index=False)
-            save_portfolio_to_sheets(combined_df)
-            return len(new_positions)
-        
-        return 0
-    
-    def get_portfolio_with_current_prices(self):
-        if not os.path.exists(self.portfolio_file):
-            return None
-        
-        try:
-            df = pd.read_csv(self.portfolio_file)
-            
-            if df.empty:
-                return None
-            
-            df['CurrentPrice'] = 0.0
-            df['Change%'] = 0.0
-            df['P/L'] = 0.0
-            
-            for idx, row in df.iterrows():
-                ticker = row['Ticker']
-                buy_price = row['BuyPrice']
-                
-                try:
-                    stock = yf.Ticker(ticker)
-                    hist = stock.history(period='1d')
-                    
-                    if not hist.empty:
-                        current_price = hist.iloc[-1]['Close']
-                        df.at[idx, 'CurrentPrice'] = round(current_price, 2)
-                        
-                        change_pct = ((current_price - buy_price) / buy_price) * 100
-                        df.at[idx, 'Change%'] = round(change_pct, 2)
-                        
-                        pl = current_price - buy_price
-                        df.at[idx, 'P/L'] = round(pl, 2)
-                except:
-                    df.at[idx, 'CurrentPrice'] = buy_price
-                    df.at[idx, 'Change%'] = 0.0
-                    df.at[idx, 'P/L'] = 0.0
-                
-                time.sleep(0.1)
-            
-            df = df.sort_values(by='Date', ascending=False)
-            
-            return df
-        except:
-            return None
-    
-    def close_position(self, position_key):
-        if not os.path.exists(self.portfolio_file):
-            return False
-        
-        try:
-            df = pd.read_csv(self.portfolio_file)
-            df.loc[df['PositionKey'] == position_key, 'Status'] = 'Closed'
-            df.to_csv(self.portfolio_file, index=False)
-            return True
-        except:
-            return False
-    
-    def delete_position(self, position_key):
-        if not os.path.exists(self.portfolio_file):
-            return False
-        
-        try:
-            df = pd.read_csv(self.portfolio_file)
-            df = df[df['PositionKey'] != position_key]
-            df.to_csv(self.portfolio_file, index=False)
-            return True
-        except:
-            return False
-
-
 def is_cloud():
     try:
         import streamlit as st
@@ -1265,50 +976,13 @@ def main_page():
         st.session_state.force_scan = False
     if 'preload_done' not in st.session_state:
         st.session_state.preload_done = False
-    if 'snapshot_done_today' not in st.session_state:
-        st.session_state.snapshot_done_today = False
-    if 'portfolio_saved_today' not in st.session_state:
-        st.session_state.portfolio_saved_today = False
-    
     st.sidebar.header("⚙️ Settings")
-    
+
     auto_scan = st.sidebar.checkbox("🔄 Auto-Scan (every minute)", value=is_market_hours())
-    
+
     if st.sidebar.button("🔄 Scan Now", type="primary"):
         st.session_state.force_scan = True
-    
-    if st.sidebar.button("🗑️ Clear Local Cache", help="מוחק קובץ cache מקומי בלבד — נתוני Sheets לא נפגעים"):
-        tracker = LiveTracker()
-        if os.path.exists(tracker.today_file):
-            os.remove(tracker.today_file)
-            st.sidebar.success("✅ Cleared local cache!")
-            st.rerun()
-    
-    if check_snapshot_time() and not st.session_state.snapshot_done_today:
-        tracker = LiveTracker()
-        portfolio = PortfolioTracker()
-        
-        if st.session_state.results:
-            if tracker.save_daily_snapshot(st.session_state.results):
-                st.sidebar.success("📸 Daily snapshot saved!")
-            
-            if not st.session_state.portfolio_saved_today:
-                today = datetime.now().strftime('%Y-%m-%d')
-                added = portfolio.add_positions(st.session_state.results, today)
-                if added > 0:
-                    st.sidebar.success(f"💼 Added {added} stocks to portfolio!")
-                    st.session_state.portfolio_saved_today = True
-        
-        if tracker.archive_today():
-            st.sidebar.success("📦 Timeline archived!")
-        
-        st.session_state.snapshot_done_today = True
-    
-    now = datetime.now()
-    if now.hour == 0 and now.minute < 5:
-        st.session_state.snapshot_done_today = False
-        st.session_state.portfolio_saved_today = False
-    
+
     should_scan = False
 
     if is_cloud():
@@ -1378,34 +1052,25 @@ def main_page():
                 progress_placeholder.info(f"🔍 Loading {ticker} ({current}/{total})")
             
             with st.spinner("🔍 Scanning..."):
-                tracker = LiveTracker()
-                
-                tracked_tickers = tracker.get_tracked_tickers()
-                
                 skip_preload = st.session_state.preload_done
-                
+
                 results = st.session_state.dashboard.scan(
-                    tracked_tickers=tracked_tickers,
+                    tracked_tickers=None,
                     progress_callback=show_progress if not skip_preload else None,
                     skip_preload=skip_preload
                 )
-                
+
                 st.session_state.results = results
                 st.session_state.last_scan = scan_start_time
                 st.session_state.preload_done = True
-                
+
                 progress_placeholder.empty()
-                
+
                 if results:
-                    logger = DataLogger()
-                    logger.save_daily_snapshot(results)
-                    
-                    added_count = tracker.add_minute_data(results, scan_start_time)
-                    
                     st.success(f"✅ {len(results)} stocks tracked!")
                 else:
                     st.warning("⚠️ No stocks")
-                
+
                 time.sleep(1)
         st.rerun()
     
@@ -1503,12 +1168,8 @@ def main_page():
     st.markdown("---")
     st.subheader("⏱️ TABLE 2: Timeline Grid")
     
-    if is_cloud():
-        df_timeline = load_timeline_today_from_sheets()
-    else:
-        tracker = LiveTracker()
-        df_timeline = tracker.get_today_grid()
-    
+    df_timeline = load_timeline_today_from_sheets()
+
     if df_timeline is None or df_timeline.empty:
         st.info("📊 No timeline data yet")
     else:
@@ -1562,18 +1223,13 @@ def daily_summary_page():
     st.title("📅 DAILY SUMMARY")
     system_health_bar()
 
-    if is_cloud():
-        all_df = _cached_daily_summary()
-        if all_df.empty:
-            # fallback: daily_snapshots has full-column 14:59 snapshot data
-            all_df = _cached_daily_snapshots()
-        if all_df.empty:
-            st.warning("⚠️ No data yet - will be populated at 14:59")
-            return
-        dates = sorted(all_df["Date"].unique().tolist(), reverse=True)
-    else:
-        logger = DataLogger()
-        dates = logger.get_all_dates()
+    all_df = _cached_daily_summary()
+    if all_df.empty:
+        all_df = _cached_daily_snapshots()
+    if all_df.empty:
+        st.warning("⚠️ No data yet - will be populated at 14:59")
+        return
+    dates = sorted(all_df["Date"].unique().tolist(), reverse=True)
 
     if not dates:
         st.warning("⚠️ No data")
@@ -1581,10 +1237,7 @@ def daily_summary_page():
 
     selected_date = st.selectbox("📆 Date", dates, index=0)
 
-    if is_cloud():
-        df = all_df[all_df["Date"] == selected_date].drop(columns=["Date"], errors="ignore")
-    else:
-        df = logger.load_date(selected_date)
+    df = all_df[all_df["Date"] == selected_date].drop(columns=["Date"], errors="ignore")
     
     if df is None or df.empty:
         st.error("❌ No data")
@@ -1645,19 +1298,15 @@ def timeline_archive_page():
     st.caption("Score timeline per scan — pivoted by ScanTime (from timeline_live)")
     system_health_bar()
 
-    if is_cloud():
-        try:
-            all_df = _cached_timeline_live()
-            if all_df.empty:
-                st.warning("⚠️ No timeline data yet")
-                return
-            dates = sorted(all_df["Date"].unique().tolist(), reverse=True)
-        except Exception as e:
-            st.error(f"Error: {e}")
+    try:
+        all_df = _cached_timeline_live()
+        if all_df.empty:
+            st.warning("⚠️ No timeline data yet")
             return
-    else:
-        tracker = LiveTracker()
-        dates = tracker.get_archive_dates()
+        dates = sorted(all_df["Date"].unique().tolist(), reverse=True)
+    except Exception as e:
+        st.error(f"Error: {e}")
+        return
 
     if not dates:
         st.warning("⚠️ No timeline data yet")
@@ -1665,17 +1314,14 @@ def timeline_archive_page():
 
     selected_date = st.selectbox("📆 Select Date", dates, index=0)
 
-    if is_cloud():
-        day_df = all_df[all_df["Date"] == selected_date].drop(columns=["Date"], errors="ignore")
-        day_df["Score"] = pd.to_numeric(day_df.get("Score", 0), errors="coerce")
-        if "ScanTime" in day_df.columns:
-            df = day_df.pivot_table(index="Ticker", columns="ScanTime", values="Score", aggfunc="last")
-            df = df[sorted(df.columns, reverse=True)].round(2)
-        else:
-            numeric_cols = day_df.select_dtypes(include="number").columns
-            df = day_df.set_index("Ticker")[numeric_cols].round(2) if "Ticker" in day_df.columns else day_df.round(2)
+    day_df = all_df[all_df["Date"] == selected_date].drop(columns=["Date"], errors="ignore")
+    day_df["Score"] = pd.to_numeric(day_df.get("Score", 0), errors="coerce")
+    if "ScanTime" in day_df.columns:
+        df = day_df.pivot_table(index="Ticker", columns="ScanTime", values="Score", aggfunc="last")
+        df = df[sorted(df.columns, reverse=True)].round(2)
     else:
-        df = tracker.load_archive(selected_date)
+        numeric_cols = day_df.select_dtypes(include="number").columns
+        df = day_df.set_index("Ticker")[numeric_cols].round(2) if "Ticker" in day_df.columns else day_df.round(2)
     
     if df is None or df.empty:
         st.error("❌ No data for this date")
