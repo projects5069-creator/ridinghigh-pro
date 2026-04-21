@@ -43,7 +43,9 @@ SHEET_NAMES = [
 ]
 
 # timeline_live is slimmed to exactly these columns
-TIMELINE_LIVE_COLS = ["Date", "ScanTime", "Ticker", "Price", "Score", "Score_I", "Score_B", "Score_C", "Score_D", "Score_E", "Score_F", "Score_G", "Score_H", "EntryScore", "MxV", "RunUp", "REL_VOL"]
+TIMELINE_LIVE_COLS = ["Date", "ScanTime", "Ticker", "Price", "Score", "Score_I", "Score_B", "Score_C",
+ "Score_D", "Score_E", "Score_F", "Score_G", "Score_H", "EntryScore", "MxV", "RunUp", "REL_VOL",
+ "Change", "RSI", "ATRX", "Gap", "TypicalPriceDist", "PriceToHigh", "PriceTo52WHigh", "Float%"]
 
 SCOPES = [
     "https://spreadsheets.google.com/feeds",
