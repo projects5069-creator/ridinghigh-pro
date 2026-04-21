@@ -466,3 +466,71 @@ if __name__ == "__main__":
     print("\n" + "=" * 60)
     print("All utils loaded successfully ✅")
     print("=" * 60)
+
+
+# ============================================================
+# Issue #19: Data validation + yfinance retry logic
+# ============================================================
+
+def validate_stock_data(price, week52high, atr14, high_today=None, low_today=None,
+                       open_price=None, avg_volume=None):
+    """
+    Validate stock data for common yfinance issues.
+    Returns: "CLEAN" | "SUSPICIOUS" | "BROKEN" | "PRE_SPLIT" | "NO_DATA"
+    """
+    try:
+        if price is None or price == 0:
+            return "NO_DATA"
+
+        price = float(price)
+
+        # BROKEN — physical impossibilities
+        if high_today is not None and low_today is not None:
+            if float(high_today) < float(low_today):
+                return "BROKEN"
+        if price > 10000:
+            return "BROKEN"
+        if avg_volume is not None and float(avg_volume) < 0:
+            return "BROKEN"
+
+        # PRE_SPLIT — Week52High absurdly high vs current price
+        if week52high is not None and float(week52high) > 0:
+            if float(week52high) > price * 50:
+                return "PRE_SPLIT"
+
+        # PRE_SPLIT — ATR14 absurdly high vs current price
+        if atr14 is not None and float(atr14) > 0:
+            if float(atr14) > price * 3:
+                return "PRE_SPLIT"
+
+        # SUSPICIOUS — legitimate but extreme volatility
+        if open_price is not None and high_today is not None:
+            op = float(open_price)
+            hi = float(high_today)
+            if op > 0 and hi > op * 2:
+                return "SUSPICIOUS"
+
+        return "CLEAN"
+    except (TypeError, ValueError):
+        return "BROKEN"
+
+
+def yf_fetch_with_retry(ticker, period="1d", interval="1d", max_retries=3, backoff=1.0):
+    """
+    Fetch yfinance data with retry logic for transient failures.
+    Returns: DataFrame (possibly empty) or None if all retries failed.
+    """
+    import yfinance as yf
+    import time as _time
+
+    for attempt in range(max_retries):
+        try:
+            stock = yf.Ticker(ticker)
+            hist = stock.history(period=period, interval=interval)
+            if hist is not None and not hist.empty:
+                return hist
+        except Exception:
+            pass
+        if attempt < max_retries - 1:
+            _time.sleep(backoff * (2 ** attempt))
+    return None

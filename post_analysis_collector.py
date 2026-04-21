@@ -42,6 +42,7 @@ from utils import (
     is_day_complete,
     get_trading_days_after,
     calculate_stats,
+    validate_stock_data,
     PERU_TZ,
 )
 from config import MIN_SCORE_DISPLAY
@@ -519,6 +520,17 @@ def run(target_date: str = None):
         else:
             catalyst_data = {f"cat_{cat}": 0 for cat in CATALYST_CATEGORIES}
 
+        # Issue #19: validate data quality before writing
+        audit_flag = validate_stock_data(
+            price=scan_price,
+            week52high=raw_inputs.get("Week52High_raw"),
+            atr14=raw_inputs.get("ATR14_raw"),
+            high_today=raw_inputs.get("High_today_raw"),
+            low_today=raw_inputs.get("Low_today_raw"),
+            open_price=raw_inputs.get("Open_price_raw"),
+            avg_volume=raw_inputs.get("AvgVolume_raw"),
+        )
+
         new_row = {
             "Ticker":      ticker,
             "ScanDate":    scan_date,
@@ -532,6 +544,7 @@ def run(target_date: str = None):
             **{k: round(v, 2) if isinstance(v, float) else v for k, v in stats.items()},
             **d0_fund,
             **tl_stats,
+            "audit_flag": audit_flag,
         }
         new_rows.append(new_row)
         time.sleep(0.3)
