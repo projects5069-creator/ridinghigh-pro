@@ -3089,12 +3089,16 @@ def score_comparison_page():
 
     # ── Section 4: Who was most right ─────────────────────────────────────────
     st.subheader("🏆 סקשן 4 — מי היה הכי צודק על כל מניה")
-    st.caption("לכל מניה עם TP10_Hit ידוע — איזה ציון נתן לה את הציון הגבוה ביותר?")
+    st.caption("השוואה מנורמלת — אחוזון של כל score ביחס להתפלגות שלו (לא ערך מוחלט)")
 
     avail_scores = [c for c in SCORE_COLS if c in has_outcome.columns]
     if avail_scores:
         tmp = has_outcome[avail_scores + ["TP10_Hit"]].copy().dropna(subset=avail_scores, how="all")
-        tmp["_highest_score"] = tmp[avail_scores].idxmax(axis=1)
+        # Normalize each score to its own percentile rank (0-1 range).
+        # This prevents scores with systematically higher absolute values
+        # from "winning" simply due to scale differences.
+        tmp_ranked = tmp[avail_scores].rank(pct=True)
+        tmp["_highest_score"] = tmp_ranked.idxmax(axis=1)
 
         winners_sc = tmp[tmp["TP10_Hit"] == 1]["_highest_score"].value_counts().rename("Wins (TP10=1)")
         losers_sc  = tmp[tmp["TP10_Hit"] == 0]["_highest_score"].value_counts().rename("Losses (TP10=0)")
