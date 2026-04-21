@@ -29,8 +29,13 @@ from formulas import (
     calculate_runup,
     calculate_atrx,
     calculate_gap,
-    calculate_vwap_dist,
+    calculate_typical_price_dist,
     calculate_rel_vol,
+    calculate_score,
+    calculate_score_b, calculate_score_c, calculate_score_d,
+    calculate_score_e, calculate_score_f, calculate_score_g,
+    calculate_score_h, calculate_score_i,
+    calculate_entry_score,
 )
 from utils import (
     is_trading_day,
@@ -250,17 +255,52 @@ def fetch_timeline_stats(ticker: str, scan_date: str, tl_df: pd.DataFrame) -> di
         result["ScoreMax"]     = round(day["Score"].max(), 2)
         result["ScoreMin"]     = round(day["Score"].min(), 2)
         result["ScoreStd"]     = round(day["Score"].std(), 2)
-        # Score_B-I and EntryScore from the peak-score row
+        # Build metrics dict from peak row and compute scores fresh using formulas.py
+        # (replaces the old copy-from-peak-row logic; ensures scores match current formulas)
         peak_row = day.loc[day["Score"].idxmax()]
-        for st in SCORE_SUBTYPES:
-            if st in peak_row.index:
-                val = pd.to_numeric(peak_row[st], errors="coerce")
-                if pd.notna(val):
-                    result[st] = round(float(val), 2)
-        if "EntryScore" in peak_row.index:
-            es = pd.to_numeric(peak_row["EntryScore"], errors="coerce")
-            if pd.notna(es) and es > 0:
+
+        def _safe(field, default=0.0):
+            if field not in peak_row.index:
+                return default
+            v = pd.to_numeric(peak_row[field], errors="coerce")
+            return default if pd.isna(v) else float(v)
+
+        peak_metrics = {
+            "mxv":                _safe("MxV"),
+            "run_up":             _safe("RunUp"),
+            "atrx":               _safe("ATRX"),
+            "rsi":                _safe("RSI"),
+            "rel_vol":            _safe("REL_VOL"),
+            "gap":                _safe("Gap"),
+            "typical_price_dist": _safe("TypicalPriceDist"),
+            "change":             _safe("Change"),
+            "float_pct":          _safe("Float%"),
+            "price_to_high":      _safe("PriceToHigh"),
+            "price_to_52w_high":  _safe("PriceTo52WHigh"),
+        }
+
+        # Compute all 9 scores fresh from the peak row's metrics
+        result["Score_B"] = round(calculate_score_b(peak_metrics), 2)
+        result["Score_C"] = round(calculate_score_c(peak_metrics), 2)
+        result["Score_D"] = round(calculate_score_d(peak_metrics), 2)
+        result["Score_E"] = round(calculate_score_e(peak_metrics), 2)
+        result["Score_F"] = round(calculate_score_f(peak_metrics), 2)
+        result["Score_G"] = round(calculate_score_g(peak_metrics), 2)
+        result["Score_H"] = round(calculate_score_h(peak_metrics), 2)
+        result["Score_I"] = round(calculate_score_i(peak_metrics), 2)
+
+        # EntryScore uses different inputs (price-based, not metric-based)
+        try:
+            current_price = _safe("Price")
+            intra_high    = _safe("High_today") or current_price
+            scan_price    = _safe("Open_price") or current_price
+            typical_price = _safe("TypicalPrice") or current_price
+            now_peru = datetime.now(PERU_TZ)
+            es = calculate_entry_score(current_price, intra_high, scan_price, typical_price, now_peru)
+            if es > 0:
                 result["EntryScore"] = round(float(es), 2)
+        except Exception:
+            pass
     except Exception as e:
         print(f"[Collector] Timeline error for {ticker} {scan_date}: {e}")
     return result
@@ -390,11 +430,10 @@ def run(target_date: str = None):
         ohlc  = fetch_ohlc_for_days(ticker, available_days) if available_days and not is_today else {}
         stats = calculate_stats(scan_price, ohlc)
 
-        # Score metrics
+        # Raw metric fields copied from daily_snapshots.
+        # Score_B-I are NOT copied — they're computed in fetch_timeline_stats from peak row.
         metric_fields = ["MxV", "RunUp", "RSI", "ATRX", "REL_VOL", "Gap", "TypicalPriceDist",
-                         "PriceToHigh", "PriceTo52WHigh", "Float%",
-                         "Score_I", "Score_B", "Score_C", "Score_D",
-                         "Score_E", "Score_F", "Score_G", "Score_H"]
+                         "PriceToHigh", "PriceTo52WHigh", "Float%"]
         metrics = {f: round(pd.to_numeric(row.get(f, None), errors="coerce"), 2)
                    for f in metric_fields}
 
@@ -463,10 +502,13 @@ def run(target_date: str = None):
         # Timeline stats (also populates Score_B-I from peak row)
         tl_stats = fetch_timeline_stats(ticker, scan_date, tl_df) if not tl_df.empty else {}
 
-        # Enrich metrics with Score_B-I from timeline peak row (overrides NaN from daily_snapshots)
+        # Move Score_B-I (and EntryScore) from tl_stats into metrics.
+        # These are computed fresh in fetch_timeline_stats, not copied.
         for st in SCORE_SUBTYPES:
             if st in tl_stats:
                 metrics[st] = tl_stats.pop(st)
+        if "EntryScore" in tl_stats:
+            metrics["EntryScore"] = tl_stats.pop("EntryScore")
 
         # Catalyst (לא למניות של היום — חוסך זמן)
         if existing_match.empty and not is_today:
