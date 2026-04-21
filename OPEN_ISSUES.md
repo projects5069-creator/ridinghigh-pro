@@ -1,6 +1,30 @@
 # RidingHigh Pro - Open Issues Log
-*Last updated: 2026-04-20*
+*Last updated: 2026-04-21*
 *Single source of truth for open issues and fix history.*
+
+---
+
+## ✅ CLOSED — 2026-04-21 Session
+
+- ✅ **#17 post_analysis 29 rows recalc + collector computes scores** — Commit `235f4fc`
+  - Recalculated 29 rows with Score_recalc_date=empty/nan using current formulas
+  - Fixed: Score_B-H stored as 0 (never computed), broken values (Score_I=-1290, Score_C=3539)
+  - Root cause fix: post_analysis_collector now COMPUTES Score_B-I + EntryScore via formulas.py
+    instead of copying stale values from timeline_live/daily_snapshots
+  - All 129 post_analysis rows now have consistent Score_recalc_date timestamps
+
+- ✅ **#23 timeline_live expanded with 8 dynamic metric columns** — Commit `d21911a`
+  - Added: Change, RSI, ATRX, Gap, TypicalPriceDist, PriceToHigh, PriceTo52WHigh, Float%
+  - TIMELINE_LIVE_COLS expanded from 17 to 25 entries in sheets_manager.py
+  - Migration script added 8 header columns (R-Y) to timeline_live Sheet
+  - Historical rows retain 17 values (new columns empty — not backfilled)
+
+- ✅ **#24 VWAP_price/_raw/_calc renamed to TypicalPrice/_raw/Dist_calc** — Commit `d3b1cb6`
+  - Renamed across: formulas.py, auto_scanner.py, post_analysis_collector.py, dashboard.py
+  - Migration script renamed column headers in daily_snapshots + post_analysis Sheets
+  - Also resolves #11 (VWAP column naming confusion)
+
+- ✅ **#11 VWAP column name is actually Typical Price** — Resolved via #24 above
 
 ---
 
@@ -85,15 +109,6 @@
 - **Decision needed:** Add Gap back to Score as v3?
 - **Effort:** 30 min implementation + backtest
 
-#### #11: VWAP column name is actually Typical Price (H+L+C)/3
-- **Location:** formulas.calculate_vwap_dist + Sheets column
-- **Misleading:** Not real volume-weighted VWAP
-- **Impact:** Analytical confusion, not functional
-- **Effort:** 20 min rename + column migration
-
-#### #17: post_analysis 124 rows — recalc with new formulas
-- **After #7.2 refactor, some calculated values may differ**
-- **Effort:** 20 min recalc script
 
 #### #18: Section 5 page 9 biased
 - **Description:** Score tends to high values, "wins" without normalization
@@ -103,22 +118,6 @@
 - **Current:** 3 BROKEN rows, 21 NO_DATA in post_analysis
 - **Alternatives:** Polygon.io ($29/mo), FMP ($14/mo)
 - **Decision needed:** switch providers?
-
-#### #23: timeline_live silently drops VWAP (and other fields) due to header mismatch
-- **Discovered:** 2026-04-20 during #11 investigation
-- **Root cause:** auto_scanner.analyze_ticker returns dict with 'VWAP' key, but sheets_manager writes values matching only the existing 17-column header in timeline_live. VWAP (+ other keys not in header) are silently discarded.
-- **Impact:** Every scan (every minute) computes VWAP but doesn't persist it in timeline_live. Historical analysis of VWAP over time is impossible from this source.
-- **Workaround:** daily_snapshots and score_tracker DO persist VWAP correctly.
-- **Effort:** 30 min — add column to timeline_live header OR investigate why it was removed originally + decide whether to restore
-- **Priority:** Medium — doesn't break anything, but limits future analysis
-
-#### #24: "VWAP_price" column in daily_snapshots is also misnamed
-- **Discovered:** 2026-04-20 during #11 migration planning
-- **Location:** daily_snapshots column 30 ("VWAP_price")
-- **Content:** Holds the absolute Typical Price value (H+L+C)/3, not real VWAP price
-- **Dependency:** Should be renamed together with #11 for consistency, to "TypicalPrice"
-- **Effort:** Similar migration pattern as #11 — 20 min
-- **Priority:** Medium — cosmetic but compounds the VWAP naming confusion
 
 ### 🟢 Low Priority
 
@@ -166,12 +165,12 @@
 ## 📊 Stats
 
 - **Total issues tracked:** 24
-- **Closed:** 8 (33%) — 7 new in 2026-04-19 + 1 previously
+- **Closed:** 12 (50%) — 4 new in 2026-04-21 (#11, #17, #23, #24) + 8 previously
 - **Open critical:** 0 🎉
 - **Open high:** 1 (#15)
-- **Open medium:** 8
-- **Open low:** 7
-- **Deferred:** 1
+- **Open medium:** 4 (#8, #9, #18, #19)
+- **Open low:** 6 (#12, #13, #14, #16, #20, #21, #22)
+- **Deferred:** 1 (#1)
 
 ---
 
