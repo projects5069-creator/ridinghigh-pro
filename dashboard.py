@@ -701,41 +701,6 @@ def _cached_portfolio() -> pd.DataFrame:
         return pd.DataFrame()
 
 
-def calc_score_v2(row):
-    s = 0
-    try:
-        mxv = float(row.get('MxV_calc', 0) or 0)
-        if mxv < 0: s += min(abs(mxv)/200, 1) * 25
-    except: pass
-    try:
-        ru = float(row.get('RunUp_calc', 0) or 0)
-        if ru > 0: s += min(ru/30, 1) * 25
-    except: pass
-    try:
-        atrx = float(row.get('ATRX_calc', 0) or 0)
-        s += min(atrx/5, 1) * 20
-    except: pass
-    try:
-        rsi = float(row.get('RSI', 0) or 0)
-        if rsi < 50:    s += (rsi/50)*5
-        elif rsi <= 70: s += 5 + ((rsi-50)/20)*5
-        else:           s += max(0, 10 - ((rsi-70)/30)*5)
-    except: pass
-    try:
-        vwap = float(row.get('TypicalPriceDist_calc', 0) or 0)
-        if vwap > 0: s += min(vwap/8, 1) * 10
-    except: pass
-    try:
-        sc = float(row.get('ScanChange%', 0) or 0)
-        if sc > 0: s += min(sc/60, 1) * 5
-    except: pass
-    try:
-        rv = float(row.get('REL_VOL_calc', 0) or 0)
-        s += min(rv/15, 1) * 5
-    except: pass
-    return round(s, 2)
-
-
 @st.cache_data(ttl=60)
 def _cached_post_analysis() -> pd.DataFrame:
     """post_analysis → DataFrame via gsheets_sync. Refreshes every 5 min."""
@@ -1889,11 +1854,9 @@ def post_analysis_page():
     if show_only_hits and "TP10_Hit" in filtered.columns:
         filtered = filtered[filtered["TP10_Hit"] == 1]
 
-    filtered["Score_v2"] = filtered.apply(calc_score_v2, axis=1)
-
     st.subheader(f"📋 תוצאות ({len(filtered)} מניות)")
 
-    display_cols = ["Ticker", "ScanDate", "Score", "Score_v2", "ScanChange%", "ScanPrice",
+    display_cols = ["Ticker", "ScanDate", "Score", "ScanChange%", "ScanPrice",
                     "IntraHigh", "IntraLow", "DayRunUp%", "PeakScoreTime", "PeakScorePrice",
                     "CurrentPrice", "CurrentChange%", "MaxDrop%", "BestDay", "TP10_Hit", "TP15_Hit", "TP20_Hit"]
     display_cols = [c for c in display_cols if c in filtered.columns]
