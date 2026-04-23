@@ -23,6 +23,11 @@
   - Rationale: 0/11 historical wins for trades opened after 13:00
 - ✅ **#33 Revert Issue #31 — remove 13:00 entry cutoff** — Commit `2ab85a2`
   - System moving to pure research mode, trading-mode cutoff removed
+- ✅ **#34 Remove multi-score code + DynamicScore** — Commit `ecfc4e5`
+  - Removed Score_B..I, EntryScore, DynamicScore functions (10 functions, ~270 lines)
+  - Simplified live_trades to 1 trade per ticker via primary Score
+  - Pages live_trades + Score Comparison flagged for removal in #35
+  - Net: -424 lines across 6 files, 107/107 tests passing
 
 ---
 
