@@ -46,7 +46,7 @@ from utils import (
 )
 from config import (
     MIN_SCORE_DISPLAY,
-    SCANNER_MIN_SCORE,
+    TRADE_ENTRY_MIN_SCORE,
     CRITICAL_SCORE,
     POSITION_SIZE_USD,
     TP_THRESHOLD_FRAC,
@@ -3153,9 +3153,9 @@ def dashboard_home_page():
                             .drop_duplicates("Ticker")) if "Score" in today_tl.columns else today_tl
             scores = pd.to_numeric(peak.get("Score", pd.Series(dtype=float)), errors="coerce")
             critical = int((scores >= CRITICAL_SCORE).sum())
-            high     = int((scores >= SCANNER_MIN_SCORE).sum())
+            high     = int((scores >= TRADE_ENTRY_MIN_SCORE).sum())
             st.metric("מניות שנסרקו", n_tickers)
-            st.metric(f"Critical ≥{CRITICAL_SCORE}", critical, delta=f"High ≥{SCANNER_MIN_SCORE}: {high}")
+            st.metric(f"Critical ≥{CRITICAL_SCORE}", critical, delta=f"High ≥{TRADE_ENTRY_MIN_SCORE}: {high}")
         else:
             st.info("אין נתוני סריקה להיום")
 

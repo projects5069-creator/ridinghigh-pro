@@ -47,7 +47,7 @@ from formulas import (
 from config import (
     TP_THRESHOLD_FRAC,
     SL_THRESHOLD_FRAC,
-    SCANNER_MIN_SCORE,
+    TRADE_ENTRY_MIN_SCORE,
     MIN_SCORE_DISPLAY,
 )
 
@@ -431,9 +431,9 @@ def run_scan():
                 df_to_sheet(ws_snap, combined_snap)
             print("📸 Daily snapshot saved!")
 
-            # ── Portfolio: add Score>=MIN_SCORE_DISPLAY positions ───────────
+            # ── Portfolio: add Score>=TRADE_ENTRY_MIN_SCORE positions ────────
             ws_port = sheets_manager.get_worksheet("portfolio", gc=gc)
-            high_score = results_df[results_df['Score'].astype(float) >= MIN_SCORE_DISPLAY].copy()
+            high_score = results_df[results_df['Score'].astype(float) >= TRADE_ENTRY_MIN_SCORE].copy()
             if not high_score.empty:
                 existing_port = ws_port.get_all_values()
                 ex_port = pd.DataFrame()
@@ -695,7 +695,7 @@ def update_live_trades(gc, now_peru, results=None):
        מניה יכולה להופיע עד 9 פעמים (פעם לכל ציון שעובר 70)
     קריטריון: ScoreType >= 70 AND שוק פתוח
     """
-    ENTRY_MIN_SCORE = SCANNER_MIN_SCORE
+    ENTRY_MIN_SCORE = TRADE_ENTRY_MIN_SCORE
     TP_PCT = TP_THRESHOLD_FRAC
     SL_PCT = SL_THRESHOLD_FRAC
 
@@ -1016,10 +1016,10 @@ def run_eod():
 
     print(f"📊 {len(today_tl)} timeline rows for today, {today_tl['Ticker'].nunique()} tickers")
 
-    # ── Portfolio: save Score>=MIN_SCORE_DISPLAY stocks (skip if already saved)
+    # ── Portfolio: save Score>=TRADE_ENTRY_MIN_SCORE stocks (skip if already saved)
     try:
         ws_port = sheets_manager.get_worksheet("portfolio", gc=gc)
-        high_score = today_tl[today_tl["Score"] >= MIN_SCORE_DISPLAY].copy()
+        high_score = today_tl[today_tl["Score"] >= TRADE_ENTRY_MIN_SCORE].copy()
 
         # Use peak score per ticker
         best = (high_score.sort_values("Score", ascending=False)

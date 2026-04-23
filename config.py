@@ -109,11 +109,17 @@ CRITICAL_SCORE = 85
 MEDIUM_SCORE = 40
 """Score ≥ this is considered 'Medium' (yellow tier)."""
 
-# Scanner thresholds (used in Live Trades page, stricter)
-# Reverted 2026-04-23 from 60 → 70 per Issue #29
-# Research E1c showed Score 60-69 entries dilute expectancy by ~$40/trade
-# Issue #28 gate logic + RSI fix retained; only threshold reverted
-SCANNER_MIN_SCORE = 70
+# ─────────────────────────────────────────────────────────────────────
+# Trade Entry Threshold (Issue #30, 2026-04-23)
+# ─────────────────────────────────────────────────────────────────────
+# Minimum score to open a simulated trade in live_trades + portfolio.
+# Applies to: live_trades, portfolio (post_analysis inherits from these)
+# Does NOT apply to: timeline_live, daily_snapshots (those capture all scans)
+# Rationale: E1c research showed Score 60-69 dilute expectancy ~$40/trade
+TRADE_ENTRY_MIN_SCORE = 70
+
+# Legacy alias — kept for backwards compat. DO NOT use in new code.
+SCANNER_MIN_SCORE = TRADE_ENTRY_MIN_SCORE
 
 
 # ═══════════════════════════════════════════════════════════════════════
@@ -266,7 +272,8 @@ if __name__ == "__main__":
     print(f"  HIGH_SCORE         = {HIGH_SCORE}")
     print(f"  CRITICAL_SCORE     = {CRITICAL_SCORE}")
     print(f"  MEDIUM_SCORE       = {MEDIUM_SCORE}")
-    print(f"  SCANNER_MIN_SCORE  = {SCANNER_MIN_SCORE}")
+    print(f"  TRADE_ENTRY_MIN_SCORE = {TRADE_ENTRY_MIN_SCORE}")
+    print(f"  SCANNER_MIN_SCORE    = {SCANNER_MIN_SCORE}  (legacy alias)")
     
     print("\n── Trade Parameters ──")
     print(f"  POSITION_SIZE_USD     = ${POSITION_SIZE_USD}")
