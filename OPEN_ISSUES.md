@@ -28,6 +28,10 @@
   - Simplified live_trades to 1 trade per ticker via primary Score
   - Pages live_trades + Score Comparison flagged for removal in #35
   - Net: -424 lines across 6 files, 107/107 tests passing
+- ✅ **#35 Remove 6 pages from dashboard nav** — Commit `6001ce2`
+  - Navigation reduced from 9 to 3 pages (Home, Daily Summary, Timeline Archive)
+  - Functions kept as dead code for potential future restoration
+  - No Sheets data deleted — historical data preserved
 
 ---
 
