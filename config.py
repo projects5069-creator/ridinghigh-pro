@@ -110,9 +110,10 @@ MEDIUM_SCORE = 40
 """Score ≥ this is considered 'Medium' (yellow tier)."""
 
 # Scanner thresholds (used in Live Trades page, stricter)
-SCANNER_MIN_SCORE = 60
-"""Minimum score for live trade entry. Lowered from 70 to 60 (research 22/4/2026:
-Score>=60 still 86.2% TP10, ~2.9 candidates/day vs 1.6/day at 70)."""
+# Reverted 2026-04-23 from 60 → 70 per Issue #29
+# Research E1c showed Score 60-69 entries dilute expectancy by ~$40/trade
+# Issue #28 gate logic + RSI fix retained; only threshold reverted
+SCANNER_MIN_SCORE = 70
 
 
 # ═══════════════════════════════════════════════════════════════════════
