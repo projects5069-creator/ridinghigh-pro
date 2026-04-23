@@ -10,6 +10,12 @@
   - Partial revert of #28 based on E1c research (N=26)
   - Score 60-69 entries dilute expectancy by ~$40/trade
   - Issue #28 gate + RSI changes retained
+- ✅ **#30 Rename SCANNER_MIN_SCORE + fix portfolio hardcoded 60** — Commit `02afdf7`
+  - Renamed SCANNER_MIN_SCORE → TRADE_ENTRY_MIN_SCORE (more accurate name)
+  - Legacy alias retained
+  - Fixed portfolio bug: was using MIN_SCORE_DISPLAY (60) instead of trade entry threshold
+  - Now portfolio and live_trades use the same threshold (70)
+  - Original split plan cancelled — timeline_live already captures everything
 
 ---
 
