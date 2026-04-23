@@ -49,7 +49,6 @@ from config import (
     SL_THRESHOLD_FRAC,
     TRADE_ENTRY_MIN_SCORE,
     MIN_SCORE_DISPLAY,
-    ENTRY_CUTOFF_HOUR_PERU,
 )
 
 SCOPES = [
@@ -770,9 +769,7 @@ def update_live_trades(gc, now_peru, results=None):
             lt_df.at[idx, "PnL_pct"]      = pnl
 
         # ── Step 2: add new entries from current scan results ─────────────────
-        if now_peru.hour >= ENTRY_CUTOFF_HOUR_PERU:
-            print(f"⏰ live_trades: past entry cutoff ({ENTRY_CUTOFF_HOUR_PERU}:00 Peru) — tracking existing pending only, no new entries")
-        if results and is_market_hours() and now_peru.hour < ENTRY_CUTOFF_HOUR_PERU:
+        if results and is_market_hours():
             # Build dedup sets: one entry per (Ticker, day)
             pending_today = set()   # tickers currently Pending — don't double-enter
             closed_today  = set()   # tickers already TP10/SL today — no re-entry
