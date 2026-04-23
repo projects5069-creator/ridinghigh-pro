@@ -922,6 +922,7 @@ def health_check_section():
 
 
 def main_page():
+    # DEAD CODE (Issue #35): removed from navigation in research mode
     st.title("🚀 RidingHigh Pro v14.6")
     st.caption("Portfolio Tracker - Auto-saves stocks with score 60+ at 14:59")
     system_health_bar()
@@ -1706,6 +1707,7 @@ def _render_short_table(df: pd.DataFrame, download_key: str):
 
 
 def portfolio_tracker_page():
+    # DEAD CODE (Issue #35): removed from navigation in research mode
     # ── כותרת ────────────────────────────────────────────────────────────────
     t1, t2 = st.columns([6, 1])
     with t1:
@@ -1774,6 +1776,7 @@ def portfolio_tracker_page():
 
 
 def post_analysis_page():
+    # DEAD CODE (Issue #35): removed from navigation in research mode
     st.title("🔬 Post Analysis")
     st.caption("מניות עם Score 60+ — מה קרה ב-5 ימים אחרי הסריקה")
     system_health_bar()
@@ -2259,6 +2262,7 @@ def system_health_bar():
 
 
 def score_tracker_page():
+    # DEAD CODE (Issue #35): removed from navigation in research mode
     import plotly.graph_objects as _go
     st.title("🎯 Portfolio Score Tracker")
     system_health_bar()
@@ -2544,7 +2548,7 @@ def score_tracker_page():
 
 
 def live_trades_page():
-    # TODO Issue #35: Remove Score_B..I references from this page entirely
+    # DEAD CODE (Issue #35): removed from navigation in research mode
     _SCORE_TYPES = ["Score", "Score_B", "Score_C", "Score_D", "Score_E",
                     "Score_F", "Score_G", "Score_H", "Score_I"]
     _SCORE_DESC = {
@@ -2714,7 +2718,7 @@ def live_trades_page():
 
 
 def score_comparison_page():
-    # TODO Issue #35: Remove this entire page — Score_B..I no longer computed
+    # DEAD CODE (Issue #35): removed from navigation in research mode
     SCORE_COLS = ["Score", "Score_B", "Score_C", "Score_D", "Score_E", "Score_F", "Score_G", "Score_H", "Score_I"]
 
     st.title("📊 Score Comparison")
@@ -3204,9 +3208,8 @@ def dashboard_home_page():
 def main():
     _PAGE_NAMES = [
         "🏠 Home",
-        "📊 Live Tracker", "💼 Portfolio Tracker", "⚡ Live Trades",
-        "🎯 Portfolio Score Tracker", "📅 Daily Summary", "📦 Timeline Archive",
-        "🔬 Post Analysis", "📊 Score Comparison",
+        "📅 Daily Summary",
+        "📦 Timeline Archive",
     ]
 
     # Session-state key "nav_page" drives the radio (allows Home buttons to switch pages)
@@ -3231,22 +3234,10 @@ def main():
 
     if page == "🏠 Home":
         dashboard_home_page()
-    elif page == "📊 Live Tracker":
-        main_page()
-    elif page == "💼 Portfolio Tracker":
-        portfolio_tracker_page()
-    elif page == "⚡ Live Trades":
-        live_trades_page()
     elif page == "📅 Daily Summary":
         daily_summary_page()
     elif page == "📦 Timeline Archive":
         timeline_archive_page()
-    elif page == "🎯 Portfolio Score Tracker":
-        score_tracker_page()
-    elif page == "🔬 Post Analysis":
-        post_analysis_page()
-    else:
-        score_comparison_page()
 
 if __name__ == "__main__":
     main()
