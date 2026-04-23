@@ -21,6 +21,8 @@
   - update_live_trades blocks new entries at/after hour 13
   - Existing Pending positions unaffected
   - Rationale: 0/11 historical wins for trades opened after 13:00
+- ✅ **#33 Revert Issue #31 — remove 13:00 entry cutoff** — Commit `2ab85a2`
+  - System moving to pure research mode, trading-mode cutoff removed
 
 ---
 
