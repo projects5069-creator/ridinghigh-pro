@@ -1063,8 +1063,8 @@ def main_page():
                 if _ls.tzinfo is None: _ls = PERU_TZ.localize(_ls)
                 st.metric("Last Scan", _ls.astimezone(PERU_TZ).strftime("%H:%M:%S"))
         
-        # Sort by EntryScore desc (stocks ready for entry float to top)
-        results_sorted = sorted(results, key=lambda x: x.get('EntryScore', 0), reverse=True)
+        # Sort by Score desc (research 22/4/2026: EntryScore was inverted signal)
+        results_sorted = sorted(results, key=lambda x: x.get('Score', 0), reverse=True)
 
         display_data = []
         _has_change = any(r.get('Change', 0) != 0 for r in results_sorted)

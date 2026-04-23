@@ -796,9 +796,9 @@ def update_live_trades(gc, now_peru, results=None):
                 if ticker in closed_today:
                     continue  # already closed TP10/SL today — no re-entry
 
-                # pick the single ScoreType with the highest value
-                best_type = max(SCORE_TYPES, key=lambda st: float(r.get(st, 0) or 0))
-                best_val  = float(r.get(best_type, 0) or 0)
+                # Use only main Score v2 — research 22/4/2026: max(variants) triggered toxic Score_I trades (0/11 wins)
+                best_type = "Score"
+                best_val  = float(r.get("Score", 0) or 0)
                 if best_val < ENTRY_MIN_SCORE:
                     continue
 

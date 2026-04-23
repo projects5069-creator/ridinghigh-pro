@@ -419,16 +419,15 @@ def calculate_score(metrics):
     try:
         score += min(metrics['atrx'] / C["ATRX"], 1) * W["ATRX"]
     except: pass
-    # RSI — bell curve (linear up to 50, peak 50-70, decay 70+)
+    # RSI — extreme overbought only (research 22/4/2026: RSI 90+=100% TP20, bell curve 50-70 was weakest zone)
     try:
         rsi = metrics['rsi']
-        half = W["RSI"] / 2  # e.g., 5 when weight=10
-        if rsi < R["CENTER_LOW"]:
-            score += (rsi / R["CENTER_LOW"]) * half
-        elif rsi <= R["SWEET_HIGH"]:
-            score += half + ((rsi - R["CENTER_LOW"]) / R["HALF_POINT"]) * half
-        else:
-            score += max(0, W["RSI"] - ((rsi - R["SWEET_HIGH"]) / R["OVER_DECAY"]) * half)
+        if rsi >= 90:
+            score += W["RSI"]       # full 10 points
+        elif rsi >= 85:
+            score += W["RSI"] * 0.7  # 7 points
+        elif rsi >= 80:
+            score += W["RSI"] * 0.4  # 4 points
     except: pass
     # TypicalPriceDist — positive distance above typical price
     try:
