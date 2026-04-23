@@ -16,6 +16,11 @@
   - Fixed portfolio bug: was using MIN_SCORE_DISPLAY (60) instead of trade entry threshold
   - Now portfolio and live_trades use the same threshold (70)
   - Original split plan cancelled — timeline_live already captures everything
+- ✅ **#31 TASK E.3 — Block new entries after 13:00 Peru** — Commit `8a54053`
+  - Added ENTRY_CUTOFF_HOUR_PERU = 13 constant
+  - update_live_trades blocks new entries at/after hour 13
+  - Existing Pending positions unaffected
+  - Rationale: 0/11 historical wins for trades opened after 13:00
 
 ---
 
