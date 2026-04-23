@@ -4,6 +4,15 @@
 
 ---
 
+## ✅ CLOSED — 2026-04-23
+
+- ✅ **#29 Revert SCANNER_MIN_SCORE 60→70** — Commit `df589a6`
+  - Partial revert of #28 based on E1c research (N=26)
+  - Score 60-69 entries dilute expectancy by ~$40/trade
+  - Issue #28 gate + RSI changes retained
+
+---
+
 ## ✅ CLOSED — 2026-04-22 Session (Deep Audit + Research + Fixes)
 
 - ✅ **#15 Remove DataLogger, LiveTracker, PortfolioTracker** — Commit `d685747`
