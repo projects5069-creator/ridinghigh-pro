@@ -34,9 +34,6 @@ from formulas import (
     calculate_vwap_dist,
     calculate_rel_vol,
     calculate_float_pct,
-    calculate_dynamic_score,
-    normalize_mxv,
-    normalize_atrx,
 )
 from formulas import calculate_score
 from utils import (
@@ -742,7 +739,7 @@ def _cached_live_trades() -> pd.DataFrame:
             return pd.DataFrame()
         df = pd.DataFrame(raw[1:], columns=raw[0])
         for col in ["EntryPrice", "CurrentPrice", "RunningHigh", "RunningLow",
-                    "TP10_Price", "SL_Price", "Score", "EntryScore",
+                    "TP10_Price", "SL_Price", "Score",
                     "IntraHigh", "PnL_pct"]:
             if col in df.columns:
                 df[col] = pd.to_numeric(df[col], errors="coerce")
@@ -801,7 +798,7 @@ def load_latest_from_sheets():
         for _, row in df.iterrows():
             try:
                 def f(k): return float(row[k]) if row.get(k,"") not in ["nan","","None"] else 0
-                results.append({"Ticker":row["Ticker"],"Score":f("Score"),"EntryScore":f("EntryScore"),"Price":f("Price"),"Change":f("Change"),"MxV":f("MxV"),"PriceTo52WHigh":f("PriceTo52WHigh"),"PriceToHigh":f("PriceToHigh"),"RSI":f("RSI"),"ATRX":f("ATRX"),"REL_VOL":f("REL_VOL"),"RunUp":f("RunUp"),"Float%":f("Float%"),"Gap":f("Gap"),"TypicalPriceDist":f("TypicalPriceDist")})
+                results.append({"Ticker":row["Ticker"],"Score":f("Score"),"Price":f("Price"),"Change":f("Change"),"MxV":f("MxV"),"PriceTo52WHigh":f("PriceTo52WHigh"),"PriceToHigh":f("PriceToHigh"),"RSI":f("RSI"),"ATRX":f("ATRX"),"REL_VOL":f("REL_VOL"),"RunUp":f("RunUp"),"Float%":f("Float%"),"Gap":f("Gap"),"TypicalPriceDist":f("TypicalPriceDist")})
             except: continue
         return results, latest_time
     except Exception:
@@ -975,7 +972,6 @@ def main_page():
                                 _fake.append({
                                     "Ticker": _r["Ticker"],
                                     "Score": float(_r.get("Score", 0) or 0),
-                                    "EntryScore": float(_r.get("EntryScore", 0) or 0),
                                     "Price": float(_r.get("Price", 0) or 0),
                                     "Change": 0, "MxV": float(_r.get("MxV", 0) or 0),
                                     "PriceTo52WHigh": 0, "PriceToHigh": 0, "RSI": 0, "ATRX": 0,
@@ -1063,18 +1059,15 @@ def main_page():
                 if _ls.tzinfo is None: _ls = PERU_TZ.localize(_ls)
                 st.metric("Last Scan", _ls.astimezone(PERU_TZ).strftime("%H:%M:%S"))
         
-        # Sort by Score desc (research 22/4/2026: EntryScore was inverted signal)
         results_sorted = sorted(results, key=lambda x: x.get('Score', 0), reverse=True)
 
         display_data = []
         _has_change = any(r.get('Change', 0) != 0 for r in results_sorted)
         _has_rsi    = any(r.get('RSI', 0) != 0 for r in results_sorted)
         for r in results_sorted:
-            entry_s = r.get('EntryScore', 0)
             row_d = {
                 'Ticker': r['Ticker'],
                 'Score': f"{r['Score']:.2f}",
-                'EntryScore': f"{entry_s:.2f}" if r['Score'] >= MIN_SCORE_DISPLAY else "—",
                 'Price': f"${r['Price']:.2f}",
                 'MxV': f"{r['MxV']:.0f}%",
                 'RunUp': f"{r['RunUp']:+.1f}%",
@@ -1117,11 +1110,6 @@ def main_page():
                 return ''
 
         styled_df = df.style.apply(highlight_score, axis=1)
-        if 'EntryScore' in df.columns:
-            try:
-                styled_df = styled_df.map(color_entry_score, subset=['EntryScore'])
-            except AttributeError:
-                styled_df = styled_df.map(color_entry_score, subset=['EntryScore'])
         
         table_height = min(600, len(df) * 40 + 50)
         
@@ -1939,41 +1927,7 @@ def post_analysis_page():
 
     st.divider()
 
-    # ── Dynamic Score ──────────────────────────────────────────────────────
-    st.subheader("⚡ ציון דינמי — מבוסס נתונים אמיתיים")
-    st.caption("ציון חדש המבוסס רק על MxV ו-ATRX — שני המדדים שהוכחו כמנבאים ירידה. השווה אותו לציון המקורי.")
-
-    if "MxV" in df.columns and "ATRX" in df.columns:
-        df_dyn = df.copy()
-        df_dyn["MxV"] = pd.to_numeric(df_dyn["MxV"], errors="coerce").fillna(0)
-        df_dyn["ATRX"] = pd.to_numeric(df_dyn["ATRX"], errors="coerce").fillna(0)
-        # Use formulas.py functions (v2.0 2026-04-18)
-        df_dyn["MxV_norm"] = df_dyn["MxV"].apply(normalize_mxv)
-        df_dyn["ATRX_norm"] = df_dyn["ATRX"].apply(normalize_atrx)
-        df_dyn["DynamicScore"] = df_dyn.apply(
-            lambda r: calculate_dynamic_score(r["MxV"], r["ATRX"]), axis=1
-        )
-
-        dyn_display = df_dyn[["Ticker","ScanDate","Score","DynamicScore","MxV","ATRX","TP10_Hit","MaxDrop%"]].copy()
-        dyn_display["הפרש"] = (dyn_display["DynamicScore"] - dyn_display["Score"]).round(2)
-
-        def color_diff(val):
-            try:
-                v = float(val)
-                if v < -10: return "color: #e74c3c"
-                if v > 10:  return "color: #2ecc71"
-                return "color: #f1c40f"
-            except:
-                return ""
-
-        for col in dyn_display.select_dtypes(include="number").columns:
-            dyn_display[col] = dyn_display[col].round(2)
-        format_dyn = {col: "{:.2f}" for col in dyn_display.select_dtypes(include="number").columns}
-        styled_dyn = dyn_display.style.map(color_diff, subset=["הפרש"]).format(format_dyn)
-        st.dataframe(styled_dyn, use_container_width=True, hide_index=True)
-        st.caption("הפרש אדום = הציון המקורי גבוה מהדינמי (אולי מוערך יתר על המידה). ירוק = הציון הדינמי גבוה יותר.")
-    else:
-        st.info("אין מספיק נתונים לציון דינמי")
+    # DynamicScore section removed in Issue #34
 
     st.divider()
 
@@ -2590,6 +2544,7 @@ def score_tracker_page():
 
 
 def live_trades_page():
+    # TODO Issue #35: Remove Score_B..I references from this page entirely
     _SCORE_TYPES = ["Score", "Score_B", "Score_C", "Score_D", "Score_E",
                     "Score_F", "Score_G", "Score_H", "Score_I"]
     _SCORE_DESC = {
@@ -2759,6 +2714,7 @@ def live_trades_page():
 
 
 def score_comparison_page():
+    # TODO Issue #35: Remove this entire page — Score_B..I no longer computed
     SCORE_COLS = ["Score", "Score_B", "Score_C", "Score_D", "Score_E", "Score_F", "Score_G", "Score_H", "Score_I"]
 
     st.title("📊 Score Comparison")
@@ -3095,8 +3051,7 @@ def dashboard_home_page():
     today_tl = pd.DataFrame()
     if not tl.empty and "Date" in tl.columns:
         today_tl = tl[tl["Date"] == today_str].copy()
-        for col in ["Score", "Score_B", "Score_C", "Score_D",
-                    "Score_E", "Score_F", "Score_G", "Score_H", "Score_I", "RunUp"]:
+        for col in ["Score", "RunUp"]:
             if col in today_tl.columns:
                 today_tl[col] = pd.to_numeric(today_tl[col], errors="coerce")
 

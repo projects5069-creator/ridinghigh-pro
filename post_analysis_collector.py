@@ -32,10 +32,6 @@ from formulas import (
     calculate_typical_price_dist,
     calculate_rel_vol,
     calculate_score,
-    calculate_score_b, calculate_score_c, calculate_score_d,
-    calculate_score_e, calculate_score_f, calculate_score_g,
-    calculate_score_h, calculate_score_i,
-    calculate_entry_score,
 )
 from utils import (
     is_trading_day,
@@ -55,8 +51,6 @@ CATALYST_CATEGORIES = [
 
 MIN_SCORE   = MIN_SCORE_DISPLAY
 DAYS_FORWARD = 5
-
-SCORE_SUBTYPES = ["Score_B", "Score_C", "Score_D", "Score_E", "Score_F", "Score_G", "Score_H", "Score_I"]
 
 
 # ── Catalyst analysis (unchanged from v4) ────────────────────────────────────
@@ -281,27 +275,7 @@ def fetch_timeline_stats(ticker: str, scan_date: str, tl_df: pd.DataFrame) -> di
         }
 
         # Compute all 9 scores fresh from the peak row's metrics
-        result["Score_B"] = round(calculate_score_b(peak_metrics), 2)
-        result["Score_C"] = round(calculate_score_c(peak_metrics), 2)
-        result["Score_D"] = round(calculate_score_d(peak_metrics), 2)
-        result["Score_E"] = round(calculate_score_e(peak_metrics), 2)
-        result["Score_F"] = round(calculate_score_f(peak_metrics), 2)
-        result["Score_G"] = round(calculate_score_g(peak_metrics), 2)
-        result["Score_H"] = round(calculate_score_h(peak_metrics), 2)
-        result["Score_I"] = round(calculate_score_i(peak_metrics), 2)
-
-        # EntryScore uses different inputs (price-based, not metric-based)
-        try:
-            current_price = _safe("Price")
-            intra_high    = _safe("High_today") or current_price
-            scan_price    = _safe("Open_price") or current_price
-            typical_price = _safe("TypicalPrice") or current_price
-            now_peru = datetime.now(PERU_TZ)
-            es = calculate_entry_score(current_price, intra_high, scan_price, typical_price, now_peru)
-            if es > 0:
-                result["EntryScore"] = round(float(es), 2)
-        except Exception:
-            pass
+        # Score_B..I, EntryScore removed in Issue #34
     except Exception as e:
         print(f"[Collector] Timeline error for {ticker} {scan_date}: {e}")
     return result
@@ -394,7 +368,7 @@ def run(target_date: str = None):
     ws_tl   = sheets_manager.get_worksheet("timeline_live", gc=gc)
     tl_data = ws_tl.get_all_values() if ws_tl else []
     tl_df   = pd.DataFrame(tl_data[1:], columns=tl_data[0]) if len(tl_data) > 1 else pd.DataFrame()
-    # Sheet header may be stale — enforce canonical column names so Score_B-I are accessible
+    # Sheet header may be stale — enforce canonical column names
     if not tl_df.empty and len(tl_df.columns) == len(sheets_manager.TIMELINE_LIVE_COLS):
         tl_df.columns = sheets_manager.TIMELINE_LIVE_COLS
 
@@ -432,7 +406,7 @@ def run(target_date: str = None):
         stats = calculate_stats(scan_price, ohlc)
 
         # Raw metric fields copied from daily_snapshots.
-        # Score_B-I are NOT copied — they're computed in fetch_timeline_stats from peak row.
+        # Score_B-I removed in Issue #34.
         metric_fields = ["MxV", "RunUp", "RSI", "ATRX", "REL_VOL", "Gap", "TypicalPriceDist",
                          "PriceToHigh", "PriceTo52WHigh", "Float%"]
         metrics = {f: round(pd.to_numeric(row.get(f, None), errors="coerce"), 2)
@@ -500,16 +474,8 @@ def run(target_date: str = None):
         # D0 + fundamental (לא למניות של היום — עוד לא יש נתונים)
         d0_fund = fetch_d0_and_fundamental(ticker, scan_date) if not is_today else {}
 
-        # Timeline stats (also populates Score_B-I from peak row)
+        # Timeline stats
         tl_stats = fetch_timeline_stats(ticker, scan_date, tl_df) if not tl_df.empty else {}
-
-        # Move Score_B-I (and EntryScore) from tl_stats into metrics.
-        # These are computed fresh in fetch_timeline_stats, not copied.
-        for st in SCORE_SUBTYPES:
-            if st in tl_stats:
-                metrics[st] = tl_stats.pop(st)
-        if "EntryScore" in tl_stats:
-            metrics["EntryScore"] = tl_stats.pop("EntryScore")
 
         # Catalyst (לא למניות של היום — חוסך זמן)
         if existing_match.empty and not is_today:

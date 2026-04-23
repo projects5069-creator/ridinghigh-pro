@@ -34,15 +34,6 @@ from formulas import (
     calculate_float_pct,
     calculate_scan_change,
     calculate_score,
-    calculate_score_b,
-    calculate_score_c,
-    calculate_score_d,
-    calculate_score_e,
-    calculate_score_f,
-    calculate_score_g,
-    calculate_score_h,
-    calculate_score_i,
-    calculate_entry_score,
 )
 from config import (
     TP_THRESHOLD_FRAC,
@@ -229,29 +220,7 @@ def analyze_ticker(ticker, finviz_row):
             'float_pct': float_pct, 'gap': gap, 'typical_price_dist': typical_price_dist,
             'change': change,
         }
-        score   = calculate_score(metrics)
-        score_i = calculate_score_i(metrics)
-        score_b = calculate_score_b(metrics)
-        score_c = calculate_score_c(metrics)
-        score_d = calculate_score_d(metrics)
-        score_e = calculate_score_e(metrics)
-        score_f = calculate_score_f(metrics)
-        score_g = calculate_score_g(metrics)
-        score_h = calculate_score_h(metrics)
-
-        # EntryScore — real-time short entry signal
-        # Gate: any of the 9 scores >= MIN_SCORE_DISPLAY
-        entry_score = 0
-        max_score_any = max(score, score_b, score_c, score_d, score_e,
-                            score_f, score_g, score_h, score_i)
-        if max_score_any >= MIN_SCORE_DISPLAY:
-            entry_score = calculate_entry_score(
-                current_price=price,
-                intra_high=high_today,
-                scan_price=open_price,    # today's open = pump baseline
-                typical_price=typical_price,
-                now_peru=get_peru_time()
-            )
+        score = calculate_score(metrics)
 
         # AvgVolume & FloatShares (already fetched above if available)
         avg_volume   = int(yf.Ticker(ticker).info.get('averageVolume',   0) or 0) if 'stock' not in dir() else 0
@@ -271,15 +240,6 @@ def analyze_ticker(ticker, finviz_row):
             'MarketCap': int(market_cap),
             # ── Computed score metrics ─────────────────────────────────────────
             'Score':         round(score, 2),
-            'Score_I':       round(score_i, 2),
-            'Score_B':       round(score_b, 2),
-            'Score_C':       round(score_c, 2),
-            'Score_D':       round(score_d, 2),
-            'Score_E':       round(score_e, 2),
-            'Score_F':       round(score_f, 2),
-            'Score_G':       round(score_g, 2),
-            'Score_H':       round(score_h, 2),
-            'EntryScore':    round(entry_score, 2),
             'MxV':           round(mxv, 2),
             'RunUp':         round(run_up, 2),
             'RSI':           round(rsi, 2),
@@ -678,10 +638,8 @@ def update_portfolio_live(gc, now_peru):
         print(f"⚠️ portfolio_live error: {e}")
 
 
-SCORE_TYPES = ["Score", "Score_B", "Score_C", "Score_D", "Score_E", "Score_F", "Score_G", "Score_H", "Score_I"]
-
 LIVE_TRADES_COLS = [
-    "EntryTime", "Ticker", "EntryPrice", "IntraHigh", "ScoreType", "Score", "EntryScore",
+    "EntryTime", "Ticker", "EntryPrice", "IntraHigh", "ScoreType", "Score",
     "TP10_Price", "SL_Price", "CurrentPrice", "RunningHigh", "RunningLow",
     "Status", "ExitTime", "PnL_pct",
 ]
@@ -712,7 +670,7 @@ def update_live_trades(gc, now_peru, results=None):
         raw = ws.get_all_values()
         if len(raw) > 1:
             lt_df = pd.DataFrame(raw[1:], columns=raw[0])
-            for col in ["EntryPrice", "IntraHigh", "Score", "EntryScore",
+            for col in ["EntryPrice", "IntraHigh", "Score",
                         "TP10_Price", "SL_Price", "CurrentPrice",
                         "RunningHigh", "RunningLow", "PnL_pct"]:
                 if col in lt_df.columns:
@@ -784,10 +742,9 @@ def update_live_trades(gc, now_peru, results=None):
                     )
 
             for r in results:
-                ticker      = str(r.get("Ticker", ""))
-                price       = float(r.get("Price", 0) or 0)
-                entry_score = float(r.get("EntryScore", 0) or 0)
-                intra_high  = float(r.get("High_today", price) or price)
+                ticker     = str(r.get("Ticker", ""))
+                price      = float(r.get("Price", 0) or 0)
+                intra_high = float(r.get("High_today", price) or price)
 
                 if price <= 0:
                     continue
@@ -796,10 +753,8 @@ def update_live_trades(gc, now_peru, results=None):
                 if ticker in closed_today:
                     continue  # already closed TP10/SL today — no re-entry
 
-                # Use only main Score v2 — research 22/4/2026: max(variants) triggered toxic Score_I trades (0/11 wins)
-                best_type = "Score"
-                best_val  = float(r.get("Score", 0) or 0)
-                if best_val < ENTRY_MIN_SCORE:
+                score_val = float(r.get("Score", 0) or 0)
+                if score_val < ENTRY_MIN_SCORE:
                     continue
 
                 tp10_price = round(price * (1 - TP_PCT), 4)
@@ -810,9 +765,8 @@ def update_live_trades(gc, now_peru, results=None):
                     "Ticker":       ticker,
                     "EntryPrice":   price,
                     "IntraHigh":    intra_high,
-                    "ScoreType":    best_type,
-                    "Score":        round(best_val, 2),
-                    "EntryScore":   round(entry_score, 2),
+                    "ScoreType":    "Score",
+                    "Score":        round(score_val, 2),
                     "TP10_Price":   tp10_price,
                     "SL_Price":     sl_price,
                     "CurrentPrice": price,
@@ -824,7 +778,7 @@ def update_live_trades(gc, now_peru, results=None):
                 }
                 lt_df = pd.concat([lt_df, pd.DataFrame([new_trade])], ignore_index=True)
                 pending_today.add(ticker)
-                print(f"⚡ live_trades: new entry {ticker}[{best_type}] @ {price} (Score={best_val})")
+                print(f"⚡ live_trades: new entry {ticker} @ {price} (Score={score_val})")
 
         # enforce column order, fill missing columns
         for col in LIVE_TRADES_COLS:

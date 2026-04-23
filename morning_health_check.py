@@ -162,8 +162,7 @@ except Exception as e:
 print("\n[TEST 5] All 9 Scores distribution today...")
 try:
     if len(today_rows) > 0:
-        score_cols = ["Score", "Score_B", "Score_C", "Score_D", "Score_E",
-                      "Score_F", "Score_G", "Score_H", "Score_I"]
+        score_cols = ["Score"]
         print(f"  📊 Per-Score statistics:")
         print(f"  {'Score':<12} {'min':>8} {'mean':>8} {'max':>8} {'>100':>6}")
         print(f"  {'-'*12} {'-'*8} {'-'*8} {'-'*8} {'-'*6}")
