@@ -176,6 +176,11 @@ MARKET_CLOSE_HOUR_PERU = 15
 POST_ANALYSIS_HOUR_PERU = 16
 """post_analysis_collector.py runs at 16:00 Peru (1 hour after close)."""
 
+ENTRY_CUTOFF_HOUR_PERU = 13
+"""No NEW trades are opened after this hour. Research showed 0/11 wins
+for trades opened after 13:00 Peru (insufficient time to reach TP10).
+Existing Pending positions continue to track/exit normally."""
+
 
 # ═══════════════════════════════════════════════════════════════════════
 # Data Validation
@@ -287,6 +292,7 @@ if __name__ == "__main__":
     print(f"  MARKET_OPEN   = {MARKET_OPEN_HOUR_PERU}:{MARKET_OPEN_MINUTE_PERU:02d} Peru")
     print(f"  MARKET_CLOSE  = {MARKET_CLOSE_HOUR_PERU}:00 Peru")
     print(f"  POST_ANALYSIS = {POST_ANALYSIS_HOUR_PERU}:00 Peru")
+    print(f"  ENTRY_CUTOFF  = {ENTRY_CUTOFF_HOUR_PERU}:00 Peru")
     
     print("\n── Data Quality ──")
     print(f"  DATA_CUTOFF_DATE = {DATA_CUTOFF_DATE}")
