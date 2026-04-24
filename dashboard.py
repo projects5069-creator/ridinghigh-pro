@@ -706,6 +706,24 @@ def _cached_post_analysis() -> pd.DataFrame:
 
 
 @st.cache_data(ttl=60)
+def _cached_ticker_follow_up() -> pd.DataFrame:
+    """Load ticker_follow_up sheet. Cached 60s."""
+    try:
+        gc = sheets_manager._get_gc()
+        if not gc:
+            return pd.DataFrame()
+        ws = sheets_manager.get_worksheet("ticker_follow_up", gc=gc)
+        if not ws:
+            return pd.DataFrame()
+        data = ws.get_all_values()
+        if len(data) <= 1:
+            return pd.DataFrame()
+        return pd.DataFrame(data[1:], columns=data[0])
+    except Exception:
+        return pd.DataFrame()
+
+
+@st.cache_data(ttl=60)
 def _cached_tl_today() -> pd.DataFrame:
     """Today's timeline_live rows with canonical column names. Refreshes every 60s."""
     try:
@@ -1213,7 +1231,16 @@ def daily_summary_page():
         except:
             return [''] * len(row)
     
-    METRIC_COLS = ["Ticker", "Score", "MxV", "RunUp", "REL_VOL", "RSI", "ATRX", "Gap", "TypicalPriceDist"]
+    METRIC_COLS = [
+        "Ticker",
+        "Price", "Volume", "MarketCap", "Change",
+        "Score",
+        "MxV", "RunUp", "REL_VOL", "RSI", "ATRX", "Gap",
+        "TypicalPriceDist", "PriceToHigh", "PriceTo52WHigh", "Float%",
+        "Open_price", "PrevClose", "High_today", "Low_today",
+        "TypicalPrice", "ATR14_raw", "Week52High",
+        "SharesOutstanding", "AvgVolume", "FloatShares",
+    ]
     display_cols = [c for c in METRIC_COLS if c in df.columns]
     df = df[display_cols].copy()
 
@@ -1225,14 +1252,31 @@ def daily_summary_page():
 
     # Column-specific format dict (rules: Score=2dp, MxV=0dp int, %=1dp, REL_VOL=1dp, others=2dp)
     _fmt_map = {
-        "Score":   "{:.2f}",
-        "MxV":     "{:.0f}",
-        "RunUp":   "{:.1f}",
-        "REL_VOL": "{:.1f}",
-        "RSI":     "{:.1f}",
-        "ATRX":    "{:.1f}",
-        "Gap":     "{:.1f}",
-        "TypicalPriceDist": "{:.1f}",
+        "Score":              "{:.2f}",
+        "Price":              "{:.2f}",
+        "Volume":             "{:,.0f}",
+        "MarketCap":          "{:,.0f}",
+        "Change":             "{:.1f}",
+        "MxV":                "{:.0f}",
+        "RunUp":              "{:.1f}",
+        "REL_VOL":            "{:.1f}",
+        "RSI":                "{:.1f}",
+        "ATRX":               "{:.1f}",
+        "Gap":                "{:.1f}",
+        "TypicalPriceDist":   "{:.1f}",
+        "PriceToHigh":        "{:.2f}",
+        "PriceTo52WHigh":     "{:.2f}",
+        "Float%":             "{:.1f}",
+        "Open_price":         "{:.2f}",
+        "PrevClose":          "{:.2f}",
+        "High_today":         "{:.2f}",
+        "Low_today":          "{:.2f}",
+        "TypicalPrice":       "{:.2f}",
+        "ATR14_raw":          "{:.4f}",
+        "Week52High":         "{:.2f}",
+        "SharesOutstanding":  "{:,.0f}",
+        "AvgVolume":          "{:,.0f}",
+        "FloatShares":        "{:,.0f}",
     }
     fmt_dict = {c: _fmt_map.get(c, "{:.2f}") for c in df.columns if c != "Ticker"}
     numeric_cols = [c for c in df.columns if c != "Ticker" and df[c].dtype in ['float64','float32','int64','int32']]
@@ -1249,15 +1293,17 @@ def daily_summary_page():
 
 def timeline_archive_page():
     st.title("📦 Timeline Archive")
-    st.caption("Score timeline per scan — pivoted by ScanTime (from timeline_live)")
+    st.caption("Minute-by-minute data per ticker — D0 scans + D1-D3 follow-up + D1-D5 OHLC")
     system_health_bar()
 
     try:
-        all_df = _cached_timeline_live()
-        if all_df.empty:
+        tl_df = _cached_timeline_live()
+        fu_df = _cached_ticker_follow_up()
+        pa_df = _cached_post_analysis()
+        if tl_df.empty:
             st.warning("⚠️ No timeline data yet")
             return
-        dates = sorted(all_df["Date"].unique().tolist(), reverse=True)
+        dates = sorted(tl_df["Date"].unique().tolist(), reverse=True)
     except Exception as e:
         st.error(f"Error: {e}")
         return
@@ -1266,56 +1312,130 @@ def timeline_archive_page():
         st.warning("⚠️ No timeline data yet")
         return
 
-    selected_date = st.selectbox("📆 Select Date", dates, index=0)
+    # Controls
+    col_date, col_ticker = st.columns([1, 2])
+    with col_date:
+        selected_date = st.selectbox("📆 Date", dates, index=0)
 
-    day_df = all_df[all_df["Date"] == selected_date].drop(columns=["Date"], errors="ignore")
-    day_df["Score"] = pd.to_numeric(day_df.get("Score", 0), errors="coerce")
-    if "ScanTime" in day_df.columns:
-        df = day_df.pivot_table(index="Ticker", columns="ScanTime", values="Score", aggfunc="last")
-        df = df[sorted(df.columns, reverse=True)].round(2)
-    else:
-        numeric_cols = day_df.select_dtypes(include="number").columns
-        df = day_df.set_index("Ticker")[numeric_cols].round(2) if "Ticker" in day_df.columns else day_df.round(2)
-    
-    if df is None or df.empty:
-        st.error("❌ No data for this date")
+    day_df = tl_df[tl_df["Date"] == selected_date].copy()
+    tickers_today = sorted(day_df["Ticker"].unique().tolist()) if "Ticker" in day_df.columns else []
+
+    with col_ticker:
+        options = ["— All tickers (overview) —"] + tickers_today
+        selected_ticker = st.selectbox(f"🎯 Ticker ({len(tickers_today)} available)", options, index=0)
+
+    # ── Case A: no ticker → pivot overview ────────────────────────────────────
+    if selected_ticker == "— All tickers (overview) —":
+        st.subheader(f"All tickers — {selected_date}")
+
+        day_df["Score"] = pd.to_numeric(day_df.get("Score", 0), errors="coerce")
+        if "ScanTime" in day_df.columns:
+            pivot = day_df.pivot_table(index="Ticker", columns="ScanTime", values="Score", aggfunc="last")
+            pivot = pivot[sorted(pivot.columns, reverse=True)].round(2)
+        else:
+            pivot = day_df.set_index("Ticker") if "Ticker" in day_df.columns else day_df
+
+        if pivot.empty:
+            st.error("No data for this date")
+            return
+
+        col1, col2 = st.columns(2)
+        with col1:
+            st.metric("Stocks Tracked", len(pivot))
+        with col2:
+            st.metric("Time Points", len(pivot.columns))
+
+        def color_score(val):
+            try:
+                score = float(val)
+                if score >= CRITICAL_SCORE:
+                    return 'background-color: #800020; color: white; font-weight: bold'
+                elif score >= MIN_SCORE_DISPLAY:
+                    return 'background-color: #cc0000; color: white'
+                elif score >= 50:
+                    return 'background-color: #ff6600; color: white'
+                else:
+                    return 'background-color: #ffcc00; color: black'
+            except:
+                return ''
+
+        styled = pivot.style.map(color_score).format("{:.2f}")
+        st.dataframe(styled, use_container_width=True, height=600)
+
+        csv = pivot.to_csv()
+        st.download_button("📥 Download CSV", csv, f"timeline_{selected_date}.csv", "text/csv")
         return
-    
-    st.subheader(f"Timeline Grid - {selected_date}")
-    
-    col1, col2 = st.columns(2)
-    
-    with col1:
-        st.metric("Stocks Tracked", len(df))
-    
-    with col2:
-        st.metric("Time Points", len(df.columns))
-    
-    def color_score(val):
-        try:
-            score = float(val)
-            if score >= CRITICAL_SCORE:
-                return 'background-color: #800020; color: white; font-weight: bold'
-            elif score >= MIN_SCORE_DISPLAY:
-                return 'background-color: #cc0000; color: white'
-            elif score >= 50:
-                return 'background-color: #ff6600; color: white'
+
+    # ── Case B: specific ticker → 3-section detail view ───────────────────────
+    ticker = selected_ticker
+    st.subheader(f"{ticker} — Full detail")
+
+    _numeric_cols = ["Price", "Volume", "MarketCap", "Score", "MxV", "RunUp", "REL_VOL",
+                     "Change", "RSI", "ATRX", "Gap", "TypicalPriceDist", "PriceToHigh",
+                     "PriceTo52WHigh", "Float%", "Open_price", "PrevClose", "High_today",
+                     "Low_today", "TypicalPrice", "ATR14_raw", "Week52High",
+                     "SharesOutstanding", "AvgVolume", "FloatShares"]
+
+    # ── Section 1: D0 scans ──────────────────────────────────────────────────
+    st.markdown(f"### D0 — Scan day ({selected_date})")
+    st.caption("Minute-by-minute scans during market hours")
+
+    t_df = day_df[day_df["Ticker"] == ticker].copy()
+    if not t_df.empty:
+        if "ScanTime" in t_df.columns:
+            t_df = t_df.sort_values("ScanTime", ascending=False).reset_index(drop=True)
+        for col in _numeric_cols:
+            if col in t_df.columns:
+                t_df[col] = pd.to_numeric(t_df[col], errors='coerce')
+        st.metric("Scans today", len(t_df))
+        st.dataframe(t_df, use_container_width=True, height=300)
+    else:
+        st.info(f"No D0 data for {ticker} on {selected_date}")
+
+    # ── Section 2: D1-D3 follow-up ──────────────────────────────────────────
+    st.markdown("### D1-D3 — Follow-up tracking")
+    st.caption("Post-pump minute-by-minute tracking for 3 trading days")
+
+    if fu_df.empty or "Ticker" not in fu_df.columns:
+        st.info("No follow-up data yet (populates next trading day)")
+    else:
+        fu_ticker = fu_df[(fu_df["Ticker"] == ticker) &
+                          (fu_df["ScanDate"].astype(str).str[:10] == selected_date)].copy()
+        if fu_ticker.empty:
+            st.info(f"No follow-up rows for {ticker} scanned on {selected_date} yet")
+        else:
+            for col in _numeric_cols + ["FollowDay"]:
+                if col in fu_ticker.columns:
+                    fu_ticker[col] = pd.to_numeric(fu_ticker[col], errors='coerce')
+            fu_ticker = fu_ticker.sort_values(["FollowDay", "Date", "ScanTime"],
+                                              ascending=[True, True, False])
+            c1, c2, c3 = st.columns(3)
+            for day, col_ph in zip([1, 2, 3], [c1, c2, c3]):
+                day_rows = fu_ticker[fu_ticker["FollowDay"] == day]
+                col_ph.metric(f"D{day} rows", len(day_rows))
+            st.dataframe(fu_ticker, use_container_width=True, height=400)
+
+    # ── Section 3: D1-D5 OHLC summary ──────────────────────────────────────
+    st.markdown("### D1-D5 OHLC summary")
+    st.caption("Daily OHLC from post_analysis")
+
+    if pa_df.empty or "Ticker" not in pa_df.columns:
+        st.info("No post_analysis data yet")
+    else:
+        pa_ticker = pa_df[(pa_df["Ticker"] == ticker) &
+                          (pa_df["ScanDate"].astype(str).str[:10] == selected_date)].copy()
+        if pa_ticker.empty:
+            st.info(f"No post_analysis entry for {ticker} on {selected_date}")
+        else:
+            ohlc_cols = [c for c in pa_ticker.columns if
+                         c.startswith(("D0_", "D1_", "D2_", "D3_", "D4_", "D5_")) or
+                         c in ("Ticker", "ScanDate", "ScanPrice", "MaxDrop%", "TP10_Hit",
+                               "TP15_Hit", "TP20_Hit", "BestDay")]
+            show_cols = [c for c in ohlc_cols if c in pa_ticker.columns]
+            if show_cols:
+                st.dataframe(pa_ticker[show_cols], use_container_width=True, height=200)
             else:
-                return 'background-color: #ffcc00; color: black'
-        except:
-            return ''
-    
-    styled_df = df.style.map(color_score).format("{:.2f}")
-    
-    st.dataframe(styled_df, use_container_width=True, height=600)
-    
-    csv = df.to_csv()
-    st.download_button(
-        label="📥 Download CSV",
-        data=csv,
-        file_name=f"timeline_{selected_date}.csv",
-        mime="text/csv"
-    )
+                st.dataframe(pa_ticker, use_container_width=True, height=200)
 
 @st.cache_data(ttl=3600)
 def _fetch_live_prices(tickers: tuple) -> dict:
