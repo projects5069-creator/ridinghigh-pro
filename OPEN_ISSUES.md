@@ -17,6 +17,12 @@
 
 ## ✅ CLOSED — 2026-04-24
 
+- ✅ **#44 OAuth-based sheet creation (fix Drive quota)** — Commit `bf4f6fc`
+  - Service account 0 GB quota permanently bypassed
+  - User OAuth used only for sheet/folder creation; SA continues reads/writes
+  - GOOGLE_OAUTH_TOKEN_JSON added to auto_scan.yml + monthly_rotation.yml
+  - ticker_follow_up created for 2026-04 (Issue #38b feature now works)
+  - Future monthly rotations fully automated
 - ✅ **#41 URGENT Schema migration: timeline_live to 28 columns** — Data migration (no code changes)
   - Backed up to local CSV (timeline_live_backup_20260424_1644.csv, 24.3 MB)
   - Migrated 218,522 rows from old (21-col) schema to new (28-col) schema
