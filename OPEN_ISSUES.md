@@ -40,6 +40,9 @@
   - Added 9 raw metric columns for comprehensive research data
   - No impact on Score logic or display
   - Historical rows preserved with empty values in new columns
+- ✅ **#38a-fix Align TIMELINE_LIVE_COLS with dict** — Commit `0dd7229`
+  - Added 3 missing fields (SharesOutstanding, AvgVolume, FloatShares)
+  - Zero name mismatches — all 28 columns now capture every analyze_ticker field
 
 ---
 
