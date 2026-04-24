@@ -3102,7 +3102,7 @@ def dashboard_home_page():
     # ── Section 2: Today ──────────────────────────────────────────────────────
     st.subheader("📡 היום")
 
-    col1, col2, col3 = st.columns(3)
+    col1, col2 = st.columns(2)
 
     with col1:
         st.markdown("**🔭 סריקה**")
@@ -3119,28 +3119,6 @@ def dashboard_home_page():
             st.info("אין נתוני סריקה להיום")
 
     with col2:
-        st.markdown("**⚡ Live Trades**")
-        if not lt.empty and "Status" in lt.columns:
-            # All-time
-            tp_all = int((lt["Status"] == "TP10").sum())
-            sl_all = int((lt["Status"] == "SL").sum())
-            cl_all = tp_all + sl_all
-            wr_all = f"{tp_all/cl_all*100:.0f}%" if cl_all > 0 else "—"
-            # Today
-            if not today_lt.empty and "Status" in today_lt.columns:
-                tp_td = int((today_lt["Status"] == "TP10").sum())
-                sl_td = int((today_lt["Status"] == "SL").sum())
-                cl_td = tp_td + sl_td
-                today_str_disp = f"היום: {tp_td}/{cl_td}" if cl_td > 0 else "היום: אין"
-            else:
-                today_str_disp = "היום: אין"
-            pending = int((lt["Status"] == "Pending").sum())
-            st.metric("Win Rate (כולל)", wr_all, delta=f"TP:{tp_all}  SL:{sl_all}")
-            st.caption(f"{today_str_disp}  |  Pending: {pending}")
-        else:
-            st.info("אין trades")
-
-    with col3:
         st.markdown("**🏆 Top מניה**")
         if not today_tl.empty and "Score" in today_tl.columns and "Ticker" in today_tl.columns:
             peak_all = (today_tl.sort_values("Score", ascending=False)
@@ -3187,22 +3165,6 @@ def dashboard_home_page():
     else:
         st.info("אין נתוני Post Analysis עדיין")
 
-    st.divider()
-
-    # ── Section 4: Quick Navigation ───────────────────────────────────────────
-    st.subheader("🧭 ניווט מהיר")
-    nav_targets = [
-        ("📊 Live Tracker",     "📊 Live Tracker"),
-        ("💼 Portfolio",        "💼 Portfolio Tracker"),
-        ("⚡ Live Trades",      "⚡ Live Trades"),
-        ("🔬 Post Analysis",    "🔬 Post Analysis"),
-        ("📊 Score Comparison", "📊 Score Comparison"),
-    ]
-    nav_cols = st.columns(len(nav_targets))
-    for i, (label, target) in enumerate(nav_targets):
-        if nav_cols[i].button(label, use_container_width=True, key=f"home_nav_{i}"):
-            st.session_state["nav_page"] = target
-            st.rerun()
 
 
 def main():
