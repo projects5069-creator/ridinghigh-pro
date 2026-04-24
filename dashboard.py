@@ -658,7 +658,10 @@ def _cached_timeline_live() -> pd.DataFrame:
         if not ws: return pd.DataFrame()
         data = ws.get_all_values()
         if len(data) <= 1: return pd.DataFrame()
-        return pd.DataFrame(data[1:], columns=data[0])
+        df = pd.DataFrame(data[1:], columns=data[0])
+        if "ScanTime" in df.columns:
+            df["ScanTime"] = df["ScanTime"].astype(str).str.zfill(5)
+        return df
     except Exception as e:
         st.warning(f"⚠️ timeline_live read error: {e}")
         return pd.DataFrame()
@@ -674,7 +677,10 @@ def _cached_daily_snapshots() -> pd.DataFrame:
         if not ws: return pd.DataFrame()
         data = ws.get_all_values()
         if len(data) <= 1: return pd.DataFrame()
-        return pd.DataFrame(data[1:], columns=data[0])
+        df = pd.DataFrame(data[1:], columns=data[0])
+        if "ScanTime" in df.columns:
+            df["ScanTime"] = df["ScanTime"].astype(str).str.zfill(5)
+        return df
     except Exception:
         return pd.DataFrame()
 
@@ -3197,7 +3203,7 @@ def dashboard_home_page():
                 ls_str = str(val)[:5]
             break
     if ls_str == "—" and not today_tl.empty and "ScanTime" in today_tl.columns:
-        last_tl = today_tl["ScanTime"].dropna().iloc[-1] if len(today_tl) > 0 else None
+        last_tl = today_tl["ScanTime"].dropna().max() if len(today_tl) > 0 else None
         if last_tl:
             ls_str = str(last_tl)[:5]   # "HH:MM"
 
