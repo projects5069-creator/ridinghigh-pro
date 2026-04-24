@@ -40,12 +40,32 @@ SHEET_NAMES = [
     "portfolio_live",
     "score_tracker",
     "live_trades",
+    "ticker_follow_up",
 ]
 
 # timeline_live columns — expanded for research mode (Issue #38a)
 TIMELINE_LIVE_COLS = [
     # Meta
     "Date", "ScanTime", "Ticker",
+    # Core price/volume
+    "Price", "Volume", "MarketCap",
+    # Derived score
+    "Score",
+    # Computed metrics (11)
+    "MxV", "RunUp", "REL_VOL", "Change", "RSI", "ATRX", "Gap",
+    "TypicalPriceDist", "PriceToHigh", "PriceTo52WHigh", "Float%",
+    # Raw inputs (10)
+    "Open_price", "PrevClose", "High_today", "Low_today",
+    "TypicalPrice", "ATR14_raw", "Week52High",
+    "SharesOutstanding", "AvgVolume", "FloatShares",
+]
+
+# ticker_follow_up — 3-day post-pump tracking (Issue #38b)
+# Same 28 fields as timeline_live + 2 tracking columns (FollowDay, ScanDate)
+TICKER_FOLLOW_UP_COLS = [
+    # Meta + tracking
+    "Date", "ScanTime", "Ticker",
+    "FollowDay", "ScanDate",
     # Core price/volume
     "Price", "Volume", "MarketCap",
     # Derived score

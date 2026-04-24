@@ -34,6 +34,8 @@ from formulas import (
     calculate_float_pct,
     calculate_scan_change,
     calculate_score,
+    calculate_price_to_high,
+    calculate_price_to_52w_high,
 )
 from config import (
     TP_THRESHOLD_FRAC,
@@ -432,6 +434,14 @@ def run_scan():
     except Exception as e:
         print(f"⚠️ portfolio_live final update error: {e}")
 
+    # ── Ticker Follow-Up: 3-day post-pump tracking (always runs) ──────────────
+    try:
+        _gc_fu = locals().get("gc") or get_gsheets_client()
+        if _gc_fu:
+            update_ticker_follow_up(_gc_fu, now_peru)
+    except Exception as e:
+        print(f"⚠️ ticker_follow_up error: {e}")
+
     # ── Live Trades: track intraday short entries (always runs) ───────────────
     try:
         _gc3 = locals().get("gc") or get_gsheets_client()
@@ -643,6 +653,215 @@ LIVE_TRADES_COLS = [
     "TP10_Price", "SL_Price", "CurrentPrice", "RunningHigh", "RunningLow",
     "Status", "ExitTime", "PnL_pct",
 ]
+
+def update_ticker_follow_up(gc, now_peru):
+    """
+    Track stocks for 3 trading days after they first cross 15% threshold.
+    Runs every scan cycle during market hours.
+
+    Logic:
+    1. Query timeline_live for distinct tickers from recent days
+    2. For each ticker, determine its scan_date (first appearance)
+    3. Compute follow_day = trading days between scan_date and today
+    4. If 1 <= follow_day <= 3 → fetch current metrics and write row
+    5. Dedup: skip if (Ticker, ScanTime) already written today
+    """
+    from datetime import timedelta
+
+    if not is_trading_day(now_peru):
+        return
+    if not is_market_hours():
+        return
+
+    try:
+        today_str = now_peru.strftime("%Y-%m-%d")
+        today_date = now_peru.date()
+
+        # Load timeline_live to find tickers that need follow-up
+        ws_tl = sheets_manager.get_worksheet("timeline_live", gc=gc)
+        if not ws_tl:
+            return
+        tl_data = ws_tl.get_all_values()
+        if len(tl_data) <= 1:
+            return
+
+        tl_df = pd.DataFrame(tl_data[1:], columns=tl_data[0])
+        tl_df = tl_df[tl_df["Date"].astype(str).str[:10] < today_str]  # past days only
+
+        if tl_df.empty:
+            return
+
+        # First scan date per ticker
+        tl_df["Date_only"] = pd.to_datetime(tl_df["Date"], errors="coerce").dt.date
+        first_scan = tl_df.groupby("Ticker")["Date_only"].min().reset_index()
+        first_scan.columns = ["Ticker", "ScanDate"]
+
+        # Compute follow_day for each ticker
+        follow_list = []
+        for _, row in first_scan.iterrows():
+            sd = row["ScanDate"]
+            if pd.isna(sd):
+                continue
+            # Count trading days between scan date and today
+            days = 0
+            current = sd
+            while current < today_date:
+                current += timedelta(days=1)
+                if is_trading_day(datetime.combine(current, datetime.min.time()).replace(tzinfo=PERU_TZ)):
+                    days += 1
+                    if current == today_date:
+                        break
+            if 1 <= days <= 3:
+                follow_list.append((row["Ticker"], sd, days))
+
+        if not follow_list:
+            print(f"📍 ticker_follow_up: no tickers in follow window today")
+            return
+
+        # Load or create ticker_follow_up sheet
+        ws_fu = sheets_manager.get_worksheet("ticker_follow_up", gc=gc)
+        if not ws_fu:
+            print("⚠️ ticker_follow_up worksheet not found")
+            return
+        existing_data = ws_fu.get_all_values()
+
+        # Dedup: don't write duplicate (Ticker, ScanTime) rows today
+        existing_today = set()
+        if len(existing_data) > 1:
+            df_ex = pd.DataFrame(existing_data[1:], columns=existing_data[0])
+            mask = df_ex["Date"].astype(str).str[:10] == today_str
+            for _, r in df_ex[mask].iterrows():
+                existing_today.add((r.get("Ticker", ""), r.get("ScanTime", "")))
+
+        scan_time = now_peru.strftime("%H:%M")
+        new_rows = []
+
+        for ticker, scan_date, follow_day in follow_list:
+            if (ticker, scan_time) in existing_today:
+                continue
+
+            try:
+                t = yf.Ticker(ticker)
+                info = t.info or {}
+                price = float(info.get("regularMarketPrice") or
+                              info.get("currentPrice") or 0)
+                if price <= 0:
+                    continue
+
+                hist = t.history(period="1d", interval="1m")
+                if hist.empty:
+                    continue
+
+                volume = int(hist["Volume"].sum())
+                open_price = float(hist["Open"].iloc[0])
+                high_today = float(hist["High"].max())
+                low_today = float(hist["Low"].min())
+
+                # ATR14 from recent history
+                hist_long = t.history(period="1mo")
+                if len(hist_long) >= 14:
+                    tr = pd.concat([
+                        hist_long["High"] - hist_long["Low"],
+                        (hist_long["High"] - hist_long["Close"].shift()).abs(),
+                        (hist_long["Low"] - hist_long["Close"].shift()).abs(),
+                    ], axis=1).max(axis=1)
+                    atr14 = float(tr.rolling(14).mean().iloc[-1])
+                else:
+                    atr14 = 0.0
+
+                prev_close = float(hist_long["Close"].iloc[-2]) if len(hist_long) >= 2 else price
+                hist_1y = t.history(period="1y")
+                week52_high = float(hist_1y["High"].max()) if not hist_1y.empty else price
+
+                # RSI
+                if len(hist_long) >= 15:
+                    closes = hist_long["Close"]
+                    delta = closes.diff()
+                    gain = delta.where(delta > 0, 0).rolling(14).mean()
+                    loss_s = (-delta.where(delta < 0, 0)).rolling(14).mean()
+                    rs_val = gain.iloc[-1] / loss_s.iloc[-1] if loss_s.iloc[-1] != 0 else 0
+                    rsi = float(100 - 100 / (1 + rs_val))
+                else:
+                    rsi = 50.0
+
+                market_cap = int(info.get("marketCap") or 0)
+                shares_outstanding = int(info.get("sharesOutstanding") or 0)
+                avg_volume = int(info.get("averageVolume") or 0)
+                float_shares_val = int(info.get("floatShares") or 0)
+
+                # Compute derived metrics
+                mxv = calculate_mxv(market_cap, price, volume)
+                run_up = calculate_runup(price, open_price)
+                atrx = calculate_atrx(high_today, low_today, atr14)
+                gap = calculate_gap(open_price, prev_close)
+                rel_vol = calculate_rel_vol(volume, avg_volume)
+                float_pct = calculate_float_pct(float_shares_val, shares_outstanding)
+                price_to_high = calculate_price_to_high(price, high_today)
+                price_to_52w_high = calculate_price_to_52w_high(price, week52_high)
+                change = calculate_scan_change(price, prev_close)
+                typical_price = (high_today + low_today + price) / 3
+                typical_price_dist = ((price - typical_price) / typical_price * 100) if typical_price > 0 else 0
+
+                metrics = {
+                    'mxv': mxv, 'run_up': run_up, 'atrx': atrx, 'rsi': rsi,
+                    'typical_price_dist': typical_price_dist, 'rel_vol': rel_vol,
+                    'gap': gap, 'change': change,
+                }
+                score = calculate_score(metrics)
+
+                new_rows.append({
+                    "Date":             today_str,
+                    "ScanTime":         scan_time,
+                    "Ticker":           ticker,
+                    "FollowDay":        follow_day,
+                    "ScanDate":         scan_date.strftime("%Y-%m-%d"),
+                    "Price":            round(price, 2),
+                    "Volume":           volume,
+                    "MarketCap":        market_cap,
+                    "Score":            round(score, 2),
+                    "MxV":              round(mxv, 2),
+                    "RunUp":            round(run_up, 2),
+                    "REL_VOL":          round(rel_vol, 2),
+                    "Change":           round(change, 2),
+                    "RSI":              round(rsi, 2),
+                    "ATRX":             round(atrx, 2),
+                    "Gap":              round(gap, 2),
+                    "TypicalPriceDist": round(typical_price_dist, 2),
+                    "PriceToHigh":      round(price_to_high, 2),
+                    "PriceTo52WHigh":   round(price_to_52w_high, 2),
+                    "Float%":           round(float_pct, 2),
+                    "Open_price":       round(open_price, 2),
+                    "PrevClose":        round(prev_close, 2),
+                    "High_today":       round(high_today, 2),
+                    "Low_today":        round(low_today, 2),
+                    "TypicalPrice":     round(typical_price, 2),
+                    "ATR14_raw":        round(atr14, 4),
+                    "Week52High":       round(week52_high, 2),
+                    "SharesOutstanding":shares_outstanding,
+                    "AvgVolume":        avg_volume,
+                    "FloatShares":      float_shares_val,
+                })
+                time.sleep(0.2)
+            except Exception as e:
+                print(f"⚠️ follow_up {ticker}: {e}")
+                continue
+
+        # Write rows
+        if new_rows:
+            rows_df = pd.DataFrame(new_rows)
+            rows_df = rows_df.reindex(columns=sheets_manager.TICKER_FOLLOW_UP_COLS)
+
+            if len(existing_data) <= 1:
+                # First write — set header + data
+                df_to_sheet(ws_fu, rows_df)
+            else:
+                ws_fu.append_rows(rows_df.astype(str).values.tolist(),
+                                  value_input_option="USER_ENTERED")
+            print(f"📍 ticker_follow_up: wrote {len(new_rows)} rows (follow days 1-3)")
+
+    except Exception as e:
+        print(f"⚠️ ticker_follow_up error: {e}")
+
 
 def update_live_trades(gc, now_peru, results=None):
     """
