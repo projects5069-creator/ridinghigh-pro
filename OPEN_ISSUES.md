@@ -1,6 +1,25 @@
 # RidingHigh Pro - Open Issues Log
-*Last updated: 2026-04-22 23:00 Peru*
+*Last updated: 2026-04-24 17:00 Peru*
 *Single source of truth for open issues and fix history.*
+
+---
+
+## ✅ CLOSED — 2026-04-24
+
+- ✅ **#41 URGENT Schema migration: timeline_live to 28 columns** — Data migration (no code changes)
+  - Backed up to local CSV (timeline_live_backup_20260424_1644.csv, 24.3 MB)
+  - Migrated 218,522 rows from old (21-col) schema to new (28-col) schema
+  - Pre-24/4 rows: empty values in new columns (Volume, MarketCap, etc.)
+  - 24/4 rows (14,269): correctly mapped after header fix
+  - Legacy columns dropped: Score_I, Score_B..H, EntryScore
+  - Dashboard now reads Score correctly (0-100 range, not 41M)
+  - daily_summary regenerated from corrected timeline_live (890 rows, 13 dates)
+  - ticker_follow_up: not yet created (Drive quota exceeded), will auto-create
+- ✅ **#42 Fix string-sort bug for ScanTime in dashboard** — Commit `4c91c4a`
+  - ScanTime padded to HH:MM via zfill(5) in cached loaders
+  - Fixed Last scan display (was 9:59, now 14:59)
+  - Fixed Timeline Archive column ordering (newest-first)
+  - Changed iloc[-1] to .max() in Last scan fallback
 
 ---
 
