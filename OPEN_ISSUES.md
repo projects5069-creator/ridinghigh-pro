@@ -4,6 +4,17 @@
 
 ---
 
+## ⚠️ ABANDONED — 2026-04-24
+
+- ⚠️ **#43 Drive folder migration — ABANDONED**
+  - Approach: switch ROOT_FOLDER_ID to user-owned folder shared with service account
+  - Result: failed — service account has hard 0 GB quota, blocks file creation regardless of folder
+  - Root cause: Google enforces storage quota on file creator (service account), not folder owner
+  - Existing sheets work because they were created before quota enforcement
+  - Replaced by Issue #44 (user creates sheets manually or via OAuth)
+
+---
+
 ## ✅ CLOSED — 2026-04-24
 
 - ✅ **#41 URGENT Schema migration: timeline_live to 28 columns** — Data migration (no code changes)
