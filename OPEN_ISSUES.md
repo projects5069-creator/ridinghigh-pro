@@ -32,6 +32,10 @@
   - Navigation reduced from 9 to 3 pages (Home, Daily Summary, Timeline Archive)
   - Functions kept as dead code for potential future restoration
   - No Sheets data deleted — historical data preserved
+- ✅ **#37 Home page cleanup** — Commit `2ff7547`
+  - Removed Live Trades column from 'היום' section
+  - Removed 'ניווט מהיר' section with 5 buttons to dead pages
+  - Home now shows: status, scan summary, top stock, historical summary
 
 ---
 
