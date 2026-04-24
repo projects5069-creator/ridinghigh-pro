@@ -53,9 +53,10 @@ TIMELINE_LIVE_COLS = [
     # Computed metrics (11)
     "MxV", "RunUp", "REL_VOL", "Change", "RSI", "ATRX", "Gap",
     "TypicalPriceDist", "PriceToHigh", "PriceTo52WHigh", "Float%",
-    # Raw inputs (7)
+    # Raw inputs (10)
     "Open_price", "PrevClose", "High_today", "Low_today",
     "TypicalPrice", "ATR14_raw", "Week52High",
+    "SharesOutstanding", "AvgVolume", "FloatShares",
 ]
 
 SCOPES = [
