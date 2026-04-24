@@ -43,6 +43,12 @@
 - ✅ **#38a-fix Align TIMELINE_LIVE_COLS with dict** — Commit `0dd7229`
   - Added 3 missing fields (SharesOutstanding, AvgVolume, FloatShares)
   - Zero name mismatches — all 28 columns now capture every analyze_ticker field
+- ✅ **#38b ticker_follow_up Sheet + tracking** — Commit `4d0738d`
+  - New Sheet: ticker_follow_up (30 columns)
+  - Follow-up logic in update_ticker_follow_up()
+  - Tracks each stock for 3 trading days after first 15% scan
+  - yfinance-based, runs every scan cycle during market hours
+  - post_analysis unchanged
 
 ---
 
