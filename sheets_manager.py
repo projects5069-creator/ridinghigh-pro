@@ -149,6 +149,67 @@ def _get_drive_service(gc):
     return build("drive", "v3", credentials=creds)
 
 
+SERVICE_ACCOUNT_EMAIL = "ridinghigh-sheets-v2@ridinghigh-pro-v2.iam.gserviceaccount.com"
+
+
+def _get_oauth_creds():
+    """Load user OAuth credentials. Used ONLY for creating new sheets/folders.
+    Service account has 0 GB quota, so creation must use user's OAuth.
+    """
+    import json as _json
+    from google.oauth2.credentials import Credentials
+    from google.auth.transport.requests import Request
+
+    token_json = os.environ.get("GOOGLE_OAUTH_TOKEN_JSON")
+    if token_json:
+        token_data = _json.loads(token_json)
+    else:
+        token_path = os.path.join(os.path.dirname(__file__), "oauth_token.json")
+        if not os.path.exists(token_path):
+            return None
+        with open(token_path) as f:
+            token_data = _json.load(f)
+
+    creds = Credentials(
+        token=token_data.get("token"),
+        refresh_token=token_data["refresh_token"],
+        token_uri=token_data["token_uri"],
+        client_id=token_data["client_id"],
+        client_secret=token_data["client_secret"],
+        scopes=token_data.get("scopes", [
+            "https://www.googleapis.com/auth/drive",
+            "https://www.googleapis.com/auth/spreadsheets",
+        ]),
+    )
+
+    if not creds.valid:
+        creds.refresh(Request())
+
+    return creds
+
+
+def _get_drive_service_oauth():
+    """Drive API client using user OAuth (for file/folder creation)."""
+    from googleapiclient.discovery import build
+    creds = _get_oauth_creds()
+    if not creds:
+        return None
+    return build("drive", "v3", credentials=creds)
+
+
+def _share_with_service_account(drive_oauth, file_id):
+    """Grant the service account Editor access to a file/folder."""
+    drive_oauth.permissions().create(
+        fileId=file_id,
+        body={
+            "type": "user",
+            "role": "writer",
+            "emailAddress": SERVICE_ACCOUNT_EMAIL,
+        },
+        sendNotificationEmail=False,
+    ).execute()
+
+
 # ── Drive / sheet creation ────────────────────────────────────────────────────
 
 def _get_root_folder_id(drive_svc) -> str:
@@ -164,18 +225,24 @@ def _get_root_folder_id(drive_svc) -> str:
         except Exception:
             print(f"[SheetsManager] ⚠️ ROOT_FOLDER_ID not accessible — using service account root")
 
-    # Find or create top-level RidingHigh-Data folder
-    q = "name='RidingHigh-Data' and 'root' in parents and mimeType='application/vnd.google-apps.folder' and trashed=false"
-    res = drive_svc.files().list(q=q, fields="files(id)").execute()
-    files = res.get("files", [])
-    if files:
-        return files[0]["id"]
+    # Find or create top-level RidingHigh-Data folder via OAuth
+    drive_oauth = _get_drive_service_oauth()
+    if drive_oauth:
+        q = "name='RidingHigh-Data' and 'root' in parents and mimeType='application/vnd.google-apps.folder' and trashed=false"
+        res = drive_oauth.files().list(q=q, fields="files(id)").execute()
+        files = res.get("files", [])
+        if files:
+            return files[0]["id"]
 
-    meta = {"name": "RidingHigh-Data", "mimeType": "application/vnd.google-apps.folder"}
-    folder = drive_svc.files().create(body=meta, fields="id").execute()
-    folder_id = folder["id"]
-    print(f"[SheetsManager] Created RidingHigh-Data folder → {folder_id}")
-    return folder_id
+        meta = {"name": "RidingHigh-Data", "mimeType": "application/vnd.google-apps.folder"}
+        folder = drive_oauth.files().create(body=meta, fields="id").execute()
+        folder_id = folder["id"]
+        _share_with_service_account(drive_oauth, folder_id)
+        print(f"[SheetsManager] Created RidingHigh-Data folder → {folder_id} (via OAuth)")
+        return folder_id
+
+    raise RuntimeError("[SheetsManager] ROOT_FOLDER_ID not accessible and no OAuth credentials. "
+                      "Run OAuth setup first.")
 
 
 def _get_or_create_monthly_folder(drive_svc, month_key: str) -> str:
@@ -191,27 +258,40 @@ def _get_or_create_monthly_folder(drive_svc, month_key: str) -> str:
     if files:
         return files[0]["id"]
 
+    # Create via OAuth (user-owned) to bypass SA 0 GB quota
+    drive_oauth = _get_drive_service_oauth()
+    if not drive_oauth:
+        raise RuntimeError("[SheetsManager] OAuth credentials required to create folders. "
+                          "Run OAuth setup first.")
+
     meta = {
         "name": month_key,
         "mimeType": "application/vnd.google-apps.folder",
         "parents": [root_id],
     }
-    folder = drive_svc.files().create(body=meta, fields="id").execute()
+    folder = drive_oauth.files().create(body=meta, fields="id").execute()
     folder_id = folder["id"]
-    print(f"[SheetsManager] Created folder {month_key} → {folder_id}")
+    _share_with_service_account(drive_oauth, folder_id)
+    print(f"[SheetsManager] Created folder {month_key} → {folder_id} (via OAuth)")
     return folder_id
 
 
 def _create_sheet_in_folder(gc, drive_svc, display_name: str, folder_id: str) -> str:
-    """Create a Google Sheets file directly inside folder_id via Drive API."""
+    """Create a Google Sheets file inside folder_id via user OAuth."""
+    drive_oauth = _get_drive_service_oauth()
+    if not drive_oauth:
+        raise RuntimeError("[SheetsManager] OAuth credentials required to create sheets. "
+                          "Run OAuth setup first.")
+
     meta = {
         "name": display_name,
         "mimeType": "application/vnd.google-apps.spreadsheet",
         "parents": [folder_id],
     }
-    file = drive_svc.files().create(body=meta, fields="id").execute()
+    file = drive_oauth.files().create(body=meta, fields="id").execute()
     sheet_id = file["id"]
-    print(f"[SheetsManager] Created {display_name} → {sheet_id}")
+    _share_with_service_account(drive_oauth, sheet_id)
+    print(f"[SheetsManager] Created {display_name} → {sheet_id} (via OAuth)")
     return sheet_id
 
 

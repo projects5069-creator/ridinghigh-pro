@@ -33,6 +33,7 @@ data/
 google_credentials.json
 backups/*.csv
 oauth_client.json
+oauth_credentials.json
 oauth_token.json
 
 # Migration scripts (one-time use)
