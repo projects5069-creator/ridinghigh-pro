@@ -36,6 +36,10 @@
   - Removed Live Trades column from 'היום' section
   - Removed 'ניווט מהיר' section with 5 buttons to dead pages
   - Home now shows: status, scan summary, top stock, historical summary
+- ✅ **#38a Expand timeline_live to 25 columns** — Commit `1008cf4`
+  - Added 9 raw metric columns for comprehensive research data
+  - No impact on Score logic or display
+  - Historical rows preserved with empty values in new columns
 
 ---
 
