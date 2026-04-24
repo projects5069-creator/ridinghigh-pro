@@ -49,6 +49,10 @@
   - Tracks each stock for 3 trading days after first 15% scan
   - yfinance-based, runs every scan cycle during market hours
   - post_analysis unchanged
+- ✅ **#39 Dashboard UI expansion** — Commit `f07e320`
+  - Daily Summary: 26 columns (was 9)
+  - Timeline Archive: ticker detail view with D0 + D1-D3 + D1-D5
+  - Added cached loader for ticker_follow_up
 
 ---
 
