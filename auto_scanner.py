@@ -361,9 +361,9 @@ def run_scan():
 
         results_df = pd.DataFrame(results)
 
-        # ── timeline_live: 8 slim columns only, append-only ──────────────────
+        # ── timeline_live: 24 columns, append-only ─────────────────────────────
         ws_timeline = sheets_manager.get_worksheet("timeline_live", gc=gc)
-        slim_cols = sheets_manager.TIMELINE_LIVE_COLS  # ["Date","ScanTime","Ticker","Price","Score","MxV","RunUp","REL_VOL"]
+        slim_cols = sheets_manager.TIMELINE_LIVE_COLS
         data_cols = [c for c in slim_cols if c not in ("Date", "ScanTime")]
         new_rows = results_df.reindex(columns=data_cols)
         new_rows.insert(0, 'ScanTime', scan_time)

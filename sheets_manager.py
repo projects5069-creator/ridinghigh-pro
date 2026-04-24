@@ -42,9 +42,21 @@ SHEET_NAMES = [
     "live_trades",
 ]
 
-# timeline_live is slimmed to exactly these columns
-TIMELINE_LIVE_COLS = ["Date", "ScanTime", "Ticker", "Price", "Score", "MxV", "RunUp", "REL_VOL",
- "Change", "RSI", "ATRX", "Gap", "TypicalPriceDist", "PriceToHigh", "PriceTo52WHigh", "Float%"]
+# timeline_live columns — expanded for research mode (Issue #38a)
+TIMELINE_LIVE_COLS = [
+    # Meta
+    "Date", "ScanTime", "Ticker",
+    # Core price/volume
+    "Price", "Volume", "MarketCap",
+    # Derived score
+    "Score",
+    # Computed metrics (11)
+    "MxV", "RunUp", "REL_VOL", "Change", "RSI", "ATRX", "Gap",
+    "TypicalPriceDist", "PriceToHigh", "PriceTo52WHigh", "Float%",
+    # Raw inputs (7)
+    "Open_price", "PrevClose", "High_today", "Low_today",
+    "TypicalPrice", "ATR14_raw", "Week52High",
+]
 
 SCOPES = [
     "https://spreadsheets.google.com/feeds",
