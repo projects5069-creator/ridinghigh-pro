@@ -29,11 +29,16 @@ Output:
     * Failed tab — only currently-failing checks
 
 Exit codes:
-  0 — all critical checks passed
+  0 — no CRITICAL issues (healthy state, even with WARNINGs)
   1 — at least one CRITICAL check failed
-  2 — only WARNING-level issues
 
 CHANGELOG:
+  v3 (2026-04-25): Exit code semantics fixed for CI compatibility.
+                   Previously WARNINGs returned exit code 2, which GitHub
+                   Actions treats as failure — producing false-positive
+                   "exit code 2" annotations on every run (since open
+                   issues show up as warnings). Now WARNINGs return 0.
+                   Detailed status logged before exit.
   v2 (2026-04-25): Smart month selection (was selecting empty 2026-05).
                    Fixed X2 false positive (comment "# Total: 100" was
                    counted as a weight value).
@@ -969,13 +974,23 @@ def main():
         write_to_sheet(results, gc)
 
     # Determine exit code
+    # v3 (2026-04-25): WARNINGs are a normal/healthy state — open issues
+    # show up as warnings until resolved. Only CRITICAL = real CI failure.
+    # Previously v2 returned 2 for warnings, which GitHub Actions treats as
+    # failure, producing false-positive "Process completed with exit code 2"
+    # annotations on every run.
     has_critical = any(r.is_critical() for r in results)
     has_warnings = any(r.is_failure() for r in results)
 
     if has_critical:
+        print(f"\n[health_audit] Exit 1 — CRITICAL issues detected")
         return 1
-    elif has_warnings:
-        return 2
+
+    if has_warnings:
+        print(f"\n[health_audit] Exit 0 — WARNINGs present but no critical issues (healthy)")
+    else:
+        print(f"\n[health_audit] Exit 0 — all checks passed")
+
     return 0
 
 
