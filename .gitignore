@@ -53,3 +53,6 @@ TASKS_*.md
 
 # Health audit sheet ID (sensitive)
 .health_audit_sheet_id
+
+# Archived old code (kept locally, not in git)
+archive_*/
