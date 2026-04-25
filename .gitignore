@@ -50,3 +50,6 @@ TASKS_*.md
 
 # Temp backup folder
 גיבוי זמני/
+
+# Health audit sheet ID (sensitive)
+.health_audit_sheet_id
