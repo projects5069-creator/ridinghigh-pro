@@ -1,223 +1,201 @@
 # RidingHigh Pro - Open Issues Log
-*Last updated: 2026-04-24 17:00 Peru*
-*Single source of truth for open issues and fix history.*
+*Last updated: 2026-04-25*
 
 ---
 
-## ⚠️ ABANDONED — 2026-04-24
+## ✅ CLOSED (2026-04-24) - Session "Schema Migration + OAuth"
 
-- ⚠️ **#43 Drive folder migration — ABANDONED**
-  - Approach: switch ROOT_FOLDER_ID to user-owned folder shared with service account
-  - Result: failed — service account has hard 0 GB quota, blocks file creation regardless of folder
-  - Root cause: Google enforces storage quota on file creator (service account), not folder owner
-  - Existing sheets work because they were created before quota enforcement
-  - Replaced by Issue #44 (user creates sheets manually or via OAuth)
+### #41: Schema migration timeline_live → 28 cols
+- 218,522 rows migrated successfully
+- daily_summary restored to 13 days, 890 rows
+- **Status:** Closed
+- Commits: 4c91c4a, 5517989
 
----
+### #42: ScanTime sort bug
+- HH:MM strings sorted lexicographically incorrectly
+- Fixed: zfill HH:MM in dashboard cached loaders
+- **Status:** Closed
+- Commit: ff7b0a9
 
-## ✅ CLOSED — 2026-04-24
+### #43: Drive folder migration ⚠️ ABANDONED
+- Investigation showed quota is on the creator account, not folder
+- **Status:** Abandoned (not a fix path)
+- See #44 for actual solution
 
-- ✅ **#44 OAuth-based sheet creation (fix Drive quota)** — Commit `bf4f6fc`
-  - Service account 0 GB quota permanently bypassed
-  - User OAuth used only for sheet/folder creation; SA continues reads/writes
-  - GOOGLE_OAUTH_TOKEN_JSON added to auto_scan.yml + monthly_rotation.yml
-  - ticker_follow_up created for 2026-04 (Issue #38b feature now works)
-  - Future monthly rotations fully automated
-- ✅ **#41 URGENT Schema migration: timeline_live to 28 columns** — Data migration (no code changes)
-  - Backed up to local CSV (timeline_live_backup_20260424_1644.csv, 24.3 MB)
-  - Migrated 218,522 rows from old (21-col) schema to new (28-col) schema
-  - Pre-24/4 rows: empty values in new columns (Volume, MarketCap, etc.)
-  - 24/4 rows (14,269): correctly mapped after header fix
-  - Legacy columns dropped: Score_I, Score_B..H, EntryScore
-  - Dashboard now reads Score correctly (0-100 range, not 41M)
-  - daily_summary regenerated from corrected timeline_live (890 rows, 13 dates)
-  - ticker_follow_up: not yet created (Drive quota exceeded), will auto-create
-- ✅ **#42 Fix string-sort bug for ScanTime in dashboard** — Commit `4c91c4a`
-  - ScanTime padded to HH:MM via zfill(5) in cached loaders
-  - Fixed Last scan display (was 9:59, now 14:59)
-  - Fixed Timeline Archive column ordering (newest-first)
-  - Changed iloc[-1] to .max() in Last scan fallback
+### #44: OAuth-based sheet creation (quota fix)
+- Service account: continues all reads/writes
+- User OAuth (projects5069@gmail.com): used only for new sheet creation
+- GitHub Secret `GOOGLE_OAUTH_TOKEN_JSON` configured
+- ticker_follow_up sheet created: 1mlYjdKCfKew1gRt7h7DiMwSGGJP_hRFHI2yAg04gl0k
+- **Status:** Closed
+- Commits: bf4f6fc, 55ac6a4
 
 ---
 
-## ✅ CLOSED — 2026-04-23
+## ✅ CLOSED (2026-04-17) - Session "Critical Fixes"
 
-- ✅ **#29 Revert SCANNER_MIN_SCORE 60→70** — Commit `df589a6`
-  - Partial revert of #28 based on E1c research (N=26)
-  - Score 60-69 entries dilute expectancy by ~$40/trade
-  - Issue #28 gate + RSI changes retained
-- ✅ **#30 Rename SCANNER_MIN_SCORE + fix portfolio hardcoded 60** — Commit `02afdf7`
-  - Renamed SCANNER_MIN_SCORE → TRADE_ENTRY_MIN_SCORE (more accurate name)
-  - Legacy alias retained
-  - Fixed portfolio bug: was using MIN_SCORE_DISPLAY (60) instead of trade entry threshold
-  - Now portfolio and live_trades use the same threshold (70)
-  - Original split plan cancelled — timeline_live already captures everything
-- ✅ **#31 TASK E.3 — Block new entries after 13:00 Peru** — Commit `8a54053`
-  - Added ENTRY_CUTOFF_HOUR_PERU = 13 constant
-  - update_live_trades blocks new entries at/after hour 13
-  - Existing Pending positions unaffected
-  - Rationale: 0/11 historical wins for trades opened after 13:00
-- ✅ **#33 Revert Issue #31 — remove 13:00 entry cutoff** — Commit `2ab85a2`
-  - System moving to pure research mode, trading-mode cutoff removed
-- ✅ **#34 Remove multi-score code + DynamicScore** — Commit `ecfc4e5`
-  - Removed Score_B..I, EntryScore, DynamicScore functions (10 functions, ~270 lines)
-  - Simplified live_trades to 1 trade per ticker via primary Score
-  - Pages live_trades + Score Comparison flagged for removal in #35
-  - Net: -424 lines across 6 files, 107/107 tests passing
-- ✅ **#35 Remove 6 pages from dashboard nav** — Commit `6001ce2`
-  - Navigation reduced from 9 to 3 pages (Home, Daily Summary, Timeline Archive)
-  - Functions kept as dead code for potential future restoration
-  - No Sheets data deleted — historical data preserved
-- ✅ **#37 Home page cleanup** — Commit `2ff7547`
-  - Removed Live Trades column from 'היום' section
-  - Removed 'ניווט מהיר' section with 5 buttons to dead pages
-  - Home now shows: status, scan summary, top stock, historical summary
-- ✅ **#38a Expand timeline_live to 25 columns** — Commit `1008cf4`
-  - Added 9 raw metric columns for comprehensive research data
-  - No impact on Score logic or display
-  - Historical rows preserved with empty values in new columns
-- ✅ **#38a-fix Align TIMELINE_LIVE_COLS with dict** — Commit `0dd7229`
-  - Added 3 missing fields (SharesOutstanding, AvgVolume, FloatShares)
-  - Zero name mismatches — all 28 columns now capture every analyze_ticker field
-- ✅ **#38b ticker_follow_up Sheet + tracking** — Commit `4d0738d`
-  - New Sheet: ticker_follow_up (30 columns)
-  - Follow-up logic in update_ticker_follow_up()
-  - Tracks each stock for 3 trading days after first 15% scan
-  - yfinance-based, runs every scan cycle during market hours
-  - post_analysis unchanged
-- ✅ **#39 Dashboard UI expansion** — Commit `f07e320`
-  - Daily Summary: 26 columns (was 9)
-  - Timeline Archive: ticker detail view with D0 + D1-D3 + D1-D5
-  - Added cached loader for ticker_follow_up
+### 🔴 Critical Fixes
+- ✅ **ATRX formula mismatch** - dashboard had (atr/price)*100, auto_scanner had (high-low)/atr
+  - Fixed in: formulas.py calculate_atrx() - now used everywhere
+  - Commit: 4b11686
+
+- ✅ **Float% measured Turnover, not Float** - dashboard used volume/shares instead of float_shares/shares
+  - Fixed in: formulas.py calculate_float_pct() + added floatShares lookup
+  - Commit: 4b11686
+
+- ✅ **Score v1 still in dashboard** - local runs used old scoring
+  - Fixed: dashboard imports calculate_score from auto_scanner (v2)
+  - Commit: 4b11686
+
+- ✅ **REL_VOL no cap in dashboard** - could reach 26,000+ from yfinance outliers
+  - Fixed in: formulas.py calculate_rel_vol() with cap=100
+  - Commit: 4b11686
+
+### 🟠 Code Quality
+- ✅ **calculate_mxv duplicate** - was in 3 places, now centralized
+- ✅ **14 duplicate functions removed** - parse_market_cap, parse_volume,
+  is_trading_day, is_day_complete, get_trading_days_after, calculate_stats
+  - Fixed: moved to utils.py
+  - Commit: 55adc6e
+
+- ✅ **Hardcoded values scattered** - moved to config.py v2.0
+  - POSITION_SIZE_USD, TP/SL thresholds, SCORE_WEIGHTS_V2
+  - Commit: 55adc6e
+
+### Auto-closed during cleanup (2026-04-25)
+
+- ✅ **#3: ~13K broken Score VARIANTS in timeline_live**
+  - Decision: leave as-is, variants are informational only
+  - Use only 'Score' column for analysis
+
+- ✅ **#4: live_trades with broken Score_D**
+  - Verified: live_trades has 14 rows, Score 70-100 CLEAN, no Score_D column
+  - Was confusion with timeline_live variants
+
+- ✅ **#10: Hardcoded cutoff 2026-04-10 in page 7**
+  - Verified 2026-04-25: no occurrence in dashboard.py
+  - Likely removed in a previous edit
+
+- ✅ **#11: VWAP misnamed (Typical Price)**
+  - formulas.py:145-147 documents this explicitly with NOTE
+  - Decision: keep name for backward compat, doc is sufficient
 
 ---
 
-## ✅ CLOSED — 2026-04-22 Session (Deep Audit + Research + Fixes)
+## 🔴 STILL OPEN - Critical
 
-- ✅ **#15 Remove DataLogger, LiveTracker, PortfolioTracker** — Commit `d685747`
-- ✅ **#18 Score Comparison scale bias fix** — Commit `24de7ec`
-- ✅ **#19 yfinance validation layer + retry logic** — Commit `a0d4e5b`
-- ✅ **#26 Remove calc_score_v2 — duplicate Score with wrong inputs** — Commit `0a34b8e`
-  - dashboard.py had a duplicate Score that read from *_calc columns (yfinance)
-    instead of stored values (FINVIZ). Removed function + Score_v2 column.
-- ✅ **#27 REL_VOL historical capping** — Data-only fix (no code change)
-  - 30 rows in post_analysis had REL_VOL > 100 (max 26,794). Capped to 100.
-  - Original values preserved in audit_flag (e.g., `CLEAN | REL_VOL_CAPPED_from_26794.01`).
-- ✅ **#28 Entry logic overhaul** — Commit `cbcc954`
-  - Entry gate: max(Score_B..I) -> Score only (Score_I was 0/11 wins in live)
-  - SCANNER_MIN_SCORE: 70 -> 60 (86.2% TP10, 2x more candidates)
-  - RSI formula: bell curve 50-70 -> extreme-only 80+ (RSI 90+ = 100% TP20)
-  - Dashboard sort: EntryScore desc -> Score desc
-- ✅ **Deep Data Audit completed** — Phases 1-4
-  - Score formula: 110/110 rows perfect match (all 9 variants verified)
-  - TP cascade logic: 0 violations
-  - MaxDrop% vs D1-D5 lows: 0/124 mismatches
-  - OHLC High >= Low: 0 violations across D1-D5
-  - 1 D0_Drop% outlier (RDGT, correctly flagged BROKEN)
-  - timeline_live: 2,351 duplicate scans (1.2%, cosmetic)
-  - post_analysis backfilled: 138 rows total (was 129), all D1+TP filled
-- ✅ **Comprehensive research completed** — 6-phase study
-  - Best predictor: ScanChange% (r=-0.429), Score (-0.378), RunUp (-0.367)
-  - Score >= 70: 96.8% TP10, 80.6% TP20, EV=$94.52/trade
-  - Best exit: ATRX>2 smart hold -> EV=$109.63/trade
-  - Live vs post gap: 60% of SL trades were actually winners (entry timing)
-  - EntryScore inverted: high ES = 0% wins, low ES = 87.5% wins
+### #1: 3 different SL definitions across dashboard pages
+- Portfolio Tracker (page 3): uses `SL_THRESHOLD_FRAC` (7%), within 5 days
+- Live Trades (page 4): SL=10% hardcoded, within 5 days
+- Score Comparison (page 9): SL=7%, ONLY D1 (SL7_Hit_D1)
+- **Verified 2026-04-25:** only one usage of SL_THRESHOLD_FRAC in dashboard (line 2824)
+- **Impact:** Win rate inconsistency across pages
+- **Effort:** 45 min (strategic decision + implementation)
+
+### #2: Min Score threshold inconsistent across pages
+- `MIN_SCORE_DISPLAY` exists in config but not enforced everywhere
+- Hardcoded `>= 60` in lines: 1203, 1480, 3198, 3243, 3347, 3396
+- Hardcoded `>= 70` in lines: 3411, 3545
+- **Impact:** Inconsistent filtering across dashboard pages
+- **Effort:** 15 min (replace hardcoded with MIN_SCORE_DISPLAY)
+
+### #5: DynamicScore - unclear if saved anywhere
+- Calculated on-the-fly in dashboard page 8 only
+- Not saved to any sheet
+- **Impact:** Can't backtest historically
+- **Effort:** 15 min (investigation + decision)
 
 ---
 
-## ✅ CLOSED — 2026-04-21 Session
+## 🟠 STILL OPEN - Important
 
-- ✅ **#17 post_analysis 29 rows recalc** — Commit `235f4fc`
-- ✅ **#23 timeline_live expanded to 25 cols** — Commit `d21911a`
-- ✅ **#24 VWAP renamed to TypicalPrice** — Commit `d3b1cb6`
-- ✅ **#11 VWAP column naming** — Resolved via #24
+### #6: Gap removed from Score v2 despite r=-0.256 (strong correlation)
+- Removed 11/4 (commit f3d96ca) without documented reason
+- **Impact:** Score weaker than possible
+- **Decision needed:** Add back to Score v3?
 
----
+### #7: 124 rows in post_analysis - run again with new formulas?
+- After formulas.py fixes, some calculated values may differ
+- **Effort:** 20 min recalc
 
-## ✅ CLOSED — 2026-04-19 Session
+### #8: Section 5 on page 9 is biased
+- Score tends to high values, "wins" without normalization
+- **Effort:** 25 min
 
-- ✅ **#2** Min Score centralized — `6bf67a5`
-- ✅ **#3** REL_VOL_CAP centralized — `afde95e`
-- ✅ **#4** TP15/TP20 to config — `8657cad`
-- ✅ **#5** DynamicScore verified — no bug
-- ✅ **#6** MxV *100 verified — no bug
-- ✅ **#7** Score functions to formulas.py + config — `acbf0ad`, `0fb1484`
-- ✅ **#10** REL_VOL cap — `afde95e`
-
----
-
-## 🔴 HIGH PRIORITY — 23/4/2026
-
-### TASK A: Gmail notifications infrastructure (~2 hours)
-A.1. Dedicated Gmail + 2FA + App Password
-A.2. GitHub Secrets: GMAIL_USER, GMAIL_APP_PASS, REPORT_TO
-A.3. notifier.py module with send_email()
-
-### TASK B: Daily Audit Workflows (~1 hour)
-B.1. Morning audit: 06:00 Peru (11:00 UTC)
-B.2. Evening audit: 19:00 Peru (00:00 UTC)
-
-### TASK C: 4 Daily Email Reports (~1 hour)
-C.1. 09:00 Peru — market open check
-C.2. 12:00 Peru — midday scan health
-C.3. 15:00 Peru — market close summary
-C.4. 16:30 Peru — post_analysis status
-
-### TASK D: Verify Issue #28 results (~30 min)
-D.1. Confirm Score-only gate active (no Score_I entries)
-D.2. Check new entries with Score 60-69
-D.3. Report initial win rate signal
+### #9: yfinance data reliability
+- 3 BROKEN rows, 21 NO_DATA in post_analysis
+- Pre-split prices, partial intraday issues
+- **Alternatives:** Polygon.io ($29/mo), FMP ($14/mo)
+- **Decision needed:** switch providers?
 
 ---
 
-## 🟡 MEDIUM PRIORITY — THIS WEEK
+## 🟡 STILL OPEN - Medium
 
-### TASK E: Strategy improvements (research 22/4)
-E.1. **Dynamic SL by ATRX** (biggest expected win)
-E.2. **Dynamic TP by metric**
-E.3. **Block entry after 13:00 Peru** (0/11 afternoon wins)
-E.4. **Position sizing by Score tier**
-E.5. **Entry timing redesign**
-
-### TASK F: May 2026 Simplification (target: before May 1)
-F.1. Remove Score_B..I from formulas + scanner
-F.2. Update TIMELINE_LIVE_COLS for May schema
-F.3. Remove Score Comparison page
-
-### #8: DATA_CUTOFF_DATE hardcoded — make dynamic (15 min)
-### #9: Gap removed from Score v2 — decision needed (30 min)
+### #12: Score_v2 duplicate in page 8
+- After recalc, Score and Score_v2 are identical
+- **Effort:** 10 min cleanup
 
 ---
 
-## 🟢 LOW PRIORITY — FUTURE
+## 🟢 STILL OPEN - Low
 
-### TASK G: Alpaca paper trading (~3 hours)
-- Prerequisite: #28 validated, win rate improved
-- Target: Friday 25/4 at earliest
+### #13: Update documentation
+- PROJECT_DOCUMENTATION.md marked OUTDATED - needs rewrite
+- CONVERSATION_SUMMARY.md marked OUTDATED
+- README.md last touched in v1 era
 
-### TASK H: Dashboard Win Rate tooltips (~30 min)
+### #14: Cleanup backup files
+- `*_BEFORE_*.py` files in project dir
+- code_auditor.py:53 already excludes them from audit
+- **Action:** move to גיבוי זמני/
 
-### TASK I: Historical data cleanup
-- I.1. timeline_live duplicates (2,351 rows)
-- I.2. Score variants > 100 (~13K rows)
-- I.3. Old rows missing audit_flag
+### #15: config.py v1 legacy weights
+- Kept for reference - eventually can remove
 
-### #12-14, #16: Archive/cleanup (15 min total)
-### #20: Broken Score variants in TL (leave as-is, removed in May)
-### #21: Documentation outdated
+### #16: PROJECT_STATE.md doesn't exist yet
+- Planned: live snapshot of system state per session
+- Will reduce context re-injection between sessions
 
-### ⏸ #1: SL definitions (DEFERRED — user rebuilds pages)
+### #17: DropsLab schema migration pending
+- Same migration as #41 needs to apply to DropsLab
+- Currently on old schema
 
 ---
 
-## 📊 STATUS (22/4/2026 23:00)
+## 📊 Observed Stats (2026-04-17)
 
-| Sheet | Rows | Notes |
-|-------|------|-------|
-| post_analysis | 138 | All D1+TP filled (except today) |
-| timeline_live | 188,762 | 25 cols, active |
-| daily_snapshots | 583 | Active |
-| portfolio | 166 | All Open |
-| live_trades | 34 | 22 SL, 11 TP10, 1 Pending |
+### Live Trades Performance (14 trades total)
+- TP10 Wins: 2 (14.3%)
+- SL Hits: 12 (85.7%)
+- Open: 0
+- **Note:** Small sample. Real confirmation requires more trades + post_analysis 124-row data (r=-0.336).
 
-**Issues closed total: 18 | Open: ~14 (4 high, 4 medium, 6 low)**
+### Post Analysis Correlations (Apr 2026, 124 rows)
+- Score ↔ MaxDrop: r = -0.336 (strong)
+- ScanChange ↔ MaxDrop: r = -0.348
+- MxV ↔ MaxDrop: r = +0.053 (noise, despite 25% weight)
+
+---
+
+## 📅 Daily Maintenance
+
+### Daily Audit (when email setup complete)
+- 06:00 Peru: daily_audit.py pre-market check
+- 19:00 Peru: daily_audit.py post-market check (after post_analysis)
+
+---
+
+## 🎯 Next Session Checklist (open Mon 2026-04-27)
+
+- [ ] Dashboard: Daily Summary 2026-04-27, Score 0-100, last scan HH:MM
+- [ ] ticker_follow_up: new rows with FollowDay=1 (~119 tickers from 23/4 + 24/4)
+- [ ] GitHub Actions: auto_scan.yml runs every minute, no OAuth errors
+
+---
+
+## Legend
+- 🔴 Critical - affects data accuracy or trading decisions
+- 🟠 Important - system works but suboptimal
+- 🟡 Medium - nice to fix
+- 🟢 Low - cosmetic/documentation
