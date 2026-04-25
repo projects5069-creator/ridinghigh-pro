@@ -18,7 +18,17 @@ from utils import is_trading_day
 from config import TP_THRESHOLD_FRAC, SL_THRESHOLD_FRAC
 
 
-from utils import _is_missing
+def _is_missing(val):
+    """True if value is None, NaN, empty string, or the literal string 'nan'/'None'."""
+    if val is None:
+        return True
+    try:
+        import math
+        if math.isnan(float(val)):
+            return True
+    except (TypeError, ValueError):
+        pass
+    return str(val).strip() in ("", "nan", "None")
 
 
 def fetch_d0_data(ticker: str, scan_date: str) -> dict:
@@ -160,7 +170,7 @@ def run(backfill: bool = False):
                 if scan_price > 0:
                     pa.at[idx, "IntraDay_TP10"] = "1" if intra_low <= scan_price * (1 - TP_THRESHOLD_FRAC) else "0"
 
-                # SL_Hit_D0: did price go UP 7%+ from scan price on scan day?
+                # SL_Hit_D0: did price go UP SL_THRESHOLD_PCT%+ from scan price on scan day?
                 if scan_price > 0:
                     pa.at[idx, "SL_Hit_D0"] = "1" if intra_high >= scan_price * (1 + SL_THRESHOLD_FRAC) else "0"
 

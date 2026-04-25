@@ -45,7 +45,7 @@ Dependencies:
 """
 import pytz
 from datetime import datetime, timedelta
-from config import TP_THRESHOLD_FRAC, SL_THRESHOLD_FRAC, TP15_THRESHOLD_FRAC, TP20_THRESHOLD_FRAC
+from config import TP_THRESHOLD_FRAC, SL_THRESHOLD_FRAC
 
 
 # ═══════════════════════════════════════════════════════════════════════
@@ -178,48 +178,6 @@ def get_trading_days_after(scan_date_str, n=5):
     """
     import sheets_manager
     return sheets_manager.trading_days_after(scan_date_str, n)
-
-
-def _is_missing(val) -> bool:
-    """True if value is None, NaN, empty string, or literal 'nan'/'None'/'NaN'.
-
-    Used across backfill/enrich/health_check modules to detect missing data.
-    """
-    if val is None:
-        return True
-    try:
-        import math
-        if isinstance(val, float) and math.isnan(val):
-            return True
-    except (TypeError, ValueError):
-        pass
-    try:
-        import pandas as pd
-        if isinstance(val, float) and pd.isna(val):
-            return True
-    except (ImportError, TypeError, ValueError):
-        pass
-    return str(val).strip() in ("", "nan", "None", "NaN")
-
-
-def strip_comments(line):
-    """Strip # comments from a Python code line.
-
-    Basic implementation — ignores # inside strings.
-    Used by code_auditor and daily_audit for scanning code.
-    """
-    in_string = False
-    quote = None
-    for i, c in enumerate(line):
-        if c in ('"', "'") and (i == 0 or line[i-1] != '\\'):
-            if not in_string:
-                in_string = True
-                quote = c
-            elif c == quote:
-                in_string = False
-        elif c == '#' and not in_string:
-            return line[:i]
-    return line
 
 
 # ═══════════════════════════════════════════════════════════════════════
@@ -368,8 +326,12 @@ def calculate_stats(scan_price, ohlc):
             - TP15_Hit: 1 if price dropped ≥15%
             - TP20_Hit: 1 if price dropped ≥20%
             - D1_Gap%: Next day overnight gap
-            - SL7_Hit_D1: 1 if price rose ≥7% on D1
-            - IntraDay_SL: 1 if price rose ≥7% any day during tracking
+            - SL_Hit_D5: 1 if price rose ≥SL_THRESHOLD_PCT% on ANY day D1-D5
+                         (Renamed from SL7_Hit_D1 on 2026-04-25 — Issue #1
+                          SL unification. Previously checked only D1 with 7%;
+                          now checks full 5-day window with unified threshold.)
+            - IntraDay_SL: 1 if price rose ≥SL_THRESHOLD_PCT% any day during tracking
+                           (kept for backward compat — same value as SL_Hit_D5 now)
     """
     # Use formulas.py for consistent calculations
     from formulas import calculate_max_drop, calculate_d1_gap
@@ -385,7 +347,7 @@ def calculate_stats(scan_price, ohlc):
             "TP15_Hit": None,
             "TP20_Hit": None,
             "D1_Gap%": None,
-            "SL7_Hit_D1": None,
+            "SL_Hit_D5": None,
             "IntraDay_SL": None,
         }
     
@@ -396,25 +358,23 @@ def calculate_stats(scan_price, ohlc):
     d1_gap = round(calculate_d1_gap(d1_open, scan_price), 2) if d1_open else None
     
     # SL checks (short position loses when price RISES)
-    d1_high = ohlc.get("D1_High", 0) or 0
-    sl7_hit_d1 = 1 if d1_high >= scan_price * (1 + SL_THRESHOLD_FRAC) else 0
-    
-    intra_sl = 0
+    # SL_Hit_D5: did price rise ≥SL_THRESHOLD_PCT% on ANY of D1-D5?
+    sl_hit_d5 = 0
     for i in range(1, 6):
         high = ohlc.get(f"D{i}_High", 0) or 0
         if high >= scan_price * (1 + SL_THRESHOLD_FRAC):
-            intra_sl = 1
+            sl_hit_d5 = 1
             break
     
     return {
         "MaxDrop%": max_drop,
         "BestDay": best_day,
         "TP10_Hit": 1 if min_low <= scan_price * (1 - TP_THRESHOLD_FRAC) else 0,
-        "TP15_Hit": 1 if min_low <= scan_price * (1 - TP15_THRESHOLD_FRAC) else 0,
-        "TP20_Hit": 1 if min_low <= scan_price * (1 - TP20_THRESHOLD_FRAC) else 0,
+        "TP15_Hit": 1 if min_low <= scan_price * 0.85 else 0,
+        "TP20_Hit": 1 if min_low <= scan_price * 0.80 else 0,
         "D1_Gap%": d1_gap,
-        "SL7_Hit_D1": sl7_hit_d1,
-        "IntraDay_SL": intra_sl,
+        "SL_Hit_D5": sl_hit_d5,
+        "IntraDay_SL": sl_hit_d5,  # alias kept for backward compat
     }
 
 
@@ -466,71 +426,3 @@ if __name__ == "__main__":
     print("\n" + "=" * 60)
     print("All utils loaded successfully ✅")
     print("=" * 60)
-
-
-# ============================================================
-# Issue #19: Data validation + yfinance retry logic
-# ============================================================
-
-def validate_stock_data(price, week52high, atr14, high_today=None, low_today=None,
-                       open_price=None, avg_volume=None):
-    """
-    Validate stock data for common yfinance issues.
-    Returns: "CLEAN" | "SUSPICIOUS" | "BROKEN" | "PRE_SPLIT" | "NO_DATA"
-    """
-    try:
-        if price is None or price == 0:
-            return "NO_DATA"
-
-        price = float(price)
-
-        # BROKEN — physical impossibilities
-        if high_today is not None and low_today is not None:
-            if float(high_today) < float(low_today):
-                return "BROKEN"
-        if price > 10000:
-            return "BROKEN"
-        if avg_volume is not None and float(avg_volume) < 0:
-            return "BROKEN"
-
-        # PRE_SPLIT — Week52High absurdly high vs current price
-        if week52high is not None and float(week52high) > 0:
-            if float(week52high) > price * 50:
-                return "PRE_SPLIT"
-
-        # PRE_SPLIT — ATR14 absurdly high vs current price
-        if atr14 is not None and float(atr14) > 0:
-            if float(atr14) > price * 3:
-                return "PRE_SPLIT"
-
-        # SUSPICIOUS — legitimate but extreme volatility
-        if open_price is not None and high_today is not None:
-            op = float(open_price)
-            hi = float(high_today)
-            if op > 0 and hi > op * 2:
-                return "SUSPICIOUS"
-
-        return "CLEAN"
-    except (TypeError, ValueError):
-        return "BROKEN"
-
-
-def yf_fetch_with_retry(ticker, period="1d", interval="1d", max_retries=3, backoff=1.0):
-    """
-    Fetch yfinance data with retry logic for transient failures.
-    Returns: DataFrame (possibly empty) or None if all retries failed.
-    """
-    import yfinance as yf
-    import time as _time
-
-    for attempt in range(max_retries):
-        try:
-            stock = yf.Ticker(ticker)
-            hist = stock.history(period=period, interval=interval)
-            if hist is not None and not hist.empty:
-                return hist
-        except Exception:
-            pass
-        if attempt < max_retries - 1:
-            _time.sleep(backoff * (2 ** attempt))
-    return None

@@ -188,17 +188,19 @@ def test_calculate_stats(t):
     t.assert_equal(stats["TP15_Hit"], 1, "stats_tp15_hit_yes")
     t.assert_equal(stats["TP20_Hit"], 1, "stats_tp20_hit_yes")
     t.assert_equal(stats["D1_Gap%"], -5.0, "stats_d1_gap_negative")
-    t.assert_equal(stats["SL7_Hit_D1"], 0, "stats_sl7_d1_no")
+    # No D-day high reaches 10.0 * 1.10 = 11.0, so no SL hit
+    t.assert_equal(stats["SL_Hit_D5"], 0, "stats_sl_d5_no")
     t.assert_equal(stats["IntraDay_SL"], 0, "stats_intra_sl_no")
     
-    # Scenario 2: Failed short - SL hit on D1
+    # Scenario 2: Failed short - SL hit during D1-D5 window
+    # SL threshold at 10% = 10.0 * 1.10 = 11.0
     ohlc2 = {
-        "D1_Open": 10.5, "D1_High": 11.0, "D1_Low": 10.0,  # high > 10.7 ? no, 11.0 > 10.7 yes
+        "D1_Open": 10.5, "D1_High": 11.5, "D1_Low": 10.0,  # 11.5 >= 11.0 → SL hit
         "D2_Open": 11.0, "D2_High": 12.0, "D2_Low": 10.5,
     }
     stats2 = calculate_stats(10.0, ohlc2)
-    # SL7 = price * 1.07 = 10.7, D1_High = 11.0 >= 10.7 → SL hit
-    t.assert_equal(stats2["SL7_Hit_D1"], 1, "stats_sl7_d1_hit")
+    # SL = price * 1.10 = 11.0, D1_High = 11.5 >= 11.0 → SL hit
+    t.assert_equal(stats2["SL_Hit_D5"], 1, "stats_sl_d5_hit")
     t.assert_equal(stats2["IntraDay_SL"], 1, "stats_intra_sl_hit")
     
     # Scenario 3: No data

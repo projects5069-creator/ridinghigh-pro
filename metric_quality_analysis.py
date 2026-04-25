@@ -51,7 +51,7 @@ TECHNICAL = {
     "RunUp": "Intraday rise %",
     "ATRX": "Volatility ratio",
     "RSI": "Relative Strength Index",
-    "TypicalPriceDist": "Distance from Typical Price (H+L+C)/3",
+    "VWAP": "Distance from VWAP",
     "ScanChange%": "Change % vs prev close",
     "REL_VOL": "Volume relative to avg",
     "Gap": "Opening gap %",
@@ -82,7 +82,7 @@ ALL_NUMERIC_METRICS = {**TECHNICAL, **STRUCTURAL, **SCAN_METRICS}
 ALL_NUMERIC_METRICS.update({c: f"Catalyst: {c.replace('cat_','')}" for c in CATALYSTS})
 
 # Convert to numeric
-outcomes = ["MaxDrop%", "TP10_Hit", "TP15_Hit", "TP20_Hit", "SL7_Hit_D1"]
+outcomes = ["MaxDrop%", "TP10_Hit", "TP15_Hit", "TP20_Hit", "SL_Hit_D5"]
 all_cols = list(ALL_NUMERIC_METRICS.keys()) + outcomes
 for col in all_cols:
     if col in df.columns:

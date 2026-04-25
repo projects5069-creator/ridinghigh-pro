@@ -72,20 +72,12 @@ SCORE_RSI_PARAMS = {
     "OVER_DECAY":   30,   # RSI above 70 decays over this range (70-100)
     "HALF_POINT":   20,   # midpoint weight transition (50 → 70 spans 20)
 }
-"""RSI bell curve parameters for calculate_score.
-Formula:
-  if rsi < CENTER_LOW (50):   linear ramp to SWEET_HIGH
-  if CENTER_LOW <= rsi <= SWEET_HIGH (50-70): peak zone
-  if rsi > SWEET_HIGH (70):   linear decay over OVER_DECAY (30) to zero
-"""
+"""RSI scoring bell curve parameters."""
 
 
 # ═══════════════════════════════════════════════════════════════════════
-# Metric-Level Caps (absolute limits applied before any scoring)
+# Raw Data Caps (applied before scoring)
 # ═══════════════════════════════════════════════════════════════════════
-# These caps protect against yfinance data outliers — applied in formulas.py
-# BEFORE scoring logic sees them. Different from SCORE_CAPS_V2 which are
-# "max contribution per metric" thresholds for the score formula.
 
 REL_VOL_CAP = 100.0
 """Hard cap on REL_VOL (volume / avg_volume) to prevent yfinance outliers.
@@ -109,17 +101,9 @@ CRITICAL_SCORE = 85
 MEDIUM_SCORE = 40
 """Score ≥ this is considered 'Medium' (yellow tier)."""
 
-# ─────────────────────────────────────────────────────────────────────
-# Trade Entry Threshold (Issue #30, 2026-04-23)
-# ─────────────────────────────────────────────────────────────────────
-# Minimum score to open a simulated trade in live_trades + portfolio.
-# Applies to: live_trades, portfolio (post_analysis inherits from these)
-# Does NOT apply to: timeline_live, daily_snapshots (those capture all scans)
-# Rationale: E1c research showed Score 60-69 dilute expectancy ~$40/trade
-TRADE_ENTRY_MIN_SCORE = 70
-
-# Legacy alias — kept for backwards compat. DO NOT use in new code.
-SCANNER_MIN_SCORE = TRADE_ENTRY_MIN_SCORE
+# Scanner thresholds (used in Live Trades page, stricter)
+SCANNER_MIN_SCORE = 70
+"""Minimum score for Live Trades page (stricter than display)."""
 
 
 # ═══════════════════════════════════════════════════════════════════════
@@ -132,25 +116,23 @@ POSITION_SIZE_USD = 1000
 TP_THRESHOLD_PCT = 10
 """Take Profit: close position when price drops this % (short)."""
 
-SL_THRESHOLD_PCT = 7
-"""Stop Loss: close position when price rises this % (short)."""
+SL_THRESHOLD_PCT = 10
+"""Stop Loss: close position when price rises this % (short).
+
+Changed from 7% to 10% on 2026-04-25 (Issue #1 SL unification):
+Previous setup had inconsistent SL values across dashboard pages
+(Portfolio Tracker=7%, Live Trades=10%, Score Comparison=7% D1-only).
+Unified to 10% for breathing room on volatile pump stocks.
+
+Future: replace with Dynamic SL by ATRX (see Phase 2 roadmap).
+"""
 
 MAX_HOLDING_DAYS = 5
 """Maximum days to hold a position before forced exit."""
 
 # PnL calculations
 TP_THRESHOLD_FRAC = TP_THRESHOLD_PCT / 100.0  # 0.10
-SL_THRESHOLD_FRAC = SL_THRESHOLD_PCT / 100.0  # 0.07
-
-# Stretch targets — used only for labeling/metrics, not active trading
-TP15_THRESHOLD_PCT = 15
-"""TP15 stretch target: mark when price drops ≥15% (informational only)."""
-
-TP20_THRESHOLD_PCT = 20
-"""TP20 stretch target: mark when price drops ≥20% (informational only)."""
-
-TP15_THRESHOLD_FRAC = TP15_THRESHOLD_PCT / 100.0  # 0.15
-TP20_THRESHOLD_FRAC = TP20_THRESHOLD_PCT / 100.0  # 0.20
+SL_THRESHOLD_FRAC = SL_THRESHOLD_PCT / 100.0  # 0.10
 
 
 # ═══════════════════════════════════════════════════════════════════════
@@ -175,7 +157,6 @@ MARKET_CLOSE_HOUR_PERU = 15
 
 POST_ANALYSIS_HOUR_PERU = 16
 """post_analysis_collector.py runs at 16:00 Peru (1 hour after close)."""
-
 
 
 # ═══════════════════════════════════════════════════════════════════════
@@ -273,15 +254,12 @@ if __name__ == "__main__":
     print(f"  HIGH_SCORE         = {HIGH_SCORE}")
     print(f"  CRITICAL_SCORE     = {CRITICAL_SCORE}")
     print(f"  MEDIUM_SCORE       = {MEDIUM_SCORE}")
-    print(f"  TRADE_ENTRY_MIN_SCORE = {TRADE_ENTRY_MIN_SCORE}")
-    print(f"  SCANNER_MIN_SCORE    = {SCANNER_MIN_SCORE}  (legacy alias)")
+    print(f"  SCANNER_MIN_SCORE  = {SCANNER_MIN_SCORE}")
     
     print("\n── Trade Parameters ──")
     print(f"  POSITION_SIZE_USD     = ${POSITION_SIZE_USD}")
     print(f"  TP_THRESHOLD_PCT      = {TP_THRESHOLD_PCT}%  (= {TP_THRESHOLD_FRAC} frac)")
     print(f"  SL_THRESHOLD_PCT      = {SL_THRESHOLD_PCT}%  (= {SL_THRESHOLD_FRAC} frac)")
-    print(f"  TP15_THRESHOLD_PCT    = {TP15_THRESHOLD_PCT}%  (= {TP15_THRESHOLD_FRAC} frac)")
-    print(f"  TP20_THRESHOLD_PCT    = {TP20_THRESHOLD_PCT}%  (= {TP20_THRESHOLD_FRAC} frac)")
     print(f"  MAX_HOLDING_DAYS      = {MAX_HOLDING_DAYS}")
     
     print("\n── System Timing ──")
