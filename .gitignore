@@ -43,3 +43,10 @@ project_sync_*.zip
 project_sync_*/
 MIGRATION_STATUS_*.md
 TASKS_*.md
+
+# Backup files from in-place edits (Rule #4 in project conventions)
+*_BEFORE_*
+*.BEFORE_*
+
+# Temp backup folder
+גיבוי זמני/

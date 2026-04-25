@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-04-25 13:05:19 -05
+**Generated:** 2026-04-25 13:19:27 -05
 **Branch:** `main`
-**Latest commit:** `38c5293` — Add PROJECT_STATE auto-update system
+**Latest commit:** `2ba5ce7` — Cleanup: archive 38 backup files, install gitignore rules
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `38c5293 (HEAD -> main) Add PROJECT_STATE auto-update system`
+- `2ba5ce7 (HEAD -> main) Cleanup: archive 38 backup files, install gitignore rules`
+- `9b1068f Add PROJECT_STATE auto-update system`
 - `dbc5424 Update OPEN_ISSUES.md - close #3 #4 #10 #11, add #41-44 + #16 #17`
 - `55ac6a4 (origin/main) Docs: close Issue #44`
 - `bf4f6fc Issue #44: OAuth-based sheet creation (fix Drive quota)`
-- `ff7b0a9 Docs: abandon Issue #43 (approach didn't fix quota)`
 
 ---
 
@@ -32,32 +32,35 @@ _See `OPEN_ISSUES.md` for full list_
 
 | Workflow | Status | Conclusion | Started |
 |---|---|---|---|
+| RidingHigh Auto Scanner | completed | ✅ success | 2026-04-25 18:06 UTC |
 | RidingHigh Auto Scanner | completed | ✅ success | 2026-04-25 16:07 UTC |
 | RidingHigh Auto Scanner | completed | ✅ success | 2026-04-25 14:09 UTC |
 | RidingHigh Auto Scanner | completed | ✅ success | 2026-04-25 11:08 UTC |
 | RidingHigh Auto Scanner | completed | ✅ success | 2026-04-25 08:35 UTC |
-| RidingHigh Auto Scanner | completed | ✅ success | 2026-04-25 05:30 UTC |
 
 ---
 
-## 📊 Google Sheets — month `2026-05`
+## 📊 Google Sheets — showing month `2026-04`
+
+_Selection: current Peru month (2026-04) has data_
+_Months in config: `2026-04`, `2026-05`_
 
 | Sheet | Total rows | Last date | Status |
 |---|---|---|---|
-| timeline_live | 0 | — | ⚠️ empty |
-| daily_snapshots | 0 | — | ⚠️ empty |
-| daily_summary | 0 | — | ⚠️ empty |
-| post_analysis | 0 | — | ⚠️ empty |
-| portfolio | 0 | — | ⚠️ empty |
-| portfolio_live | 0 | — | ⚠️ empty |
-| score_tracker | 0 | — | ⚠️ empty |
-| live_trades | 0 | — | ⚠️ empty |
+| timeline_live | 218,522 | 2026-04-24 | ✅ |
+| daily_snapshots | 113 | 2026-04-24 | ✅ |
+| daily_summary | 890 | 2026-04-24 | ✅ |
+| post_analysis | 138 | TORO | ✅ |
+| portfolio | 180 | TRT_2026-0 | ✅ |
+| portfolio_live | 69 | ENVB | ✅ |
+| score_tracker | 15,871 | 2026-04-23 | ✅ |
+| live_trades | 15,871 | 2026-04-23 | ✅ |
+| ticker_follow_up | 0 | — | ⚠️ empty |
 
 ---
 
 ## 🩺 Health
-
-- ⚠️ 39 uncommitted file(s)
+✅ All checks passed.
 
 ---
 
@@ -74,4 +77,9 @@ cd ~/RidingHighPro && python3 generate_project_state.py
 To disable auto-update temporarily:
 ```bash
 chmod -x .git/hooks/post-commit
+```
+
+To skip update for a single commit:
+```bash
+SKIP_PROJECT_STATE=1 git commit -m "..."
 ```
