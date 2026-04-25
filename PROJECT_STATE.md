@@ -1,28 +1,28 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-04-25 13:19:27 -05
+**Generated:** 2026-04-25 13:24:51 -05
 **Branch:** `main`
-**Latest commit:** `2ba5ce7` — Cleanup: archive 38 backup files, install gitignore rules
+**Latest commit:** `dcf7c42` — Close #14 #16 in OPEN_ISSUES.md - cleanup + PROJECT_STATE
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `2ba5ce7 (HEAD -> main) Cleanup: archive 38 backup files, install gitignore rules`
+- `dcf7c42 (HEAD -> main) Close #14 #16 in OPEN_ISSUES.md - cleanup + PROJECT_STATE`
+- `7e7573e Cleanup: archive 38 backup files, install gitignore rules`
 - `9b1068f Add PROJECT_STATE auto-update system`
 - `dbc5424 Update OPEN_ISSUES.md - close #3 #4 #10 #11, add #41-44 + #16 #17`
 - `55ac6a4 (origin/main) Docs: close Issue #44`
-- `bf4f6fc Issue #44: OAuth-based sheet creation (fix Drive quota)`
 
 ---
 
-## 📋 Open issues — 13 total
+## 📋 Open issues — 11 total
 
 - 🔴 Critical: **3**
 - 🟠 Important: **4**
 - 🟡 Medium: **1**
-- 🟢 Low: **5**
+- 🟢 Low: **3**
 
 _See `OPEN_ISSUES.md` for full list_
 

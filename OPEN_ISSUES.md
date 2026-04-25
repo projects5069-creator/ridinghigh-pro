@@ -3,6 +3,24 @@
 
 ---
 
+## ✅ CLOSED (2026-04-25) - Session "Cleanup + PROJECT_STATE"
+
+### #14: Cleanup backup files
+- 38 `*_BEFORE_*.py` files moved to `גיבוי זמני/2026-04-25/`
+- `.gitignore` updated with patterns: `*_BEFORE_*`, `*.BEFORE_*`, `גיבוי זמני/`
+- **Status:** Closed
+- Commit: 2ba5ce7
+
+### #16: PROJECT_STATE.md auto-update system
+- Created `generate_project_state.py` (live snapshot generator)
+- Reads: git log, GitHub Actions API, Google Sheets stats, OPEN_ISSUES.md
+- Auto-runs after every commit via `.git/hooks/post-commit`
+- v2 includes smart month selection (prefers current Peru month with data)
+- **Status:** Closed
+- Commits: dbc5424 (initial), 2ba5ce7 (v2 + cleanup)
+
+---
+
 ## ✅ CLOSED (2026-04-24) - Session "Schema Migration + OAuth"
 
 ### #41: Schema migration timeline_live → 28 cols
@@ -145,17 +163,8 @@
 - CONVERSATION_SUMMARY.md marked OUTDATED
 - README.md last touched in v1 era
 
-### #14: Cleanup backup files
-- `*_BEFORE_*.py` files in project dir
-- code_auditor.py:53 already excludes them from audit
-- **Action:** move to גיבוי זמני/
-
 ### #15: config.py v1 legacy weights
 - Kept for reference - eventually can remove
-
-### #16: PROJECT_STATE.md doesn't exist yet
-- Planned: live snapshot of system state per session
-- Will reduce context re-injection between sessions
 
 ### #17: DropsLab schema migration pending
 - Same migration as #41 needs to apply to DropsLab
