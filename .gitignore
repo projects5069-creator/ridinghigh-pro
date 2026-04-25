@@ -56,3 +56,7 @@ TASKS_*.md
 
 # Archived old code (kept locally, not in git)
 archive_*/
+.env
+.env.local
+provider_validation_report.md
+provider_validation_report.json
