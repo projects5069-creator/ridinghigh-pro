@@ -31,7 +31,7 @@ data/
 *.pyes
 *.pyrtyhc
 google_credentials.json
-backups/*.csv
+backups/
 oauth_client.json
 oauth_credentials.json
 oauth_token.json
