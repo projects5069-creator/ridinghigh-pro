@@ -101,9 +101,14 @@ CRITICAL_SCORE = 85
 MEDIUM_SCORE = 40
 """Score ≥ this is considered 'Medium' (yellow tier)."""
 
-# Scanner thresholds (used in Live Trades page, stricter)
-SCANNER_MIN_SCORE = 70
-"""Minimum score for Live Trades page (stricter than display)."""
+# Trade entry threshold — Score must be ≥ this to enter a trade.
+# Applies to: live_trades, portfolio (post_analysis inherits from these)
+# Does NOT apply to: timeline_live, daily_snapshots (those capture all scans)
+# Rationale: E1c research showed Score 60-69 dilute expectancy ~$40/trade
+TRADE_ENTRY_MIN_SCORE = 70
+
+# Legacy alias — kept for backwards compat. DO NOT use in new code.
+SCANNER_MIN_SCORE = TRADE_ENTRY_MIN_SCORE
 
 
 # ═══════════════════════════════════════════════════════════════════════

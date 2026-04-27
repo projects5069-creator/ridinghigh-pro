@@ -10,9 +10,9 @@ import sys, os, time
 sys.path.insert(0, os.path.expanduser("~/RidingHighPro"))
 
 import pandas as pd
-import yfinance as yf
 from datetime import datetime, timedelta
 import pytz
+from data_provider import get_data_provider
 
 from gsheets_sync import load_post_analysis_from_sheets, save_post_analysis_to_sheets
 import sheets_manager
@@ -27,28 +27,29 @@ from utils import (
 # get_trading_days_after, is_day_complete, calculate_stats imported from utils
 
 def fetch_ohlc(ticker, trading_days):
+    """Fetch D1-D5 OHLC via data_provider (Issue #9 Phase 2 — was yfinance)."""
     available = [d for d in trading_days if is_day_complete(d)]
     if not available:
         return {}
+    provider = get_data_provider()
     for attempt in range(1, 5):
         try:
             end_dt = datetime.strptime(available[-1], "%Y-%m-%d") + timedelta(days=3)
-            hist   = yf.download(ticker, start=available[0],
-                                 end=end_dt.strftime("%Y-%m-%d"),
-                                 progress=False, auto_adjust=True)
-            if hist.empty:
+            # 15 daily bars buffer covers 5 trading days + weekends
+            bars = provider.get_daily_bars(ticker, days=15, end_date=end_dt)
+            if bars.empty:
                 time.sleep(2); continue
-            if isinstance(hist.columns, pd.MultiIndex):
-                hist.columns = hist.columns.get_level_values(0)
-            hist.index = pd.to_datetime(hist.index).strftime("%Y-%m-%d")
+            # Provider returns DatetimeIndex; convert to YYYY-MM-DD strings
+            bars = bars.copy()
+            bars.index = pd.to_datetime(bars.index).strftime("%Y-%m-%d")
             result = {}
             for i, day in enumerate(trading_days, 1):
-                if day in hist.index:
-                    r = hist.loc[day]
-                    result[f"D{i}_Open"]  = round(float(r["Open"]),  4)
-                    result[f"D{i}_High"]  = round(float(r["High"]),  4)
-                    result[f"D{i}_Low"]   = round(float(r["Low"]),   4)
-                    result[f"D{i}_Close"] = round(float(r["Close"]), 4)
+                if day in bars.index:
+                    r = bars.loc[day]
+                    result[f"D{i}_Open"]  = round(float(r["open"]),  4)
+                    result[f"D{i}_High"]  = round(float(r["high"]),  4)
+                    result[f"D{i}_Low"]   = round(float(r["low"]),   4)
+                    result[f"D{i}_Close"] = round(float(r["close"]), 4)
                 else:
                     for s in ["Open","High","Low","Close"]:
                         result[f"D{i}_{s}"] = None

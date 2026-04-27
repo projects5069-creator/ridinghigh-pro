@@ -300,6 +300,7 @@ class YFinanceFundamentalsProvider(FundamentalsProvider):
             "average_volume": None,
             "sector": None,
             "industry": None,
+            "ipo_epoch": None,
         }
         try:
             info = self._yf.Ticker(ticker).info
@@ -310,6 +311,7 @@ class YFinanceFundamentalsProvider(FundamentalsProvider):
                 "average_volume":     _safe_int(info.get("averageVolume")),
                 "sector":             info.get("sector"),
                 "industry":           info.get("industry"),
+                "ipo_epoch":          _safe_int(info.get("firstTradeDateMilliseconds") / 1000) if info.get("firstTradeDateMilliseconds") else None,
             }
         except Exception as e:
             logger.warning(f"yfinance fundamentals({ticker}) failed: {e}")

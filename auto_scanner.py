@@ -92,16 +92,17 @@ def save_mc_cache():
         pass
 
 # ── Scanner logic (mirrors dashboard.py exactly) ─────────────────────────────
-import yfinance as yf
+# yfinance imported lazily where needed (Issue #9 Phase 2)
 from finvizfinance.screener.overview import Overview
 from ta.momentum import RSIIndicator
 from ta.volatility import AverageTrueRange
+from data_provider import get_data_provider, get_fundamentals_provider
 
 _shares_cache = {}
 
 # parse_market_cap and parse_volume imported from utils
 
-# get_market_cap_smart imported from utils
+# get_market_cap_smart imported from utils (Issue #9 Phase 2 — was local duplicate)
 
 def analyze_ticker(ticker, finviz_row):
     try:
@@ -117,7 +118,11 @@ def analyze_ticker(ticker, finviz_row):
 
         finviz_mc = parse_market_cap(finviz_row.get('Market Cap', None))
         market_cap, shares = get_market_cap_smart(
-            ticker, finviz_mc=finviz_mc, shares_cache=_shares_cache
+            ticker,
+            price=price,
+            finviz_mc=finviz_mc,
+            shares_cache=_shares_cache,
+            return_tuple=True,
         )
         if market_cap and market_cap > 0:
             _mc_cache[ticker] = int(market_cap)
@@ -139,58 +144,71 @@ def analyze_ticker(ticker, finviz_row):
         high_today = 0; low_today = 0; typical_price = 0
         week52_high = 0
 
+        # Issue #9 Phase 2 — was yf.Ticker(ticker).history() + stock.info
         try:
-            stock = yf.Ticker(ticker)
-            hist  = stock.history(period='60d')
+            provider = get_data_provider()
+            # Fetch 252 days for 52w_high calculation; last 60 used for RSI/ATR
+            hist_full = provider.get_daily_bars(ticker, days=252)
 
-            if not hist.empty and len(hist) >= 2:
-                info    = stock.info
+            # Lazy fundamentals — only fetch if we got valid hist
+            fund = None
+
+            if not hist_full.empty and len(hist_full) >= 2:
+                # Provider returns lowercase columns — use them directly
+                hist = hist_full.tail(60)  # last 60 trading days for indicators
                 current  = hist.iloc[-1]
                 previous = hist.iloc[-2]
 
+                # Fetch fundamentals once (used in multiple places below)
+                try:
+                    fund = get_fundamentals_provider().get_fundamentals(ticker) or {}
+                except Exception:
+                    fund = {}
+
                 if len(hist) >= 14:
                     try:
-                        rsi_vals = RSIIndicator(close=hist['Close'], window=14).rsi()
+                        rsi_vals = RSIIndicator(close=hist['close'], window=14).rsi()
                         if not rsi_vals.empty and not pd.isna(rsi_vals.iloc[-1]):
                             rsi = rsi_vals.iloc[-1]
                     except: pass
 
                     try:
                         atr_vals = AverageTrueRange(
-                            high=hist['High'], low=hist['Low'],
-                            close=hist['Close'], window=14
+                            high=hist['high'], low=hist['low'],
+                            close=hist['close'], window=14
                         ).average_true_range()
-                        atr = atr_vals.iloc[-1] if not atr_vals.empty else current['High'] - current['Low']
-                        atrx = calculate_atrx(current["High"], current["Low"], atr)
+                        atr = atr_vals.iloc[-1] if not atr_vals.empty else current['high'] - current['low']
+                        atrx = calculate_atrx(current["high"], current["low"], atr)
                         atrx = validate_atrx(atrx, atr, price)
                         atr14_raw = round(float(atr), 4)  # raw ATR14
                     except: pass
 
                 try:
-                    avg_vol = info.get('averageVolume', volume)
-                    # calculate_rel_vol already caps at config.REL_VOL_CAP
+                    avg_vol = fund.get('average_volume') or volume
                     rel_vol = calculate_rel_vol(volume, avg_vol)
+                    if rel_vol > 100:
+                        print(f"  ⚠ REL_VOL capped: {rel_vol:.1f} -> 100 for {ticker}")
+                        rel_vol = 100
                 except: pass
 
                 try:
-                    open_price = round(float(current['Open']), 4)
-                    run_up = calculate_runup(price, current['Open'])
+                    open_price = round(float(current['open']), 4)
+                    run_up = calculate_runup(price, current['open'])
                 except: pass
 
                 try:
-                    prev_close = round(float(previous['Close']), 4)
-                    gap = calculate_gap(current['Open'], previous['Close'])
+                    prev_close = round(float(previous['close']), 4)
+                    gap = calculate_gap(current['open'], previous['close'])
                 except: pass
 
                 try:
-                    high_today = round(float(current['High']), 4)
-                    low_today  = round(float(current['Low']), 4)
-                    typical_price = round((current['High'] + current['Low'] + price) / 3, 4)
-                    typical_price_dist = calculate_typical_price_dist(price, current['High'], current['Low'])
+                    high_today = round(float(current['high']), 4)
+                    low_today  = round(float(current['low']), 4)
+                    typical_price = round((current['high'] + current['low'] + price) / 3, 4)
+                    typical_price_dist = calculate_typical_price_dist(price, current['high'], current['low'])
                 except: pass
 
                 # Fallback: if daily bar hasn't updated high yet, use price as high.
-                # This means no reversal signal yet — EntryScore will be low intentionally.
                 if high_today <= price:
                     high_today = price
 
@@ -199,20 +217,25 @@ def analyze_ticker(ticker, finviz_row):
                 except: pass
 
                 try:
-                    week52_high       = float(info.get('fiftyTwoWeekHigh', price))
-                    h52               = week52_high
+                    # 52w high computed from 252-day history (was yfinance fiftyTwoWeekHigh)
+                    week52_high = float(hist_full['high'].max()) if not hist_full.empty else price
+                    h52 = week52_high
                     price_to_52w_high = ((price - h52) / h52) * 100 if h52 > 0 else 0
                 except: pass
 
                 if shares_outstanding == 0:
-                    shares_outstanding = info.get('sharesOutstanding', int(market_cap / price) if price > 0 else 0)
+                    shares_outstanding = (fund.get('shares_outstanding') or 0) or (
+                        int(market_cap / price) if price > 0 else 0
+                    )
 
                 try:
-                    fs = info.get('floatShares', 0) or 0
+                    fs = (fund.get('float_shares') or 0)
                     float_pct = calculate_float_pct(fs, shares_outstanding)
                 except: pass
 
-        except: pass
+        except Exception as e:
+            print(f"  ⚠ analyze_ticker provider error for {ticker}: {e}")
+            pass
 
         mxv = calculate_mxv(market_cap, price, volume)
         metrics = {
@@ -224,14 +247,17 @@ def analyze_ticker(ticker, finviz_row):
         }
         score = calculate_score(metrics)
 
-        # AvgVolume & FloatShares (already fetched above if available)
-        avg_volume   = int(yf.Ticker(ticker).info.get('averageVolume',   0) or 0) if 'stock' not in dir() else 0
-        float_shares = int(yf.Ticker(ticker).info.get('floatShares',     0) or 0) if 'stock' not in dir() else 0
+        # AvgVolume & FloatShares — Issue #9 Phase 2 (was yfinance)
+        avg_volume   = 0
+        float_shares = 0
         try:
-            if 'stock' in dir() and stock:
-                avg_volume   = int(stock.info.get('averageVolume',   0) or 0)
-                float_shares = int(stock.info.get('floatShares',     0) or 0)
-        except: pass
+            from data_provider import get_fundamentals_provider
+            fund = get_fundamentals_provider().get_fundamentals(ticker)
+            if fund:
+                avg_volume   = int(fund.get('average_volume', 0) or 0)
+                float_shares = int(fund.get('float_shares',   0) or 0)
+        except Exception:
+            pass
 
         return {
             # ── Core ──────────────────────────────────────────────────────────
@@ -320,15 +346,16 @@ def run_scan():
                 print(f"📌 Tracking {len(missing)} missing tickers...")
                 for ticker in missing:
                     try:
-                        stock = yf.Ticker(ticker)
-                        hist = stock.history(period='60d')
+                        # Issue #9 Phase 2 — was yf.Ticker(ticker).history()
+                        provider = get_data_provider()
+                        hist = provider.get_daily_bars(ticker, days=60)
                         if hist.empty or len(hist) < 2:
                             continue
-                        info = stock.info
-                        price = hist.iloc[-1]['Close']
-                        prev = hist.iloc[-2]['Close']
+                        # Provider returns lowercase columns
+                        price = hist.iloc[-1]['close']
+                        prev = hist.iloc[-2]['close']
                         change = ((price - prev) / prev) * 100
-                        volume = int(hist.iloc[-1]['Volume'])
+                        volume = int(hist.iloc[-1]['volume'])
                         finviz_row = {'Price': price, 'Change': change/100, 'Volume': str(volume), 'Market Cap': None}
                         data = analyze_ticker(ticker, finviz_row)
                         if data:
@@ -589,12 +616,14 @@ def update_portfolio_live(gc, now_peru):
                     continue
 
             # Fetch live price + intraday high (catches SL even if price pulled back)
+            # Issue #9 Phase 2 — was yf.Ticker(ticker).history("1d")
             try:
-                hist = yf.Ticker(ticker).history(period="1d")
-                if hist.empty:
+                provider = get_data_provider()
+                bar = provider.get_latest_bar(ticker)
+                if not bar:
                     continue
-                live_price  = round(float(hist.iloc[-1]["Close"]), 2)
-                intra_high  = round(float(hist.iloc[-1]["High"]),  2)
+                live_price  = round(float(bar["close"]), 2)
+                intra_high  = round(float(bar["high"]), 2)
             except Exception:
                 continue
 
@@ -741,41 +770,65 @@ def update_ticker_follow_up(gc, now_peru):
                 continue
 
             try:
-                t = yf.Ticker(ticker)
-                info = t.info or {}
-                price = float(info.get("regularMarketPrice") or
-                              info.get("currentPrice") or 0)
+                # Issue #9 Phase 2 — was 4 yfinance calls (info, history 1d/1m, 1mo, 1y)
+                provider = get_data_provider()
+
+                # 1) Fundamentals (replaces t.info — except current price)
+                try:
+                    fund = get_fundamentals_provider().get_fundamentals(ticker) or {}
+                except Exception:
+                    fund = {}
+
+                # 2) Current price (replaces info.get("regularMarketPrice"))
+                try:
+                    latest_bar = provider.get_latest_bar(ticker)
+                    price = float(latest_bar["close"]) if latest_bar else 0.0
+                except Exception:
+                    price = 0.0
                 if price <= 0:
                     continue
 
-                hist = t.history(period="1d", interval="1m")
-                if hist.empty:
+                # 3) Daily bars — 252 days serves both 30d (ATR/RSI) and 52w high
+                hist_full = provider.get_daily_bars(ticker, days=252)
+                if hist_full.empty:
                     continue
 
-                volume = int(hist["Volume"].sum())
-                open_price = float(hist["Open"].iloc[0])
-                high_today = float(hist["High"].max())
-                low_today = float(hist["Low"].min())
+                # 4) Intraday minute bars for today's volume/open/high/low
+                today_date_val = now_peru.date()
+                try:
+                    intraday = provider.get_intraday_bars(ticker, today_date_val, '1Min')
+                except Exception as e:
+                    print(f"⚠️  follow_up intraday {ticker}: {e}")
+                    continue
 
-                # ATR14 from recent history
-                hist_long = t.history(period="1mo")
+                if intraday is None or intraday.empty:
+                    continue
+
+                volume     = int(intraday["volume"].sum())
+                open_price = float(intraday["open"].iloc[0])
+                high_today = float(intraday["high"].max())
+                low_today  = float(intraday["low"].min())
+
+                # ATR14 from last 30 days (lowercase columns)
+                hist_long = hist_full.tail(30)
                 if len(hist_long) >= 14:
                     tr = pd.concat([
-                        hist_long["High"] - hist_long["Low"],
-                        (hist_long["High"] - hist_long["Close"].shift()).abs(),
-                        (hist_long["Low"] - hist_long["Close"].shift()).abs(),
+                        hist_long["high"] - hist_long["low"],
+                        (hist_long["high"] - hist_long["close"].shift()).abs(),
+                        (hist_long["low"]  - hist_long["close"].shift()).abs(),
                     ], axis=1).max(axis=1)
                     atr14 = float(tr.rolling(14).mean().iloc[-1])
                 else:
                     atr14 = 0.0
 
-                prev_close = float(hist_long["Close"].iloc[-2]) if len(hist_long) >= 2 else price
-                hist_1y = t.history(period="1y")
-                week52_high = float(hist_1y["High"].max()) if not hist_1y.empty else price
+                prev_close = float(hist_long["close"].iloc[-2]) if len(hist_long) >= 2 else price
 
-                # RSI
+                # 52w high — from full 252-day history
+                week52_high = float(hist_full["high"].max())
+
+                # RSI from last 30 days
                 if len(hist_long) >= 15:
-                    closes = hist_long["Close"]
+                    closes = hist_long["close"]
                     delta = closes.diff()
                     gain = delta.where(delta > 0, 0).rolling(14).mean()
                     loss_s = (-delta.where(delta < 0, 0)).rolling(14).mean()
@@ -784,10 +837,11 @@ def update_ticker_follow_up(gc, now_peru):
                 else:
                     rsi = 50.0
 
-                market_cap = int(info.get("marketCap") or 0)
-                shares_outstanding = int(info.get("sharesOutstanding") or 0)
-                avg_volume = int(info.get("averageVolume") or 0)
-                float_shares_val = int(info.get("floatShares") or 0)
+                # Fundamentals from fund_provider (replaces info.get fields)
+                market_cap         = int(fund.get("market_cap")         or 0)
+                shares_outstanding = int(fund.get("shares_outstanding") or 0)
+                avg_volume         = int(fund.get("average_volume")     or 0)
+                float_shares_val   = int(fund.get("float_shares")       or 0)
 
                 # Compute derived metrics
                 mxv = calculate_mxv(market_cap, price, volume)
@@ -907,12 +961,14 @@ def update_live_trades(gc, now_peru, results=None):
             prev_high   = lt_df.at[idx, "RunningHigh"]
             prev_low    = lt_df.at[idx, "RunningLow"]
 
+            # Issue #9 Phase 2 — was yf.Ticker(ticker).history("1d")
             try:
-                hist = yf.Ticker(ticker).history(period="1d")
-                if hist.empty:
+                provider = get_data_provider()
+                bar = provider.get_latest_bar(ticker)
+                if not bar:
                     continue
-                live_price = round(float(hist.iloc[-1]["Close"]), 2)
-                intra_high = round(float(hist.iloc[-1]["High"]), 2)
+                live_price = round(float(bar["close"]), 2)
+                intra_high = round(float(bar["high"]), 2)
             except:
                 continue
 
@@ -1021,9 +1077,10 @@ def sync_score_tracker(gc, now_peru):
              Gap, VWAP_Dist, Volume, High, Low, Open, PrevClose
     """
     try:
-        import yfinance as yf
+        # Issue #9 Phase 2 — was yfinance lazy import
         from ta.momentum import RSIIndicator
         from ta.volatility import AverageTrueRange
+        # data_provider + fundamentals_provider already imported at top of file
 
         today     = now_peru.strftime("%Y-%m-%d")
         scan_time = now_peru.strftime("%H:%M")
@@ -1058,35 +1115,41 @@ def sync_score_tracker(gc, now_peru):
         new_rows = []
         for ticker, scan_date in sorted(active):
             try:
-                stock = yf.Ticker(ticker)
-                hist  = stock.history(period="60d")
+                # Issue #9 Phase 2 — was yfinance
+                provider = get_data_provider()
+                hist = provider.get_daily_bars(ticker, days=60)
                 if hist.empty or len(hist) < 2:
                     continue
-                info     = stock.info
+
+                # Fetch fundamentals (replaces stock.info)
+                try:
+                    fund = get_fundamentals_provider().get_fundamentals(ticker) or {}
+                except Exception:
+                    fund = {}
+
                 current  = hist.iloc[-1]
                 previous = hist.iloc[-2]
-                price      = round(float(current["Close"]), 2)
-                high       = round(float(current["High"]), 2)
-                low        = round(float(current["Low"]), 2)
-                open_price = round(float(current["Open"]), 2)
-                prev_close = round(float(previous["Close"]), 2)
-                volume     = int(current["Volume"])
-                mkt_cap    = info.get("marketCap", 0)
+                price      = round(float(current["close"]), 2)
+                high       = round(float(current["high"]), 2)
+                low        = round(float(current["low"]), 2)
+                open_price = round(float(current["open"]), 2)
+                prev_close = round(float(previous["close"]), 2)
+                volume     = int(current["volume"])
+                mkt_cap    = fund.get("market_cap") or 0
                 if not mkt_cap:
                     continue
 
                 rsi = 50.0; atrx = 0.0; rel_vol = 1.0; run_up = 0.0
                 try:
-                    rsi = float(RSIIndicator(hist["Close"], 14).rsi().iloc[-1])
+                    rsi = float(RSIIndicator(hist["close"], 14).rsi().iloc[-1])
                 except Exception: pass
                 try:
-                    atr  = float(AverageTrueRange(hist["High"],hist["Low"],hist["Close"],14).average_true_range().iloc[-1])
+                    atr  = float(AverageTrueRange(hist["high"], hist["low"], hist["close"], 14).average_true_range().iloc[-1])
                     atrx = calculate_atrx(high, low, atr)
                     atrx = validate_atrx(atrx, atr, price)
                 except Exception: pass
                 try:
-                    avg_vol = info.get("averageVolume", volume)
-                    # calculate_rel_vol already caps at config.REL_VOL_CAP
+                    avg_vol = fund.get("average_volume") or volume
                     rel_vol = calculate_rel_vol(volume, avg_vol)
                 except Exception: pass
                 try:

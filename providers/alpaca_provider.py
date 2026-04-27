@@ -20,7 +20,7 @@ Created: 2026-04-25 (Issue #9)
 
 import logging
 import os
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timedelta, timezone, date
 from typing import Dict, List, Optional, Union
 
 import pandas as pd
@@ -93,11 +93,18 @@ def _normalize_bars_df(df: pd.DataFrame, ticker: str) -> pd.DataFrame:
     return df
 
 
-def _parse_scan_date(scan_date: Union[str, datetime]) -> datetime:
-    """Parse scan_date input to a tz-naive datetime at midnight."""
+def _parse_scan_date(scan_date: Union[str, datetime, date]) -> datetime:
+    """Parse scan_date input to a tz-naive datetime at midnight.
+
+    Accepts: str ('YYYY-MM-DD'), datetime, or date.
+    Issue #9 Phase 2 — added date support for now_peru.date() callsites.
+    """
     if isinstance(scan_date, str):
         return datetime.strptime(scan_date[:10], "%Y-%m-%d")
+    # IMPORTANT: datetime is a subclass of date, so check datetime FIRST
     if isinstance(scan_date, datetime):
+        return datetime(scan_date.year, scan_date.month, scan_date.day)
+    if isinstance(scan_date, date):
         return datetime(scan_date.year, scan_date.month, scan_date.day)
     raise ValueError(f"Invalid scan_date type: {type(scan_date)}")
 

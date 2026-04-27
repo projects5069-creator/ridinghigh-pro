@@ -9,53 +9,36 @@ v3: Uses sheets_manager (new multi-sheet architecture). No hardcoded local paths
 
 import argparse
 import pandas as pd
-import yfinance as yf
 from datetime import datetime, timedelta
 import time
 import sheets_manager
 from gsheets_sync import load_post_analysis_from_sheets, save_post_analysis_to_sheets
-from utils import is_trading_day
+from utils import is_trading_day, _is_missing
 from config import TP_THRESHOLD_FRAC, SL_THRESHOLD_FRAC
-
-
-def _is_missing(val):
-    """True if value is None, NaN, empty string, or the literal string 'nan'/'None'."""
-    if val is None:
-        return True
-    try:
-        import math
-        if math.isnan(float(val)):
-            return True
-    except (TypeError, ValueError):
-        pass
-    return str(val).strip() in ("", "nan", "None")
+from data_provider import get_data_provider
 
 
 def fetch_d0_data(ticker: str, scan_date: str) -> dict:
-    """Fetch D0 (scan day) closing price and volume from Yahoo Finance."""
+    """Fetch D0 (scan day) closing price and volume via data_provider
+    (Issue #9 Phase 2 — was yfinance)."""
+    provider = get_data_provider()
     for attempt in range(1, 4):
         try:
             scan_dt = datetime.strptime(scan_date, "%Y-%m-%d")
             end_dt  = scan_dt + timedelta(days=1)
-            hist = yf.download(
-                ticker,
-                start=scan_date,
-                end=end_dt.strftime("%Y-%m-%d"),
-                progress=False,
-                auto_adjust=True
-            )
-            if hist.empty:
+            # 5 daily bars buffer covers scan_date even with weekends
+            bars = provider.get_daily_bars(ticker, days=5, end_date=end_dt)
+            if bars.empty:
                 time.sleep(1)
                 continue
-            if isinstance(hist.columns, pd.MultiIndex):
-                hist.columns = hist.columns.get_level_values(0)
-            hist.columns = [str(c) for c in hist.columns]
-            hist.index = pd.to_datetime(hist.index).strftime("%Y-%m-%d")
-            if scan_date in hist.index:
-                row = hist.loc[scan_date]
+            # Provider returns DatetimeIndex; convert to YYYY-MM-DD strings
+            bars = bars.copy()
+            bars.index = pd.to_datetime(bars.index).strftime("%Y-%m-%d")
+            if scan_date in bars.index:
+                row = bars.loc[scan_date]
                 return {
-                    "D0_Close":  round(float(row["Close"]), 4),
-                    "D0_Volume": int(row["Volume"]),
+                    "D0_Close":  round(float(row["close"]), 4),
+                    "D0_Volume": int(row["volume"]),
                 }
             return {}
         except Exception as e:

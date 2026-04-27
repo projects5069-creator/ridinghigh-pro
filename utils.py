@@ -254,53 +254,120 @@ def parse_volume(s):
 
 
 # ═══════════════════════════════════════════════════════════════════════
-# Market Cap Smart Lookup
+# Market Cap Smart Lookup (UNIFIED — Issue #9 Phase 2)
 # ═══════════════════════════════════════════════════════════════════════
+# This is the single source of truth for market cap resolution.
+# Previously there were 2 implementations (utils + dashboard) — unified here.
+# Dashboard-specific features (cache file, history lookup) are now optional
+# callbacks so all callers can opt in.
 
-def get_market_cap_smart(ticker, finviz_mc=None, shares_cache=None, yf_info=None):
+def get_market_cap_smart(
+    ticker,
+    price=None,
+    finviz_mc=None,
+    shares_cache=None,
+    fund_info=None,
+    cache_get=None,
+    cache_set=None,
+    history_lookup=None,
+    return_tuple=False,
+):
     """
-    Get market cap with smart fallback priority:
-    1. FINVIZ value (if valid)
-    2. yfinance marketCap field
-    3. Calculated from shares * price (if cache available)
-    4. None if all fail
-    
+    Get market cap with smart fallback priority chain.
+
+    Priority order:
+        1. FINVIZ value (if provided and valid)
+        2. fundamentals_provider marketCap field
+        3. Calculated from shares * price (if shares available)
+        4. History lookup (if history_lookup callback provided)
+        5. Cache file (if cache_get callback provided)
+        6. None if all fail
+
+    Sources (3, 4, 5) write back to cache_set if provided.
+
     Args:
-        ticker: Stock ticker symbol
-        finviz_mc: Market cap from FINVIZ (already parsed to float)
-        shares_cache: Dict of {ticker: shares_outstanding} for fallback
-        yf_info: yfinance Ticker.info dict (optional, to avoid re-fetching)
-    
+        ticker:         Stock ticker symbol
+        price:          Current price (used for shares*price fallback). Optional.
+        finviz_mc:      Market cap from FINVIZ (already parsed to float). Optional.
+        shares_cache:   Dict of {ticker: shares_outstanding} for fallback. Optional.
+        fund_info:      Pre-fetched fundamentals dict (avoid re-fetching).
+                        Format: dict with keys 'market_cap', 'shares_outstanding'.
+                        Optional.
+        cache_get:      Callable(ticker) -> Optional[int]. Reads from cache.
+                        Optional. Used as last-resort fallback.
+        cache_set:      Callable(ticker, market_cap) -> None. Writes to cache.
+                        Optional. Called after each successful lookup.
+        history_lookup: Callable(ticker, field='MarketCap') -> Optional[float].
+                        Looks up MC from historical data.
+                        Optional.
+        return_tuple:   If True, returns (market_cap, shares_outstanding).
+                        If False, returns market_cap only.
+                        Default: False (matches dashboard behavior).
+
     Returns:
-        tuple: (market_cap, shares_outstanding) or (None, None)
+        int or None  (or tuple if return_tuple=True)
     """
-    # Priority 1: Use FINVIZ value if available and valid
+    def _persist(mc):
+        """Helper to persist to cache if callback provided."""
+        if cache_set is not None and mc is not None and mc > 0:
+            try:
+                cache_set(ticker, int(mc))
+            except Exception:
+                pass
+
+    # Priority 1: FINVIZ value
     if finviz_mc is not None and finviz_mc > 0:
+        mc = int(finviz_mc)
         shares = shares_cache.get(ticker, 0) if shares_cache else 0
-        return finviz_mc, shares
-    
-    # Priority 2: Try yfinance
+        _persist(mc)
+        return (mc, shares) if return_tuple else mc
+
+    # Priority 2: fundamentals_provider
     try:
-        if yf_info is None:
-            import yfinance as yf
-            stock = yf.Ticker(ticker)
-            yf_info = stock.info
-        
-        mc = yf_info.get('marketCap', 0) or 0
-        shares = yf_info.get('sharesOutstanding', 0) or 0
-        
-        if mc > 0:
-            return mc, shares
-        
-        # Priority 3: Calculate from shares * price
-        price = yf_info.get('currentPrice', 0) or yf_info.get('regularMarketPrice', 0) or 0
-        if shares > 0 and price > 0:
-            return shares * price, shares
-        
+        if fund_info is None:
+            from data_provider import get_fundamentals_provider
+            fund_info = get_fundamentals_provider().get_fundamentals(ticker)
+
+        mc_raw = fund_info.get('market_cap') if fund_info else None
+        shares = fund_info.get('shares_outstanding', 0) if fund_info else 0
+        shares = shares or 0
+
+        if mc_raw and mc_raw > 0:
+            mc = int(mc_raw)
+            _persist(mc)
+            return (mc, shares) if return_tuple else mc
+
+        # Priority 3: shares * price
+        if shares > 0 and price is not None and price > 0:
+            mc = int(shares * price)
+            _persist(mc)
+            return (mc, shares) if return_tuple else mc
     except Exception:
         pass
-    
-    return None, None
+
+    # Priority 4: History lookup callback (dashboard-only feature)
+    if history_lookup is not None:
+        try:
+            hist_mc = history_lookup(ticker, 'MarketCap')
+            if hist_mc and hist_mc > 0:
+                mc = int(hist_mc)
+                _persist(mc)
+                return (mc, 0) if return_tuple else mc
+        except Exception:
+            pass
+
+    # Priority 5: Cache file callback (dashboard-only feature)
+    if cache_get is not None:
+        try:
+            cached_mc = cache_get(ticker)
+            if cached_mc and cached_mc > 0:
+                mc = int(cached_mc)
+                # Don't re-persist on read
+                return (mc, 0) if return_tuple else mc
+        except Exception:
+            pass
+
+    return (None, None) if return_tuple else None
 
 
 # ═══════════════════════════════════════════════════════════════════════
@@ -426,3 +493,88 @@ if __name__ == "__main__":
     print("\n" + "=" * 60)
     print("All utils loaded successfully ✅")
     print("=" * 60)
+
+
+def validate_stock_data(price, week52high, atr14, high_today=None, low_today=None,
+                       open_price=None, avg_volume=None):
+    """
+    Validate stock data for common yfinance issues.
+    Returns: "CLEAN" | "SUSPICIOUS" | "BROKEN" | "PRE_SPLIT" | "NO_DATA"
+    """
+    try:
+        if price is None or price == 0:
+            return "NO_DATA"
+
+        price = float(price)
+
+        # BROKEN — physical impossibilities
+        if high_today is not None and low_today is not None:
+            if float(high_today) < float(low_today):
+                return "BROKEN"
+        if price > 10000:
+            return "BROKEN"
+        if avg_volume is not None and float(avg_volume) < 0:
+            return "BROKEN"
+
+        # PRE_SPLIT — Week52High absurdly high vs current price
+        if week52high is not None and float(week52high) > 0:
+            if float(week52high) > price * 50:
+                return "PRE_SPLIT"
+
+        # PRE_SPLIT — ATR14 absurdly high vs current price
+        if atr14 is not None and float(atr14) > 0:
+            if float(atr14) > price * 3:
+                return "PRE_SPLIT"
+
+        # SUSPICIOUS — legitimate but extreme volatility
+        if open_price is not None and high_today is not None:
+            op = float(open_price)
+            hi = float(high_today)
+            if op > 0 and hi > op * 2:
+                return "SUSPICIOUS"
+
+        return "CLEAN"
+    except (TypeError, ValueError):
+        return "BROKEN"
+
+
+def _is_missing(val) -> bool:
+    """True if value is None, NaN, empty string, or literal 'nan'/'None'/'NaN'.
+
+    Used across backfill/enrich/health_check modules to detect missing data.
+    """
+    if val is None:
+        return True
+    try:
+        import math
+        if isinstance(val, float) and math.isnan(val):
+            return True
+    except (TypeError, ValueError):
+        pass
+    try:
+        import pandas as pd
+        if isinstance(val, float) and pd.isna(val):
+            return True
+    except (ImportError, TypeError, ValueError):
+        pass
+    return str(val).strip() in ("", "nan", "None", "NaN")
+
+
+def strip_comments(line):
+    """Strip # comments from a Python code line.
+
+    Basic implementation — ignores # inside strings.
+    Used by code_auditor and daily_audit for scanning code.
+    """
+    in_string = False
+    quote = None
+    for i, c in enumerate(line):
+        if c in ('"', "'") and (i == 0 or line[i-1] != '\\'):
+            if not in_string:
+                in_string = True
+                quote = c
+            elif c == quote:
+                in_string = False
+        elif c == '#' and not in_string:
+            return line[:i]
+    return line

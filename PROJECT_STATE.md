@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-04-25 18:31:53 -05
+**Generated:** 2026-04-26 19:29:04 -05
 **Branch:** `main`
-**Latest commit:** `fae70bf` — Issue #9 Phase 1: Data provider abstraction layer
+**Latest commit:** `85b6875` — Issue #9 Phase 2: Complete yfinance → data_provider migration
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `fae70bf (HEAD -> main) Issue #9 Phase 1: Data provider abstraction layer`
-- `d36714d (origin/main) Issue #1: Unify SL to 10% across all dashboard pages`
+- `85b6875 (HEAD -> main) Issue #9 Phase 2: Complete yfinance → data_provider migration`
+- `d7e0db1 (origin/main) Issue #9 Phase 1: Data provider abstraction layer`
+- `d36714d Issue #1: Unify SL to 10% across all dashboard pages`
 - `cdf4e14 Fix Health Audit exit code: WARNINGs return 0, not 2`
 - `5f0359d Final cleanup: explicitly ignore backups/ folder`
-- `3f333e6 Clean GitHub: remove archived files from tracking`
 
 ---
 
@@ -32,11 +32,11 @@ _See `OPEN_ISSUES.md` for full list_
 
 | Workflow | Status | Conclusion | Started |
 |---|---|---|---|
-| Health Audit | completed | ✅ success | 2026-04-25 22:07 UTC |
-| Health Audit | completed | ✅ success | 2026-04-25 21:58 UTC |
-| RidingHigh Auto Scanner | completed | ✅ success | 2026-04-25 21:55 UTC |
-| RidingHigh Auto Scanner | completed | ✅ success | 2026-04-25 19:58 UTC |
-| RidingHigh Auto Scanner | completed | ✅ success | 2026-04-25 18:06 UTC |
+| RidingHigh Auto Scanner | completed | ❌ failure | 2026-04-26 23:59 UTC |
+| RidingHigh Auto Scanner | completed | ❌ failure | 2026-04-26 21:57 UTC |
+| RidingHigh Auto Scanner | completed | ❌ failure | 2026-04-26 20:02 UTC |
+| Health Audit | completed | ✅ success | 2026-04-26 19:36 UTC |
+| RidingHigh Auto Scanner | completed | ❌ failure | 2026-04-26 18:08 UTC |
 
 ---
 
@@ -60,7 +60,9 @@ _Months in config: `2026-04`, `2026-05`_
 ---
 
 ## 🩺 Health
-✅ All checks passed.
+
+- ⚠️ 2 uncommitted file(s):
+-    - 2 new/untracked
 
 ---
 

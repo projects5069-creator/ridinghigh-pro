@@ -278,6 +278,10 @@ class FundamentalsProvider(ABC):
               - average_volume (int)  — typically 30-day average
               - sector (str)
               - industry (str)
+              - ipo_epoch (int) — Unix timestamp of first trade date.
+                                  Convert to days-since-IPO via:
+                                  (datetime.now() - datetime.fromtimestamp(ipo_epoch)).days
+                                  None if unavailable.
             Missing keys = None.
         """
         ...

@@ -15,8 +15,8 @@ NEW in v5:
 
 import argparse
 import pandas as pd
-import yfinance as yf
 from datetime import datetime, timedelta
+from data_provider import get_data_provider, get_fundamentals_provider
 import pytz
 import sys
 import os
@@ -139,25 +139,27 @@ def is_complete(existing_row: pd.Series, trading_days: list) -> bool:
 
 
 def fetch_ohlc_for_days(ticker: str, trading_days: list) -> dict:
+    """Fetch D1-D5 OHLC via data_provider (Issue #9 Phase 2 — was yfinance)."""
+    provider = get_data_provider()
     for attempt in range(1, 6):
         try:
-            start   = trading_days[0]
-            end_dt  = datetime.strptime(trading_days[-1], "%Y-%m-%d") + timedelta(days=3)
-            hist    = yf.download(ticker, start=start, end=end_dt.strftime("%Y-%m-%d"),
-                                  progress=False, auto_adjust=True)
-            if hist.empty:
+            # Fetch enough daily bars to cover the trading_days range.
+            end_dt = datetime.strptime(trading_days[-1], "%Y-%m-%d") + timedelta(days=3)
+            # 15 daily bars buffer covers 5 trading days + weekends
+            bars = provider.get_daily_bars(ticker, days=15, end_date=end_dt)
+            if bars.empty:
                 time.sleep(2); continue
-            if isinstance(hist.columns, pd.MultiIndex):
-                hist.columns = hist.columns.get_level_values(0)
-            hist.index = pd.to_datetime(hist.index).strftime("%Y-%m-%d")
+            # Provider returns DatetimeIndex; convert to YYYY-MM-DD strings
+            bars = bars.copy()
+            bars.index = pd.to_datetime(bars.index).strftime("%Y-%m-%d")
             result = {}
             for i, day in enumerate(trading_days, 1):
-                if day in hist.index:
-                    row = hist.loc[day]
-                    result[f"D{i}_Open"]  = round(float(row["Open"]), 4)
-                    result[f"D{i}_High"]  = round(float(row["High"]), 4)
-                    result[f"D{i}_Low"]   = round(float(row["Low"]), 4)
-                    result[f"D{i}_Close"] = round(float(row["Close"]), 4)
+                if day in bars.index:
+                    row = bars.loc[day]
+                    result[f"D{i}_Open"]  = round(float(row["open"]),  4)
+                    result[f"D{i}_High"]  = round(float(row["high"]),  4)
+                    result[f"D{i}_Low"]   = round(float(row["low"]),   4)
+                    result[f"D{i}_Close"] = round(float(row["close"]), 4)
                 else:
                     for suffix in ["Open","High","Low","Close"]:
                         result[f"D{i}_{suffix}"] = None
@@ -173,61 +175,78 @@ def fetch_ohlc_for_days(ticker: str, trading_days: list) -> dict:
 
 # ── NEW: D0 OHLC + fundamental data ──────────────────────────────────────────
 def fetch_d0_and_fundamental(ticker: str, scan_date: str) -> dict:
+    """
+    Fetch D0 OHLC + SMA20 + Consecutive_Up + fundamentals.
+
+    Hybrid strategy (Issue #9 Phase 2):
+    - Prices (D0, SMA20, Consecutive_Up) → data_provider (Alpaca)
+    - Fundamentals (floatShares, sector, etc.) → fundamentals_provider (yfinance)
+    """
     result = {}
+    prices_provider = get_data_provider()
+    fund_provider = get_fundamentals_provider()
+    scan_dt = datetime.strptime(scan_date, "%Y-%m-%d")
+
+    # ── Prices: D0 OHLC + SMA20 + Consecutive_Up ──────────────────────
     try:
-        stock  = yf.Ticker(ticker)
-        scan_dt = datetime.strptime(scan_date, "%Y-%m-%d")
-        start  = (scan_dt - timedelta(days=60)).strftime("%Y-%m-%d")
-        end    = (scan_dt + timedelta(days=2)).strftime("%Y-%m-%d")
-        hist   = yf.download(ticker, start=start, end=end, progress=False, auto_adjust=True)
+        # Fetch ~60 days of history ending 2 days after scan_date
+        end_dt = scan_dt + timedelta(days=2)
+        bars = prices_provider.get_daily_bars(ticker, days=60, end_date=end_dt)
+        if not bars.empty:
+            bars = bars.copy()
+            bars.index = pd.to_datetime(bars.index).strftime("%Y-%m-%d")
 
-        if isinstance(hist.columns, pd.MultiIndex):
-            hist.columns = hist.columns.get_level_values(0)
-        hist.index = pd.to_datetime(hist.index).strftime("%Y-%m-%d")
+            # D0 OHLC
+            if scan_date in bars.index:
+                row = bars.loc[scan_date]
+                result["D0_Open"] = round(float(row["open"]), 4)
+                result["D0_High"] = round(float(row["high"]), 4)
+                result["D0_Low"]  = round(float(row["low"]),  4)
+                if float(row["high"]) > 0:
+                    result["D0_Drop%_from_High"] = round(
+                        (float(row["close"]) - float(row["high"])) / float(row["high"]) * 100, 2)
 
-        # D0 OHLC
-        if scan_date in hist.index:
-            row = hist.loc[scan_date]
-            result["D0_Open"] = round(float(row["Open"]), 4)
-            result["D0_High"] = round(float(row["High"]), 4)
-            result["D0_Low"]  = round(float(row["Low"]), 4)
-            if float(row["High"]) > 0:
-                result["D0_Drop%_from_High"] = round(
-                    (float(row["Close"]) - float(row["High"])) / float(row["High"]) * 100, 2)
+            # SMA20
+            hist_before = bars[bars.index <= scan_date]
+            if len(hist_before) >= 20:
+                sma20 = hist_before["close"].iloc[-20:].mean()
+                scan_close = hist_before["close"].iloc[-1]
+                result["Price_vs_SMA20"] = round(
+                    (float(scan_close) - float(sma20)) / float(sma20) * 100, 2)
 
-        # SMA20
-        hist_before = hist[hist.index <= scan_date]
-        if len(hist_before) >= 20:
-            sma20 = hist_before["Close"].iloc[-20:].mean()
-            scan_close = hist_before["Close"].iloc[-1]
-            result["Price_vs_SMA20"] = round(
-                (float(scan_close) - float(sma20)) / float(sma20) * 100, 2)
-
-        # Consecutive up days
-        hist_pre = hist[hist.index < scan_date]
-        if len(hist_pre) >= 2:
-            consec, closes = 0, hist_pre["Close"].values
-            for i in range(len(closes)-1, 0, -1):
-                if closes[i] > closes[i-1]: consec += 1
-                else: break
-            result["Consecutive_Up"] = consec
-
-        # Fundamental from Yahoo
-        info = stock.info
-        float_shares = info.get("floatShares", None)
-        if float_shares:
-            result["RealFloat"]   = int(float_shares)
-            result["RealFloat_M"] = round(float_shares / 1_000_000, 2)
-        result["Sector"]   = info.get("sector", "")
-        result["Industry"] = info.get("industry", "")
-        mc = info.get("marketCap", 0) or 0
-        result["MarketCapCategory"] = "Micro" if mc < 300_000_000 else ("Small" if mc < 2_000_000_000 else "Mid+")
-        ipo = info.get("firstTradeDateEpochUtc", None)
-        if ipo:
-            result["DaysSinceIPO"] = (scan_dt - datetime.fromtimestamp(ipo)).days
-
+            # Consecutive up days
+            hist_pre = bars[bars.index < scan_date]
+            if len(hist_pre) >= 2:
+                consec, closes = 0, hist_pre["close"].values
+                for i in range(len(closes)-1, 0, -1):
+                    if closes[i] > closes[i-1]: consec += 1
+                    else: break
+                result["Consecutive_Up"] = consec
     except Exception as e:
-        print(f"[Collector] D0/fundamental error for {ticker}: {e}")
+        print(f"[Collector] D0/SMA error for {ticker}: {e}")
+
+    # ── Fundamentals from yfinance (via fund_provider) ────────────────
+    try:
+        fund = fund_provider.get_fundamentals(ticker)
+        if fund:
+            float_shares = fund.get("float_shares")
+            if float_shares:
+                result["RealFloat"]   = int(float_shares)
+                result["RealFloat_M"] = round(float_shares / 1_000_000, 2)
+            result["Sector"]   = fund.get("sector") or ""
+            result["Industry"] = fund.get("industry") or ""
+            mc = fund.get("market_cap", 0) or 0
+            result["MarketCapCategory"] = (
+                "Micro" if mc < 300_000_000
+                else ("Small" if mc < 2_000_000_000 else "Mid+")
+            )
+            # DaysSinceIPO from ipo_epoch (added in Phase 2 prep)
+            ipo_epoch = fund.get("ipo_epoch")
+            if ipo_epoch:
+                result["DaysSinceIPO"] = (scan_dt - datetime.fromtimestamp(ipo_epoch)).days
+    except Exception as e:
+        print(f"[Collector] Fundamentals error for {ticker}: {e}")
+
     return result
 
 

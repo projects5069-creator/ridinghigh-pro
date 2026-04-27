@@ -16,8 +16,8 @@ from datetime import datetime, time as dt_time, timedelta
 import pytz
 import pytz
 from data_logger import DataLogger
-import yfinance as yf
 from ta.momentum import RSIIndicator
+from data_provider import get_data_provider, get_fundamentals_provider
 from ta.volatility import AverageTrueRange
 import os
 import shutil
@@ -33,7 +33,6 @@ from formulas import (
     calculate_vwap_dist,
     calculate_rel_vol,
     calculate_float_pct,
-    calculate_dynamic_score,
     normalize_mxv,
     normalize_atrx,
 )
@@ -183,65 +182,26 @@ class Dashboard:
     # parse_market_cap and parse_volume imported from utils
 
     def get_market_cap_smart(self, ticker, price, finviz_mc=None):
-        market_cap = None
-        
-        if finviz_mc and finviz_mc > 0:
-            market_cap = int(finviz_mc)
-            self.market_cap_cache[ticker] = market_cap
-            self.save_to_cache_file(ticker, market_cap)
-            return market_cap
-        
-        try:
-            stock = yf.Ticker(ticker)
-            info = stock.info
-            
-            mc = info.get('marketCap', None)
-            if mc and mc > 0:
-                market_cap = int(mc)
-                self.market_cap_cache[ticker] = market_cap
-                self.save_to_cache_file(ticker, market_cap)
-                return market_cap
-        except:
-            pass
-        
-        try:
-            if ticker not in self.shares_cache:
-                stock = yf.Ticker(ticker)
-                info = stock.info
-                shares = info.get('sharesOutstanding', None)
-                if shares and shares > 0:
-                    self.shares_cache[ticker] = int(shares)
-            
-            if ticker in self.shares_cache:
-                shares = self.shares_cache[ticker]
-                if shares > 0 and price > 0:
-                    market_cap = int(shares * price)
-                    self.market_cap_cache[ticker] = market_cap
-                    self.save_to_cache_file(ticker, market_cap)
-                    return market_cap
-        except:
-            pass
-        
-        try:
-            hist_mc = self.get_from_history_all_days(ticker, 'MarketCap')
-            if hist_mc and hist_mc > 0:
-                market_cap = int(hist_mc)
-                self.market_cap_cache[ticker] = market_cap
-                self.save_to_cache_file(ticker, market_cap)
-                return market_cap
-        except:
-            pass
-        
-        try:
-            cached_mc = self.load_from_cache_file(ticker)
-            if cached_mc and cached_mc > 0:
-                market_cap = int(cached_mc)
-                self.market_cap_cache[ticker] = market_cap
-                return market_cap
-        except:
-            pass
-        
-        return None
+        """Wrapper around utils.get_market_cap_smart that injects dashboard-specific
+        callbacks (cache file persistence + history lookup).
+        Issue #9 Phase 2 — unified with auto_scanner via utils.py.
+        """
+        from utils import get_market_cap_smart as _unified_mc
+
+        def _cache_set(t, mc):
+            self.market_cap_cache[t] = int(mc)
+            self.save_to_cache_file(t, mc)
+
+        market_cap = _unified_mc(
+            ticker,
+            price=price,
+            finviz_mc=finviz_mc,
+            shares_cache=self.shares_cache,
+            cache_get=self.load_from_cache_file,
+            cache_set=_cache_set,
+            history_lookup=self.get_from_history_all_days,
+        )
+        return market_cap
     
     def preload_market_caps(self, finviz_df, progress_callback=None):
         if finviz_df is None or finviz_df.empty:
@@ -263,26 +223,31 @@ class Dashboard:
             time.sleep(0.3)
     
     def analyze_ticker_from_yahoo(self, ticker):
+        """Issue #9 Phase 2 — was yfinance, now uses data_provider."""
         try:
-            stock = yf.Ticker(ticker)
-            hist = stock.history(period='5d')
-            
-            if hist.empty or len(hist) < 2:
+            provider = get_data_provider()
+            full_hist = provider.get_daily_bars(ticker, days=60)
+
+            if full_hist.empty or len(full_hist) < 2:
                 return None
-            
-            info = stock.info
-            current = hist.iloc[-1]
-            previous = hist.iloc[-2]
-            
-            price = current['Close']
-            change = ((current['Close'] - previous['Close']) / previous['Close']) * 100
-            volume = current['Volume']
-            
+
+            try:
+                fund = get_fundamentals_provider().get_fundamentals(ticker) or {}
+            except Exception:
+                fund = {}
+
+            current = full_hist.iloc[-1]
+            previous = full_hist.iloc[-2]
+
+            price = current['close']
+            change = ((current['close'] - previous['close']) / previous['close']) * 100
+            volume = current['volume']
+
             market_cap = self.get_market_cap_smart(ticker, price)
-            
+
             if market_cap is None or market_cap == 0:
                 return None
-            
+
             rsi = 50
             atr = 0
             atrx = 0
@@ -294,98 +259,96 @@ class Dashboard:
             price_to_52w_high = 0
             shares_outstanding = self.shares_cache.get(ticker, 0)
             float_pct = 0
-            
-            full_hist = stock.history(period='60d')
-            
+
             if not full_hist.empty and len(full_hist) >= 2:
                 try:
                     if len(full_hist) >= 14:
-                        rsi_indicator = RSIIndicator(close=full_hist['Close'], window=14)
+                        rsi_indicator = RSIIndicator(close=full_hist['close'], window=14)
                         rsi_values = rsi_indicator.rsi()
                         if not rsi_values.empty and not pd.isna(rsi_values.iloc[-1]):
                             rsi = rsi_values.iloc[-1]
                 except:
                     rsi = 50
-                
+
                 try:
                     if len(full_hist) >= 14:
                         atr_indicator = AverageTrueRange(
-                            high=full_hist['High'],
-                            low=full_hist['Low'],
-                            close=full_hist['Close'],
+                            high=full_hist['high'],
+                            low=full_hist['low'],
+                            close=full_hist['close'],
                             window=14
                         )
                         atr_values = atr_indicator.average_true_range()
                         if not atr_values.empty and not pd.isna(atr_values.iloc[-1]):
                             atr = atr_values.iloc[-1]
                         else:
-                            atr = current['High'] - current['Low']
+                            atr = current['high'] - current['low']
                     else:
-                        atr = current['High'] - current['Low']
-                    atrx = validate_atrx(calculate_atrx(current["High"], current["Low"], atr), atr, price)
+                        atr = current['high'] - current['low']
+                    atrx = validate_atrx(calculate_atrx(current["high"], current["low"], atr), atr, price)
                 except:
                     atr = 0
                     atrx = 0
-                
+
                 try:
-                    avg_volume = info.get('averageVolume', volume)
+                    avg_volume = fund.get('average_volume') or volume
                     if avg_volume > 0:
                         rel_vol = calculate_rel_vol(volume, avg_volume)
                     else:
                         if len(full_hist) >= 20:
-                            avg_vol_20 = full_hist['Volume'].tail(20).mean()
+                            avg_vol_20 = full_hist['volume'].tail(20).mean()
                         else:
-                            avg_vol_20 = full_hist['Volume'].mean()
+                            avg_vol_20 = full_hist['volume'].mean()
                         rel_vol = calculate_rel_vol(volume, avg_vol_20)
                 except:
                     rel_vol = 1.0
-                
+
                 try:
-                    if current['Open'] > 0:
-                        run_up = calculate_runup(price, current['Open'])
+                    if current['open'] > 0:
+                        run_up = calculate_runup(price, current['open'])
                 except:
                     run_up = 0
-                
+
                 try:
-                    gap = calculate_gap(current['Open'], previous['Close'])
+                    gap = calculate_gap(current['open'], previous['close'])
                 except:
                     gap = 0
-                
+
                 try:
-                    vwap_dist = calculate_vwap_dist(price, current['High'], current['Low'])
+                    vwap_dist = calculate_vwap_dist(price, current['high'], current['low'])
                 except:
                     vwap_dist = 0
-                
+
                 try:
-                    high_today = current['High']
+                    high_today = current['high']
                     price_to_high = ((price - high_today) / high_today) * 100 if high_today > 0 else 0
                 except:
                     price_to_high = 0
-                
+
                 try:
-                    high_52w = info.get('fiftyTwoWeekHigh', price)
+                    high_52w = float(full_hist['high'].max())
                     price_to_52w_high = ((price - high_52w) / high_52w) * 100 if high_52w > 0 else 0
                 except:
                     price_to_52w_high = 0
-                
+
                 if shares_outstanding == 0:
                     try:
-                        shares_outstanding = info.get('sharesOutstanding', 0)
+                        shares_outstanding = fund.get('shares_outstanding') or 0
                         if shares_outstanding == 0:
                             shares_outstanding = int(market_cap / price) if price > 0 else 0
                     except:
                         shares_outstanding = int(market_cap / price) if price > 0 else 0
-                
+
                 try:
-                    float_shares = info.get('floatShares', 0) or 0
+                    float_shares = fund.get('float_shares') or 0
                     float_pct = calculate_float_pct(float_shares, shares_outstanding)
                 except:
                     float_pct = 0
-            
+
             mxv = calculate_mxv(market_cap, price, volume)
 
             try:
-                change = ((price - previous['Close']) / previous['Close']) * 100 if previous['Close'] > 0 else 0
+                change = ((price - previous['close']) / previous['close']) * 100 if previous['close'] > 0 else 0
             except:
                 change = 0
             metrics = {
@@ -464,95 +427,100 @@ class Dashboard:
             shares_outstanding = self.shares_cache.get(ticker, 0)
             float_pct = 0
             
+            # Issue #9 Phase 2 — was yfinance
             try:
-                stock = yf.Ticker(ticker)
-                hist = stock.history(period='60d')
-                
+                provider = get_data_provider()
+                hist = provider.get_daily_bars(ticker, days=60)
+
                 if not hist.empty and len(hist) >= 2:
-                    info = stock.info
+                    try:
+                        fund = get_fundamentals_provider().get_fundamentals(ticker) or {}
+                    except Exception:
+                        fund = {}
+
                     current = hist.iloc[-1]
                     previous = hist.iloc[-2]
-                    
+
                     try:
                         if len(hist) >= 14:
-                            rsi_indicator = RSIIndicator(close=hist['Close'], window=14)
+                            rsi_indicator = RSIIndicator(close=hist['close'], window=14)
                             rsi_values = rsi_indicator.rsi()
                             if not rsi_values.empty and not pd.isna(rsi_values.iloc[-1]):
                                 rsi = rsi_values.iloc[-1]
                     except:
                         rsi = 50
-                    
+
                     try:
                         if len(hist) >= 14:
                             atr_indicator = AverageTrueRange(
-                                high=hist['High'],
-                                low=hist['Low'],
-                                close=hist['Close'],
+                                high=hist['high'],
+                                low=hist['low'],
+                                close=hist['close'],
                                 window=14
                             )
                             atr_values = atr_indicator.average_true_range()
                             if not atr_values.empty and not pd.isna(atr_values.iloc[-1]):
                                 atr = atr_values.iloc[-1]
                             else:
-                                atr = current['High'] - current['Low']
+                                atr = current['high'] - current['low']
                         else:
-                            atr = current['High'] - current['Low']
-                        atrx = validate_atrx(calculate_atrx(current["High"], current["Low"], atr), atr, price)
+                            atr = current['high'] - current['low']
+                        atrx = validate_atrx(calculate_atrx(current["high"], current["low"], atr), atr, price)
                     except:
                         atr = 0
                         atrx = 0
-                    
+
                     try:
-                        avg_volume = info.get('averageVolume', volume)
+                        avg_volume = fund.get('average_volume') or volume
                         if avg_volume > 0:
                             rel_vol = calculate_rel_vol(volume, avg_volume)
                         else:
                             if len(hist) >= 20:
-                                avg_vol_20 = hist['Volume'].tail(20).mean()
+                                avg_vol_20 = hist['volume'].tail(20).mean()
                             else:
-                                avg_vol_20 = hist['Volume'].mean()
+                                avg_vol_20 = hist['volume'].mean()
                             rel_vol = calculate_rel_vol(volume, avg_vol_20)
                     except:
                         rel_vol = 1.0
-                    
+
                     try:
-                        if current['Open'] > 0:
-                            run_up = calculate_runup(price, current['Open'])
+                        if current['open'] > 0:
+                            run_up = calculate_runup(price, current['open'])
                     except:
                         run_up = 0
-                    
+
                     try:
-                        gap = calculate_gap(current['Open'], previous['Close'])
+                        gap = calculate_gap(current['open'], previous['close'])
                     except:
                         gap = 0
-                    
+
                     try:
-                        vwap_dist = calculate_vwap_dist(price, current['High'], current['Low'])
+                        vwap_dist = calculate_vwap_dist(price, current['high'], current['low'])
                     except:
                         vwap_dist = 0
-                    
+
                     try:
-                        high_today = current['High']
+                        high_today = current['high']
                         price_to_high = ((price - high_today) / high_today) * 100 if high_today > 0 else 0
                     except:
                         price_to_high = 0
-                    
+
                     try:
-                        high_52w = info.get('fiftyTwoWeekHigh', price)
+                        high_52w = float(hist['high'].max())
                         price_to_52w_high = ((price - high_52w) / high_52w) * 100 if high_52w > 0 else 0
                     except:
                         price_to_52w_high = 0
-                    
+
                     if shares_outstanding == 0:
                         try:
-                            shares_outstanding = info.get('sharesOutstanding', 0)
+                            shares_outstanding = fund.get('shares_outstanding') or 0
                             if shares_outstanding == 0:
                                 shares_outstanding = int(market_cap / price) if price > 0 else 0
                         except:
                             shares_outstanding = int(market_cap / price) if price > 0 else 0
-                    
+
                     try:
-                        float_shares = info.get('floatShares', 0) or 0
+                        float_shares = fund.get('float_shares') or 0
                         float_pct = calculate_float_pct(float_shares, shares_outstanding)
                     except:
                         float_pct = 0
@@ -868,28 +836,29 @@ class PortfolioTracker:
             df['Change%'] = 0.0
             df['P/L'] = 0.0
             
+            # Issue #9 Phase 2 — was yfinance
+            provider = get_data_provider()
             for idx, row in df.iterrows():
                 ticker = row['Ticker']
                 buy_price = row['BuyPrice']
-                
+
                 try:
-                    stock = yf.Ticker(ticker)
-                    hist = stock.history(period='1d')
-                    
-                    if not hist.empty:
-                        current_price = hist.iloc[-1]['Close']
+                    bar = provider.get_latest_bar(ticker)
+
+                    if bar:
+                        current_price = float(bar['close'])
                         df.at[idx, 'CurrentPrice'] = round(current_price, 2)
-                        
+
                         change_pct = ((current_price - buy_price) / buy_price) * 100
                         df.at[idx, 'Change%'] = round(change_pct, 2)
-                        
+
                         pl = current_price - buy_price
                         df.at[idx, 'P/L'] = round(pl, 2)
                 except:
                     df.at[idx, 'CurrentPrice'] = buy_price
                     df.at[idx, 'Change%'] = 0.0
                     df.at[idx, 'P/L'] = 0.0
-                
+
                 time.sleep(0.1)
             
             df = df.sort_values(by='Date', ascending=False)
@@ -1719,22 +1688,26 @@ def timeline_archive_page():
 
 @st.cache_data(ttl=3600)
 def _fetch_live_prices(tickers: tuple) -> dict:
-    """Batch-fetch latest prices from yfinance. Cached 1 hour. Accepts tuple for hashability."""
+    """Fetch latest prices via data_provider. Cached 1 hour.
+    Issue #9 Phase 2 — was yfinance batch download.
+    Performance note: loops one-at-a-time. ~50ms per ticker via Alpaca.
+    For 100 tickers ≈ 5s, but cached 1hr so amortized cost is negligible.
+    """
     tickers = list(tickers)
     if not tickers:
         return {}
-    try:
-        data = yf.download(tickers, period="1d", progress=False, auto_adjust=True)["Close"]
-        if len(tickers) == 1:
-            prices = data.dropna()
-            return {tickers[0]: round(float(prices.iloc[-1]), 2)} if not prices.empty else {}
-        return {
-            t: round(float(data[t].dropna().iloc[-1]), 2)
-            for t in tickers
-            if t in data.columns and not data[t].dropna().empty
-        }
-    except Exception:
-        return {}
+
+    from data_provider import get_data_provider
+    provider = get_data_provider()
+    result = {}
+    for ticker in tickers:
+        try:
+            bar = provider.get_latest_bar(ticker)
+            if bar:
+                result[ticker] = round(float(bar["close"]), 2)
+        except Exception:
+            continue
+    return result
 
 
 @st.cache_data(ttl=3600)
@@ -1766,31 +1739,37 @@ def _fetch_high_low_since(ticker_dates: tuple) -> dict:
         d1_to_tickers[d1].append((ticker, scan_date))
         scan_to_d1[scan_date] = d1
 
+    # Issue #9 Phase 2 — was yfinance batch download per d1_date
+    from data_provider import get_data_provider
+    from datetime import datetime as _dt
+    provider = get_data_provider()
     result = {}
     for d1_date, ticker_scan_pairs in d1_to_tickers.items():
+        # Compute days_since_d1 to know how many bars to fetch
         try:
-            all_tickers = list({t for t, _ in ticker_scan_pairs})
-            data = yf.download(all_tickers, start=d1_date, progress=False, auto_adjust=True)
-            if data.empty:
-                continue
-            highs = data["High"] if "High" in data else None
-            lows  = data["Low"]  if "Low"  in data else None
-            if highs is None or lows is None:
-                continue
-            for ticker, scan_date in ticker_scan_pairs:
-                key = f"{ticker}_{scan_date}"
-                try:
-                    if len(all_tickers) == 1:
-                        h = round(float(highs.dropna().max()), 2)
-                        l = round(float(lows.dropna().min()),  2)
-                    else:
-                        h = round(float(highs[ticker].dropna().max()), 2)
-                        l = round(float(lows[ticker].dropna().min()),  2)
-                    result[key] = {"high": h, "low": l}
-                except Exception:
-                    continue
+            if isinstance(d1_date, str):
+                d1_dt = _dt.strptime(d1_date[:10], "%Y-%m-%d").date()
+            else:
+                d1_dt = d1_date
+            days_back = (_dt.now().date() - d1_dt).days + 5  # buffer for weekends
         except Exception:
-            continue
+            days_back = 30  # safe default
+
+        for ticker, scan_date in ticker_scan_pairs:
+            key = f"{ticker}_{scan_date}"
+            try:
+                hist = provider.get_daily_bars(ticker, days=days_back)
+                if hist.empty:
+                    continue
+                # Filter to >= d1_date (provider returns lowercase columns)
+                hist = hist[hist.index >= str(d1_dt)] if hasattr(hist.index, 'astype') else hist
+                if hist.empty:
+                    continue
+                h = round(float(hist["high"].dropna().max()), 2)
+                l = round(float(hist["low"].dropna().min()),  2)
+                result[key] = {"high": h, "low": l}
+            except Exception:
+                continue
     return result
 
 
@@ -2183,14 +2162,19 @@ def post_analysis_page():
         df = _cached_post_analysis()
 
     if not df.empty and "Ticker" in df.columns:
-        import yfinance as yf
+        # Issue #9 Phase 2 — was yfinance batch download
+        from data_provider import get_data_provider
+        provider = get_data_provider()
         tickers = df["Ticker"].unique().tolist()
         try:
-            prices = yf.download(tickers, period="1d", progress=False, auto_adjust=True)["Close"]
-            if len(tickers) == 1:
-                current_price = {tickers[0]: round(float(prices.iloc[-1]), 2)}
-            else:
-                current_price = {t: round(float(prices[t].iloc[-1]), 2) for t in tickers if t in prices.columns}
+            current_price = {}
+            for ticker in tickers:
+                try:
+                    bar = provider.get_latest_bar(ticker)
+                    if bar:
+                        current_price[ticker] = round(float(bar["close"]), 2)
+                except Exception:
+                    continue
             df["CurrentPrice"] = df["Ticker"].map(current_price)
             df["CurrentChange%"] = ((df["CurrentPrice"] - df["ScanPrice"]) / df["ScanPrice"] * 100).round(2)
         except:
@@ -2330,41 +2314,7 @@ def post_analysis_page():
 
     st.divider()
 
-    # ── Dynamic Score ──────────────────────────────────────────────────────
-    st.subheader("⚡ ציון דינמי — מבוסס נתונים אמיתיים")
-    st.caption("ציון חדש המבוסס רק על MxV ו-ATRX — שני המדדים שהוכחו כמנבאים ירידה. השווה אותו לציון המקורי.")
-
-    if "MxV" in df.columns and "ATRX" in df.columns:
-        df_dyn = df.copy()
-        df_dyn["MxV"] = pd.to_numeric(df_dyn["MxV"], errors="coerce").fillna(0)
-        df_dyn["ATRX"] = pd.to_numeric(df_dyn["ATRX"], errors="coerce").fillna(0)
-        # Use formulas.py functions (v2.0 2026-04-18)
-        df_dyn["MxV_norm"] = df_dyn["MxV"].apply(normalize_mxv)
-        df_dyn["ATRX_norm"] = df_dyn["ATRX"].apply(normalize_atrx)
-        df_dyn["DynamicScore"] = df_dyn.apply(
-            lambda r: calculate_dynamic_score(r["MxV"], r["ATRX"]), axis=1
-        )
-
-        dyn_display = df_dyn[["Ticker","ScanDate","Score","DynamicScore","MxV","ATRX","TP10_Hit","MaxDrop%"]].copy()
-        dyn_display["הפרש"] = (dyn_display["DynamicScore"] - dyn_display["Score"]).round(2)
-
-        def color_diff(val):
-            try:
-                v = float(val)
-                if v < -10: return "color: #e74c3c"
-                if v > 10:  return "color: #2ecc71"
-                return "color: #f1c40f"
-            except:
-                return ""
-
-        for col in dyn_display.select_dtypes(include="number").columns:
-            dyn_display[col] = dyn_display[col].round(2)
-        format_dyn = {col: "{:.2f}" for col in dyn_display.select_dtypes(include="number").columns}
-        styled_dyn = dyn_display.style.map(color_diff, subset=["הפרש"]).format(format_dyn)
-        st.dataframe(styled_dyn, use_container_width=True, hide_index=True)
-        st.caption("הפרש אדום = הציון המקורי גבוה מהדינמי (אולי מוערך יתר על המידה). ירוק = הציון הדינמי גבוה יותר.")
-    else:
-        st.info("אין מספיק נתונים לציון דינמי")
+    # ── Dynamic Score section removed (Issue #34 — transitioning to single Score v2) ──
 
     st.divider()
 
