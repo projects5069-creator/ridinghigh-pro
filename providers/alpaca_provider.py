@@ -44,6 +44,7 @@ def _import_sdk():
             StockLatestBarRequest,
         )
         from alpaca.data.timeframe import TimeFrame, TimeFrameUnit
+        from alpaca.data.enums import DataFeed
         from alpaca.trading.client import TradingClient
         return {
             "StockHistoricalDataClient": StockHistoricalDataClient,
@@ -52,6 +53,7 @@ def _import_sdk():
             "StockLatestBarRequest": StockLatestBarRequest,
             "TimeFrame": TimeFrame,
             "TimeFrameUnit": TimeFrameUnit,
+            "DataFeed": DataFeed,
             "TradingClient": TradingClient,
         }
     except ImportError as e:
@@ -205,6 +207,7 @@ class AlpacaDataProvider(DataProvider):
                 timeframe=self._sdk["TimeFrame"].Day,
                 start=start_date,
                 end=end_date,
+                feed=self._sdk["DataFeed"].IEX,  # Issue #9 fix 2026-04-27 — paper plan only allows IEX
             )
             bars = self.data_client.get_stock_bars(req)
             df = _normalize_bars_df(bars.df, ticker)
@@ -250,6 +253,7 @@ class AlpacaDataProvider(DataProvider):
                 timeframe=self._sdk["TimeFrame"].Day,
                 start=start,
                 end=end,
+                feed=self._sdk["DataFeed"].IEX,  # Issue #9 fix 2026-04-27 — paper plan only allows IEX
             )
             bars = self.data_client.get_stock_bars(req)
             df = _normalize_bars_df(bars.df, ticker)
@@ -286,7 +290,10 @@ class AlpacaDataProvider(DataProvider):
     
     def get_latest_quote(self, ticker: str) -> Optional[Dict]:
         try:
-            req = self._sdk["StockLatestQuoteRequest"](symbol_or_symbols=[ticker])
+            req = self._sdk["StockLatestQuoteRequest"](
+                symbol_or_symbols=[ticker],
+                feed=self._sdk["DataFeed"].IEX,  # Issue #9 fix 2026-04-27 — paper plan only allows IEX
+            )
             quotes = self.data_client.get_stock_latest_quote(req)
             if ticker not in quotes:
                 return None
@@ -305,7 +312,10 @@ class AlpacaDataProvider(DataProvider):
     
     def get_latest_bar(self, ticker: str) -> Optional[Dict]:
         try:
-            req = self._sdk["StockLatestBarRequest"](symbol_or_symbols=[ticker])
+            req = self._sdk["StockLatestBarRequest"](
+                symbol_or_symbols=[ticker],
+                feed=self._sdk["DataFeed"].IEX,  # Issue #9 fix 2026-04-27 — paper plan only allows IEX
+            )
             bars = self.data_client.get_stock_latest_bar(req)
             if ticker not in bars:
                 return None
@@ -351,6 +361,7 @@ class AlpacaDataProvider(DataProvider):
                 timeframe=tf,
                 start=start,
                 end=end,
+                feed=self._sdk["DataFeed"].IEX,  # Issue #9 fix 2026-04-27 — paper plan only allows IEX (this was the cron failure!)
             )
             bars = self.data_client.get_stock_bars(req)
             return _normalize_bars_df(bars.df, ticker)

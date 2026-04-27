@@ -686,7 +686,7 @@ LIVE_TRADES_COLS = [
 def update_ticker_follow_up(gc, now_peru):
     """
     Track stocks for 3 trading days after they first cross 15% threshold.
-    Runs every scan cycle during market hours.
+    Runs every 5 minutes during market hours (heavy: ~85 tickers, ~3-4 min runtime).
 
     Logic:
     1. Query timeline_live for distinct tickers from recent days
@@ -696,6 +696,10 @@ def update_ticker_follow_up(gc, now_peru):
     5. Dedup: skip if (Ticker, ScanTime) already written today
     """
     from datetime import timedelta
+
+    # Issue #9 throttle 2026-04-27 — only run every 5 minutes (heavy: ~85 tickers)
+    if now_peru.minute % 5 != 0:
+        return
 
     if not is_trading_day(now_peru):
         return
