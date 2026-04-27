@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-04-26 19:29:04 -05
+**Generated:** 2026-04-26 20:00:20 -05
 **Branch:** `main`
-**Latest commit:** `85b6875` — Issue #9 Phase 2: Complete yfinance → data_provider migration
+**Latest commit:** `eeccb2a` — Restore Issue #35 research mode — 3 pages only
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `85b6875 (HEAD -> main) Issue #9 Phase 2: Complete yfinance → data_provider migration`
-- `d7e0db1 (origin/main) Issue #9 Phase 1: Data provider abstraction layer`
+- `eeccb2a (HEAD -> main) Restore Issue #35 research mode — 3 pages only`
+- `3e51d81 (origin/main) Issue #9 Phase 2: Complete yfinance → data_provider migration`
+- `d7e0db1 Issue #9 Phase 1: Data provider abstraction layer`
 - `d36714d Issue #1: Unify SL to 10% across all dashboard pages`
 - `cdf4e14 Fix Health Audit exit code: WARNINGs return 0, not 2`
-- `5f0359d Final cleanup: explicitly ignore backups/ folder`
 
 ---
 

@@ -3588,9 +3588,8 @@ def dashboard_home_page():
 def main():
     _PAGE_NAMES = [
         "🏠 Home",
-        "📊 Live Tracker", "💼 Portfolio Tracker", "⚡ Live Trades",
-        "🎯 Portfolio Score Tracker", "📅 Daily Summary", "📦 Timeline Archive",
-        "🔬 Post Analysis", "📊 Score Comparison",
+        "📅 Daily Summary",
+        "📦 Timeline Archive",
     ]
 
     # Session-state key "nav_page" drives the radio (allows Home buttons to switch pages)
@@ -3615,22 +3614,10 @@ def main():
 
     if page == "🏠 Home":
         dashboard_home_page()
-    elif page == "📊 Live Tracker":
-        main_page()
-    elif page == "💼 Portfolio Tracker":
-        portfolio_tracker_page()
-    elif page == "⚡ Live Trades":
-        live_trades_page()
     elif page == "📅 Daily Summary":
         daily_summary_page()
     elif page == "📦 Timeline Archive":
         timeline_archive_page()
-    elif page == "🎯 Portfolio Score Tracker":
-        score_tracker_page()
-    elif page == "🔬 Post Analysis":
-        post_analysis_page()
-    else:
-        score_comparison_page()
 
 if __name__ == "__main__":
     main()
