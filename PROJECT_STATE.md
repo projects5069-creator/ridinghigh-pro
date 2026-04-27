@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-04-26 20:00:20 -05
+**Generated:** 2026-04-26 20:51:18 -05
 **Branch:** `main`
-**Latest commit:** `eeccb2a` — Restore Issue #35 research mode — 3 pages only
+**Latest commit:** `2f5be76` — CI: Add Alpaca dependencies + env vars to GitHub Actions
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `eeccb2a (HEAD -> main) Restore Issue #35 research mode — 3 pages only`
-- `3e51d81 (origin/main) Issue #9 Phase 2: Complete yfinance → data_provider migration`
+- `2f5be76 (HEAD -> main) CI: Add Alpaca dependencies + env vars to GitHub Actions`
+- `ea002ce (origin/main, origin/HEAD) Restore Issue #35 research mode — 3 pages only`
+- `3e51d81 Issue #9 Phase 2: Complete yfinance → data_provider migration`
 - `d7e0db1 Issue #9 Phase 1: Data provider abstraction layer`
 - `d36714d Issue #1: Unify SL to 10% across all dashboard pages`
-- `cdf4e14 Fix Health Audit exit code: WARNINGs return 0, not 2`
 
 ---
 

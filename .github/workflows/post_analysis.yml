@@ -19,28 +19,44 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install finvizfinance gspread google-auth google-api-python-client pandas yfinance pytz pandas_market_calendars ta
+          pip install finvizfinance gspread google-auth google-api-python-client pandas yfinance pytz pandas_market_calendars ta alpaca-py
 
       - name: EOD Snapshot (portfolio + daily_summary)
         env:
           GOOGLE_CREDENTIALS_JSON: ${{ secrets.GOOGLE_CREDENTIALS_JSON }}
+          ALPACA_API_KEY_ID: ${{ secrets.ALPACA_API_KEY_ID }}
+          ALPACA_SECRET_KEY: ${{ secrets.ALPACA_SECRET_KEY }}
+          DATA_PROVIDER: alpaca
+          ALPACA_PAPER: "true"
         run: |
           python auto_scanner.py --eod
 
       - name: Run Post Analysis Collector
         env:
           GOOGLE_CREDENTIALS_JSON: ${{ secrets.GOOGLE_CREDENTIALS_JSON }}
+          ALPACA_API_KEY_ID: ${{ secrets.ALPACA_API_KEY_ID }}
+          ALPACA_SECRET_KEY: ${{ secrets.ALPACA_SECRET_KEY }}
+          DATA_PROVIDER: alpaca
+          ALPACA_PAPER: "true"
         run: |
           python post_analysis_collector.py
 
       - name: Enrich with Intraday Data
         env:
           GOOGLE_CREDENTIALS_JSON: ${{ secrets.GOOGLE_CREDENTIALS_JSON }}
+          ALPACA_API_KEY_ID: ${{ secrets.ALPACA_API_KEY_ID }}
+          ALPACA_SECRET_KEY: ${{ secrets.ALPACA_SECRET_KEY }}
+          DATA_PROVIDER: alpaca
+          ALPACA_PAPER: "true"
         run: |
           python enrich_post_analysis.py
 
       - name: Backfill missing OHLC
         env:
           GOOGLE_CREDENTIALS_JSON: ${{ secrets.GOOGLE_CREDENTIALS_JSON }}
+          ALPACA_API_KEY_ID: ${{ secrets.ALPACA_API_KEY_ID }}
+          ALPACA_SECRET_KEY: ${{ secrets.ALPACA_SECRET_KEY }}
+          DATA_PROVIDER: alpaca
+          ALPACA_PAPER: "true"
         run: |
           python backfill_ohlc.py

@@ -10,3 +10,6 @@ google-api-python-client>=2.0.0
 pytz>=2023.3
 openpyxl
 pandas-market-calendars
+
+# Alpaca data provider (Issue #9 Phase 2)
+alpaca-py>=0.25.0
