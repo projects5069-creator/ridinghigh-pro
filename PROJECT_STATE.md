@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-04-26 20:51:18 -05
+**Generated:** 2026-04-26 21:14:28 -05
 **Branch:** `main`
-**Latest commit:** `2f5be76` — CI: Add Alpaca dependencies + env vars to GitHub Actions
+**Latest commit:** `c7a032b` — Restore Issue #37 — remove regressed Live Trades column + Quick Nav
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `2f5be76 (HEAD -> main) CI: Add Alpaca dependencies + env vars to GitHub Actions`
-- `ea002ce (origin/main, origin/HEAD) Restore Issue #35 research mode — 3 pages only`
+- `c7a032b (HEAD -> main) Restore Issue #37 — remove regressed Live Trades column + Quick Nav`
+- `ba63e3a (origin/main, origin/HEAD) CI: Add Alpaca dependencies + env vars to GitHub Actions`
+- `ea002ce Restore Issue #35 research mode — 3 pages only`
 - `3e51d81 Issue #9 Phase 2: Complete yfinance → data_provider migration`
 - `d7e0db1 Issue #9 Phase 1: Data provider abstraction layer`
-- `d36714d Issue #1: Unify SL to 10% across all dashboard pages`
 
 ---
 
@@ -32,11 +32,11 @@ _See `OPEN_ISSUES.md` for full list_
 
 | Workflow | Status | Conclusion | Started |
 |---|---|---|---|
+| Health Audit | completed | ✅ success | 2026-04-27 01:56 UTC |
+| RidingHigh Auto Scanner | completed | ✅ success | 2026-04-27 01:52 UTC |
 | RidingHigh Auto Scanner | completed | ❌ failure | 2026-04-26 23:59 UTC |
 | RidingHigh Auto Scanner | completed | ❌ failure | 2026-04-26 21:57 UTC |
 | RidingHigh Auto Scanner | completed | ❌ failure | 2026-04-26 20:02 UTC |
-| Health Audit | completed | ✅ success | 2026-04-26 19:36 UTC |
-| RidingHigh Auto Scanner | completed | ❌ failure | 2026-04-26 18:08 UTC |
 
 ---
 
