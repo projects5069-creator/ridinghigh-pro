@@ -39,6 +39,10 @@ jobs:
           GMAIL_USER: ${{ secrets.GMAIL_USER }}
           GMAIL_APP_PASS: ${{ secrets.GMAIL_APP_PASS }}
           REPORT_TO: ${{ secrets.REPORT_TO }}
+          ALPACA_API_KEY_ID: ${{ secrets.ALPACA_API_KEY_ID }}
+          ALPACA_SECRET_KEY: ${{ secrets.ALPACA_SECRET_KEY }}
+          DATA_PROVIDER: alpaca
+          ALPACA_PAPER: "true"
         run: |
           python3 health_audit.py
         continue-on-error: true  # Failures should not abort — report is the goal

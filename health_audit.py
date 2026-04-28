@@ -865,6 +865,73 @@ def check_16_metric_sanity(gc):
                            WARNING, f"Check failed: {e}")
 
 
+def check_17_fundamentals_provider():
+    """P1: Verify fundamentals provider returns valid data for a known ticker.
+
+    Catches breaks like UnboundLocalError, missing imports, or yfinance API
+    failures BEFORE they affect production. Uses AAPL as a stable test ticker.
+    """
+    try:
+        from data_provider import get_fundamentals_provider
+        provider = get_fundamentals_provider()
+        fund = provider.get_fundamentals('AAPL')
+
+        if not fund:
+            return CheckResult("17", "Fundamentals provider", "Providers",
+                               CRITICAL, "Provider returned empty/None for AAPL",
+                               "Expected dict with market_cap, average_volume, etc.")
+
+        required = ['market_cap', 'average_volume', 'shares_outstanding']
+        missing = [k for k in required if not fund.get(k)]
+
+        if missing:
+            return CheckResult("17", "Fundamentals provider", "Providers",
+                               CRITICAL, f"Missing required fields: {missing}",
+                               f"Got keys: {list(fund.keys())}")
+
+        return CheckResult("17", "Fundamentals provider", "Providers",
+                           PASSED, f"AAPL fundamentals OK (market_cap={fund['market_cap']:,})")
+    except Exception as e:
+        return CheckResult("17", "Fundamentals provider", "Providers",
+                           CRITICAL, f"Provider crashed: {type(e).__name__}",
+                           str(e)[:300])
+
+
+def check_18_daily_bars_provider():
+    """P2: Verify daily bars provider returns valid OHLC for a known ticker.
+
+    Tests the data_provider (Alpaca or yfinance fallback) by fetching 10 days
+    of AAPL bars. Catches Alpaca SIP errors, auth failures, rate limits.
+    """
+    try:
+        from data_provider import get_data_provider
+        provider = get_data_provider()
+        bars = provider.get_daily_bars('AAPL', days=10)
+
+        if bars is None or bars.empty:
+            return CheckResult("18", "Daily bars provider", "Providers",
+                               CRITICAL, "Provider returned empty bars for AAPL")
+
+        if len(bars) < 5:
+            return CheckResult("18", "Daily bars provider", "Providers",
+                               WARNING, f"Only {len(bars)} bars returned (expected ~10)")
+
+        # Verify columns
+        required_cols = ['open', 'high', 'low', 'close', 'volume']
+        missing = [c for c in required_cols if c not in bars.columns]
+        if missing:
+            return CheckResult("18", "Daily bars provider", "Providers",
+                               CRITICAL, f"Missing columns: {missing}",
+                               f"Got: {list(bars.columns)}")
+
+        return CheckResult("18", "Daily bars provider", "Providers",
+                           PASSED, f"AAPL bars OK ({len(bars)} rows)")
+    except Exception as e:
+        return CheckResult("18", "Daily bars provider", "Providers",
+                           CRITICAL, f"Provider crashed: {type(e).__name__}",
+                           str(e)[:300])
+
+
 def check_15_gitignore_enforcement():
     """R2: No files in tree that should match .gitignore patterns."""
     bad_patterns = [r"_BEFORE_", r"\.BEFORE_", r"\.pyc$", r"__pycache__"]
@@ -1077,7 +1144,7 @@ def main():
 
     # Run all checks
     results = []
-    print("[health_audit] Running 16 checks...")
+    print("[health_audit] Running 18 checks...")
 
     # Code integrity
     results.append(check_01_duplicate_functions())
@@ -1104,6 +1171,10 @@ def main():
     # Repo health
     results.append(check_14_uncommitted_count())
     results.append(check_15_gitignore_enforcement())
+
+    # Providers
+    results.append(check_17_fundamentals_provider())
+    results.append(check_18_daily_bars_provider())
 
     print_report(results)
 
