@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-04-28 13:23:08 -05
+**Generated:** 2026-04-28 13:30:07 -05
 **Branch:** `main`
-**Latest commit:** `40a25dc` — feat(health_audit): send email alert on CRITICAL issues
+**Latest commit:** `cd14281` — test: temporary workflow to verify email alerting
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `40a25dc (HEAD -> main) feat(health_audit): send email alert on CRITICAL issues`
-- `9c51925 (origin/main, origin/HEAD) fix(health_audit): check_05 reads ScanDate column, not Ticker`
+- `cd14281 (HEAD -> main) test: temporary workflow to verify email alerting`
+- `c0259fa (origin/main, origin/HEAD) feat(health_audit): send email alert on CRITICAL issues`
+- `9c51925 fix(health_audit): check_05 reads ScanDate column, not Ticker`
 - `6a8def0 refactor(auto_scanner): replace 12 DEBUG prints with minimal warning prints`
 - `e408608 fix(auto_scanner): remove duplicate fundamentals fetch causing UnboundLocalError`
-- `6a6692b debug(auto_scanner): add prints to 3 silent 'fund = {}' fallbacks`
 
 ---
 
@@ -32,11 +32,11 @@ _See `OPEN_ISSUES.md` for full list_
 
 | Workflow | Status | Conclusion | Started |
 |---|---|---|---|
-| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-04-28 18:23 UTC |
-| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-04-28 18:22 UTC |
-| RidingHigh Auto Scanner | completed | ✅ success | 2026-04-28 18:21 UTC |
-| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-04-28 18:20 UTC |
-| RidingHigh Auto Scanner | completed | ✅ success | 2026-04-28 18:19 UTC |
+| RidingHigh Auto Scanner | queued | ⏳ — | 2026-04-28 18:30 UTC |
+| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-04-28 18:29 UTC |
+| RidingHigh Auto Scanner | completed | ✅ success | 2026-04-28 18:28 UTC |
+| RidingHigh Auto Scanner | completed | ✅ success | 2026-04-28 18:27 UTC |
+| RidingHigh Auto Scanner | completed | ✅ success | 2026-04-28 18:26 UTC |
 
 ---
 
@@ -47,7 +47,7 @@ _Months in config: `2026-04`, `2026-05`_
 
 | Sheet | Total rows | Last date | Status |
 |---|---|---|---|
-| timeline_live | 222,236 | 2026-04-28 | ✅ |
+| timeline_live | 222,401 | 2026-04-28 | ✅ |
 | daily_snapshots | 161 | 2026-04-27 | ✅ |
 | daily_summary | 940 | 2026-04-27 | ✅ |
 | post_analysis | 148 | YAAS | ✅ |

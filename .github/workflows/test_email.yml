@@ -1,0 +1,40 @@
+name: TEST Email Alert
+on:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install dependencies
+        run: pip install pytz
+      - name: Run email test
+        env:
+          GMAIL_USER: ${{ secrets.GMAIL_USER }}
+          GMAIL_APP_PASS: ${{ secrets.GMAIL_APP_PASS }}
+          REPORT_TO: ${{ secrets.REPORT_TO }}
+        run: |
+          python3 <<'PYEOF'
+          import os, sys
+          sys.path.insert(0, '.')
+          from health_audit import CheckResult, CRITICAL, send_email_alert
+
+          # יצירת CRITICAL מזוייף לבדיקה
+          fake = CheckResult(
+              "TEST", "Email Alert Test", "Test Category",
+              CRITICAL,
+              "This is a test email from RidingHigh Pro health_audit",
+              "If you got this, email alerting works correctly. Triggered manually at run " + os.environ.get('GITHUB_RUN_ID', 'local')
+          )
+
+          ok = send_email_alert([fake])
+          if not ok:
+              print("❌ Email send returned False")
+              sys.exit(1)
+          print("✅ Email sent successfully")
+          PYEOF
