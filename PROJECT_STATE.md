@@ -1,28 +1,28 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-04-28 13:56:07 -05
+**Generated:** 2026-04-28 14:10:56 -05
 **Branch:** `main`
-**Latest commit:** `02de227` — feat(health_audit): add Phase 3 provider health checks (17, 18)
+**Latest commit:** `55b3edc` — docs(open_issues): close 6 issues from 2026-04-28 session, add 4 new
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `02de227 (HEAD -> main) feat(health_audit): add Phase 3 provider health checks (17, 18)`
-- `ff7a6be (origin/main, origin/HEAD) test: remove email validation workflow (validated successfully)`
+- `55b3edc (HEAD -> main) docs(open_issues): close 6 issues from 2026-04-28 session, add 4 new`
+- `9927b0d (origin/main, origin/HEAD) feat(health_audit): add Phase 3 provider health checks (17, 18)`
+- `ff7a6be test: remove email validation workflow (validated successfully)`
 - `b4235d4 test: temporary workflow to verify full email report (will be deleted after validation)`
 - `d6589bd feat(health_audit): expand email alert to full report`
-- `90d111a test: temporary workflow to verify email alerting`
 
 ---
 
-## 📋 Open issues — 11 total
+## 📋 Open issues — 15 total
 
 - 🔴 Critical: **3**
 - 🟠 Important: **4**
 - 🟡 Medium: **1**
-- 🟢 Low: **3**
+- 🟢 Low: **7**
 
 _See `OPEN_ISSUES.md` for full list_
 
@@ -32,11 +32,11 @@ _See `OPEN_ISSUES.md` for full list_
 
 | Workflow | Status | Conclusion | Started |
 |---|---|---|---|
-| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-04-28 18:56 UTC |
-| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-04-28 18:55 UTC |
-| RidingHigh Auto Scanner | completed | ✅ success | 2026-04-28 18:54 UTC |
-| RidingHigh Auto Scanner | completed | ✅ success | 2026-04-28 18:53 UTC |
-| RidingHigh Auto Scanner | completed | ✅ success | 2026-04-28 18:52 UTC |
+| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-04-28 19:10 UTC |
+| RidingHigh Auto Scanner | completed | ✅ success | 2026-04-28 19:09 UTC |
+| RidingHigh Auto Scanner | completed | ✅ success | 2026-04-28 19:08 UTC |
+| RidingHigh Auto Scanner | completed | ✅ success | 2026-04-28 19:07 UTC |
+| RidingHigh Auto Scanner | completed | ✅ success | 2026-04-28 19:06 UTC |
 
 ---
 
@@ -47,7 +47,7 @@ _Months in config: `2026-04`, `2026-05`_
 
 | Sheet | Total rows | Last date | Status |
 |---|---|---|---|
-| timeline_live | 223,192 | 2026-04-28 | ✅ |
+| timeline_live | 223,702 | 2026-04-28 | ✅ |
 | daily_snapshots | 161 | 2026-04-27 | ✅ |
 | daily_summary | 940 | 2026-04-27 | ✅ |
 | post_analysis | 148 | YAAS | ✅ |

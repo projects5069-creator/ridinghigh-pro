@@ -1,5 +1,50 @@
 # RidingHigh Pro - Open Issues Log
-*Last updated: 2026-04-25*
+*Last updated: 2026-04-28 14:00 Peru*
+
+---
+
+## ✅ CLOSED (2026-04-28) - Session "UnboundLocalError + Email Alerts"
+
+### 🔴 Critical: UnboundLocalError in analyze_ticker (silent 24h+ outage)
+- **Root cause:** Duplicate `from data_provider import get_fundamentals_provider` at line 264 inside analyze_ticker. Python treated the name as local for entire function, breaking earlier use at line 164. The `except: pass` swallowed the UnboundLocalError silently.
+- **Symptoms:**
+  - REL_VOL stuck at 1.0 in 100% of rows since Phase 2 deploy (26/4)
+  - Float% stuck at 0.0
+  - MxV using only FINVIZ market_cap (degraded values)
+  - All 3 metrics defaulted because `fund={}` after the silent exception
+- **Detection:** Manual inspection 28/4 morning when scanner data looked off
+- **Fix:** Removed duplicate import + reuse `fund` already fetched at line 164. Avoids double API call AND fixes UnboundLocalError.
+- **Verification:** Local run shows REL_VOL=0.03/0.8/13.26/1.58 (varied), Float%=77.75/11.86/92.17/12.65 (varied)
+- **Status:** Closed
+- **Commit:** 59ebc33
+
+### 🟠 check_05 false positive — Post-analysis completeness
+- **Root cause:** Read `col_values(1)` (Ticker column) and tried to parse as date. All parses failed silently, check always returned "Missing X/X recent days" even when data was complete.
+- **Fix:** Read `col_values(2)` (ScanDate column) instead.
+- **Impact:** Misled today's investigation into post_analysis_collector — collector was healthy all along.
+- **Status:** Closed
+- **Commit:** e832d89
+
+### 🟢 health_audit improvements (Phase 3 monitoring)
+- **check_16 — Metric Sanity:** detects stuck REL_VOL=1.0, Float%=0, Gap outliers >100% in last 200 timeline_live rows. Born from today's incident.
+- **check_17 — Fundamentals provider:** calls `get_fundamentals('AAPL')`, validates required fields. Would have caught UnboundLocalError at next 06:00 cycle.
+- **check_18 — Daily bars provider:** calls `get_daily_bars('AAPL', days=10)`, validates OHLCV columns.
+- **Email alerts:** Gmail SMTP SSL via 3 GitHub Secrets (GMAIL_USER, GMAIL_APP_PASS, REPORT_TO). Sends only on CRITICAL with full report (summary, all CRITICAL details, all WARNINGs, PASSED list).
+- **Status:** Closed
+- **Commits:** a0b5fc4 (check_16), 02de227 (check_17+18), 40a25dc (email basic), 241074f (email full report)
+
+### 🟢 Backfill 3 missing post_analysis days
+- Manually ran `post_analysis_collector.run(target_date='YYYY-MM-DD')` for 23/4, 24/4, 27/4
+- Added 5+3+2 = 10 rows
+- post_analysis: 138 → 148 rows
+- **Status:** Closed (manual operation, no commit)
+
+### 🟢 Cleanup: 12 DEBUG prints
+- 9 `[DEBUG-T*]` and 3 `[DEBUG-FUND-*]` added during root cause investigation
+- Replaced with minimal `print(f"⚠ {ticker}: {type(e).__name__}")` after fix verified
+- Preserves visibility of future silent failures without DEBUG-tag clutter
+- **Status:** Closed
+- **Commit:** cf531fd
 
 ---
 
@@ -116,6 +161,7 @@
 - Hardcoded `>= 70` in lines: 3411, 3545
 - **Impact:** Inconsistent filtering across dashboard pages
 - **Effort:** 15 min (replace hardcoded with MIN_SCORE_DISPLAY)
+- **Note 28/4:** Confirmed by health_audit check_C2 — 6 hardcoded thresholds detected
 
 ### #5: DynamicScore - unclear if saved anywhere
 - Calculated on-the-fly in dashboard page 8 only
@@ -169,6 +215,30 @@
 ### #17: DropsLab schema migration pending
 - Same migration as #41 needs to apply to DropsLab
 - Currently on old schema
+
+## 🆕 DISCOVERED 2026-04-28
+
+### #18: Document MxV positive values are normal (not bug)
+- During UnboundLocalError investigation, initially thought MxV being positive (98-100) was a bug
+- **Reality:** MxV = (MarketCap - Price×Volume) / MarketCap × 100. Positive values just mean "no pump" (volume × price << market_cap). Negative = pump (volume × price > market_cap).
+- **Impact:** Documentation says "negative = pump" but doesn't clarify positive range
+- **Effort:** 5 min (update PROJECT_KB.md with full MxV interpretation)
+
+### #19: Post-analysis collector logic — why does it select so few candidates?
+- Day 22/4: 992 rows with Score≥60 in timeline_live → only 5 saved to post_analysis
+- Pattern: collector picks `peak row per ticker per day`, so volume reduces from "rows" to "unique tickers"
+- **Verified working as designed** — but worth documenting for future reference
+- **Effort:** 10 min (add note to PROJECT_KB.md about collector behavior)
+
+### #20: Streamlit Cloud dashboard.py ImportError (deferred from 25/4)
+- Error: `from formulas import (...)` at dashboard.py line 27
+- Status pre-incident, not caused by today's fixes
+- **Effort:** 20 min (fix import or update formulas exports)
+
+### #21: GitHub Actions runner queue resilience
+- Today's GitHub outage (08:30–10:30 Peru) caused 12 consecutive scanner failures + 17 queued runs
+- No auto-retry or backoff strategy in place
+- **Effort:** 30 min (add retry logic or alert on stuck queue)
 
 ---
 
