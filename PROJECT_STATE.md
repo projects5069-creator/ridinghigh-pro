@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-04-26 21:38:28 -05
+**Generated:** 2026-04-28 09:00:10 -05
 **Branch:** `main`
-**Latest commit:** `8f813ae` — Restore Issues #39 + #42 — Daily Summary expansion + Timeline ticker detail + ScanTime zfill
+**Latest commit:** `a0b5fc4` — feat(health_audit): add check_16 metric sanity detection
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `8f813ae (HEAD -> main) Restore Issues #39 + #42 — Daily Summary expansion + Timeline ticker detail + ScanTime zfill`
-- `5c054cc (origin/main, origin/HEAD) Restore Issue #37 — remove regressed Live Trades column + Quick Nav`
+- `a0b5fc4 (HEAD -> main) feat(health_audit): add check_16 metric sanity detection`
+- `bd5de7e (origin/main, origin/HEAD) Fix Issue #9: Alpaca IEX feed + ticker_follow_up 5-min throttle`
+- `1c8ca33 Restore Issues #39 + #42 — Daily Summary expansion + Timeline ticker detail + ScanTime zfill`
+- `5c054cc Restore Issue #37 — remove regressed Live Trades column + Quick Nav`
 - `ba63e3a CI: Add Alpaca dependencies + env vars to GitHub Actions`
-- `ea002ce Restore Issue #35 research mode — 3 pages only`
-- `3e51d81 Issue #9 Phase 2: Complete yfinance → data_provider migration`
 
 ---
 
@@ -32,11 +32,11 @@ _See `OPEN_ISSUES.md` for full list_
 
 | Workflow | Status | Conclusion | Started |
 |---|---|---|---|
-| Health Audit | completed | ✅ success | 2026-04-27 01:56 UTC |
-| RidingHigh Auto Scanner | completed | ✅ success | 2026-04-27 01:52 UTC |
-| RidingHigh Auto Scanner | completed | ❌ failure | 2026-04-26 23:59 UTC |
-| RidingHigh Auto Scanner | completed | ❌ failure | 2026-04-26 21:57 UTC |
-| RidingHigh Auto Scanner | completed | ❌ failure | 2026-04-26 20:02 UTC |
+| RidingHigh Auto Scanner | queued | ⏳ — | 2026-04-28 14:00 UTC |
+| RidingHigh Auto Scanner | queued | ⏳ — | 2026-04-28 13:59 UTC |
+| RidingHigh Auto Scanner | queued | ⏳ — | 2026-04-28 13:58 UTC |
+| RidingHigh Auto Scanner | queued | ⏳ — | 2026-04-28 13:57 UTC |
+| RidingHigh Auto Scanner | queued | ⏳ — | 2026-04-28 13:56 UTC |
 
 ---
 
@@ -47,22 +47,22 @@ _Months in config: `2026-04`, `2026-05`_
 
 | Sheet | Total rows | Last date | Status |
 |---|---|---|---|
-| timeline_live | 218,522 | 2026-04-24 | ✅ |
-| daily_snapshots | 113 | 2026-04-24 | ✅ |
-| daily_summary | 890 | 2026-04-24 | ✅ |
+| timeline_live | 220,217 | 2026-04-27 | ✅ |
+| daily_snapshots | 161 | 2026-04-27 | ✅ |
+| daily_summary | 940 | 2026-04-27 | ✅ |
 | post_analysis | 138 | TORO | ✅ |
-| portfolio | 180 | TRT_2026-0 | ✅ |
-| portfolio_live | 69 | ENVB | ✅ |
-| score_tracker | 15,871 | 2026-04-23 | ✅ |
-| live_trades | 15,871 | 2026-04-23 | ✅ |
-| ticker_follow_up | 0 | — | ⚠️ empty |
+| portfolio | 182 | HTCO_2026- | ✅ |
+| portfolio_live | 72 | HTCO | ✅ |
+| score_tracker | 15,890 | 2026-04-27 | ✅ |
+| live_trades | 15,890 | 2026-04-27 | ✅ |
+| ticker_follow_up | 85 | 2026-04-27 | ✅ |
 
 ---
 
 ## 🩺 Health
 
-- ⚠️ 2 uncommitted file(s):
--    - 2 new/untracked
+- ⚠️ 3 uncommitted file(s):
+-    - 3 new/untracked
 
 ---
 

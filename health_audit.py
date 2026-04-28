@@ -807,6 +807,64 @@ def check_14_uncommitted_count():
                            output[:300])
 
 
+def check_16_metric_sanity(gc):
+    """Q5: Detect stuck metrics in timeline_live (REL_VOL=1.0, Float%=0, Gap outliers)."""
+    try:
+        month, sheets = get_active_month_sheets(gc)
+        if not sheets or "timeline_live" not in sheets:
+            return CheckResult("16", "Metric Sanity", "Data Quality",
+                               WARNING, "timeline_live sheet not found in config")
+        ws = gc.open_by_key(sheets["timeline_live"]).sheet1
+        all_data = ws.get_all_values()
+
+        if len(all_data) < 50:
+            return CheckResult("16", "Metric Sanity", "Data Quality",
+                               PASSED, "Not enough data to evaluate (< 50 rows)")
+
+        header = all_data[0]
+        recent = all_data[-200:]
+        problems = []
+
+        def to_floats(col_name):
+            if col_name not in header:
+                return []
+            i = header.index(col_name)
+            out = []
+            for r in recent:
+                if i < len(r) and r[i]:
+                    try:
+                        out.append(float(r[i]))
+                    except ValueError:
+                        pass
+            return out
+
+        rel = to_floats("REL_VOL")
+        if rel and max(rel) - min(rel) < 0.01 and abs(rel[0] - 1.0) < 0.01:
+            problems.append(f"REL_VOL stuck at {rel[0]:.2f} across {len(rel)} rows")
+
+        flt = to_floats("Float%")
+        if flt and max(flt) - min(flt) < 0.01:
+            problems.append(f"Float% stuck at {flt[0]:.2f} across {len(flt)} rows")
+
+        gap = to_floats("Gap")
+        outliers = [v for v in gap if abs(v) > 100]
+        if outliers:
+            problems.append(f"Gap has {len(outliers)} outliers > 100% (max={max(outliers):.0f})")
+
+        if problems:
+            return CheckResult("16", "Metric Sanity", "Data Quality",
+                               CRITICAL,
+                               f"{len(problems)} stuck/broken metrics detected",
+                               " | ".join(problems))
+
+        return CheckResult("16", "Metric Sanity", "Data Quality",
+                           PASSED, "All metrics show healthy variance")
+
+    except Exception as e:
+        return CheckResult("16", "Metric Sanity", "Data Quality",
+                           WARNING, f"Check failed: {e}")
+
+
 def check_15_gitignore_enforcement():
     """R2: No files in tree that should match .gitignore patterns."""
     bad_patterns = [r"_BEFORE_", r"\.BEFORE_", r"\.pyc$", r"__pycache__"]
@@ -941,7 +999,7 @@ def main():
 
     # Run all checks
     results = []
-    print("[health_audit] Running 15 checks...")
+    print("[health_audit] Running 16 checks...")
 
     # Code integrity
     results.append(check_01_duplicate_functions())
@@ -958,6 +1016,7 @@ def main():
     results.append(check_08_required_columns(gc))
     results.append(check_09_duplicate_post_analysis_rows(gc))
     results.append(check_10_outliers(gc))
+    results.append(check_16_metric_sanity(gc))
 
     # Config
     results.append(check_11_sheets_config_current_month())
