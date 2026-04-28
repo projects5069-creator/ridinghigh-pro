@@ -257,17 +257,10 @@ def analyze_ticker(ticker, finviz_row):
         }
         score = calculate_score(metrics)
 
-        # AvgVolume & FloatShares — Issue #9 Phase 2 (was yfinance)
-        avg_volume   = 0
-        float_shares = 0
-        try:
-            from data_provider import get_fundamentals_provider
-            fund = get_fundamentals_provider().get_fundamentals(ticker)
-            if fund:
-                avg_volume   = int(fund.get('average_volume', 0) or 0)
-                float_shares = int(fund.get('float_shares',   0) or 0)
-        except Exception:
-            pass
+        # AvgVolume & FloatShares — Issue #9 Phase 2
+        # Reuse fund already fetched at line ~164 (avoid double API call + UnboundLocalError)
+        avg_volume   = int((fund.get('average_volume', 0) or 0)) if fund else 0
+        float_shares = int((fund.get('float_shares',   0) or 0)) if fund else 0
 
         return {
             # ── Core ──────────────────────────────────────────────────────────

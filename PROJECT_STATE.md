@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-04-28 11:04:28 -05
+**Generated:** 2026-04-28 11:47:58 -05
 **Branch:** `main`
-**Latest commit:** `ae81a23` — debug(auto_scanner): add prints to 3 silent 'fund = {}' fallbacks
+**Latest commit:** `59ebc33` — fix(auto_scanner): remove duplicate fundamentals fetch causing UnboundLocalError
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `ae81a23 (HEAD -> main) debug(auto_scanner): add prints to 3 silent 'fund = {}' fallbacks`
-- `58bc669 (origin/main, origin/HEAD) debug(auto_scanner): replace 9 silent 'except: pass' with labeled prints`
+- `59ebc33 (HEAD -> main) fix(auto_scanner): remove duplicate fundamentals fetch causing UnboundLocalError`
+- `6a6692b (origin/main, origin/HEAD) debug(auto_scanner): add prints to 3 silent 'fund = {}' fallbacks`
+- `58bc669 debug(auto_scanner): replace 9 silent 'except: pass' with labeled prints`
 - `29ed481 feat(health_audit): add check_16 metric sanity detection`
 - `bd5de7e Fix Issue #9: Alpaca IEX feed + ticker_follow_up 5-min throttle`
-- `1c8ca33 Restore Issues #39 + #42 — Daily Summary expansion + Timeline ticker detail + ScanTime zfill`
 
 ---
 
@@ -32,11 +32,11 @@ _See `OPEN_ISSUES.md` for full list_
 
 | Workflow | Status | Conclusion | Started |
 |---|---|---|---|
+| RidingHigh Auto Scanner | completed | ⏳ cancelled | 2026-04-28 16:05 UTC |
 | RidingHigh Auto Scanner | completed | ✅ success | 2026-04-28 15:39 UTC |
 | RidingHigh Auto Scanner | completed | ⏳ cancelled | 2026-04-28 15:37 UTC |
 | RidingHigh Auto Scanner | completed | ⏳ cancelled | 2026-04-28 15:36 UTC |
 | RidingHigh Auto Scanner | completed | ⏳ cancelled | 2026-04-28 15:35 UTC |
-| RidingHigh Auto Scanner | completed | ⏳ cancelled | 2026-04-28 15:34 UTC |
 
 ---
 
@@ -47,15 +47,15 @@ _Months in config: `2026-04`, `2026-05`_
 
 | Sheet | Total rows | Last date | Status |
 |---|---|---|---|
-| timeline_live | 220,230 | 2026-04-28 | ✅ |
+| timeline_live | 220,297 | 2026-04-28 | ✅ |
 | daily_snapshots | 161 | 2026-04-27 | ✅ |
 | daily_summary | 940 | 2026-04-27 | ✅ |
 | post_analysis | 138 | TORO | ✅ |
 | portfolio | 182 | HTCO_2026- | ✅ |
 | portfolio_live | 72 | HTCO | ✅ |
-| score_tracker | 15,890 | 2026-04-27 | ✅ |
-| live_trades | 15,890 | 2026-04-27 | ✅ |
-| ticker_follow_up | 85 | 2026-04-27 | ✅ |
+| score_tracker | 15,900 | 2026-04-28 | ✅ |
+| live_trades | 15,900 | 2026-04-28 | ✅ |
+| ticker_follow_up | 146 | 2026-04-28 | ✅ |
 
 ---
 
