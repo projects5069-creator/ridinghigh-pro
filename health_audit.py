@@ -980,6 +980,51 @@ def write_to_sheet(results, gc):
 # MAIN
 # ============================================================================
 
+def send_email_alert(results):
+    """Send email alert when CRITICAL issues detected. Requires GMAIL_USER,
+    GMAIL_APP_PASS, REPORT_TO env vars (set as GitHub Secrets)."""
+    gmail_user = os.environ.get("GMAIL_USER")
+    gmail_pass = os.environ.get("GMAIL_APP_PASS")
+    report_to  = os.environ.get("REPORT_TO")
+
+    if not all([gmail_user, gmail_pass, report_to]):
+        print("[health_audit] ⚠️ Email not configured — skipping alert")
+        return False
+
+    critical = [r for r in results if r.is_critical()]
+    subject = f"🔴 RidingHigh Health Audit — {len(critical)} CRITICAL issue(s)"
+
+    body_lines = [
+        f"Health Audit — {now_peru_str()} Peru",
+        f"CRITICAL issues: {len(critical)}",
+        "",
+    ]
+    for r in critical:
+        body_lines.append(f"[{r.check_id}] {r.name}: {r.message}")
+        if r.details:
+            body_lines.append(f"  Details: {r.details[:200]}")
+    body_lines.append("")
+    body_lines.append("— RidingHigh Pro Health Audit (automated)")
+
+    try:
+        import smtplib
+        from email.mime.text import MIMEText
+
+        msg = MIMEText("\n".join(body_lines))
+        msg["Subject"] = subject
+        msg["From"]    = gmail_user
+        msg["To"]      = report_to
+
+        with smtplib.SMTP_SSL("smtp.gmail.com", 465) as smtp:
+            smtp.login(gmail_user, gmail_pass)
+            smtp.sendmail(gmail_user, [report_to], msg.as_string())
+        print(f"[health_audit] ✅ Alert email sent to {report_to}")
+        return True
+    except Exception as e:
+        print(f"[health_audit] ❌ Email failed: {e}")
+        return False
+
+
 def main():
     args = sys.argv[1:]
     local_mode = "--local" in args
@@ -1042,6 +1087,7 @@ def main():
     has_warnings = any(r.is_failure() for r in results)
 
     if has_critical:
+        send_email_alert(results)
         print(f"\n[health_audit] Exit 1 — CRITICAL issues detected")
         return 1
 
