@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-04-28 13:43:31 -05
+**Generated:** 2026-04-28 13:49:36 -05
 **Branch:** `main`
-**Latest commit:** `362f1d3` — test: temporary workflow to verify full email report (will be deleted after validation)
+**Latest commit:** `241074f` — test: remove email validation workflow (validated successfully)
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `362f1d3 (HEAD -> main) test: temporary workflow to verify full email report (will be deleted after validation)`
-- `d6589bd (origin/main, origin/HEAD) feat(health_audit): expand email alert to full report`
+- `241074f (HEAD -> main) test: remove email validation workflow (validated successfully)`
+- `b4235d4 (origin/main, origin/HEAD) test: temporary workflow to verify full email report (will be deleted after validation)`
+- `d6589bd feat(health_audit): expand email alert to full report`
 - `90d111a test: temporary workflow to verify email alerting`
 - `c0259fa feat(health_audit): send email alert on CRITICAL issues`
-- `9c51925 fix(health_audit): check_05 reads ScanDate column, not Ticker`
 
 ---
 
@@ -32,11 +32,11 @@ _See `OPEN_ISSUES.md` for full list_
 
 | Workflow | Status | Conclusion | Started |
 |---|---|---|---|
-| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-04-28 18:43 UTC |
-| RidingHigh Auto Scanner | completed | ✅ success | 2026-04-28 18:42 UTC |
-| RidingHigh Auto Scanner | completed | ✅ success | 2026-04-28 18:41 UTC |
-| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-04-28 18:40 UTC |
-| RidingHigh Auto Scanner | completed | ✅ success | 2026-04-28 18:39 UTC |
+| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-04-28 18:49 UTC |
+| RidingHigh Auto Scanner | completed | ✅ success | 2026-04-28 18:48 UTC |
+| TEST Email Alert | completed | ✅ success | 2026-04-28 18:47 UTC |
+| RidingHigh Auto Scanner | completed | ✅ success | 2026-04-28 18:47 UTC |
+| RidingHigh Auto Scanner | completed | ✅ success | 2026-04-28 18:46 UTC |
 
 ---
 
@@ -47,7 +47,7 @@ _Months in config: `2026-04`, `2026-05`_
 
 | Sheet | Total rows | Last date | Status |
 |---|---|---|---|
-| timeline_live | 222,839 | 2026-04-28 | ✅ |
+| timeline_live | 223,031 | 2026-04-28 | ✅ |
 | daily_snapshots | 161 | 2026-04-27 | ✅ |
 | daily_summary | 940 | 2026-04-27 | ✅ |
 | post_analysis | 148 | YAAS | ✅ |
