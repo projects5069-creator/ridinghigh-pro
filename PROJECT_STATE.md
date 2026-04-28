@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-04-28 09:00:10 -05
+**Generated:** 2026-04-28 10:21:36 -05
 **Branch:** `main`
-**Latest commit:** `a0b5fc4` — feat(health_audit): add check_16 metric sanity detection
+**Latest commit:** `1f07b8b` — debug(auto_scanner): replace 9 silent 'except: pass' with labeled prints
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `a0b5fc4 (HEAD -> main) feat(health_audit): add check_16 metric sanity detection`
-- `bd5de7e (origin/main, origin/HEAD) Fix Issue #9: Alpaca IEX feed + ticker_follow_up 5-min throttle`
+- `1f07b8b (HEAD -> main) debug(auto_scanner): replace 9 silent 'except: pass' with labeled prints`
+- `29ed481 (origin/main, origin/HEAD) feat(health_audit): add check_16 metric sanity detection`
+- `bd5de7e Fix Issue #9: Alpaca IEX feed + ticker_follow_up 5-min throttle`
 - `1c8ca33 Restore Issues #39 + #42 — Daily Summary expansion + Timeline ticker detail + ScanTime zfill`
 - `5c054cc Restore Issue #37 — remove regressed Live Trades column + Quick Nav`
-- `ba63e3a CI: Add Alpaca dependencies + env vars to GitHub Actions`
 
 ---
 
@@ -32,11 +32,11 @@ _See `OPEN_ISSUES.md` for full list_
 
 | Workflow | Status | Conclusion | Started |
 |---|---|---|---|
-| RidingHigh Auto Scanner | queued | ⏳ — | 2026-04-28 14:00 UTC |
-| RidingHigh Auto Scanner | queued | ⏳ — | 2026-04-28 13:59 UTC |
-| RidingHigh Auto Scanner | queued | ⏳ — | 2026-04-28 13:58 UTC |
-| RidingHigh Auto Scanner | queued | ⏳ — | 2026-04-28 13:57 UTC |
-| RidingHigh Auto Scanner | queued | ⏳ — | 2026-04-28 13:56 UTC |
+| RidingHigh Auto Scanner | queued | ⏳ — | 2026-04-28 15:21 UTC |
+| RidingHigh Auto Scanner | queued | ⏳ — | 2026-04-28 15:20 UTC |
+| RidingHigh Auto Scanner | queued | ⏳ — | 2026-04-28 15:19 UTC |
+| RidingHigh Auto Scanner | queued | ⏳ — | 2026-04-28 15:18 UTC |
+| RidingHigh Auto Scanner | queued | ⏳ — | 2026-04-28 15:17 UTC |
 
 ---
 

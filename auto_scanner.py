@@ -170,7 +170,8 @@ def analyze_ticker(ticker, finviz_row):
                         rsi_vals = RSIIndicator(close=hist['close'], window=14).rsi()
                         if not rsi_vals.empty and not pd.isna(rsi_vals.iloc[-1]):
                             rsi = rsi_vals.iloc[-1]
-                    except: pass
+                    except Exception as e:
+                        print(f"  ⚠ [DEBUG-T1-RSI] {ticker}: {type(e).__name__}: {e}")
 
                     try:
                         atr_vals = AverageTrueRange(
@@ -181,7 +182,8 @@ def analyze_ticker(ticker, finviz_row):
                         atrx = calculate_atrx(current["high"], current["low"], atr)
                         atrx = validate_atrx(atrx, atr, price)
                         atr14_raw = round(float(atr), 4)  # raw ATR14
-                    except: pass
+                    except Exception as e:
+                        print(f"  ⚠ [DEBUG-T2-ATRX] {ticker}: {type(e).__name__}: {e}")
 
                 try:
                     avg_vol = fund.get('average_volume') or volume
@@ -189,24 +191,28 @@ def analyze_ticker(ticker, finviz_row):
                     if rel_vol > 100:
                         print(f"  ⚠ REL_VOL capped: {rel_vol:.1f} -> 100 for {ticker}")
                         rel_vol = 100
-                except: pass
+                except Exception as e:
+                    print(f"  ⚠ [DEBUG-T3-RELVOL] {ticker}: {type(e).__name__}: {e}")
 
                 try:
                     open_price = round(float(current['open']), 4)
                     run_up = calculate_runup(price, current['open'])
-                except: pass
+                except Exception as e:
+                    print(f"  ⚠ [DEBUG-T4-RUNUP] {ticker}: {type(e).__name__}: {e}")
 
                 try:
                     prev_close = round(float(previous['close']), 4)
                     gap = calculate_gap(current['open'], previous['close'])
-                except: pass
+                except Exception as e:
+                    print(f"  ⚠ [DEBUG-T5-GAP] {ticker}: {type(e).__name__}: {e}")
 
                 try:
                     high_today = round(float(current['high']), 4)
                     low_today  = round(float(current['low']), 4)
                     typical_price = round((current['high'] + current['low'] + price) / 3, 4)
                     typical_price_dist = calculate_typical_price_dist(price, current['high'], current['low'])
-                except: pass
+                except Exception as e:
+                    print(f"  ⚠ [DEBUG-T6-TYPICAL] {ticker}: {type(e).__name__}: {e}")
 
                 # Fallback: if daily bar hasn't updated high yet, use price as high.
                 if high_today <= price:
@@ -214,14 +220,16 @@ def analyze_ticker(ticker, finviz_row):
 
                 try:
                     price_to_high  = ((price - high_today) / high_today * 100) if high_today > 0 else 0
-                except: pass
+                except Exception as e:
+                    print(f"  ⚠ [DEBUG-T7-PTH] {ticker}: {type(e).__name__}: {e}")
 
                 try:
                     # 52w high computed from 252-day history (was yfinance fiftyTwoWeekHigh)
                     week52_high = float(hist_full['high'].max()) if not hist_full.empty else price
                     h52 = week52_high
                     price_to_52w_high = ((price - h52) / h52) * 100 if h52 > 0 else 0
-                except: pass
+                except Exception as e:
+                    print(f"  ⚠ [DEBUG-T8-52W] {ticker}: {type(e).__name__}: {e}")
 
                 if shares_outstanding == 0:
                     shares_outstanding = (fund.get('shares_outstanding') or 0) or (
@@ -231,7 +239,8 @@ def analyze_ticker(ticker, finviz_row):
                 try:
                     fs = (fund.get('float_shares') or 0)
                     float_pct = calculate_float_pct(fs, shares_outstanding)
-                except: pass
+                except Exception as e:
+                    print(f"  ⚠ [DEBUG-T9-FLOAT] {ticker}: {type(e).__name__}: {e}")
 
         except Exception as e:
             print(f"  ⚠ analyze_ticker provider error for {ticker}: {e}")
