@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-04-28 12:35:36 -05
+**Generated:** 2026-04-28 13:05:07 -05
 **Branch:** `main`
-**Latest commit:** `cf531fd` — refactor(auto_scanner): replace 12 DEBUG prints with minimal warning prints
+**Latest commit:** `e832d89` — fix(health_audit): check_05 reads ScanDate column, not Ticker
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `cf531fd (HEAD -> main) refactor(auto_scanner): replace 12 DEBUG prints with minimal warning prints`
-- `e408608 (origin/main, origin/HEAD) fix(auto_scanner): remove duplicate fundamentals fetch causing UnboundLocalError`
+- `e832d89 (HEAD -> main) fix(health_audit): check_05 reads ScanDate column, not Ticker`
+- `6a8def0 (origin/main, origin/HEAD) refactor(auto_scanner): replace 12 DEBUG prints with minimal warning prints`
+- `e408608 fix(auto_scanner): remove duplicate fundamentals fetch causing UnboundLocalError`
 - `6a6692b debug(auto_scanner): add prints to 3 silent 'fund = {}' fallbacks`
 - `58bc669 debug(auto_scanner): replace 9 silent 'except: pass' with labeled prints`
-- `29ed481 feat(health_audit): add check_16 metric sanity detection`
 
 ---
 
@@ -32,11 +32,11 @@ _See `OPEN_ISSUES.md` for full list_
 
 | Workflow | Status | Conclusion | Started |
 |---|---|---|---|
-| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-04-28 17:35 UTC |
-| RidingHigh Auto Scanner | completed | ✅ success | 2026-04-28 17:34 UTC |
-| RidingHigh Auto Scanner | completed | ✅ success | 2026-04-28 17:33 UTC |
-| RidingHigh Auto Scanner | completed | ✅ success | 2026-04-28 17:32 UTC |
-| RidingHigh Auto Scanner | completed | ✅ success | 2026-04-28 17:31 UTC |
+| RidingHigh Auto Scanner | queued | ⏳ — | 2026-04-28 18:05 UTC |
+| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-04-28 18:04 UTC |
+| RidingHigh Auto Scanner | completed | ✅ success | 2026-04-28 18:03 UTC |
+| RidingHigh Auto Scanner | completed | ✅ success | 2026-04-28 18:02 UTC |
+| RidingHigh Auto Scanner | completed | ✅ success | 2026-04-28 18:01 UTC |
 
 ---
 
@@ -47,10 +47,10 @@ _Months in config: `2026-04`, `2026-05`_
 
 | Sheet | Total rows | Last date | Status |
 |---|---|---|---|
-| timeline_live | 221,061 | 2026-04-28 | ✅ |
+| timeline_live | 221,694 | 2026-04-28 | ✅ |
 | daily_snapshots | 161 | 2026-04-27 | ✅ |
 | daily_summary | 940 | 2026-04-27 | ✅ |
-| post_analysis | 138 | TORO | ✅ |
+| post_analysis | 148 | YAAS | ✅ |
 | portfolio | 182 | HTCO_2026- | ✅ |
 | portfolio_live | 72 | HTCO | ✅ |
 | score_tracker | 15,900 | 2026-04-28 | ✅ |

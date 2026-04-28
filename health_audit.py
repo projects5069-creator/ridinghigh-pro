@@ -411,7 +411,7 @@ def check_05_post_analysis_completeness(gc):
 
     try:
         ws = gc.open_by_key(sheets["post_analysis"]).sheet1
-        col1 = ws.col_values(1)[1:]  # skip header
+        col1 = ws.col_values(2)[1:]  # ScanDate is column 2
         if not col1:
             return CheckResult("D2", "Post-analysis completeness", "Data freshness",
                                WARNING, "post_analysis is empty")
