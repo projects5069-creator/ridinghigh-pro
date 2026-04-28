@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-04-28 11:47:58 -05
+**Generated:** 2026-04-28 12:35:36 -05
 **Branch:** `main`
-**Latest commit:** `59ebc33` — fix(auto_scanner): remove duplicate fundamentals fetch causing UnboundLocalError
+**Latest commit:** `cf531fd` — refactor(auto_scanner): replace 12 DEBUG prints with minimal warning prints
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `59ebc33 (HEAD -> main) fix(auto_scanner): remove duplicate fundamentals fetch causing UnboundLocalError`
-- `6a6692b (origin/main, origin/HEAD) debug(auto_scanner): add prints to 3 silent 'fund = {}' fallbacks`
+- `cf531fd (HEAD -> main) refactor(auto_scanner): replace 12 DEBUG prints with minimal warning prints`
+- `e408608 (origin/main, origin/HEAD) fix(auto_scanner): remove duplicate fundamentals fetch causing UnboundLocalError`
+- `6a6692b debug(auto_scanner): add prints to 3 silent 'fund = {}' fallbacks`
 - `58bc669 debug(auto_scanner): replace 9 silent 'except: pass' with labeled prints`
 - `29ed481 feat(health_audit): add check_16 metric sanity detection`
-- `bd5de7e Fix Issue #9: Alpaca IEX feed + ticker_follow_up 5-min throttle`
 
 ---
 
@@ -32,11 +32,11 @@ _See `OPEN_ISSUES.md` for full list_
 
 | Workflow | Status | Conclusion | Started |
 |---|---|---|---|
-| RidingHigh Auto Scanner | completed | ⏳ cancelled | 2026-04-28 16:05 UTC |
-| RidingHigh Auto Scanner | completed | ✅ success | 2026-04-28 15:39 UTC |
-| RidingHigh Auto Scanner | completed | ⏳ cancelled | 2026-04-28 15:37 UTC |
-| RidingHigh Auto Scanner | completed | ⏳ cancelled | 2026-04-28 15:36 UTC |
-| RidingHigh Auto Scanner | completed | ⏳ cancelled | 2026-04-28 15:35 UTC |
+| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-04-28 17:35 UTC |
+| RidingHigh Auto Scanner | completed | ✅ success | 2026-04-28 17:34 UTC |
+| RidingHigh Auto Scanner | completed | ✅ success | 2026-04-28 17:33 UTC |
+| RidingHigh Auto Scanner | completed | ✅ success | 2026-04-28 17:32 UTC |
+| RidingHigh Auto Scanner | completed | ✅ success | 2026-04-28 17:31 UTC |
 
 ---
 
@@ -47,7 +47,7 @@ _Months in config: `2026-04`, `2026-05`_
 
 | Sheet | Total rows | Last date | Status |
 |---|---|---|---|
-| timeline_live | 220,297 | 2026-04-28 | ✅ |
+| timeline_live | 221,061 | 2026-04-28 | ✅ |
 | daily_snapshots | 161 | 2026-04-27 | ✅ |
 | daily_summary | 940 | 2026-04-27 | ✅ |
 | post_analysis | 138 | TORO | ✅ |
