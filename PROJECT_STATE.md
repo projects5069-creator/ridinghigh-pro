@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-04-28 10:21:36 -05
+**Generated:** 2026-04-28 11:04:28 -05
 **Branch:** `main`
-**Latest commit:** `1f07b8b` — debug(auto_scanner): replace 9 silent 'except: pass' with labeled prints
+**Latest commit:** `ae81a23` — debug(auto_scanner): add prints to 3 silent 'fund = {}' fallbacks
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `1f07b8b (HEAD -> main) debug(auto_scanner): replace 9 silent 'except: pass' with labeled prints`
-- `29ed481 (origin/main, origin/HEAD) feat(health_audit): add check_16 metric sanity detection`
+- `ae81a23 (HEAD -> main) debug(auto_scanner): add prints to 3 silent 'fund = {}' fallbacks`
+- `58bc669 (origin/main, origin/HEAD) debug(auto_scanner): replace 9 silent 'except: pass' with labeled prints`
+- `29ed481 feat(health_audit): add check_16 metric sanity detection`
 - `bd5de7e Fix Issue #9: Alpaca IEX feed + ticker_follow_up 5-min throttle`
 - `1c8ca33 Restore Issues #39 + #42 — Daily Summary expansion + Timeline ticker detail + ScanTime zfill`
-- `5c054cc Restore Issue #37 — remove regressed Live Trades column + Quick Nav`
 
 ---
 
@@ -32,11 +32,11 @@ _See `OPEN_ISSUES.md` for full list_
 
 | Workflow | Status | Conclusion | Started |
 |---|---|---|---|
-| RidingHigh Auto Scanner | queued | ⏳ — | 2026-04-28 15:21 UTC |
-| RidingHigh Auto Scanner | queued | ⏳ — | 2026-04-28 15:20 UTC |
-| RidingHigh Auto Scanner | queued | ⏳ — | 2026-04-28 15:19 UTC |
-| RidingHigh Auto Scanner | queued | ⏳ — | 2026-04-28 15:18 UTC |
-| RidingHigh Auto Scanner | queued | ⏳ — | 2026-04-28 15:17 UTC |
+| RidingHigh Auto Scanner | completed | ✅ success | 2026-04-28 15:39 UTC |
+| RidingHigh Auto Scanner | completed | ⏳ cancelled | 2026-04-28 15:37 UTC |
+| RidingHigh Auto Scanner | completed | ⏳ cancelled | 2026-04-28 15:36 UTC |
+| RidingHigh Auto Scanner | completed | ⏳ cancelled | 2026-04-28 15:35 UTC |
+| RidingHigh Auto Scanner | completed | ⏳ cancelled | 2026-04-28 15:34 UTC |
 
 ---
 
@@ -47,7 +47,7 @@ _Months in config: `2026-04`, `2026-05`_
 
 | Sheet | Total rows | Last date | Status |
 |---|---|---|---|
-| timeline_live | 220,217 | 2026-04-27 | ✅ |
+| timeline_live | 220,230 | 2026-04-28 | ✅ |
 | daily_snapshots | 161 | 2026-04-27 | ✅ |
 | daily_summary | 940 | 2026-04-27 | ✅ |
 | post_analysis | 138 | TORO | ✅ |

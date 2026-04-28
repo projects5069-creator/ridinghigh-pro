@@ -162,7 +162,8 @@ def analyze_ticker(ticker, finviz_row):
                 # Fetch fundamentals once (used in multiple places below)
                 try:
                     fund = get_fundamentals_provider().get_fundamentals(ticker) or {}
-                except Exception:
+                except Exception as fund_e:
+                    print(f"  ⚠ [DEBUG-FUND-MAIN] {ticker}: {type(fund_e).__name__}: {fund_e}")
                     fund = {}
 
                 if len(hist) >= 14:
@@ -789,7 +790,8 @@ def update_ticker_follow_up(gc, now_peru):
                 # 1) Fundamentals (replaces t.info — except current price)
                 try:
                     fund = get_fundamentals_provider().get_fundamentals(ticker) or {}
-                except Exception:
+                except Exception as fund_e:
+                    print(f"  ⚠ [DEBUG-FUND-FOLLOWUP] {ticker}: {type(fund_e).__name__}: {fund_e}")
                     fund = {}
 
                 # 2) Current price (replaces info.get("regularMarketPrice"))
@@ -1137,7 +1139,8 @@ def sync_score_tracker(gc, now_peru):
                 # Fetch fundamentals (replaces stock.info)
                 try:
                     fund = get_fundamentals_provider().get_fundamentals(ticker) or {}
-                except Exception:
+                except Exception as fund_e:
+                    print(f"  ⚠ [DEBUG-FUND-EOD] {ticker}: {type(fund_e).__name__}: {fund_e}")
                     fund = {}
 
                 current  = hist.iloc[-1]
