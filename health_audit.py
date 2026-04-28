@@ -981,40 +981,73 @@ def write_to_sheet(results, gc):
 # ============================================================================
 
 def send_email_alert(results):
-    """Send email alert when CRITICAL issues detected. Requires GMAIL_USER,
-    GMAIL_APP_PASS, REPORT_TO env vars (set as GitHub Secrets)."""
+    """Send email alert when CRITICAL issues detected. Includes full report.
+    Requires GMAIL_USER, GMAIL_APP_PASS, REPORT_TO env vars."""
     gmail_user = os.environ.get("GMAIL_USER")
     gmail_pass = os.environ.get("GMAIL_APP_PASS")
     report_to  = os.environ.get("REPORT_TO")
 
     if not all([gmail_user, gmail_pass, report_to]):
-        print("[health_audit] ⚠️ Email not configured — skipping alert")
+        print("[health_audit] ⚠️  Email not configured — skipping alert")
         return False
 
     critical = [r for r in results if r.is_critical()]
+    warnings = [r for r in results if r.status == WARNING]
+    passed   = [r for r in results if r.status == PASSED]
+    info     = [r for r in results if r.status == INFO]
+
+    if not critical:
+        return False  # Don't send if no critical
+
     subject = f"🔴 RidingHigh Health Audit — {len(critical)} CRITICAL issue(s)"
 
-    body_lines = [
-        f"Health Audit — {now_peru_str()} Peru",
-        f"CRITICAL issues: {len(critical)}",
-        "",
-    ]
+    lines = []
+    lines.append(f"RidingHigh Pro — Health Audit Report")
+    lines.append(f"Time: {now_peru_str()} Peru")
+    lines.append("")
+    lines.append(f"Summary:")
+    lines.append(f"  🔴 CRITICAL: {len(critical)}")
+    lines.append(f"  🟠 WARNING:  {len(warnings)}")
+    lines.append(f"  ✅ PASSED:   {len(passed)}")
+    lines.append(f"  🔵 INFO:     {len(info)}")
+    lines.append("")
+    lines.append("=" * 60)
+    lines.append(f"🔴 CRITICAL Issues ({len(critical)}):")
+    lines.append("=" * 60)
     for r in critical:
-        body_lines.append(f"[{r.check_id}] {r.name}: {r.message}")
+        lines.append(f"")
+        lines.append(f"[{r.check_id}] {r.name} ({r.category})")
+        lines.append(f"  Status:  {r.status}")
+        lines.append(f"  Message: {r.message}")
         if r.details:
-            body_lines.append(f"  Details: {r.details[:200]}")
-    body_lines.append("")
-    body_lines.append("— RidingHigh Pro Health Audit (automated)")
+            lines.append(f"  Details: {r.details[:300]}")
+
+    if warnings:
+        lines.append("")
+        lines.append("=" * 60)
+        lines.append(f"🟠 WARNINGs ({len(warnings)}):")
+        lines.append("=" * 60)
+        for r in warnings:
+            lines.append(f"  [{r.check_id}] {r.name}: {r.message}")
+
+    lines.append("")
+    lines.append("=" * 60)
+    lines.append(f"✅ Passed checks ({len(passed)}):")
+    lines.append("=" * 60)
+    for r in passed:
+        lines.append(f"  [{r.check_id}] {r.name}")
+
+    lines.append("")
+    lines.append("— RidingHigh Pro Health Audit (automated)")
+    lines.append(f"  Next run: 06:00 / 12:00 / 22:00 Peru daily")
 
     try:
         import smtplib
         from email.mime.text import MIMEText
-
-        msg = MIMEText("\n".join(body_lines))
+        msg = MIMEText("\n".join(lines))
         msg["Subject"] = subject
         msg["From"]    = gmail_user
         msg["To"]      = report_to
-
         with smtplib.SMTP_SSL("smtp.gmail.com", 465) as smtp:
             smtp.login(gmail_user, gmail_pass)
             smtp.sendmail(gmail_user, [report_to], msg.as_string())
