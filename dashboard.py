@@ -1196,7 +1196,7 @@ def _build_timeline_summary(arch_df):
         else:
             trend = "Stable"
 
-        time_above_60 = int((scores >= 60).sum())
+        time_above_60 = int((scores >= MIN_SCORE_DISPLAY).sum())
 
         rows.append({
             "Date":         date,
@@ -1473,7 +1473,7 @@ def main_page():
                 if val == "—":
                     return 'background-color: #444444; color: #aaaaaa'
                 v = float(val)
-                if v >= 60:
+                if v >= MIN_SCORE_DISPLAY:
                     return 'background-color: #006400; color: white; font-weight: bold'
                 elif v >= 40:
                     return 'background-color: #808000; color: white'
@@ -3267,7 +3267,7 @@ def score_comparison_page():
                 except (TypeError, ValueError):
                     return ""
                 if v >= 80:   return "background-color: #5a1a1a; color: #ffaaaa"
-                if v >= 60:   return "background-color: #5a3a00; color: #ffcc80"
+                if v >= MIN_SCORE_DISPLAY:   return "background-color: #5a3a00; color: #ffcc80"
                 if v >= 45:   return "background-color: #4a4a00; color: #ffff80"
                 return ""
 
@@ -3312,7 +3312,7 @@ def score_comparison_page():
     for sc in SCORE_COLS:
         if sc not in df.columns:
             continue
-        subset = has_outcome[has_outcome[sc] >= 60]
+        subset = has_outcome[has_outcome[sc] >= MIN_SCORE_DISPLAY]
         n = len(subset)
         if n == 0:
             perf_rows.append({"Score": sc, "n (≥60)": 0, "Win Rate": None,
@@ -3416,7 +3416,7 @@ def score_comparison_page():
         try: v = float(val)
         except (TypeError, ValueError): return "color: #888888"
         if v >= 80: return "background-color: #5a1a1a; color: #ffaaaa"
-        if v >= 60: return "background-color: #5a3a00; color: #ffcc80"
+        if v >= MIN_SCORE_DISPLAY: return "background-color: #5a3a00; color: #ffcc80"
         if v >= 45: return "background-color: #4a4a00; color: #ffff80"
         return "background-color: #2a2a2a; color: #888888"
 
@@ -3465,7 +3465,7 @@ def score_comparison_page():
         wr_rows = []
         for sc in SCORE_COLS:
             if sc not in closed.columns: continue
-            sub = closed[closed[sc].notna() & (closed[sc] >= 60)]
+            sub = closed[closed[sc].notna() & (closed[sc] >= MIN_SCORE_DISPLAY)]
             if sub.empty: continue
             wr = sub["TP10_Hit"].mean()
             wr_rows.append({
@@ -3480,7 +3480,7 @@ def score_comparison_page():
             def _wr_color(val):
                 try: v = float(val)
                 except: return ""
-                if v >= 70: return "background-color: #1a4a1a; color: #80ff80"
+                if v >= TRADE_ENTRY_MIN_SCORE: return "background-color: #1a4a1a; color: #80ff80"
                 if v >= 50: return "background-color: #3a3a10; color: #ffff80"
                 return "background-color: #4a1a1a; color: #ff8080"
             st.dataframe(

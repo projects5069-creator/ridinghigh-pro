@@ -379,7 +379,7 @@ def run(target_date: str = None):
     candidates = snapshots_df[snapshots_df["Score"] >= MIN_SCORE].copy()
     print(f"[Collector] {len(candidates)} stocks with score >= {MIN_SCORE}")
     if candidates.empty:
-        print("[Collector] ⚠️ No candidates found — check that daily_snapshots has Score>=60 stocks")
+        print(f"[Collector] ⚠️ No candidates found — check that daily_snapshots has Score>={MIN_SCORE_DISPLAY} stocks")
         return
 
     # Load timeline_live for stats

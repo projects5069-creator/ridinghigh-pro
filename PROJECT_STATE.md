@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-04-29 11:01:23 -05
+**Generated:** 2026-04-29 11:21:11 -05
 **Branch:** `main`
-**Latest commit:** `34e7c4e` — fix(project_state): show actual last date instead of ticker
+**Latest commit:** `30d3292` — fix(config): replace hardcoded MIN_SCORE_DISPLAY/TRADE_ENTRY_MIN_SCORE
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `34e7c4e (HEAD -> main) fix(project_state): show actual last date instead of ticker`
-- `c47e874 (origin/main, origin/HEAD) docs(open_issues): close #19 — collector selection logic documented`
+- `30d3292 (HEAD -> main) fix(config): replace hardcoded MIN_SCORE_DISPLAY/TRADE_ENTRY_MIN_SCORE`
+- `04447c9 (origin/main, origin/HEAD) fix(project_state): show actual last date instead of ticker`
+- `c47e874 docs(open_issues): close #19 — collector selection logic documented`
 - `ecbaf2c fix(ci): use requirements.txt for health_audit deps`
 - `4959ecc fix(ci): add pandas + alpaca-py to health_audit workflow`
-- `88553e8 feat(health_audit): add check_19 PK sync verification (Task #N1)`
 
 ---
 
@@ -32,11 +32,11 @@ _See `OPEN_ISSUES.md` for full list_
 
 | Workflow | Status | Conclusion | Started |
 |---|---|---|---|
-| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-04-29 16:01 UTC |
-| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-04-29 16:00 UTC |
-| RidingHigh Auto Scanner | completed | ✅ success | 2026-04-29 15:59 UTC |
-| RidingHigh Auto Scanner | completed | ✅ success | 2026-04-29 15:58 UTC |
-| RidingHigh Auto Scanner | completed | ✅ success | 2026-04-29 15:57 UTC |
+| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-04-29 16:21 UTC |
+| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-04-29 16:20 UTC |
+| RidingHigh Auto Scanner | completed | ✅ success | 2026-04-29 16:19 UTC |
+| RidingHigh Auto Scanner | completed | ✅ success | 2026-04-29 16:18 UTC |
+| RidingHigh Auto Scanner | completed | ✅ success | 2026-04-29 16:17 UTC |
 
 ---
 
@@ -47,7 +47,7 @@ _Months in config: `2026-04`, `2026-05`_
 
 | Sheet | Total rows | Last date | Status |
 |---|---|---|---|
-| timeline_live | 228,888 | 2026-04-29 | ✅ |
+| timeline_live | 229,518 | 2026-04-29 | ✅ |
 | daily_snapshots | 197 | 2026-04-28 | ✅ |
 | daily_summary | 979 | 2026-04-28 | ✅ |
 | post_analysis | 148 | 2026-04-27 | ✅ |
