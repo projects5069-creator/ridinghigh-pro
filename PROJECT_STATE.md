@@ -1,28 +1,28 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-04-29 09:45:20 -05
+**Generated:** 2026-04-29 10:34:06 -05
 **Branch:** `main`
-**Latest commit:** `3a2442f` — fix(ci): use requirements.txt for health_audit deps
+**Latest commit:** `552c977` — docs(open_issues): close #19 — collector selection logic documented
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `3a2442f (HEAD -> main) fix(ci): use requirements.txt for health_audit deps`
-- `4959ecc (origin/main, origin/HEAD) fix(ci): add pandas + alpaca-py to health_audit workflow`
+- `552c977 (HEAD -> main) docs(open_issues): close #19 — collector selection logic documented`
+- `ecbaf2c (origin/main, origin/HEAD) fix(ci): use requirements.txt for health_audit deps`
+- `4959ecc fix(ci): add pandas + alpaca-py to health_audit workflow`
 - `88553e8 feat(health_audit): add check_19 PK sync verification (Task #N1)`
 - `0fe3d08 docs: close Issue #1 (SL unification) — verified merged in d36714d`
-- `6c3912d docs(kb): document post_analysis_collector peak Score selection logic (§8 + issue #16)`
 
 ---
 
-## 📋 Open issues — 14 total
+## 📋 Open issues — 13 total
 
 - 🔴 Critical: **2**
 - 🟠 Important: **4**
 - 🟡 Medium: **1**
-- 🟢 Low: **7**
+- 🟢 Low: **6**
 
 _See `OPEN_ISSUES.md` for full list_
 
@@ -32,11 +32,11 @@ _See `OPEN_ISSUES.md` for full list_
 
 | Workflow | Status | Conclusion | Started |
 |---|---|---|---|
-| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-04-29 14:45 UTC |
-| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-04-29 14:44 UTC |
-| RidingHigh Auto Scanner | completed | ✅ success | 2026-04-29 14:43 UTC |
-| RidingHigh Auto Scanner | completed | ✅ success | 2026-04-29 14:42 UTC |
-| RidingHigh Auto Scanner | completed | ✅ success | 2026-04-29 14:41 UTC |
+| RidingHigh Auto Scanner | queued | ⏳ — | 2026-04-29 15:34 UTC |
+| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-04-29 15:33 UTC |
+| RidingHigh Auto Scanner | completed | ✅ success | 2026-04-29 15:32 UTC |
+| RidingHigh Auto Scanner | completed | ✅ success | 2026-04-29 15:31 UTC |
+| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-04-29 15:30 UTC |
 
 ---
 
@@ -47,7 +47,7 @@ _Months in config: `2026-04`, `2026-05`_
 
 | Sheet | Total rows | Last date | Status |
 |---|---|---|---|
-| timeline_live | 226,729 | 2026-04-29 | ✅ |
+| timeline_live | 228,068 | 2026-04-29 | ✅ |
 | daily_snapshots | 197 | 2026-04-28 | ✅ |
 | daily_summary | 979 | 2026-04-28 | ✅ |
 | post_analysis | 148 | YAAS | ✅ |

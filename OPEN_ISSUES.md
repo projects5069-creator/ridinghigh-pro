@@ -46,6 +46,17 @@
 - **Status:** Closed
 - **Commit:** cf531fd
 
+### ✅ #19: post_analysis_collector selection logic — documented (closed 2026-04-29)
+- **Decision:** Verified working as designed. Collector selects peak Score row per
+  (ticker, scan_date) — see `day.loc[day["Score"].idxmax()]` in post_analysis_collector.py.
+- **Why volume drops:** 992 timeline_live rows ≥60 on 22/4 → 5 rows in post_analysis.
+  Collector picks one row per ticker, so volume reduces from "rows" to "unique tickers".
+- **Documentation:** PROJECT_KB.md §8 (collector row in critical files table) + §9 issue #16
+  ("post_analysis << timeline_live row count — Not a bug").
+- **Status:** Closed
+- **Commits:** f68b5b3 (PROJECT_KB §8 documentation), this commit (OPEN_ISSUES closure)
+- **Verified:** 2026-04-29 by code audit + grep cross-check between OPEN_ISSUES.md and PROJECT_KB.md
+
 ---
 
 ## ✅ CLOSED (2026-04-25) - Session "Cleanup + PROJECT_STATE"
@@ -223,12 +234,6 @@
 - **Reality:** MxV = (MarketCap - Price×Volume) / MarketCap × 100. Positive values just mean "no pump" (volume × price << market_cap). Negative = pump (volume × price > market_cap).
 - **Impact:** Documentation says "negative = pump" but doesn't clarify positive range
 - **Effort:** 5 min (update PROJECT_KB.md with full MxV interpretation)
-
-### #19: Post-analysis collector logic — why does it select so few candidates?
-- Day 22/4: 992 rows with Score≥60 in timeline_live → only 5 saved to post_analysis
-- Pattern: collector picks `peak row per ticker per day`, so volume reduces from "rows" to "unique tickers"
-- **Verified working as designed** — but worth documenting for future reference
-- **Effort:** 10 min (add note to PROJECT_KB.md about collector behavior)
 
 ### #20: Streamlit Cloud dashboard.py ImportError (deferred from 25/4)
 - Error: `from formulas import (...)` at dashboard.py line 27
