@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-04-28 14:10:56 -05
+**Generated:** 2026-04-28 19:10:44 -05
 **Branch:** `main`
-**Latest commit:** `55b3edc` — docs(open_issues): close 6 issues from 2026-04-28 session, add 4 new
+**Latest commit:** `adc56e6` — docs(kb): add §8.5 Data Provider Layer + known issue #15
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `55b3edc (HEAD -> main) docs(open_issues): close 6 issues from 2026-04-28 session, add 4 new`
-- `9927b0d (origin/main, origin/HEAD) feat(health_audit): add Phase 3 provider health checks (17, 18)`
+- `adc56e6 (HEAD -> main) docs(kb): add §8.5 Data Provider Layer + known issue #15`
+- `f81d088 (origin/main, origin/HEAD) docs(open_issues): close 6 issues from 2026-04-28 session, add 4 new`
+- `9927b0d feat(health_audit): add Phase 3 provider health checks (17, 18)`
 - `ff7a6be test: remove email validation workflow (validated successfully)`
 - `b4235d4 test: temporary workflow to verify full email report (will be deleted after validation)`
-- `d6589bd feat(health_audit): expand email alert to full report`
 
 ---
 
@@ -32,11 +32,11 @@ _See `OPEN_ISSUES.md` for full list_
 
 | Workflow | Status | Conclusion | Started |
 |---|---|---|---|
-| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-04-28 19:10 UTC |
-| RidingHigh Auto Scanner | completed | ✅ success | 2026-04-28 19:09 UTC |
-| RidingHigh Auto Scanner | completed | ✅ success | 2026-04-28 19:08 UTC |
-| RidingHigh Auto Scanner | completed | ✅ success | 2026-04-28 19:07 UTC |
-| RidingHigh Auto Scanner | completed | ✅ success | 2026-04-28 19:06 UTC |
+| Post Analysis Collector | in_progress | ⏳ — | 2026-04-29 00:09 UTC |
+| Daily Backup — post_analysis | completed | ✅ success | 2026-04-28 23:14 UTC |
+| Daily Backup — post_analysis | completed | ✅ success | 2026-04-28 22:15 UTC |
+| RidingHigh Auto Scanner | completed | ✅ success | 2026-04-28 21:43 UTC |
+| RidingHigh Auto Scanner | completed | ✅ success | 2026-04-28 20:59 UTC |
 
 ---
 
@@ -47,15 +47,15 @@ _Months in config: `2026-04`, `2026-05`_
 
 | Sheet | Total rows | Last date | Status |
 |---|---|---|---|
-| timeline_live | 223,702 | 2026-04-28 | ✅ |
-| daily_snapshots | 161 | 2026-04-27 | ✅ |
-| daily_summary | 940 | 2026-04-27 | ✅ |
+| timeline_live | 225,420 | 2026-04-28 | ✅ |
+| daily_snapshots | 197 | 2026-04-28 | ✅ |
+| daily_summary | 979 | 2026-04-28 | ✅ |
 | post_analysis | 148 | YAAS | ✅ |
-| portfolio | 182 | HTCO_2026- | ✅ |
-| portfolio_live | 72 | HTCO | ✅ |
+| portfolio | 184 | SBLX_2026- | ✅ |
+| portfolio_live | 73 | AKAN | ✅ |
 | score_tracker | 15,900 | 2026-04-28 | ✅ |
-| live_trades | 15,900 | 2026-04-28 | ✅ |
-| ticker_follow_up | 146 | 2026-04-28 | ✅ |
+| live_trades | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| ticker_follow_up | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
 
 ---
 

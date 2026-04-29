@@ -15,6 +15,7 @@
 6. [9 דפי Dashboard](#6-9-דפי-dashboard)
 7. [פייפליין הדאטה](#7-פייפליין-הדאטה)
 8. [קבצי קוד מרכזיים](#8-קבצי-קוד-מרכזיים)
+   - 8.5 [Data Provider Layer](#85-data-provider-layer-issue-9-april-2026)
 9. [Known Issues & Bugs](#9-known-issues)
 10. [כללי עבודה עם המערכת](#10-כללי-עבודה)
 11. [היסטוריית תיקונים](#11-היסטוריית-תיקונים)
@@ -432,6 +433,85 @@ Config: `~/RidingHighPro/sheets_config.json`
 - `quick_audit.py` — audit של post_analysis → audit_flag
 - `OPEN_ISSUES.md` — מעקב אחר באגים פתוחים (מקומי)
 
+**Data Provider Layer:** see §8.5 — `data_provider.py`, `providers/alpaca_provider.py`, `providers/yfinance_provider.py`
+
+---
+
+## 8.5 DATA PROVIDER LAYER (Issue #9, April 2026)
+
+Pluggable abstraction over market data sources — same interface for Alpaca and yfinance. Enables "twin system": same prices feed both simulation AND live Alpaca trades in Phase 2.
+
+### Architecture
+```
+data_provider.py (root)
+  ├── DataProvider (ABC)
+  ├── FundamentalsProvider (ABC)
+  ├── get_data_provider()
+  ├── get_fundamentals_provider()
+  └── reset_providers()
+
+providers/
+  ├── __init__.py
+  ├── alpaca_provider.py
+  │     └── class AlpacaDataProvider(DataProvider)
+  └── yfinance_provider.py
+        ├── class YFinanceDataProvider(DataProvider)
+        └── class YFinanceFundamentalsProvider(FundamentalsProvider)
+
+test_data_provider.py
+```
+
+### Files
+| File | Purpose |
+|------|---------|
+| `data_provider.py` | ABC + factories + convenience functions (`get_daily_bars`, `get_5day_ohlc`, `get_latest_quote`, `get_latest_bar`, `get_intraday_bars`, `get_fundamentals`) |
+| `providers/alpaca_provider.py` | Alpaca impl — alpaca-py SDK, IEX feed for all requests (paper plan limitation, fixed 2026-04-27) |
+| `providers/yfinance_provider.py` | yfinance impl — fallback + fundamentals |
+| `test_data_provider.py` | Unit tests + factory tests + A/B comparison |
+
+### Configuration (.env)
+```
+# Defaults (not explicitly in .env — code uses these if missing):
+# DATA_PROVIDER=alpaca
+# FUNDAMENTALS_PROVIDER=yfinance
+# ALPACA_PAPER=true
+
+# Required in .env:
+ALPACA_API_KEY_ID=...
+ALPACA_SECRET_KEY=...
+ALPACA_BASE_URL=https://paper-api.alpaca.markets/v2
+ALPACA_DATA_URL=https://data.alpaca.markets/v2
+```
+
+### Standard data shapes
+- **Bars:** DataFrame `[open, high, low, close, volume]`, DatetimeIndex UTC
+- **Quote:** `{bid_price, ask_price, last_price, timestamp}` or None
+- **5-day OHLC:** `{D1_Open..D5_Volume}`, missing = None
+- **Fundamentals:** `{market_cap, shares_outstanding, float_shares, average_volume, sector, industry, ipo_epoch}`
+
+### Usage
+```python
+from data_provider import get_data_provider, get_fundamentals_provider
+
+prices = get_data_provider()
+fund   = get_fundamentals_provider()
+
+bars = prices.get_daily_bars("AAPL", days=60)
+ohlc = prices.get_5day_ohlc("AAPL", "2026-04-25")
+info = fund.get_fundamentals("AAPL")
+
+# A/B testing
+alpaca_bars = get_data_provider(force_provider="alpaca").get_daily_bars("AAPL")
+yf_bars     = get_data_provider(force_provider="yfinance").get_daily_bars("AAPL")
+```
+
+### Key facts
+- Singleton by default; `force_provider` bypasses
+- Lazy SDK imports — alpaca-py loaded only when AlpacaDataProvider instantiated
+- Transient errors → empty DataFrame / None; config errors → raise
+- Alpaca Basic (free): IEX feed for all requests (paper plan does not allow SIP, fixed 2026-04-27)
+- Fundamentals stays on yfinance — Alpaca Basic doesn't expose shares/float
+
 ---
 
 ## 9. Known Issues
@@ -483,6 +563,9 @@ Config: `~/RidingHighPro/sheets_config.json`
 ### 🟢 עדיפות נמוכה
 
 **#12-14:** שם VWAP, hardcoded cutoff, Score_v2 כפילות
+
+**#15: `data_provider` quote returns None**
+- Not always a bug — check if market closed or Alpaca IEX feed delayed
 
 ---
 
