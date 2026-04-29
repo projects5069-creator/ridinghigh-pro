@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-04-28 19:10:44 -05
+**Generated:** 2026-04-28 19:34:15 -05
 **Branch:** `main`
-**Latest commit:** `adc56e6` — docs(kb): add §8.5 Data Provider Layer + known issue #15
+**Latest commit:** `f68b5b3` — docs(kb): document post_analysis_collector peak Score selection logic (§8 + issue #16)
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `adc56e6 (HEAD -> main) docs(kb): add §8.5 Data Provider Layer + known issue #15`
-- `f81d088 (origin/main, origin/HEAD) docs(open_issues): close 6 issues from 2026-04-28 session, add 4 new`
+- `f68b5b3 (HEAD -> main) docs(kb): document post_analysis_collector peak Score selection logic (§8 + issue #16)`
+- `ab79bb9 (origin/main, origin/HEAD) docs(kb): add §8.5 Data Provider Layer + known issue #15`
+- `f81d088 docs(open_issues): close 6 issues from 2026-04-28 session, add 4 new`
 - `9927b0d feat(health_audit): add Phase 3 provider health checks (17, 18)`
 - `ff7a6be test: remove email validation workflow (validated successfully)`
-- `b4235d4 test: temporary workflow to verify full email report (will be deleted after validation)`
 
 ---
 
@@ -32,11 +32,11 @@ _See `OPEN_ISSUES.md` for full list_
 
 | Workflow | Status | Conclusion | Started |
 |---|---|---|---|
-| Post Analysis Collector | in_progress | ⏳ — | 2026-04-29 00:09 UTC |
+| Daily Backup — post_analysis | completed | ✅ success | 2026-04-29 00:13 UTC |
+| Post Analysis Collector | completed | ✅ success | 2026-04-29 00:09 UTC |
 | Daily Backup — post_analysis | completed | ✅ success | 2026-04-28 23:14 UTC |
 | Daily Backup — post_analysis | completed | ✅ success | 2026-04-28 22:15 UTC |
 | RidingHigh Auto Scanner | completed | ✅ success | 2026-04-28 21:43 UTC |
-| RidingHigh Auto Scanner | completed | ✅ success | 2026-04-28 20:59 UTC |
 
 ---
 
@@ -54,8 +54,8 @@ _Months in config: `2026-04`, `2026-05`_
 | portfolio | 184 | SBLX_2026- | ✅ |
 | portfolio_live | 73 | AKAN | ✅ |
 | score_tracker | 15,900 | 2026-04-28 | ✅ |
-| live_trades | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| ticker_follow_up | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| live_trades | 15,900 | 2026-04-28 | ✅ |
+| ticker_follow_up | 146 | 2026-04-28 | ✅ |
 
 ---
 

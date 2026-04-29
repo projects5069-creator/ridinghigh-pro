@@ -418,7 +418,7 @@ Config: `~/RidingHighPro/sheets_config.json`
 |------|-------|-------|
 | `auto_scanner.py` | 1,395 | Scanner ראשי: FINVIZ scrape, Sheets write. Score functions הועברו ל-formulas.py (commits acbf0ad+0fb1484) |
 | `dashboard.py` | 3,778 | Streamlit app, 9 דפים, 161KB — **רגיש!** |
-| `post_analysis_collector.py` | 539 | EOD collector: D1-D5 OHLC, TP/SL check |
+| `post_analysis_collector.py` | 539 | EOD collector: D1-D5 OHLC, TP/SL check. **Selection logic:** from all timeline_live rows for a ticker on a given day (can be 100+), the collector selects the **peak Score row** (`day.loc[day["Score"].idxmax()]` / `sort_values("Score", ascending=False).drop_duplicates("Ticker")`). Result: post_analysis contains **one row per ticker per day** — the peak. This is by design, not a bug. |
 | `sheets_manager.py` | 354 | Multi-sheet architecture, monthly rotation |
 | `gsheets_sync.py` | - | Load/save post_analysis ל/מ-Sheets |
 | `enrich_post_analysis.py` | - | אינטראדיי enrichment |
@@ -566,6 +566,9 @@ yf_bars     = get_data_provider(force_provider="yfinance").get_daily_bars("AAPL"
 
 **#15: `data_provider` quote returns None**
 - Not always a bug — check if market closed or Alpaca IEX feed delayed
+
+**#16: post_analysis << timeline_live row count**
+- Not a bug — collector selects peak Score row per ticker per day. See §8 / collector docs
 
 ---
 
