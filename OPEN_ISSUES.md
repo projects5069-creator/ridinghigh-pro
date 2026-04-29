@@ -50,6 +50,14 @@
 
 ## ✅ CLOSED (2026-04-25) - Session "Cleanup + PROJECT_STATE"
 
+### ✅ #1 — SL Unification (closed 2026-04-25)
+- **Decision:** TP=-10%, SL=+10%, 5-day window, unified across all 3 dashboard pages
+- **Implementation:** all SL/TP reads from `config.py` (`TP_THRESHOLD_PCT`, `SL_THRESHOLD_PCT`, `MAX_HOLDING_DAYS`)
+- **Schema change:** `SL7_Hit_D1` → `SL_Hit_D5` (renamed in utils.py:396-401)
+- **Migration script:** `migrate_sl_hit_d5.py`
+- **Commit:** d36714d
+- **Verified:** 2026-04-28 by code audit — all 3 dashboard pages + auto_scanner + utils consistent
+
 ### #14: Cleanup backup files
 - 38 `*_BEFORE_*.py` files moved to `גיבוי זמני/2026-04-25/`
 - `.gitignore` updated with patterns: `*_BEFORE_*`, `*.BEFORE_*`, `גיבוי זמני/`
@@ -146,14 +154,6 @@
 ---
 
 ## 🔴 STILL OPEN - Critical
-
-### #1: 3 different SL definitions across dashboard pages
-- Portfolio Tracker (page 3): uses `SL_THRESHOLD_FRAC` (7%), within 5 days
-- Live Trades (page 4): SL=10% hardcoded, within 5 days
-- Score Comparison (page 9): SL=7%, ONLY D1 (SL7_Hit_D1)
-- **Verified 2026-04-25:** only one usage of SL_THRESHOLD_FRAC in dashboard (line 2824)
-- **Impact:** Win rate inconsistency across pages
-- **Effort:** 45 min (strategic decision + implementation)
 
 ### #2: Min Score threshold inconsistent across pages
 - `MIN_SCORE_DISPLAY` exists in config but not enforced everywhere

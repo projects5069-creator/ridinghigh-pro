@@ -1,25 +1,25 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-04-28 19:34:15 -05
+**Generated:** 2026-04-28 19:48:53 -05
 **Branch:** `main`
-**Latest commit:** `f68b5b3` — docs(kb): document post_analysis_collector peak Score selection logic (§8 + issue #16)
+**Latest commit:** `91171fa` — docs: close Issue #1 (SL unification) — verified merged in d36714d
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `f68b5b3 (HEAD -> main) docs(kb): document post_analysis_collector peak Score selection logic (§8 + issue #16)`
-- `ab79bb9 (origin/main, origin/HEAD) docs(kb): add §8.5 Data Provider Layer + known issue #15`
+- `91171fa (HEAD -> main) docs: close Issue #1 (SL unification) — verified merged in d36714d`
+- `6c3912d (origin/main, origin/HEAD) docs(kb): document post_analysis_collector peak Score selection logic (§8 + issue #16)`
+- `ab79bb9 docs(kb): add §8.5 Data Provider Layer + known issue #15`
 - `f81d088 docs(open_issues): close 6 issues from 2026-04-28 session, add 4 new`
 - `9927b0d feat(health_audit): add Phase 3 provider health checks (17, 18)`
-- `ff7a6be test: remove email validation workflow (validated successfully)`
 
 ---
 
-## 📋 Open issues — 15 total
+## 📋 Open issues — 14 total
 
-- 🔴 Critical: **3**
+- 🔴 Critical: **2**
 - 🟠 Important: **4**
 - 🟡 Medium: **1**
 - 🟢 Low: **7**

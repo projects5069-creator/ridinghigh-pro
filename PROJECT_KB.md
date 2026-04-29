@@ -51,9 +51,9 @@
 - **MaxDrop ממוצע:** -23.14% (חציון -19.12%)
 - **Score ממוצע אחרי recalc:** 58.5 (ירד מ-74 אחרי תיקון ATRX)
 
-### 🚨 בעיות פתוחות (14)
+### 🚨 בעיות פתוחות (13)
 ראה סעיף [Known Issues](#9-known-issues). הקריטיות ביותר:
-1. **3 הגדרות SL שונות** ב-3 דפים
+1. ~~**3 הגדרות SL שונות**~~ ✅ תוקן 25/4 — SL=10%, TP=10%, 5d אחיד
 2. **KB לא תאם לקוד** (תוקן במסמך הזה!)
 3. **Gap הוסר מה-Score** למרות קורלציה חזקה
 4. **live_trades sheet עם Scores ישנים שבורים**
@@ -518,11 +518,13 @@ yf_bars     = get_data_provider(force_provider="yfinance").get_daily_bars("AAPL"
 
 ### 🔴 עדיפות גבוהה מאוד
 
-**#1: 3 הגדרות SL שונות**
-- Portfolio Tracker (דף 3): SL=7%, תוך 5 ימים
-- Live Trades (דף 4): SL=10%, תוך 5 ימים
-- Score Comparison (דף 9): SL=7%, **רק D1!** (SL7_Hit_D1)
-- **השפעה:** אותה מניה יכולה להיות Win/Loss/Pending בדפים שונים
+~~**#1: 3 הגדרות SL שונות**~~ ✅ נסגר 2026-04-25
+**הוחלט:** TP=-10%, SL=+10%, חלון 5 ימים — אחיד בכל הדפים והקוד.
+- מקור אמת: `config.py` (`TP_THRESHOLD_PCT=10`, `SL_THRESHOLD_PCT=10`, `MAX_HOLDING_DAYS=5`)
+- כל הדפים בדאשבורד + auto_scanner + utils + enrich קוראים מ-config
+- שינוי schema: `SL7_Hit_D1` → `SL_Hit_D5` (1 if price rose ≥10% any day D1-D5)
+- migration סקריפט: `migrate_sl_hit_d5.py`
+- **commit:** d36714d
 
 **#2: Min Score Threshold שונה**
 - דף 3: ≥60 | דף 4: ≥70 | דף 9: ≥60
