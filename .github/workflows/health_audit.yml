@@ -29,7 +29,7 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install gspread google-auth pytz
+          pip install gspread google-auth pytz pandas alpaca-py
 
       - name: Run health audit
         env:
