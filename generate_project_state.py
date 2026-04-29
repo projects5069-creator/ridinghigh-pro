@@ -90,6 +90,54 @@ def run_git(*args):
         return ""
 
 
+def _last_date(headers, values):
+    """Find the latest date in a sheet by locating the date column dynamically.
+
+    Different sheets have different schemas:
+    - timeline_live, daily_snapshots, daily_summary: col 0 is 'Date'
+    - post_analysis, portfolio_live: col 0 is 'Ticker', col 1 is 'ScanDate'
+    - portfolio: col 0 is 'PositionKey', col 1 is 'Date'
+
+    Also: last row is NOT necessarily the latest date (e.g. post_analysis is
+    sorted by Ticker alphabetically). We need max() of valid YYYY-MM-DD values.
+
+    Args:
+        headers: list of column header strings
+        values: list of data rows (after header)
+
+    Returns:
+        Latest date as YYYY-MM-DD string, or "—" if none found.
+    """
+    if not headers or not values:
+        return "—"
+
+    # Find date column by header name (case-insensitive)
+    date_col_idx = None
+    for i, h in enumerate(headers):
+        h_clean = h.strip().lower()
+        if h_clean in ("date", "scandate", "scan_date"):
+            date_col_idx = i
+            break
+
+    if date_col_idx is None:
+        return "—"
+
+    # Collect valid YYYY-MM-DD values from that column, return max
+    date_pattern = re.compile(r"^\d{4}-\d{2}-\d{2}")
+    valid_dates = []
+    for row in values:
+        if date_col_idx >= len(row):
+            continue
+        val = row[date_col_idx]
+        if val and date_pattern.match(val):
+            valid_dates.append(val[:10])
+
+    if not valid_dates:
+        return "—"
+
+    return max(valid_dates)
+
+
 # ============================================================================
 # SECTION GENERATORS
 # ============================================================================
@@ -279,12 +327,16 @@ def section_sheets_stats():
         for name, sheet_id in sheets.items():
             try:
                 ws = gc.open_by_key(sheet_id).sheet1
-                # Use efficient API: only first column for last date
+                # Pull all values once; _last_date finds the date column
+                # dynamically (handles post_analysis/portfolio/portfolio_live
+                # which have Ticker/PositionKey in col 0, not Date).
                 values = ws.get_all_values()
                 total = max(0, len(values) - 1)
-                last_date = "—"
-                if total > 0 and values[-1]:
-                    last_date = values[-1][0][:10] if values[-1][0] else "—"
+                if total > 0:
+                    headers = values[0]
+                    last_date = _last_date(headers, values[1:])
+                else:
+                    last_date = "—"
                 status = "✅" if total > 0 else "⚠️ empty"
                 rows.append(f"| {name} | {total:,} | {last_date} | {status} |")
             except Exception as e:

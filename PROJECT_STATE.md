@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-04-29 10:34:06 -05
+**Generated:** 2026-04-29 11:01:23 -05
 **Branch:** `main`
-**Latest commit:** `552c977` — docs(open_issues): close #19 — collector selection logic documented
+**Latest commit:** `34e7c4e` — fix(project_state): show actual last date instead of ticker
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `552c977 (HEAD -> main) docs(open_issues): close #19 — collector selection logic documented`
-- `ecbaf2c (origin/main, origin/HEAD) fix(ci): use requirements.txt for health_audit deps`
+- `34e7c4e (HEAD -> main) fix(project_state): show actual last date instead of ticker`
+- `c47e874 (origin/main, origin/HEAD) docs(open_issues): close #19 — collector selection logic documented`
+- `ecbaf2c fix(ci): use requirements.txt for health_audit deps`
 - `4959ecc fix(ci): add pandas + alpaca-py to health_audit workflow`
 - `88553e8 feat(health_audit): add check_19 PK sync verification (Task #N1)`
-- `0fe3d08 docs: close Issue #1 (SL unification) — verified merged in d36714d`
 
 ---
 
@@ -32,11 +32,11 @@ _See `OPEN_ISSUES.md` for full list_
 
 | Workflow | Status | Conclusion | Started |
 |---|---|---|---|
-| RidingHigh Auto Scanner | queued | ⏳ — | 2026-04-29 15:34 UTC |
-| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-04-29 15:33 UTC |
-| RidingHigh Auto Scanner | completed | ✅ success | 2026-04-29 15:32 UTC |
-| RidingHigh Auto Scanner | completed | ✅ success | 2026-04-29 15:31 UTC |
-| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-04-29 15:30 UTC |
+| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-04-29 16:01 UTC |
+| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-04-29 16:00 UTC |
+| RidingHigh Auto Scanner | completed | ✅ success | 2026-04-29 15:59 UTC |
+| RidingHigh Auto Scanner | completed | ✅ success | 2026-04-29 15:58 UTC |
+| RidingHigh Auto Scanner | completed | ✅ success | 2026-04-29 15:57 UTC |
 
 ---
 
@@ -47,12 +47,12 @@ _Months in config: `2026-04`, `2026-05`_
 
 | Sheet | Total rows | Last date | Status |
 |---|---|---|---|
-| timeline_live | 228,068 | 2026-04-29 | ✅ |
+| timeline_live | 228,888 | 2026-04-29 | ✅ |
 | daily_snapshots | 197 | 2026-04-28 | ✅ |
 | daily_summary | 979 | 2026-04-28 | ✅ |
-| post_analysis | 148 | YAAS | ✅ |
-| portfolio | 184 | SBLX_2026- | ✅ |
-| portfolio_live | 74 | SBLX | ✅ |
+| post_analysis | 148 | 2026-04-27 | ✅ |
+| portfolio | 184 | 2026-04-28 | ✅ |
+| portfolio_live | 74 | 2026-04-28 | ✅ |
 | score_tracker | 15,900 | 2026-04-28 | ✅ |
 | live_trades | 15,900 | 2026-04-28 | ✅ |
 | ticker_follow_up | 146 | 2026-04-28 | ✅ |
