@@ -958,6 +958,104 @@ def check_15_gitignore_enforcement():
 
 
 # ============================================================================
+# CHECKS — Category 7: Sync
+# ============================================================================
+
+def check_19_pk_sync():
+    """S1: Verify local repo is in sync with origin/main and docs are consistent."""
+    import time as _time
+
+    # ── Part A: CI skip ──────────────────────────────────────────────────
+    if os.environ.get("GITHUB_ACTIONS") == "true":
+        return CheckResult("19", "PK sync", "Sync",
+                           INFO, "Skipped in CI (always in sync with origin)")
+
+    # ── Part B: git sync ─────────────────────────────────────────────────
+    run_cmd("git", "fetch", "origin", "main", timeout=15)
+    local_sha, rc1 = run_cmd("git", "rev-parse", "HEAD")
+    origin_sha, rc2 = run_cmd("git", "rev-parse", "origin/main")
+
+    if rc1 != 0 or rc2 != 0:
+        return CheckResult("19", "PK sync", "Sync",
+                           INFO, "git not available or no remote")
+
+    local_sha = local_sha.strip()
+    origin_sha = origin_sha.strip()
+
+    if local_sha == origin_sha:
+        # In sync — also check docs consistency (Part C)
+        doc_issue = _check_docs_consistency()
+        if doc_issue:
+            return CheckResult("19", "PK sync", "Sync",
+                               WARNING, f"In sync with origin, but: {doc_issue}")
+        return CheckResult("19", "PK sync", "Sync",
+                           PASSED, "In sync with origin/main")
+
+    # Check if ahead, behind, or diverged
+    ahead_out, _ = run_cmd("git", "log", "origin/main..HEAD", "--oneline")
+    behind_out, _ = run_cmd("git", "log", "HEAD..origin/main", "--oneline")
+    ahead_n = len([l for l in ahead_out.strip().splitlines() if l])
+    behind_n = len([l for l in behind_out.strip().splitlines() if l])
+
+    if ahead_n > 0 and behind_n > 0:
+        return CheckResult("19", "PK sync", "Sync",
+                           CRITICAL, f"Diverged from origin — {ahead_n} ahead, {behind_n} behind",
+                           "Manual resolution needed: git pull --rebase or merge")
+
+    if behind_n > 0:
+        return CheckResult("19", "PK sync", "Sync",
+                           WARNING, f"Behind origin by {behind_n} commit(s) — pull needed")
+
+    # Ahead — check how long ago last commit was
+    ts_out, _ = run_cmd("git", "log", "-1", "--format=%ct")
+    try:
+        commit_ts = int(ts_out.strip())
+        age_hours = (_time.time() - commit_ts) / 3600
+    except (ValueError, TypeError):
+        age_hours = 0
+
+    if age_hours < 6:
+        age_str = f"{int(age_hours * 60)} minutes" if age_hours < 1 else f"{age_hours:.1f} hours"
+        return CheckResult("19", "PK sync", "Sync",
+                           INFO, f"Ahead by {ahead_n} commit(s), last commit {age_str} ago")
+    elif age_hours < 24:
+        return CheckResult("19", "PK sync", "Sync",
+                           WARNING, f"Ahead by {ahead_n} commit(s) for {age_hours:.0f}h — consider pushing")
+    else:
+        return CheckResult("19", "PK sync", "Sync",
+                           CRITICAL, f"Ahead by {ahead_n} commit(s) for {age_hours:.0f}h+ — push immediately")
+
+
+def _check_docs_consistency():
+    """Check OPEN_ISSUES.md for issues marked fixed but still in STILL OPEN section."""
+    oi_path = REPO_ROOT / "OPEN_ISSUES.md"
+    if not oi_path.exists():
+        return None
+
+    content = oi_path.read_text(encoding="utf-8")
+    # Split into STILL OPEN sections vs CLOSED sections
+    in_open = False
+    stale = []
+    for line in content.splitlines():
+        if "STILL OPEN" in line:
+            in_open = True
+        elif line.startswith("## ✅ CLOSED") or line.startswith("## 📊") or line.startswith("## 📅"):
+            in_open = False
+        elif in_open and line.startswith("### "):
+            # Check if issue title has strikethrough or ✅ or closed/fixed/resolved
+            if "~~" in line or "✅" in line:
+                # Extract issue number
+                import re as _re
+                m = _re.search(r"#(\d+)", line)
+                num = m.group(1) if m else "?"
+                stale.append(f"#{num}")
+
+    if stale:
+        return f"Issue(s) marked fixed but still in STILL OPEN: {', '.join(stale)}"
+    return None
+
+
+# ============================================================================
 # REPORTING
 # ============================================================================
 
@@ -1144,7 +1242,7 @@ def main():
 
     # Run all checks
     results = []
-    print("[health_audit] Running 18 checks...")
+    print("[health_audit] Running 19 checks...")
 
     # Code integrity
     results.append(check_01_duplicate_functions())
@@ -1175,6 +1273,9 @@ def main():
     # Providers
     results.append(check_17_fundamentals_provider())
     results.append(check_18_daily_bars_provider())
+
+    # Sync
+    results.append(check_19_pk_sync())
 
     print_report(results)
 

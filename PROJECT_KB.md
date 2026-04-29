@@ -572,6 +572,10 @@ yf_bars     = get_data_provider(force_provider="yfinance").get_daily_bars("AAPL"
 **#16: post_analysis << timeline_live row count**
 - Not a bug — collector selects peak Score row per ticker per day. See §8 / collector docs
 
+**#17: Documentation lags behind code**
+- Issue marked fixed in OPEN_ISSUES.md but not moved to CLOSED section
+- check_19 in health_audit catches this automatically
+
 ---
 
 ## 10. כללי עבודה
