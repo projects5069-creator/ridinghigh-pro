@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-04-29 09:34:52 -05
+**Generated:** 2026-04-29 09:45:20 -05
 **Branch:** `main`
-**Latest commit:** `f1578a1` — fix(ci): add pandas + alpaca-py to health_audit workflow
+**Latest commit:** `3a2442f` — fix(ci): use requirements.txt for health_audit deps
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `f1578a1 (HEAD -> main) fix(ci): add pandas + alpaca-py to health_audit workflow`
-- `88553e8 (origin/main, origin/HEAD) feat(health_audit): add check_19 PK sync verification (Task #N1)`
+- `3a2442f (HEAD -> main) fix(ci): use requirements.txt for health_audit deps`
+- `4959ecc (origin/main, origin/HEAD) fix(ci): add pandas + alpaca-py to health_audit workflow`
+- `88553e8 feat(health_audit): add check_19 PK sync verification (Task #N1)`
 - `0fe3d08 docs: close Issue #1 (SL unification) — verified merged in d36714d`
 - `6c3912d docs(kb): document post_analysis_collector peak Score selection logic (§8 + issue #16)`
-- `ab79bb9 docs(kb): add §8.5 Data Provider Layer + known issue #15`
 
 ---
 
@@ -32,11 +32,11 @@ _See `OPEN_ISSUES.md` for full list_
 
 | Workflow | Status | Conclusion | Started |
 |---|---|---|---|
-| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-04-29 14:34 UTC |
-| RidingHigh Auto Scanner | completed | ✅ success | 2026-04-29 14:33 UTC |
-| RidingHigh Auto Scanner | completed | ✅ success | 2026-04-29 14:32 UTC |
-| RidingHigh Auto Scanner | completed | ✅ success | 2026-04-29 14:31 UTC |
-| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-04-29 14:30 UTC |
+| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-04-29 14:45 UTC |
+| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-04-29 14:44 UTC |
+| RidingHigh Auto Scanner | completed | ✅ success | 2026-04-29 14:43 UTC |
+| RidingHigh Auto Scanner | completed | ✅ success | 2026-04-29 14:42 UTC |
+| RidingHigh Auto Scanner | completed | ✅ success | 2026-04-29 14:41 UTC |
 
 ---
 
@@ -47,7 +47,7 @@ _Months in config: `2026-04`, `2026-05`_
 
 | Sheet | Total rows | Last date | Status |
 |---|---|---|---|
-| timeline_live | 226,489 | 2026-04-29 | ✅ |
+| timeline_live | 226,729 | 2026-04-29 | ✅ |
 | daily_snapshots | 197 | 2026-04-28 | ✅ |
 | daily_summary | 979 | 2026-04-28 | ✅ |
 | post_analysis | 148 | YAAS | ✅ |
