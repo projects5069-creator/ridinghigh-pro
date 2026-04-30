@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-04-30 07:25:56 -05
+**Generated:** 2026-04-30 08:37:47 -05
 **Branch:** `main`
-**Latest commit:** `856f836` — docs: close 7 tasks from 2026-04-29 session + #18 MxV documentation
+**Latest commit:** `3abcacb` — docs(open_issues): structural cleanup — split #2, add 2026-04-29 discoveries
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `856f836 (HEAD -> main) docs: close 7 tasks from 2026-04-29 session + #18 MxV documentation`
-- `c1328d1 (origin/main, origin/HEAD) fix(config): replace hardcoded MIN_SCORE_DISPLAY/TRADE_ENTRY_MIN_SCORE`
+- `3abcacb (HEAD -> main) docs(open_issues): structural cleanup — split #2, add 2026-04-29 discoveries`
+- `15d1d39 (origin/main, origin/HEAD) docs: close 7 tasks from 2026-04-29 session + #18 MxV documentation`
+- `c1328d1 fix(config): replace hardcoded MIN_SCORE_DISPLAY/TRADE_ENTRY_MIN_SCORE`
 - `04447c9 fix(project_state): show actual last date instead of ticker`
 - `c47e874 docs(open_issues): close #19 — collector selection logic documented`
-- `ecbaf2c fix(ci): use requirements.txt for health_audit deps`
 
 ---
 
@@ -32,11 +32,11 @@ _See `OPEN_ISSUES.md` for full list_
 
 | Workflow | Status | Conclusion | Started |
 |---|---|---|---|
-| Health Audit | completed | ✅ success | 2026-04-30 10:23 UTC |
-| RidingHigh Auto Scanner | completed | ✅ success | 2026-04-30 07:52 UTC |
-| Daily Backup — post_analysis | completed | ✅ success | 2026-04-30 00:12 UTC |
-| Post Analysis Collector | completed | ✅ success | 2026-04-30 00:10 UTC |
-| RidingHigh Auto Scanner | completed | ✅ success | 2026-04-29 23:39 UTC |
+| RidingHigh Auto Scanner | completed | ✅ success | 2026-04-30 13:37 UTC |
+| RidingHigh Auto Scanner | completed | ✅ success | 2026-04-30 13:36 UTC |
+| RidingHigh Auto Scanner | completed | ✅ success | 2026-04-30 13:35 UTC |
+| RidingHigh Auto Scanner | completed | ✅ success | 2026-04-30 13:34 UTC |
+| RidingHigh Auto Scanner | completed | ✅ success | 2026-04-30 13:33 UTC |
 
 ---
 

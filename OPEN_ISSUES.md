@@ -1,5 +1,5 @@
 # RidingHigh Pro - Open Issues Log
-*Last updated: 2026-04-29 19:30 Peru*
+*Last updated: 2026-04-29 19:55 Peru*
 
 ---
 
@@ -34,15 +34,19 @@
 - **Status:** Closed
 - **Commit:** 04447c9
 
-### ✅ #2: MIN_SCORE_DISPLAY hardcoded — replaced with config imports
+### ✅ #2: MIN_SCORE_DISPLAY hardcoded — replaced with config imports (partial)
 - **Scope:** 6 occurrences of `>= 60` + 1 of `>= 70` in dashboard.py and post_analysis_collector.py
 - **Fix:** All replaced with MIN_SCORE_DISPLAY (60) and TRADE_ENTRY_MIN_SCORE (70) from config.py.
   Imports already existed in both files.
 - **False positives confirmed:** dashboard.py:1313, 1364 are `total_seconds() >= 60` (seconds, not Score).
-- **Health audit C2:** 6 → 5 thresholds (drop smaller than expected because audit also flags
-  thresholds outside this task's scope — tracked as Task #N8).
+- **Health audit C2:** 6 → 5 thresholds.
+- **Note:** This task closed the dashboard.py + post_analysis_collector.py portion only.
+  The broader issue ("Min Score threshold inconsistent across pages" — original #2)
+  was renumbered to **#22** since other thresholds remain in score_distribution.py,
+  auto_scanner.py, and health_check.py (tracked as #N8).
 - **Status:** Closed
 - **Commit:** c1328d1
+- **Related (still open):** #22, #N8
 
 ### ✅ #N6: post_analysis missing 2026-04-28 (D2 health alert) — backfilled
 - **Detected by:** Health audit D2 — "Missing 1/3 recent days: ['2026-04-28']"
@@ -236,13 +240,18 @@
 
 ## 🔴 STILL OPEN - Critical
 
-### #2: Min Score threshold inconsistent across pages
+### #22: Min Score threshold inconsistent across pages (formerly #2 — partial closure 2026-04-29)
 - `MIN_SCORE_DISPLAY` exists in config but not enforced everywhere
-- Hardcoded `>= 60` in lines: 1203, 1480, 3198, 3243, 3347, 3396
-- Hardcoded `>= 70` in lines: 3411, 3545
-- **Impact:** Inconsistent filtering across dashboard pages
-- **Effort:** 15 min (replace hardcoded with MIN_SCORE_DISPLAY)
-- **Note 28/4:** Confirmed by health_audit check_C2 — 6 hardcoded thresholds detected
+- **Closed (2026-04-29 commit c1328d1):** dashboard.py + post_analysis_collector.py
+  (8 hardcoded thresholds → 0). See ✅ #2 in CLOSED 2026-04-29.
+- **Still open:** thresholds in other files (tracked as #N8):
+    - `score_distribution.py:[205, 240]` → TP_THRESHOLD_FRAC (0.10)
+    - `auto_scanner.py:[933, 935]` → MIN_SCORE threshold (70)
+    - `health_check.py:[169]` → MIN_SCORE
+- **Health audit C2 status:** 5 thresholds remaining (down from 6 before #2 closure)
+- **Renumbered:** This issue was originally #2; renumbered to #22 to avoid collision
+  with closed #2 (partial fix). The broader scope continues here.
+- **Effort:** 30 min to close fully via #N8
 
 ### #5: DynamicScore - unclear if saved anywhere
 - Calculated on-the-fly in dashboard page 8 only
@@ -296,6 +305,49 @@
 ### #17: DropsLab schema migration pending
 - Same migration as #41 needs to apply to DropsLab
 - Currently on old schema
+
+## 🆕 DISCOVERED 2026-04-29
+
+### #N7: Migrate 5 workflows to `pip install -r requirements.txt`
+- **Background:** Today's #N4 fix migrated `health_audit.yml` to use `requirements.txt`.
+  5 other workflows still install dependencies manually:
+    - `auto_scan.yml`
+    - `post_analysis.yml`
+    - `backup.yml`
+    - `monthly_rotation.yml`
+    - `prepare_next_month.yml`
+- **Risk if left unfixed:** Adding a new dependency to `requirements.txt` won't propagate
+  to those workflows. Future drift potential — same root cause as N4.
+- **Effort:** 45 min (need to verify each workflow gets all deps it actually uses, not
+  just blindly switch to `-r requirements.txt`)
+- **Priority:** LT (long-term refactoring)
+- **Discovered:** 2026-04-29 during N4 investigation
+
+### #N8: 4 hardcoded thresholds outside #2/#22 scope
+- **Background:** #2 closure on 2026-04-29 (commit c1328d1) reduced health_audit C2
+  from 6 → 5 thresholds — not 6 → 0 as initially expected. The remaining 5 are in
+  files outside the original #2 scope:
+    - `score_distribution.py:[205, 240]` → `TP_THRESHOLD_FRAC` (0.10)
+    - `auto_scanner.py:[933, 935]` → `MIN_SCORE` (70)
+    - `health_check.py:[169]` → `MIN_SCORE`
+    - `dashboard.py:[1313, 1364]` — **false positives** (seconds, not Score) — already
+      verified during #2; would need check_C2 logic improvement to suppress
+- **Effort:** 30 min (4 str_replace + verify check_C2 result)
+- **Priority:** P2
+- **Discovered:** 2026-04-29 by health_audit C2 analysis after #2 closure
+
+### #N9: check_19 doesn't catch issues marked "Verified" without ~~ or ✅ markers
+- **Background:** #19 (post_analysis_collector selection logic) was marked "Verified
+  working as designed" on 2026-04-28 but stayed in DISCOVERED section. check_19 didn't
+  flag this drift because it scans only for `~~` (strikethrough) or `✅` markers in
+  issue titles — not body text.
+- **Suggested fix:** Extend check_19 to detect issues where body contains "Verified",
+  "Closed", "Confirmed working", or similar wording without title markers.
+- **Effort:** 20 min (regex update + test)
+- **Priority:** P3 (nice-to-have)
+- **Discovered:** 2026-04-29 during #19 closure investigation
+
+---
 
 ## 🆕 DISCOVERED 2026-04-28
 
