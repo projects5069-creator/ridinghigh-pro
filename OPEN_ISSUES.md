@@ -1,5 +1,75 @@
 # RidingHigh Pro - Open Issues Log
-*Last updated: 2026-04-28 14:00 Peru*
+*Last updated: 2026-04-29 19:30 Peru*
+
+---
+
+## ✅ CLOSED (2026-04-29) - Session "Quick Wins + Health Audit Fixes"
+
+### ✅ #N4: Health Audit workflow missing pandas + yfinance
+- **Root cause:** `.github/workflows/health_audit.yml` installed only `gspread google-auth pytz`,
+  causing checks 17 + 18 to crash with `ModuleNotFoundError: No module named 'pandas'`.
+  After fixing pandas, exposed missing yfinance (FundamentalsProvider always uses yfinance).
+- **Fix:** Switched to `pip install -r requirements.txt` (single source of truth).
+  Other 5 workflows still on manual install — tracked as new Task #N7 (LT).
+- **Verification:** Health Audit Run #17 — 0 CRITICAL (was 2), Status Success.
+- **Status:** Closed
+- **Commits:** 4959ecc (initial pandas/alpaca-py), ecbaf2c (final requirements.txt)
+
+### ✅ #19: post_analysis_collector selection logic — documented
+- **Decision:** Verified working as designed. Collector selects peak Score row per
+  (ticker, scan_date) — see `day.loc[day["Score"].idxmax()]`.
+- **Documentation:** PROJECT_KB.md §8 + §9 issue #16.
+- **Status:** Closed
+- **Commits:** f68b5b3 (PROJECT_KB doc), c47e874 (OPEN_ISSUES closure)
+
+### ✅ #N5: PROJECT_STATE "YAAS" bug — last_date showing ticker instead of date
+- **Root cause:** `generate_project_state.py` used `values[-1][0][:10]` — assumed col 0
+  is always Date AND last row is latest date. Both wrong for post_analysis (col 0=Ticker,
+  sorted alphabetically → "YAAS"), portfolio (col 0=PositionKey → "SBLX_2026-"),
+  portfolio_live (col 0=Ticker → "AKAN").
+- **Fix:** New `_last_date(headers, values)` helper finds date column dynamically by
+  header name (Date / ScanDate / scan_date), returns max() of valid YYYY-MM-DD values.
+- **Side effect:** Exposed real D2 issue — post_analysis missing 2026-04-28 (was masked
+  by bogus YAAS display). Fixed via N6 backfill.
+- **Status:** Closed
+- **Commit:** 04447c9
+
+### ✅ #2: MIN_SCORE_DISPLAY hardcoded — replaced with config imports
+- **Scope:** 6 occurrences of `>= 60` + 1 of `>= 70` in dashboard.py and post_analysis_collector.py
+- **Fix:** All replaced with MIN_SCORE_DISPLAY (60) and TRADE_ENTRY_MIN_SCORE (70) from config.py.
+  Imports already existed in both files.
+- **False positives confirmed:** dashboard.py:1313, 1364 are `total_seconds() >= 60` (seconds, not Score).
+- **Health audit C2:** 6 → 5 thresholds (drop smaller than expected because audit also flags
+  thresholds outside this task's scope — tracked as Task #N8).
+- **Status:** Closed
+- **Commit:** c1328d1
+
+### ✅ #N6: post_analysis missing 2026-04-28 (D2 health alert) — backfilled
+- **Detected by:** Health audit D2 — "Missing 1/3 recent days: ['2026-04-28']"
+- **Investigation:** daily_snapshots had 2 candidates with Score≥60 (AKAN 86.21, SBLX 65.68)
+  but post_analysis had 0 rows for that date. Collector ran but didn't persist results.
+- **Fix:** Manual backfill: `python3 post_analysis_collector.py --date 2026-04-28`
+- **Result:** 2 rows added (AKAN, SBLX). post_analysis: 148 → 150 rows. D2 → PASSED. D3 → PASSED.
+- **Status:** Closed (manual operation, no commit)
+
+### ✅ #18: Document MxV positive values are normal
+- **Decision:** Added full value range explanation to PROJECT_KB.md §4.5:
+  +98 to +100 = no pump, 0 = boundary, negative = pump.
+  Explicitly noted: positive values are NOT a bug.
+- **Status:** Closed
+- **Commit:** [this commit]
+
+### ✅ #N3: Project Knowledge "missing files" — investigation result
+- **Concern raised:** UI showed only 1 file ("ridinghigh-pro" GitHub connector card),
+  user feared sync issues.
+- **Investigation:** Clicking the connector card opened full file list — 64 files all
+  selected, 14% capacity. `git ls-files | wc -l` confirmed 64 files locally.
+- **Conclusion:** NOT a bug. The connector card is a collapsed view; clicking expands
+  to all files. Search index is fully synced and finds all files correctly.
+- **Related:** Web search confirmed Issue #25759 (anthropics/claude-code, 14-Feb-2026)
+  about RAG mode at 2% capacity threshold — relevant context but not the issue here.
+- **Status:** Closed (no action needed)
+- **Verified:** 2026-04-29 by user screenshot inspection
 
 ---
 
@@ -228,12 +298,6 @@
 - Currently on old schema
 
 ## 🆕 DISCOVERED 2026-04-28
-
-### #18: Document MxV positive values are normal (not bug)
-- During UnboundLocalError investigation, initially thought MxV being positive (98-100) was a bug
-- **Reality:** MxV = (MarketCap - Price×Volume) / MarketCap × 100. Positive values just mean "no pump" (volume × price << market_cap). Negative = pump (volume × price > market_cap).
-- **Impact:** Documentation says "negative = pump" but doesn't clarify positive range
-- **Effort:** 5 min (update PROJECT_KB.md with full MxV interpretation)
 
 ### #20: Streamlit Cloud dashboard.py ImportError (deferred from 25/4)
 - Error: `from formulas import (...)` at dashboard.py line 27

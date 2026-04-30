@@ -204,6 +204,16 @@ ATRX_norm: clip(0, 50) → scale 0-100
 MxV = ((MarketCap - Price × Volume) / MarketCap) × 100
 ```
 יותר שלילי = פאמפ חזק יותר. טווח טיפוסי -30 עד -1500.
+
+**טווח הערכים המלא:**
+- **MxV ≈ +98 עד +100:** אין pump (price × volume << market_cap, נורמלי לרוב המניות)
+- **MxV = 0:** price × volume שווה ל-market_cap (גבול תיאורטי)
+- **MxV < 0:** pump — price × volume גדול מ-market_cap
+- **MxV ≈ -30 עד -1500:** טווח pump טיפוסי
+- **MxV < -1500:** extreme pump (נדיר)
+
+**חשוב:** ערכים חיוביים אינם bug — הם המצב הנורמלי. אם רואים MxV positive ברוב המניות, זה תקין. רק ערכים שליליים תורמים ל-Score (לפי SCORE_WEIGHTS_V2).
+
 ⚠️ **ראינו קורלציה r=+0.179 (הפוכה!)** — צריך מחקר נוסף.
 
 **RunUp:**

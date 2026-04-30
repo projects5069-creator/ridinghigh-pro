@@ -1,28 +1,28 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-04-29 11:21:11 -05
+**Generated:** 2026-04-30 07:25:56 -05
 **Branch:** `main`
-**Latest commit:** `30d3292` — fix(config): replace hardcoded MIN_SCORE_DISPLAY/TRADE_ENTRY_MIN_SCORE
+**Latest commit:** `856f836` — docs: close 7 tasks from 2026-04-29 session + #18 MxV documentation
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `30d3292 (HEAD -> main) fix(config): replace hardcoded MIN_SCORE_DISPLAY/TRADE_ENTRY_MIN_SCORE`
-- `04447c9 (origin/main, origin/HEAD) fix(project_state): show actual last date instead of ticker`
+- `856f836 (HEAD -> main) docs: close 7 tasks from 2026-04-29 session + #18 MxV documentation`
+- `c1328d1 (origin/main, origin/HEAD) fix(config): replace hardcoded MIN_SCORE_DISPLAY/TRADE_ENTRY_MIN_SCORE`
+- `04447c9 fix(project_state): show actual last date instead of ticker`
 - `c47e874 docs(open_issues): close #19 — collector selection logic documented`
 - `ecbaf2c fix(ci): use requirements.txt for health_audit deps`
-- `4959ecc fix(ci): add pandas + alpaca-py to health_audit workflow`
 
 ---
 
-## 📋 Open issues — 13 total
+## 📋 Open issues — 12 total
 
 - 🔴 Critical: **2**
 - 🟠 Important: **4**
 - 🟡 Medium: **1**
-- 🟢 Low: **6**
+- 🟢 Low: **5**
 
 _See `OPEN_ISSUES.md` for full list_
 
@@ -32,11 +32,11 @@ _See `OPEN_ISSUES.md` for full list_
 
 | Workflow | Status | Conclusion | Started |
 |---|---|---|---|
-| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-04-29 16:21 UTC |
-| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-04-29 16:20 UTC |
-| RidingHigh Auto Scanner | completed | ✅ success | 2026-04-29 16:19 UTC |
-| RidingHigh Auto Scanner | completed | ✅ success | 2026-04-29 16:18 UTC |
-| RidingHigh Auto Scanner | completed | ✅ success | 2026-04-29 16:17 UTC |
+| Health Audit | completed | ✅ success | 2026-04-30 10:23 UTC |
+| RidingHigh Auto Scanner | completed | ✅ success | 2026-04-30 07:52 UTC |
+| Daily Backup — post_analysis | completed | ✅ success | 2026-04-30 00:12 UTC |
+| Post Analysis Collector | completed | ✅ success | 2026-04-30 00:10 UTC |
+| RidingHigh Auto Scanner | completed | ✅ success | 2026-04-29 23:39 UTC |
 
 ---
 
@@ -47,12 +47,12 @@ _Months in config: `2026-04`, `2026-05`_
 
 | Sheet | Total rows | Last date | Status |
 |---|---|---|---|
-| timeline_live | 229,518 | 2026-04-29 | ✅ |
-| daily_snapshots | 197 | 2026-04-28 | ✅ |
-| daily_summary | 979 | 2026-04-28 | ✅ |
-| post_analysis | 148 | 2026-04-27 | ✅ |
-| portfolio | 184 | 2026-04-28 | ✅ |
-| portfolio_live | 74 | 2026-04-28 | ✅ |
+| timeline_live | 238,406 | 2026-04-29 | ✅ |
+| daily_snapshots | 242 | 2026-04-29 | ✅ |
+| daily_summary | 1,032 | 2026-04-29 | ✅ |
+| post_analysis | 150 | 2026-04-28 | ✅ |
+| portfolio | 188 | 2026-04-29 | ✅ |
+| portfolio_live | 76 | 2026-04-29 | ✅ |
 | score_tracker | 15,900 | 2026-04-28 | ✅ |
 | live_trades | 15,900 | 2026-04-28 | ✅ |
 | ticker_follow_up | 146 | 2026-04-28 | ✅ |
