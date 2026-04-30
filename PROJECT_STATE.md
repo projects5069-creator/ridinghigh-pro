@@ -1,26 +1,26 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-04-30 09:54:55 -05
+**Generated:** 2026-04-30 16:22:51 -05
 **Branch:** `main`
-**Latest commit:** `bfb5555` — fix(open_issues): remove literal markers from #N9 title (check_19 false positive)
+**Latest commit:** `15826b3` — docs(open_issues): close 2 stale issues + scope #9 + new #N10
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `bfb5555 (HEAD -> main) fix(open_issues): remove literal markers from #N9 title (check_19 false positive)`
-- `62cf71d (origin/main, origin/HEAD) docs(open_issues): structural cleanup — split #2, add 2026-04-29 discoveries`
+- `15826b3 (HEAD -> main) docs(open_issues): close 2 stale issues + scope #9 + new #N10`
+- `1293525 (origin/main, origin/HEAD) fix(open_issues): remove literal markers from #N9 title (check_19 false positive)`
+- `62cf71d docs(open_issues): structural cleanup — split #2, add 2026-04-29 discoveries`
 - `15d1d39 docs: close 7 tasks from 2026-04-29 session + #18 MxV documentation`
 - `c1328d1 fix(config): replace hardcoded MIN_SCORE_DISPLAY/TRADE_ENTRY_MIN_SCORE`
-- `04447c9 fix(project_state): show actual last date instead of ticker`
 
 ---
 
-## 📋 Open issues — 12 total
+## 📋 Open issues — 10 total
 
-- 🔴 Critical: **2**
-- 🟠 Important: **4**
+- 🔴 Critical: **1**
+- 🟠 Important: **3**
 - 🟡 Medium: **1**
 - 🟢 Low: **5**
 
@@ -32,11 +32,11 @@ _See `OPEN_ISSUES.md` for full list_
 
 | Workflow | Status | Conclusion | Started |
 |---|---|---|---|
-| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-04-30 14:54 UTC |
-| RidingHigh Auto Scanner | completed | ✅ success | 2026-04-30 14:53 UTC |
-| RidingHigh Auto Scanner | completed | ✅ success | 2026-04-30 14:52 UTC |
-| RidingHigh Auto Scanner | completed | ✅ success | 2026-04-30 14:51 UTC |
-| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-04-30 14:50 UTC |
+| RidingHigh Auto Scanner | completed | ✅ success | 2026-04-30 20:59 UTC |
+| RidingHigh Auto Scanner | completed | ✅ success | 2026-04-30 20:58 UTC |
+| RidingHigh Auto Scanner | completed | ✅ success | 2026-04-30 20:57 UTC |
+| RidingHigh Auto Scanner | completed | ✅ success | 2026-04-30 20:56 UTC |
+| RidingHigh Auto Scanner | completed | ✅ success | 2026-04-30 20:55 UTC |
 
 ---
 
@@ -47,12 +47,12 @@ _Months in config: `2026-04`, `2026-05`_
 
 | Sheet | Total rows | Last date | Status |
 |---|---|---|---|
-| timeline_live | 240,685 | 2026-04-30 | ✅ |
-| daily_snapshots | 242 | 2026-04-29 | ✅ |
-| daily_summary | 1,032 | 2026-04-29 | ✅ |
+| timeline_live | 263,774 | 2026-04-30 | ✅ |
+| daily_snapshots | 343 | 2026-04-30 | ✅ |
+| daily_summary | 1,138 | 2026-04-30 | ✅ |
 | post_analysis | 150 | 2026-04-28 | ✅ |
-| portfolio | 188 | 2026-04-29 | ✅ |
-| portfolio_live | 78 | 2026-04-29 | ✅ |
+| portfolio | 190 | 2026-04-30 | ✅ |
+| portfolio_live | ? | ? | ❌ APIError: [503]: The service is currentl |
 | score_tracker | 15,900 | 2026-04-28 | ✅ |
 | live_trades | 15,900 | 2026-04-28 | ✅ |
 | ticker_follow_up | 146 | 2026-04-28 | ✅ |

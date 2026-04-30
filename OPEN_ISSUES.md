@@ -1,5 +1,41 @@
 # RidingHigh Pro - Open Issues Log
-*Last updated: 2026-04-29 19:55 Peru*
+*Last updated: 2026-04-30 15:58 Peru*
+
+---
+
+## ✅ CLOSED (2026-04-30) - Session "Stale Issue Audit + #N9 Workaround"
+
+### ✅ #N9 (workaround): check_19 false positive — title markers removed
+- **Background:** #N9 title contained literal `~~` and `✅` characters as descriptive
+  text, which check_19 interprets as "fixed marker" indicators. Result: false-positive
+  WARNING on every check_sync run, displaying `#?` because the regex `\d+` couldn't
+  extract numeric ID from "N9".
+- **Workaround applied:** Renamed #N9 title to remove the trigger characters.
+  Body still explains the markers check_19 scans for. The proper fix (extending
+  check_19 to detect 'Verified'/'Closed' wording in body text) remains tracked as #N9.
+- **Status:** Workaround closed. #N9 itself still open as P3.
+- **Commit:** 1293525
+- **Verified:** check_sync.py [19] ✅ PASSED after workaround
+
+### ✅ #5: DynamicScore — investigation revealed already removed
+- **Original concern:** "Calculated on-the-fly in dashboard page 8 only, not saved, can't backtest"
+- **Investigation result:** DynamicScore was REMOVED entirely in Issue #34 (commit ecfc4e5).
+  Only stale comments remain:
+    - `formulas.py:377` — "# Score_B..I, EntryScore, DynamicScore removed in Issue #34"
+    - `dashboard.py:2439` — "# Dynamic Score section removed (Issue #34)"
+- **Why this issue stayed open:** Drift — code was fixed but tracker wasn't updated.
+  Same pattern as closed #19 yesterday.
+- **Status:** Closed (no action needed)
+- **Verified:** 2026-04-30 by stale issue audit
+
+### ✅ #7: post_analysis recalc — context shifted, no longer applicable
+- **Original concern:** "124 rows might need recalc with new formulas after formulas.py fixes"
+- **Investigation result:** post_analysis now has 150 rows (was 124 when issue opened).
+  Daily collector running consistently, new rows use current formulas.
+- **What's left:** Validating that the original 124 historical rows match new formulas
+  (a narrower question). Tracked separately as #N10 in DISCOVERED 2026-04-30.
+- **Status:** Closed (superseded by #N10)
+- **Verified:** 2026-04-30 by stale issue audit
 
 ---
 
@@ -253,12 +289,6 @@
   with closed #2 (partial fix). The broader scope continues here.
 - **Effort:** 30 min to close fully via #N8
 
-### #5: DynamicScore - unclear if saved anywhere
-- Calculated on-the-fly in dashboard page 8 only
-- Not saved to any sheet
-- **Impact:** Can't backtest historically
-- **Effort:** 15 min (investigation + decision)
-
 ---
 
 ## 🟠 STILL OPEN - Important
@@ -268,19 +298,22 @@
 - **Impact:** Score weaker than possible
 - **Decision needed:** Add back to Score v3?
 
-### #7: 124 rows in post_analysis - run again with new formulas?
-- After formulas.py fixes, some calculated values may differ
-- **Effort:** 20 min recalc
-
 ### #8: Section 5 on page 9 is biased
 - Score tends to high values, "wins" without normalization
 - **Effort:** 25 min
 
-### #9: yfinance data reliability
-- 3 BROKEN rows, 21 NO_DATA in post_analysis
-- Pre-split prices, partial intraday issues
-- **Alternatives:** Polygon.io ($29/mo), FMP ($14/mo)
-- **Decision needed:** switch providers?
+### #9: yfinance reliability for fundamentals (post Phase 2 Alpaca migration)
+- **Current state (2026-04-30 audit):**
+    - Main bars data → Alpaca (post Phase 2 migration, working)
+    - **Fundamentals → yfinance** (still required: Alpaca Basic doesn't expose shares/float/marketcap)
+    - Active code path: `providers/yfinance_provider.py:32` (fundamentals only)
+    - Direct `import yfinance` only in archive/old sync copies
+- **Original concern:** 3 BROKEN rows, 21 NO_DATA in post_analysis (pre-split prices, partial intraday)
+- **Reduced scope after Phase 2:** Reliability concern now narrows to fundamentals fetch only.
+  Bars data is on Alpaca and stable.
+- **Alternatives for fundamentals:** Polygon.io ($29/mo), FMP ($14/mo)
+- **Decision needed:** Is fundamentals reliability sufficient with yfinance, or worth $14-29/mo upgrade?
+- **Updated:** 2026-04-30 — narrowed scope after architecture audit
 
 ---
 
@@ -305,6 +338,22 @@
 ### #17: DropsLab schema migration pending
 - Same migration as #41 needs to apply to DropsLab
 - Currently on old schema
+
+## 🆕 DISCOVERED 2026-04-30
+
+### #N10: Validate that original 124 post_analysis rows match new formulas
+- **Background:** Original #7 was closed today (was about "recalc 124 rows after formulas.py fixes").
+  But the underlying concern remains, in narrower form: do the historical 124 rows in
+  post_analysis (pre-formula-fixes) give matching results when current formulas are applied?
+- **Why this matters:** Backtests and Score correlations include those 124 rows. If they
+  diverge from current formulas, analysis is on inconsistent data.
+- **What to check:** Run a sample of the 124 historical rows through current formulas
+  and compare. If divergence > 5% on key metrics (MxV, ATRX, RunUp), do recalc.
+- **Effort:** 30 min sampling + decide
+- **Priority:** P1 (data integrity)
+- **Discovered:** 2026-04-30 from #7 closure investigation
+
+---
 
 ## 🆕 DISCOVERED 2026-04-29
 
