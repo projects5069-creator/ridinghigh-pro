@@ -20,6 +20,7 @@ sys.path.insert(0, __import__("os").path.expanduser("~/RidingHighPro"))
 import pytz
 import sheets_manager
 from gsheets_sync import load_post_analysis_from_sheets
+from config import TRADE_ENTRY_MIN_SCORE
 
 PERU_TZ = pytz.timezone("America/Lima")
 
@@ -166,12 +167,12 @@ def check_timeline_live(gc) -> tuple:
             lines.append(f"  ✅ היום ({today}): {len(today_rows)} שורות")
 
     # EntryScore check — only today's data (historical rows predate the feature)
-    today_high = tl[(tl["Date"] == today) & (tl["Score"] >= 70)]
+    today_high = tl[(tl["Date"] == today) & (tl["Score"] >= TRADE_ENTRY_MIN_SCORE)]
     if not today_high.empty and "EntryScore" in tl.columns:
         entry_missing = today_high["EntryScore"].apply(_is_missing).sum()
         if entry_missing:
             pct = entry_missing / len(today_high) * 100
-            msg = f"  ⚠️  EntryScore חסר ל-{entry_missing}/{len(today_high)} מניות Score≥70 היום ({pct:.0f}%)"
+            msg = f"  ⚠️  EntryScore חסר ל-{entry_missing}/{len(today_high)} מניות Score≥{TRADE_ENTRY_MIN_SCORE} היום ({pct:.0f}%)"
             if pct > 50:
                 lines.append(msg.replace("⚠️", "❌"))
                 critical += 1

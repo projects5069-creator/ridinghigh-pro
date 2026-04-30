@@ -1,5 +1,29 @@
 # RidingHigh Pro - Open Issues Log
-*Last updated: 2026-04-30 15:58 Peru*
+*Last updated: 2026-04-30 16:30 Peru*
+
+---
+
+## ✅ CLOSED (2026-04-30) - Session "Stale Issue Audit + #N9 Workaround + #N8 fix"
+
+### ✅ #22 + #N8: Min Score threshold consistency — fully resolved
+- **Original concern (#22, was #2):** MIN_SCORE_DISPLAY exists in config but hardcoded
+  `>= 60` and `>= 70` thresholds appear throughout the codebase.
+- **Phase 1 (closed 2026-04-29 commit c1328d1):** dashboard.py + post_analysis_collector.py
+  — 8 hardcoded thresholds replaced with config imports (MIN_SCORE_DISPLAY, TRADE_ENTRY_MIN_SCORE).
+- **Phase 2 (this commit):** Investigation of remaining 5 health_audit C2 entries revealed:
+    - **1 real hardcoded** (now fixed): `health_check.py:169` — `Score >= 70` →
+      `Score >= TRADE_ENTRY_MIN_SCORE`. Added `from config import TRADE_ENTRY_MIN_SCORE`.
+      Also updated f-string at line 174 to use the variable.
+    - **4 false positives** (no fix needed):
+        - `score_distribution.py:[205, 240]` — `quantile(0.10)` is statistical (p10), not threshold.
+          The 0.10 value coincidentally matches TP_THRESHOLD_FRAC.
+        - `auto_scanner.py:[933, 935]` — Hebrew docstring/comment, not code.
+        - `dashboard.py:[1313, 1364]` — `total_seconds() >= 60` (seconds, not Score).
+- **Result:** All actual hardcoded MIN_SCORE thresholds now use config. C2 dropped 5 → 4,
+  and the 4 remaining are confirmed false positives.
+- **Status:** Closed (#22 fully resolved, #N8 fully resolved)
+- **Commit:** [this commit]
+- **Discovered new task:** #N11 — improve check_C2 to suppress false positives
 
 ---
 
@@ -276,18 +300,6 @@
 
 ## 🔴 STILL OPEN - Critical
 
-### #22: Min Score threshold inconsistent across pages (broader scope, see #N8)
-- `MIN_SCORE_DISPLAY` exists in config but not enforced everywhere
-- **Closed (2026-04-29 commit c1328d1):** dashboard.py + post_analysis_collector.py
-  (8 hardcoded thresholds → 0). See ✅ #2 in CLOSED 2026-04-29.
-- **Still open:** thresholds in other files (tracked as #N8):
-    - `score_distribution.py:[205, 240]` → TP_THRESHOLD_FRAC (0.10)
-    - `auto_scanner.py:[933, 935]` → MIN_SCORE threshold (70)
-    - `health_check.py:[169]` → MIN_SCORE
-- **Health audit C2 status:** 5 thresholds remaining (down from 6 before #2 closure)
-- **Renumbered:** This issue was originally #2; renumbered to #22 to avoid collision
-  with closed #2 (partial fix). The broader scope continues here.
-- **Effort:** 30 min to close fully via #N8
 
 ---
 
@@ -341,6 +353,26 @@
 
 ## 🆕 DISCOVERED 2026-04-30
 
+### #N11: Improve check_C2 to suppress false positive thresholds
+- **Background:** #N8 closure (this morning) revealed 4 of 5 detected thresholds
+  were false positives:
+    - `quantile(0.10)` — statistical, not threshold
+    - Hebrew docstrings/comments
+    - `total_seconds() >= 60` — time, not Score
+    - String constants in f-strings (already fixed but worth detecting)
+- **Suggested improvements:**
+    1. Skip lines inside docstrings/comments (parse via `ast` instead of regex)
+    2. Distinguish `>=` in `Score`/`MIN_SCORE` context vs `total_seconds`/`quantile`
+    3. Skip f-string literals or treat them as cosmetic (lower severity)
+    4. Allow whitelist of known-safe values (0.10 in quantile context)
+- **Why this matters:** Currently health_audit C2 always reports WARNING with 4-5
+  false positives, dulling alert fatigue and hiding real hardcoded values.
+- **Suggested approach:** Use `ast.parse()` to walk the AST and only flag actual
+  numeric comparisons in code paths, not strings/comments/docstrings.
+- **Effort:** 1-2 hours (proper AST-based analysis)
+- **Priority:** P3 (nice-to-have, doesn't break anything)
+- **Discovered:** 2026-04-30 by #N8 closure investigation
+
 ### #N10: Validate that original 124 post_analysis rows match new formulas
 - **Background:** Original #7 was closed today (was about "recalc 124 rows after formulas.py fixes").
   But the underlying concern remains, in narrower form: do the historical 124 rows in
@@ -372,18 +404,6 @@
 - **Priority:** LT (long-term refactoring)
 - **Discovered:** 2026-04-29 during N4 investigation
 
-### #N8: 4 hardcoded thresholds outside #2/#22 scope
-- **Background:** #2 closure on 2026-04-29 (commit c1328d1) reduced health_audit C2
-  from 6 → 5 thresholds — not 6 → 0 as initially expected. The remaining 5 are in
-  files outside the original #2 scope:
-    - `score_distribution.py:[205, 240]` → `TP_THRESHOLD_FRAC` (0.10)
-    - `auto_scanner.py:[933, 935]` → `MIN_SCORE` (70)
-    - `health_check.py:[169]` → `MIN_SCORE`
-    - `dashboard.py:[1313, 1364]` — **false positives** (seconds, not Score) — already
-      verified during #2; would need check_C2 logic improvement to suppress
-- **Effort:** 30 min (4 str_replace + verify check_C2 result)
-- **Priority:** P2
-- **Discovered:** 2026-04-29 by health_audit C2 analysis after #2 closure
 
 ### #N9: check_19 false positive — fails to catch issues marked Verified in body without title markers
 - **Background:** #19 (post_analysis_collector selection logic) was marked "Verified
