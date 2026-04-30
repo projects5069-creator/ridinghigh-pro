@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-04-30 08:37:47 -05
+**Generated:** 2026-04-30 09:54:55 -05
 **Branch:** `main`
-**Latest commit:** `3abcacb` — docs(open_issues): structural cleanup — split #2, add 2026-04-29 discoveries
+**Latest commit:** `bfb5555` — fix(open_issues): remove literal markers from #N9 title (check_19 false positive)
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `3abcacb (HEAD -> main) docs(open_issues): structural cleanup — split #2, add 2026-04-29 discoveries`
-- `15d1d39 (origin/main, origin/HEAD) docs: close 7 tasks from 2026-04-29 session + #18 MxV documentation`
+- `bfb5555 (HEAD -> main) fix(open_issues): remove literal markers from #N9 title (check_19 false positive)`
+- `62cf71d (origin/main, origin/HEAD) docs(open_issues): structural cleanup — split #2, add 2026-04-29 discoveries`
+- `15d1d39 docs: close 7 tasks from 2026-04-29 session + #18 MxV documentation`
 - `c1328d1 fix(config): replace hardcoded MIN_SCORE_DISPLAY/TRADE_ENTRY_MIN_SCORE`
 - `04447c9 fix(project_state): show actual last date instead of ticker`
-- `c47e874 docs(open_issues): close #19 — collector selection logic documented`
 
 ---
 
@@ -32,11 +32,11 @@ _See `OPEN_ISSUES.md` for full list_
 
 | Workflow | Status | Conclusion | Started |
 |---|---|---|---|
-| RidingHigh Auto Scanner | completed | ✅ success | 2026-04-30 13:37 UTC |
-| RidingHigh Auto Scanner | completed | ✅ success | 2026-04-30 13:36 UTC |
-| RidingHigh Auto Scanner | completed | ✅ success | 2026-04-30 13:35 UTC |
-| RidingHigh Auto Scanner | completed | ✅ success | 2026-04-30 13:34 UTC |
-| RidingHigh Auto Scanner | completed | ✅ success | 2026-04-30 13:33 UTC |
+| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-04-30 14:54 UTC |
+| RidingHigh Auto Scanner | completed | ✅ success | 2026-04-30 14:53 UTC |
+| RidingHigh Auto Scanner | completed | ✅ success | 2026-04-30 14:52 UTC |
+| RidingHigh Auto Scanner | completed | ✅ success | 2026-04-30 14:51 UTC |
+| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-04-30 14:50 UTC |
 
 ---
 
@@ -47,12 +47,12 @@ _Months in config: `2026-04`, `2026-05`_
 
 | Sheet | Total rows | Last date | Status |
 |---|---|---|---|
-| timeline_live | 238,406 | 2026-04-29 | ✅ |
+| timeline_live | 240,685 | 2026-04-30 | ✅ |
 | daily_snapshots | 242 | 2026-04-29 | ✅ |
 | daily_summary | 1,032 | 2026-04-29 | ✅ |
 | post_analysis | 150 | 2026-04-28 | ✅ |
 | portfolio | 188 | 2026-04-29 | ✅ |
-| portfolio_live | 76 | 2026-04-29 | ✅ |
+| portfolio_live | 78 | 2026-04-29 | ✅ |
 | score_tracker | 15,900 | 2026-04-28 | ✅ |
 | live_trades | 15,900 | 2026-04-28 | ✅ |
 | ticker_follow_up | 146 | 2026-04-28 | ✅ |

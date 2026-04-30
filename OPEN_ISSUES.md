@@ -240,7 +240,7 @@
 
 ## 🔴 STILL OPEN - Critical
 
-### #22: Min Score threshold inconsistent across pages (formerly #2 — partial closure 2026-04-29)
+### #22: Min Score threshold inconsistent across pages (broader scope, see #N8)
 - `MIN_SCORE_DISPLAY` exists in config but not enforced everywhere
 - **Closed (2026-04-29 commit c1328d1):** dashboard.py + post_analysis_collector.py
   (8 hardcoded thresholds → 0). See ✅ #2 in CLOSED 2026-04-29.
@@ -336,7 +336,7 @@
 - **Priority:** P2
 - **Discovered:** 2026-04-29 by health_audit C2 analysis after #2 closure
 
-### #N9: check_19 doesn't catch issues marked "Verified" without ~~ or ✅ markers
+### #N9: check_19 false positive — fails to catch issues marked Verified in body without title markers
 - **Background:** #19 (post_analysis_collector selection logic) was marked "Verified
   working as designed" on 2026-04-28 but stayed in DISCOVERED section. check_19 didn't
   flag this drift because it scans only for `~~` (strikethrough) or `✅` markers in
