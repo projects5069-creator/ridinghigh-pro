@@ -1,28 +1,28 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-04-30 17:45:22 -05
+**Generated:** 2026-04-30 19:09:28 -05
 **Branch:** `main`
-**Latest commit:** `0f3c9a9` — fix(health_check): use TRADE_ENTRY_MIN_SCORE + close #22/#N8 + new #N11
+**Latest commit:** `e85894b` — fix(config): remove WEIGHTS_V1_LEGACY dead code + close #15
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `0f3c9a9 (HEAD -> main) fix(health_check): use TRADE_ENTRY_MIN_SCORE + close #22/#N8 + new #N11`
-- `b921aa1 (origin/main, origin/HEAD) docs(open_issues): close 2 stale issues + scope #9 + new #N10`
+- `e85894b (HEAD -> main) fix(config): remove WEIGHTS_V1_LEGACY dead code + close #15`
+- `4687366 (origin/main, origin/HEAD) fix(health_check): use TRADE_ENTRY_MIN_SCORE + close #22/#N8 + new #N11`
+- `b921aa1 docs(open_issues): close 2 stale issues + scope #9 + new #N10`
 - `1293525 fix(open_issues): remove literal markers from #N9 title (check_19 false positive)`
 - `62cf71d docs(open_issues): structural cleanup — split #2, add 2026-04-29 discoveries`
-- `15d1d39 docs: close 7 tasks from 2026-04-29 session + #18 MxV documentation`
 
 ---
 
-## 📋 Open issues — 9 total
+## 📋 Open issues — 8 total
 
 - 🔴 Critical: **0**
 - 🟠 Important: **3**
 - 🟡 Medium: **1**
-- 🟢 Low: **5**
+- 🟢 Low: **4**
 
 _See `OPEN_ISSUES.md` for full list_
 
@@ -32,11 +32,11 @@ _See `OPEN_ISSUES.md` for full list_
 
 | Workflow | Status | Conclusion | Started |
 |---|---|---|---|
+| Post Analysis Collector | completed | ✅ success | 2026-05-01 00:08 UTC |
+| Daily Backup — post_analysis | completed | ✅ success | 2026-04-30 23:14 UTC |
 | Daily Backup — post_analysis | completed | ✅ success | 2026-04-30 21:39 UTC |
 | RidingHigh Auto Scanner | completed | ✅ success | 2026-04-30 21:34 UTC |
 | RidingHigh Auto Scanner | completed | ✅ success | 2026-04-30 20:59 UTC |
-| RidingHigh Auto Scanner | completed | ✅ success | 2026-04-30 20:58 UTC |
-| RidingHigh Auto Scanner | completed | ✅ success | 2026-04-30 20:57 UTC |
 
 ---
 
@@ -53,9 +53,9 @@ _Months in config: `2026-04`, `2026-05`_
 | post_analysis | 150 | 2026-04-28 | ✅ |
 | portfolio | 190 | 2026-04-30 | ✅ |
 | portfolio_live | 80 | 2026-04-30 | ✅ |
-| score_tracker | 15,900 | 2026-04-28 | ✅ |
-| live_trades | 15,900 | 2026-04-28 | ✅ |
-| ticker_follow_up | 146 | 2026-04-28 | ✅ |
+| score_tracker | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| live_trades | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| ticker_follow_up | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
 
 ---
 

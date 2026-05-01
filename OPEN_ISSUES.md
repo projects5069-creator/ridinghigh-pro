@@ -1,5 +1,5 @@
 # RidingHigh Pro - Open Issues Log
-*Last updated: 2026-04-30 16:30 Peru*
+*Last updated: 2026-04-30 17:00 Peru*
 
 ---
 
@@ -24,10 +24,6 @@
 - **Status:** Closed (#22 fully resolved, #N8 fully resolved)
 - **Commit:** [this commit]
 - **Discovered new task:** #N11 — improve check_C2 to suppress false positives
-
----
-
-## ✅ CLOSED (2026-04-30) - Session "Stale Issue Audit + #N9 Workaround"
 
 ### ✅ #N9 (workaround): check_19 false positive — title markers removed
 - **Background:** #N9 title contained literal `~~` and `✅` characters as descriptive
@@ -60,6 +56,29 @@
   (a narrower question). Tracked separately as #N10 in DISCOVERED 2026-04-30.
 - **Status:** Closed (superseded by #N10)
 - **Verified:** 2026-04-30 by stale issue audit
+
+### ✅ #15: config.py WEIGHTS_V1_LEGACY removed (dead code cleanup)
+- **Background:** config.py contained `WEIGHTS_V1_LEGACY` dict with comment
+  "DEPRECATED: DO NOT USE", kept for reference since Score v1 → v2 migration
+  on 2026-04-11.
+- **Investigation:** No active code imports or references `WEIGHTS_V1_LEGACY`.
+  Only mentions were:
+    - `config.py:33` — migration note in module docstring
+    - `config.py:220` — the dict definition itself
+    - archive/backup copies (not active)
+- **Fix:**
+    - Removed `WEIGHTS_V1_LEGACY` dict and its docstring (20 lines)
+    - Removed migration note from module docstring (5 lines), replaced with
+      single-line summary: "Score v2 (current) replaces Score v1 (deprecated 2026-04-11)."
+    - Cosmetic: trimmed 4 blank lines → 2 between DASHBOARD_COLORS and Module self-test.
+- **Verification:**
+    - `grep -c WEIGHTS_V1_LEGACY config.py` → 0
+    - `python3 -c "import config"` → OK, SCORE_WEIGHTS_V2 loads with 7 keys
+    - `python3 -c "import ast; ast.parse(open('config.py').read())"` → syntax OK
+- **Why now:** "שלמות > מהירות" — dead code cleanup; git history preserves
+  the legacy weights if anyone needs them for reference.
+- **Status:** Closed
+- **Commit:** [this commit]
 
 ---
 
@@ -344,8 +363,6 @@
 - CONVERSATION_SUMMARY.md marked OUTDATED
 - README.md last touched in v1 era
 
-### #15: config.py v1 legacy weights
-- Kept for reference - eventually can remove
 
 ### #17: DropsLab schema migration pending
 - Same migration as #41 needs to apply to DropsLab

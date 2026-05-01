@@ -26,11 +26,7 @@ Usage:
         POSITION_SIZE_USD,
     )
 
-Migration note:
----------------
-Previous config.py had Score v1 weights (MXV=30%, Gap=10%, etc).
-Current system uses Score v2 weights (MXV=25%, ATRX=20%, Gap=0%, etc).
-The old WEIGHTS dict is kept under WEIGHTS_V1_LEGACY for reference only.
+Score v2 (current) replaces Score v1 (deprecated 2026-04-11).
 """
 
 
@@ -209,28 +205,6 @@ COLORS = {
     "CELL_YELLOW": "background-color: #5a5500; color: #ffee80",
     "CELL_GREEN":  "background-color: #1a4a1a; color: #80ff80",
 }
-
-
-# ═══════════════════════════════════════════════════════════════════════
-# Legacy (DEPRECATED - DO NOT USE)
-# ═══════════════════════════════════════════════════════════════════════
-# Kept for reference only. These were Score v1 weights.
-# Score v1 was replaced by Score v2 on 2026-04-11.
-
-WEIGHTS_V1_LEGACY = {
-    'MXV':     20,   # was 20%, now 25%
-    'RUN_UP':  5,    # was 5%, now 25% (also v1 scored negative runup!)
-    'ATRX':    10,   # was 10%, now 20% (and v1 used /15 cap not /5)
-    'RSI':     15,   # was 15% linear, now 10% bell curve
-    'VWAP':    2,    # was 2%, now 10%
-    'GAP':     3,    # was 3%, now REMOVED
-    'REL_VOL': 15,   # was 15%, now 5% (and v1 had /2 cap not /15)
-    'FLOAT':   5,    # was 5%, now REMOVED
-    'P52W':    10,   # was 10%, now REMOVED
-    'PTH':     15,   # was 15%, now REMOVED
-}
-"""DEPRECATED: Score v1 weights. DO NOT USE.
-Current system uses SCORE_WEIGHTS_V2."""
 
 
 # ═══════════════════════════════════════════════════════════════════════
