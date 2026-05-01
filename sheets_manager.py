@@ -21,6 +21,10 @@ import os
 import json
 from datetime import datetime
 
+import pytz
+
+PERU_TZ = pytz.timezone("America/Lima")
+
 ROOT_FOLDER_ID = "1mHSdsTENVuMTtlv4XM54SrbadCEF_HHh"
 LEGACY_SPREADSHEET_ID = "1oyefUPV52SMeAlC4UejECYoPRNRudJJS42rukNGYx5k"
 
@@ -333,7 +337,7 @@ def get_sheet_id(tab_name: str, month: str = None) -> str:
     month defaults to current month (YYYY-MM). Auto-creates sheets if missing.
     """
     if month is None:
-        month = datetime.now().strftime("%Y-%m")
+        month = datetime.now(PERU_TZ).strftime("%Y-%m")
 
     config = _load_config()
     if month in config and tab_name in config[month]:
@@ -352,7 +356,7 @@ def get_worksheet(tab_name: str, month: str = None, gc=None):
     Pass gc to reuse an existing authenticated client. Auto-creates if needed.
     """
     if month is None:
-        month = datetime.now().strftime("%Y-%m")
+        month = datetime.now(PERU_TZ).strftime("%Y-%m")
 
     sheet_id = get_sheet_id(tab_name, month)
 
@@ -402,7 +406,7 @@ def ensure_monthly_setup(month: str = None) -> dict:
     Defaults to current month. Prints progress and returns the month's config.
     """
     if month is None:
-        month = datetime.now().strftime("%Y-%m")
+        month = datetime.now(PERU_TZ).strftime("%Y-%m")
     print(f"[SheetsManager] Bootstrapping sheets for {month}...")
     cfg = _ensure_month(month)
     print(f"[SheetsManager] sheets_config.json written to {CONFIG_PATH}")
