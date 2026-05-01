@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-05-01 08:58:05 -05
+**Generated:** 2026-05-01 09:30:22 -05
 **Branch:** `main`
-**Latest commit:** `9e44143` — fix(prepare_next_month): UTC date bug — use Peru TZ for next-month calc
+**Latest commit:** `8ea5b92` — fix(workflow): prepare_next_month — install from requirements.txt
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `9e44143 (HEAD -> main) fix(prepare_next_month): UTC date bug — use Peru TZ for next-month calc`
-- `110c0e7 (origin/main, origin/HEAD) fix(sheets_manager): UTC date bug — use Peru TZ for monthly rotation`
+- `8ea5b92 (HEAD -> main) fix(workflow): prepare_next_month — install from requirements.txt`
+- `26fc8d2 (origin/main, origin/HEAD) fix(prepare_next_month): UTC date bug — use Peru TZ for next-month calc`
+- `110c0e7 fix(sheets_manager): UTC date bug — use Peru TZ for monthly rotation`
 - `4ce24b2 fix(config): remove WEIGHTS_V1_LEGACY dead code + close #15`
 - `4687366 fix(health_check): use TRADE_ENTRY_MIN_SCORE + close #22/#N8 + new #N11`
-- `b921aa1 docs(open_issues): close 2 stale issues + scope #9 + new #N10`
 
 ---
 
@@ -32,11 +32,11 @@ _See `OPEN_ISSUES.md` for full list_
 
 | Workflow | Status | Conclusion | Started |
 |---|---|---|---|
-| RidingHigh Auto Scanner | queued | ⏳ — | 2026-05-01 13:58 UTC |
-| RidingHigh Auto Scanner | completed | ✅ success | 2026-05-01 13:57 UTC |
-| RidingHigh Auto Scanner | completed | ✅ success | 2026-05-01 13:56 UTC |
-| RidingHigh Auto Scanner | completed | ✅ success | 2026-05-01 13:55 UTC |
-| RidingHigh Auto Scanner | completed | ✅ success | 2026-05-01 13:54 UTC |
+| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-05-01 14:30 UTC |
+| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-05-01 14:29 UTC |
+| RidingHigh Auto Scanner | completed | ✅ success | 2026-05-01 14:28 UTC |
+| RidingHigh Auto Scanner | completed | ✅ success | 2026-05-01 14:27 UTC |
+| RidingHigh Auto Scanner | completed | ✅ success | 2026-05-01 14:26 UTC |
 
 ---
 
@@ -47,7 +47,7 @@ _Months in config: `2026-04`, `2026-05`_
 
 | Sheet | Total rows | Last date | Status |
 |---|---|---|---|
-| timeline_live | 282 | 2026-05-01 | ✅ |
+| timeline_live | 1,266 | 2026-05-01 | ✅ |
 | daily_snapshots | 0 | — | ⚠️ empty |
 | daily_summary | 0 | — | ⚠️ empty |
 | post_analysis | 0 | — | ⚠️ empty |
@@ -60,7 +60,8 @@ _Months in config: `2026-04`, `2026-05`_
 
 ## 🩺 Health
 
-- ⚠️ 3 uncommitted file(s):
+- ⚠️ 4 uncommitted file(s):
+-    - 1 modified
 -    - 3 new/untracked
 
 ---
