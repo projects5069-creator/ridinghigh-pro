@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-05-01 09:30:22 -05
+**Generated:** 2026-05-01 18:50:37 -05
 **Branch:** `main`
-**Latest commit:** `8ea5b92` — fix(workflow): prepare_next_month — install from requirements.txt
+**Latest commit:** `07e2285` — feat(token-warmer): keep OAuth refresh token alive
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `8ea5b92 (HEAD -> main) fix(workflow): prepare_next_month — install from requirements.txt`
-- `26fc8d2 (origin/main, origin/HEAD) fix(prepare_next_month): UTC date bug — use Peru TZ for next-month calc`
+- `07e2285 (HEAD -> main) feat(token-warmer): keep OAuth refresh token alive`
+- `7decd86 (origin/main, origin/HEAD) Auto: Add sheets_config for new month`
+- `2aa2377 fix(workflow): prepare_next_month — install from requirements.txt`
+- `26fc8d2 fix(prepare_next_month): UTC date bug — use Peru TZ for next-month calc`
 - `110c0e7 fix(sheets_manager): UTC date bug — use Peru TZ for monthly rotation`
-- `4ce24b2 fix(config): remove WEIGHTS_V1_LEGACY dead code + close #15`
-- `4687366 fix(health_check): use TRADE_ENTRY_MIN_SCORE + close #22/#N8 + new #N11`
 
 ---
 
@@ -32,29 +32,29 @@ _See `OPEN_ISSUES.md` for full list_
 
 | Workflow | Status | Conclusion | Started |
 |---|---|---|---|
-| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-05-01 14:30 UTC |
-| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-05-01 14:29 UTC |
-| RidingHigh Auto Scanner | completed | ✅ success | 2026-05-01 14:28 UTC |
-| RidingHigh Auto Scanner | completed | ✅ success | 2026-05-01 14:27 UTC |
-| RidingHigh Auto Scanner | completed | ✅ success | 2026-05-01 14:26 UTC |
+| Daily Backup — post_analysis | completed | ✅ success | 2026-05-01 23:10 UTC |
+| RidingHigh Auto Scanner | completed | ✅ success | 2026-05-01 22:36 UTC |
+| RidingHigh Auto Scanner | completed | ✅ success | 2026-05-01 20:59 UTC |
+| RidingHigh Auto Scanner | completed | ✅ success | 2026-05-01 20:58 UTC |
+| RidingHigh Auto Scanner | completed | ✅ success | 2026-05-01 20:57 UTC |
 
 ---
 
 ## 📊 Google Sheets — showing month `2026-05`
 
 _Selection: current Peru month (2026-05) has data_
-_Months in config: `2026-04`, `2026-05`_
+_Months in config: `2026-04`, `2026-05`, `2026-06`_
 
 | Sheet | Total rows | Last date | Status |
 |---|---|---|---|
-| timeline_live | 1,266 | 2026-05-01 | ✅ |
-| daily_snapshots | 0 | — | ⚠️ empty |
-| daily_summary | 0 | — | ⚠️ empty |
+| timeline_live | 19,903 | 2026-05-01 | ✅ |
+| daily_snapshots | 70 | 2026-05-01 | ✅ |
+| daily_summary | 79 | 2026-05-01 | ✅ |
 | post_analysis | 0 | — | ⚠️ empty |
-| portfolio | 0 | — | ⚠️ empty |
-| portfolio_live | 0 | — | ⚠️ empty |
-| score_tracker | 0 | — | ⚠️ empty |
-| live_trades | 0 | — | ⚠️ empty |
+| portfolio | 2 | 2026-05-01 | ✅ |
+| portfolio_live | 2 | 2026-05-01 | ✅ |
+| score_tracker | 2 | 2026-05-01 | ✅ |
+| live_trades | 2 | 2026-05-01 | ✅ |
 
 ---
 
