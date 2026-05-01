@@ -7,6 +7,8 @@ import json
 import os
 import sys
 from datetime import datetime
+import pytz
+PERU_TZ = pytz.timezone('America/Lima')
 from google.oauth2.credentials import Credentials
 from google.auth.transport.requests import Request
 from googleapiclient.discovery import build
@@ -135,7 +137,7 @@ def add_live_trades_tab(gc, score_tracker_id):
 
 def main():
     # חודש הבא
-    now = datetime.now()
+    now = datetime.now(PERU_TZ)
     if now.month == 12:
         next_year, next_month = now.year + 1, 1
     else:

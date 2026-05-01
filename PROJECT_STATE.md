@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-04-30 21:02:35 -05
+**Generated:** 2026-05-01 08:58:05 -05
 **Branch:** `main`
-**Latest commit:** `7b81b15` — fix(sheets_manager): UTC date bug — use Peru TZ for monthly rotation
+**Latest commit:** `9e44143` — fix(prepare_next_month): UTC date bug — use Peru TZ for next-month calc
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `7b81b15 (HEAD -> main) fix(sheets_manager): UTC date bug — use Peru TZ for monthly rotation`
-- `4ce24b2 (origin/main, origin/HEAD) fix(config): remove WEIGHTS_V1_LEGACY dead code + close #15`
+- `9e44143 (HEAD -> main) fix(prepare_next_month): UTC date bug — use Peru TZ for next-month calc`
+- `110c0e7 (origin/main, origin/HEAD) fix(sheets_manager): UTC date bug — use Peru TZ for monthly rotation`
+- `4ce24b2 fix(config): remove WEIGHTS_V1_LEGACY dead code + close #15`
 - `4687366 fix(health_check): use TRADE_ENTRY_MIN_SCORE + close #22/#N8 + new #N11`
 - `b921aa1 docs(open_issues): close 2 stale issues + scope #9 + new #N10`
-- `1293525 fix(open_issues): remove literal markers from #N9 title (check_19 false positive)`
 
 ---
 
@@ -32,37 +32,35 @@ _See `OPEN_ISSUES.md` for full list_
 
 | Workflow | Status | Conclusion | Started |
 |---|---|---|---|
-| RidingHigh Auto Scanner | completed | ✅ success | 2026-05-01 00:12 UTC |
-| Daily Backup — post_analysis | completed | ✅ success | 2026-05-01 00:11 UTC |
-| Post Analysis Collector | completed | ✅ success | 2026-05-01 00:08 UTC |
-| Daily Backup — post_analysis | completed | ✅ success | 2026-04-30 23:14 UTC |
-| Daily Backup — post_analysis | completed | ✅ success | 2026-04-30 21:39 UTC |
+| RidingHigh Auto Scanner | queued | ⏳ — | 2026-05-01 13:58 UTC |
+| RidingHigh Auto Scanner | completed | ✅ success | 2026-05-01 13:57 UTC |
+| RidingHigh Auto Scanner | completed | ✅ success | 2026-05-01 13:56 UTC |
+| RidingHigh Auto Scanner | completed | ✅ success | 2026-05-01 13:55 UTC |
+| RidingHigh Auto Scanner | completed | ✅ success | 2026-05-01 13:54 UTC |
 
 ---
 
-## 📊 Google Sheets — showing month `2026-04`
+## 📊 Google Sheets — showing month `2026-05`
 
-_Selection: current Peru month (2026-04) has data_
+_Selection: current Peru month (2026-05) has data_
 _Months in config: `2026-04`, `2026-05`_
 
 | Sheet | Total rows | Last date | Status |
 |---|---|---|---|
-| timeline_live | 263,774 | 2026-04-30 | ✅ |
-| daily_snapshots | 343 | 2026-04-30 | ✅ |
-| daily_summary | 1,138 | 2026-04-30 | ✅ |
-| post_analysis | 150 | 2026-04-28 | ✅ |
-| portfolio | 190 | 2026-04-30 | ✅ |
-| portfolio_live | 80 | 2026-04-30 | ✅ |
-| score_tracker | 15,900 | 2026-04-28 | ✅ |
-| live_trades | 15,900 | 2026-04-28 | ✅ |
-| ticker_follow_up | 146 | 2026-04-28 | ✅ |
+| timeline_live | 282 | 2026-05-01 | ✅ |
+| daily_snapshots | 0 | — | ⚠️ empty |
+| daily_summary | 0 | — | ⚠️ empty |
+| post_analysis | 0 | — | ⚠️ empty |
+| portfolio | 0 | — | ⚠️ empty |
+| portfolio_live | 0 | — | ⚠️ empty |
+| score_tracker | 0 | — | ⚠️ empty |
+| live_trades | 0 | — | ⚠️ empty |
 
 ---
 
 ## 🩺 Health
 
-- ⚠️ 4 uncommitted file(s):
--    - 1 modified
+- ⚠️ 3 uncommitted file(s):
 -    - 3 new/untracked
 
 ---
