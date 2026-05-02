@@ -283,18 +283,19 @@ def save_post_analysis_to_sheets(df: pd.DataFrame) -> bool:
         else:
             existing_df = pd.DataFrame()
 
-        # Safety: if the sheet returned empty but has row_count > 50, something
-        # is wrong (quota blip / wrong tab). Abort rather than overwrite history.
-        try:
-            if existing_df.empty and ws.row_count > 50:
+        # Safety: distinguish "fresh sheet" from "data disappeared (quota blip)"
+        # Fresh sheet: get_all_values() returns [[]] (truly empty grid)
+        # Data lost: get_all_values() returns [] or shorter than expected
+        if existing_df.empty and ws.row_count > 50:
+            # raw is the result of get_all_values() from line 280
+            # If raw[0] has any content, headers exist → data was lost (abort)
+            # If raw is [[]] or raw[0] is [] → fresh empty sheet (safe to write)
+            if raw and raw[0] and any(cell.strip() for cell in raw[0] if cell):
                 raise RuntimeError(
-                    f"[GSheets] ⚠️ post_analysis sheet has {ws.row_count} rows but "
-                    f"get_all_values() returned empty — aborting to protect history."
+                    f"[GSheets] ⚠️  post_analysis sheet has headers but get_all_values() "
+                    f"returned no data — aborting to protect history."
                 )
-        except Exception as _row_count_err:
-            # row_count unavailable (API error) — re-raise only if it's our RuntimeError
-            if "aborting to protect history" in str(_row_count_err):
-                raise
+            # else: truly new empty sheet — safe to write fresh
 
         # ── Step 2: seed from legacy if current sheet is empty ────────────
         if existing_df.empty:
