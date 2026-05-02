@@ -368,6 +368,53 @@
 - Same migration as #41 needs to apply to DropsLab
 - Currently on old schema
 
+## 🆕 DISCOVERED 2026-05-01
+
+### #N21: Health Audit מורחב + Live Write Verification
+- **Priority:** 🟠 P1 (חשוב, לא דחוף — אחרי משימות 2/3/4)
+- **Background:** On 2026-05-01 at 09:00 Peru, 3 sheets (score_tracker, live_trades,
+  portfolio_live) showed 0 rows. Investigation revealed all 3 are working correctly:
+  score_tracker writes every 5 min, live_trades waits for entries ≥70 after market open
+  (09:30), portfolio_live is empty because it's the first day of the month with no open
+  positions. But the Health Audit didn't flag this — and when everything passes, it sends
+  no email, creating an illusion of a dead system.
+- **What to build:**
+    1. Add cron `0 14 * * 1-5` (08:40 Peru, Mon-Fri) to `health_audit.yml` — smoke test
+       10 min after market open verifying scanner is writing.
+    2. New `check_live_writes()` in `health_audit.py`:
+       - Distinguish EXPECTED_LIVE vs EXPECTED_EOD by time of day
+       - LIVE sheet with no data in last 15 min during market hours → CRITICAL
+       - EOD sheet with no data after EOD window → CRITICAL
+    3. **Decision needed — heartbeat email strategy:**
+       - Option A: Always send email after every check (simple)
+       - Option B: CRITICAL/WARNING only, add Slack/Discord heartbeat (cleaner)
+       - Option C: Daily heartbeat at 06:00 Peru only, silent otherwise unless CRITICAL
+    4. Minor fix: `auto_scanner.py:565` — add `print("📊 portfolio sheet empty, skipping
+       portfolio_live")` so logs distinguish "empty" from "crashed"
+- **Effort:** 2-3 hours
+- **Blockers:** Requires decision on heartbeat option (A/B/C)
+- **Files:** `.github/workflows/health_audit.yml`, `health_audit.py`, `auto_scanner.py`
+- **Discovered:** 2026-05-01 during investigation of "missing writes" false alarm
+
+### #N22: sheets_manager._get_root_folder_id falls back to wrong folder when run locally
+- **Priority:** 🟡 P2
+- **Background:** When `ensure_monthly_setup` runs locally with OAuth credentials,
+  `_get_root_folder_id()` can't reach ROOT_FOLDER_ID (`1mHSdsTENVuMTtlv4XM54SrbadCEF_HHh`)
+  and falls back to creating/using a `RidingHigh-Data` folder. This caused
+  ticker_follow_up sheets for 2026-05 and 2026-06 to be created in the wrong
+  parent folder on 2026-05-01 (manually fixed via Drive API move).
+- **Why:** SA may not have access to ROOT_FOLDER_ID, or there's a permission issue
+  with the OAuth user's view of that folder via the SA `_get_drive_service()` path.
+- **Fix needed:** Investigate why ROOT_FOLDER_ID isn't accessible from local SA,
+  add explicit error if fallback would create different folder structure.
+- **Impact:** Confusion when running `ensure_monthly_setup` locally for repair.
+  Does not affect CI runs (which use both SA and OAuth credentials correctly).
+- **Files:** `sheets_manager.py:219-249`, `_get_root_folder_id()`
+- **Discovered:** 2026-05-01 during ticker_follow_up backfill
+- **Cleanup status:** All misplaced folders moved to RidingHighPro/. RidingHigh-Data deleted (2026-05-01 evening).
+
+---
+
 ## 🆕 DISCOVERED 2026-04-30
 
 ### #N11: Improve check_C2 to suppress false positive thresholds

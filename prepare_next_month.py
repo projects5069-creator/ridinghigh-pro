@@ -24,6 +24,7 @@ SHEET_NAMES = [
     "portfolio",
     "portfolio_live",
     "score_tracker",  # live_trades יהיה כ-tab נוסף בתוכו
+    "ticker_follow_up",
 ]
 CONFIG_PATH = "sheets_config.json"
 

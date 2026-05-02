@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-05-01 18:50:37 -05
+**Generated:** 2026-05-01 19:22:25 -05
 **Branch:** `main`
-**Latest commit:** `07e2285` — feat(token-warmer): keep OAuth refresh token alive
+**Latest commit:** `fe8395d` — fix(monthly-sheets): add ticker_follow_up to SHEET_NAMES + backfill May/June
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `07e2285 (HEAD -> main) feat(token-warmer): keep OAuth refresh token alive`
-- `7decd86 (origin/main, origin/HEAD) Auto: Add sheets_config for new month`
+- `fe8395d (HEAD -> main) fix(monthly-sheets): add ticker_follow_up to SHEET_NAMES + backfill May/June`
+- `498ce77 (origin/main, origin/HEAD) feat(token-warmer): keep OAuth refresh token alive`
+- `7decd86 Auto: Add sheets_config for new month`
 - `2aa2377 fix(workflow): prepare_next_month — install from requirements.txt`
 - `26fc8d2 fix(prepare_next_month): UTC date bug — use Peru TZ for next-month calc`
-- `110c0e7 fix(sheets_manager): UTC date bug — use Peru TZ for monthly rotation`
 
 ---
 
@@ -32,11 +32,11 @@ _See `OPEN_ISSUES.md` for full list_
 
 | Workflow | Status | Conclusion | Started |
 |---|---|---|---|
+| Daily Backup — post_analysis | completed | ✅ success | 2026-05-02 00:09 UTC |
+| Daily Backup — post_analysis | completed | ✅ success | 2026-05-02 00:08 UTC |
+| Post Analysis Collector | completed | ✅ success | 2026-05-02 00:07 UTC |
+| Warm OAuth Token | completed | ✅ success | 2026-05-01 23:56 UTC |
 | Daily Backup — post_analysis | completed | ✅ success | 2026-05-01 23:10 UTC |
-| RidingHigh Auto Scanner | completed | ✅ success | 2026-05-01 22:36 UTC |
-| RidingHigh Auto Scanner | completed | ✅ success | 2026-05-01 20:59 UTC |
-| RidingHigh Auto Scanner | completed | ✅ success | 2026-05-01 20:58 UTC |
-| RidingHigh Auto Scanner | completed | ✅ success | 2026-05-01 20:57 UTC |
 
 ---
 
@@ -51,17 +51,17 @@ _Months in config: `2026-04`, `2026-05`, `2026-06`_
 | daily_snapshots | 70 | 2026-05-01 | ✅ |
 | daily_summary | 79 | 2026-05-01 | ✅ |
 | post_analysis | 0 | — | ⚠️ empty |
-| portfolio | 2 | 2026-05-01 | ✅ |
+| portfolio | 5 | 2026-05-01 | ✅ |
 | portfolio_live | 2 | 2026-05-01 | ✅ |
 | score_tracker | 2 | 2026-05-01 | ✅ |
 | live_trades | 2 | 2026-05-01 | ✅ |
+| ticker_follow_up | ? | ? | ❌  |
 
 ---
 
 ## 🩺 Health
 
-- ⚠️ 4 uncommitted file(s):
--    - 1 modified
+- ⚠️ 3 uncommitted file(s):
 -    - 3 new/untracked
 
 ---
