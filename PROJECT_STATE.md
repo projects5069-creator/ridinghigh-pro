@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-05-01 21:53:12 -05
+**Generated:** 2026-05-02 09:01:01 -05
 **Branch:** `main`
-**Latest commit:** `4c5fe37` — docs(open-issues): add #N23 — pandas_market_calendars Python 3.9 incompatibility
+**Latest commit:** `7d31af9` — feat(score-version): tag v1/v2 records (issue #N10)
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `4c5fe37 (HEAD -> main) docs(open-issues): add #N23 — pandas_market_calendars Python 3.9 incompatibility`
-- `8ae2c88 (origin/main, origin/HEAD) refactor(health-audit): C1 — eliminate duplicate functions`
+- `7d31af9 (HEAD -> main) feat(score-version): tag v1/v2 records (issue #N10)`
+- `040d2f1 (origin/main, origin/HEAD) docs(open-issues): add #N23 — pandas_market_calendars Python 3.9 incompatibility`
+- `8ae2c88 refactor(health-audit): C1 — eliminate duplicate functions`
 - `664dde2 fix(health-audit): D2 cross-month boundary — check previous month when needed`
 - `7513ecf fix(post-analysis): sanitize inf/nan + check save return value`
-- `8d3d162 fix(gsheets-sync): guard correctly distinguishes fresh sheet from quota blip`
 
 ---
 
@@ -32,11 +32,11 @@ _See `OPEN_ISSUES.md` for full list_
 
 | Workflow | Status | Conclusion | Started |
 |---|---|---|---|
+| RidingHigh Auto Scanner | completed | ✅ success | 2026-05-02 12:04 UTC |
+| RidingHigh Auto Scanner | completed | ✅ success | 2026-05-02 09:49 UTC |
+| Health Audit | completed | ✅ success | 2026-05-02 08:14 UTC |
+| RidingHigh Auto Scanner | completed | ✅ success | 2026-05-02 06:21 UTC |
 | Health Audit | completed | ✅ success | 2026-05-02 02:44 UTC |
-| Health Audit | completed | ✅ success | 2026-05-02 02:20 UTC |
-| Health Audit | completed | ✅ success | 2026-05-02 02:09 UTC |
-| Post Analysis Collector | completed | ✅ success | 2026-05-02 01:55 UTC |
-| Post Analysis Collector | completed | ✅ success | 2026-05-02 01:46 UTC |
 
 ---
 
