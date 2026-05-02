@@ -56,6 +56,8 @@ import subprocess
 from datetime import datetime, timedelta
 from pathlib import Path
 
+from utils import is_trading_day
+
 # ============================================================================
 # CONFIG
 # ============================================================================
@@ -101,11 +103,7 @@ def now_peru():
         return datetime.utcnow()
 
 
-def is_trading_day(dt=None):
-    """Mon-Fri = trading day for NYSE."""
-    if dt is None:
-        dt = now_peru()
-    return dt.weekday() < 5  # 0=Mon, 4=Fri
+# is_trading_day moved to utils.py (single source of truth + holiday detection)
 
 
 def run_cmd(*args, timeout=10):
@@ -272,7 +270,7 @@ def check_01_duplicate_functions():
 
     duplicates = {k: v for k, v in func_locations.items() if len(set(v)) > 1}
     # Filter out known acceptable duplicates
-    acceptable = {"calculate_score"}  # may exist in auto_scanner + tests
+    acceptable = {"calculate_score", "run", "now_peru"}  # calculate_score: auto_scanner+tests; run: generic entry; now_peru: different APIs (datetime vs str)
     duplicates = {k: v for k, v in duplicates.items() if k not in acceptable}
 
     if not duplicates:
