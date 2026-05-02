@@ -807,62 +807,100 @@ def check_14_uncommitted_count():
                            output[:300])
 
 
-def check_16_metric_sanity(gc):
-    """Q5: Detect stuck metrics in timeline_live (REL_VOL=1.0, Float%=0, Gap outliers)."""
+def _load_recent_metrics(gc):
+    """Helper: load last 200 rows of timeline_live for metric sanity checks."""
+    month, sheets = get_active_month_sheets(gc)
+    if not sheets or "timeline_live" not in sheets:
+        return None, None, "timeline_live sheet not found in config"
+    ws = gc.open_by_key(sheets["timeline_live"]).sheet1
+    all_data = ws.get_all_values()
+    if len(all_data) < 50:
+        return None, None, "Not enough data to evaluate (< 50 rows)"
+    return all_data[0], all_data[-200:], None
+
+
+def _to_floats(header, recent, col_name):
+    """Helper: extract numeric values for given column from recent rows."""
+    if col_name not in header:
+        return []
+    idx = header.index(col_name)
+    out = []
+    for row in recent:
+        if idx >= len(row):
+            continue
+        try:
+            out.append(float(row[idx]))
+        except (ValueError, TypeError):
+            pass
+    return out
+
+
+def check_16_rel_vol_stuck(gc):
+    """Q5a: Detect REL_VOL stuck at 1.0 (CRITICAL — REL_VOL is part of Score v2)."""
     try:
-        month, sheets = get_active_month_sheets(gc)
-        if not sheets or "timeline_live" not in sheets:
-            return CheckResult("16", "Metric Sanity", "Data Quality",
-                               WARNING, "timeline_live sheet not found in config")
-        ws = gc.open_by_key(sheets["timeline_live"]).sheet1
-        all_data = ws.get_all_values()
+        header, recent, err = _load_recent_metrics(gc)
+        if err:
+            status = PASSED if "Not enough" in err else WARNING
+            return CheckResult("16", "REL_VOL Sanity", "Data Quality", status, err)
 
-        if len(all_data) < 50:
-            return CheckResult("16", "Metric Sanity", "Data Quality",
-                               PASSED, "Not enough data to evaluate (< 50 rows)")
-
-        header = all_data[0]
-        recent = all_data[-200:]
-        problems = []
-
-        def to_floats(col_name):
-            if col_name not in header:
-                return []
-            i = header.index(col_name)
-            out = []
-            for r in recent:
-                if i < len(r) and r[i]:
-                    try:
-                        out.append(float(r[i]))
-                    except ValueError:
-                        pass
-            return out
-
-        rel = to_floats("REL_VOL")
+        rel = _to_floats(header, recent, "REL_VOL")
         if rel and max(rel) - min(rel) < 0.01 and abs(rel[0] - 1.0) < 0.01:
-            problems.append(f"REL_VOL stuck at {rel[0]:.2f} across {len(rel)} rows")
-
-        flt = to_floats("Float%")
-        if flt and max(flt) - min(flt) < 0.01:
-            problems.append(f"Float% stuck at {flt[0]:.2f} across {len(flt)} rows")
-
-        gap = to_floats("Gap")
-        outliers = [v for v in gap if abs(v) > 100]
-        if outliers:
-            problems.append(f"Gap has {len(outliers)} outliers > 100% (max={max(outliers):.0f})")
-
-        if problems:
-            return CheckResult("16", "Metric Sanity", "Data Quality",
+            return CheckResult("16", "REL_VOL Sanity", "Data Quality",
                                CRITICAL,
-                               f"{len(problems)} stuck/broken metrics detected",
-                               " | ".join(problems))
+                               "REL_VOL stuck at 1.0 — likely calculation bug",
+                               details=f"Last 200 rows: variance < 0.01, all near 1.0. REL_VOL is in Score v2 (5%) — affects scoring.")
 
-        return CheckResult("16", "Metric Sanity", "Data Quality",
-                           PASSED, "All metrics show healthy variance")
-
+        return CheckResult("16", "REL_VOL Sanity", "Data Quality",
+                           PASSED, f"REL_VOL varies normally ({len(rel)} samples)")
     except Exception as e:
-        return CheckResult("16", "Metric Sanity", "Data Quality",
-                           WARNING, f"Check failed: {e}")
+        return CheckResult("16", "REL_VOL Sanity", "Data Quality",
+                           WARNING, f"Could not check: {e}")
+
+
+def check_20_float_pct_stuck(gc):
+    """Q5b: Detect Float% stuck (WARNING — Float% not in Score v2, dashboard only)."""
+    try:
+        header, recent, err = _load_recent_metrics(gc)
+        if err:
+            status = PASSED if "Not enough" in err else WARNING
+            return CheckResult("20", "Float% Sanity", "Data Quality", status, err)
+
+        flt = _to_floats(header, recent, "Float%")
+        if flt and max(flt) - min(flt) < 0.01:
+            return CheckResult("20", "Float% Sanity", "Data Quality",
+                               WARNING,
+                               f"Float% stuck at {flt[0]:.2f} — likely data source issue",
+                               details=f"Last 200 rows: variance < 0.01. Float% is shown in dashboard but NOT in Score v2 — not blocking trading.")
+
+        return CheckResult("20", "Float% Sanity", "Data Quality",
+                           PASSED, f"Float% varies normally ({len(flt)} samples)")
+    except Exception as e:
+        return CheckResult("20", "Float% Sanity", "Data Quality",
+                           WARNING, f"Could not check: {e}")
+
+
+def check_21_gap_outliers(gc):
+    """Q5c: Detect Gap outliers > 500% (WARNING — Gap not in Score v2, often corporate actions)."""
+    try:
+        header, recent, err = _load_recent_metrics(gc)
+        if err:
+            status = PASSED if "Not enough" in err else WARNING
+            return CheckResult("21", "Gap Outliers", "Data Quality", status, err)
+
+        gap = _to_floats(header, recent, "Gap")
+        # Threshold raised to 500% — Gaps 100-500% are real for low-priced stocks (corporate actions)
+        outliers = [v for v in gap if abs(v) > 500]
+        if outliers:
+            return CheckResult("21", "Gap Outliers", "Data Quality",
+                               WARNING,
+                               f"Gap has {len(outliers)} outliers > 500% (max={max(outliers):.0f})",
+                               details=f"Likely corporate actions (reverse splits) — Alpaca returns unadjusted PrevClose. Gap is NOT in Score v2 — does not affect trading decisions.")
+
+        return CheckResult("21", "Gap Outliers", "Data Quality",
+                           PASSED, f"Gap within normal range ({len(gap)} samples)")
+    except Exception as e:
+        return CheckResult("21", "Gap Outliers", "Data Quality",
+                           WARNING, f"Could not check: {e}")
 
 
 def check_17_fundamentals_provider():
@@ -1245,7 +1283,7 @@ def main():
 
     # Run all checks
     results = []
-    print("[health_audit] Running 19 checks...")
+    print("[health_audit] Running 21 checks...")
 
     # Code integrity
     results.append(check_01_duplicate_functions())
@@ -1262,7 +1300,9 @@ def main():
     results.append(check_08_required_columns(gc))
     results.append(check_09_duplicate_post_analysis_rows(gc))
     results.append(check_10_outliers(gc))
-    results.append(check_16_metric_sanity(gc))
+    results.append(check_16_rel_vol_stuck(gc))
+    results.append(check_20_float_pct_stuck(gc))
+    results.append(check_21_gap_outliers(gc))
 
     # Config
     results.append(check_11_sheets_config_current_month())
