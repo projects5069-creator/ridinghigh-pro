@@ -103,6 +103,9 @@ def _df_to_sheet(ws, df, include_index=False):
     """
     if include_index:
         df = df.reset_index()
+    # Sanitize inf/nan — JSON RFC doesn't support them, gspread.ws.update() fails
+    # Replace inf with empty string (preserves "no value" semantics for numeric cols)
+    df = df.replace([float('inf'), float('-inf')], '').fillna('')
     data = [df.columns.tolist()] + df.astype(str).values.tolist()
     # Write data starting from A1 (overwrites existing content)
     ws.update("A1", data)

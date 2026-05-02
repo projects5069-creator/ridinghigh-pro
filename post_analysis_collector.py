@@ -538,8 +538,11 @@ def run(target_date: str = None):
         print("[Collector] No new rows to save"); return
 
     new_df = pd.DataFrame(new_rows)
-    save_post_analysis_to_sheets(new_df)
-    print(f"[Collector] ✅ Saved/updated {len(new_rows)} rows")
+    if save_post_analysis_to_sheets(new_df):
+        print(f"[Collector] ✅ Saved/updated {len(new_rows)} rows")
+    else:
+        print(f"[Collector] ❌ Save FAILED — {len(new_rows)} rows NOT written to Sheets")
+        sys.exit(1)
 
 
 if __name__ == "__main__":
