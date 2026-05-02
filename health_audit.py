@@ -438,6 +438,32 @@ def check_05_post_analysis_completeness(gc):
                 break
 
         missing = [d for d in expected if d not in scan_dates]
+
+        # Cross-month boundary: if active sheet doesn't cover all expected days,
+        # check previous month's sheet (data may be there during first days of month)
+        if missing:
+            try:
+                config = json.loads(SHEETS_CONFIG.read_text())
+                months = sorted(config.keys())
+                idx = months.index(month) if month in months else -1
+                if idx > 0:
+                    prev_month = months[idx - 1]
+                    prev_sheets = config[prev_month]
+                    if "post_analysis" in prev_sheets:
+                        prev_ws = gc.open_by_key(prev_sheets["post_analysis"]).sheet1
+                        prev_col = prev_ws.col_values(2)[1:]
+                        for v in prev_col:
+                            try:
+                                d = v[:10]
+                                datetime.strptime(d, "%Y-%m-%d")
+                                scan_dates.add(d)
+                            except ValueError:
+                                continue
+                        # Recompute missing after merging previous month
+                        missing = [d for d in expected if d not in scan_dates]
+            except Exception:
+                pass  # Previous month unavailable — fall through with original missing
+
         if not missing:
             return CheckResult("D2", "Post-analysis completeness", "Data freshness",
                                PASSED, f"All recent {len(expected)} trading days present")

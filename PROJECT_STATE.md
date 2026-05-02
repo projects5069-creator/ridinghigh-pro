@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-05-01 20:54:34 -05
+**Generated:** 2026-05-01 21:20:06 -05
 **Branch:** `main`
-**Latest commit:** `77b372a` — fix(post-analysis): sanitize inf/nan + check save return value
+**Latest commit:** `0a64479` — fix(health-audit): D2 cross-month boundary — check previous month when needed
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `77b372a (HEAD -> main) fix(post-analysis): sanitize inf/nan + check save return value`
-- `8d3d162 (origin/main, origin/HEAD) fix(gsheets-sync): guard correctly distinguishes fresh sheet from quota blip`
+- `0a64479 (HEAD -> main) fix(health-audit): D2 cross-month boundary — check previous month when needed`
+- `7513ecf (origin/main, origin/HEAD) fix(post-analysis): sanitize inf/nan + check save return value`
+- `8d3d162 fix(gsheets-sync): guard correctly distinguishes fresh sheet from quota blip`
 - `fa702f8 refactor(health-audit): split check_16 into 3 severity-aware checks`
 - `4128c08 feat(health-audit): heartbeat mode — always send email`
-- `7bc2361 fix(monthly-sheets): add ticker_follow_up to SHEET_NAMES + backfill May/June`
 
 ---
 
@@ -32,11 +32,11 @@ _See `OPEN_ISSUES.md` for full list_
 
 | Workflow | Status | Conclusion | Started |
 |---|---|---|---|
+| Health Audit | completed | ✅ success | 2026-05-02 02:09 UTC |
+| Post Analysis Collector | completed | ✅ success | 2026-05-02 01:55 UTC |
 | Post Analysis Collector | completed | ✅ success | 2026-05-02 01:46 UTC |
 | Health Audit | completed | ✅ success | 2026-05-02 01:32 UTC |
 | Health Audit | completed | ✅ success | 2026-05-02 00:34 UTC |
-| Daily Backup — post_analysis | completed | ✅ success | 2026-05-02 00:09 UTC |
-| Daily Backup — post_analysis | completed | ✅ success | 2026-05-02 00:08 UTC |
 
 ---
 
@@ -50,12 +50,12 @@ _Months in config: `2026-04`, `2026-05`, `2026-06`_
 | timeline_live | 19,903 | 2026-05-01 | ✅ |
 | daily_snapshots | 70 | 2026-05-01 | ✅ |
 | daily_summary | 79 | 2026-05-01 | ✅ |
-| post_analysis | 0 | — | ⚠️ empty |
+| post_analysis | 2 | 2026-05-01 | ✅ |
 | portfolio | 5 | 2026-05-01 | ✅ |
 | portfolio_live | 2 | 2026-05-01 | ✅ |
 | score_tracker | 2 | 2026-05-01 | ✅ |
 | live_trades | 2 | 2026-05-01 | ✅ |
-| ticker_follow_up | ? | ? | ❌  |
+| ticker_follow_up | 0 | — | ⚠️ empty |
 
 ---
 
