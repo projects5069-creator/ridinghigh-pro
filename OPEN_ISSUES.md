@@ -3,6 +3,27 @@
 
 ---
 
+## ✅ CLOSED (2026-05-02) - Session "Score v1/v2 tagging (#N10 + #6)"
+
+### ✅ #N10 — Score v1/v2 validation (closed 2026-05-02)
+- **Decision:** Tag instead of recompute (Option C — minimal risk, ~30 min vs 4-6h)
+- **Investigation:** 104/156 April records (67%) computed with Score v1 (before commit f3d96ca, 11/4/2026)
+- **Resolution:** Added `score_version` column to post_analysis & daily_snapshots
+  - post_analysis: v1=104, v2=50
+  - daily_snapshots: v1=0, v2=343 (sheet started 2026-04-23, all post-cutoff)
+- **Why tagging not recompute:** r=-0.07 (Score barely predicts wins) → not worth touching 5 sheets and risking inconsistency. Raw metrics (MxV, ATRX, RunUp) unchanged → still usable for primary analyses.
+- **Implementation:** `mark_score_version.py` (idempotent, with backups + audit log)
+- **Commit:** bf2892b
+- **Backups:** `~/RidingHighPro/backups/{post_analysis,daily_snapshots}_2026-04_pre_mark_*.csv`
+- **Next action:** Filter `score_version == 'v2'` in dashboard pages that use Score
+
+### ✅ #6 — Gap removed from Score v2 (closed 2026-05-02)
+- **Status:** Deferred to Score v3 design phase
+- **Original concern:** Gap removed 11/4 (commit f3d96ca) despite r=-0.256 (strong correlation with wins)
+- **Decision:** Not re-adding to current Score v2. When Score v3 is designed (after Phase 1 data accumulation), Gap will be reconsidered with fresh data.
+- **Why defer not fix:** v2 is producing data; mid-flight re-introduction would cause yet another version drift like #N10.
+- **Reference:** Closed alongside #N10 since both relate to Score v2 formula stability.
+
 ## ✅ CLOSED (2026-04-30) - Session "Stale Issue Audit + #N9 Workaround + #N8 fix"
 
 ### ✅ #22 + #N8: Min Score threshold consistency — fully resolved
@@ -324,11 +345,6 @@
 
 ## 🟠 STILL OPEN - Important
 
-### #6: Gap removed from Score v2 despite r=-0.256 (strong correlation)
-- Removed 11/4 (commit f3d96ca) without documented reason
-- **Impact:** Score weaker than possible
-- **Decision needed:** Add back to Score v3?
-
 ### #8: Section 5 on page 9 is biased
 - Score tends to high values, "wins" without normalization
 - **Effort:** 25 min
@@ -453,18 +469,6 @@
 - **Effort:** 1-2 hours (proper AST-based analysis)
 - **Priority:** P3 (nice-to-have, doesn't break anything)
 - **Discovered:** 2026-04-30 by #N8 closure investigation
-
-### #N10: Validate that original 124 post_analysis rows match new formulas
-- **Background:** Original #7 was closed today (was about "recalc 124 rows after formulas.py fixes").
-  But the underlying concern remains, in narrower form: do the historical 124 rows in
-  post_analysis (pre-formula-fixes) give matching results when current formulas are applied?
-- **Why this matters:** Backtests and Score correlations include those 124 rows. If they
-  diverge from current formulas, analysis is on inconsistent data.
-- **What to check:** Run a sample of the 124 historical rows through current formulas
-  and compare. If divergence > 5% on key metrics (MxV, ATRX, RunUp), do recalc.
-- **Effort:** 30 min sampling + decide
-- **Priority:** P1 (data integrity)
-- **Discovered:** 2026-04-30 from #7 closure investigation
 
 ---
 
