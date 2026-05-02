@@ -413,6 +413,23 @@
 - **Discovered:** 2026-05-01 during ticker_follow_up backfill
 - **Cleanup status:** All misplaced folders moved to RidingHighPro/. RidingHigh-Data deleted (2026-05-01 evening).
 
+### #N23: pandas_market_calendars Python 3.9 incompatibility (LOCAL ONLY)
+- **Priority:** 🟢 P3 (cosmetic, local-only — production unaffected)
+- **Background:** `mcal.get_calendar('NASDAQ')` throws `TypeError: unsupported operand type(s) for |: 'type' and 'NoneType'` on Python 3.9 due to PEP 604 union types (`X | None` syntax) which requires Python 3.10+.
+- **Impact:**
+  - Local runs of `utils.is_trading_day` fall back to weekday-only check (no holiday detection — Memorial Day, Christmas, etc. tagged as trading days locally).
+  - GitHub Actions (Python 3.11.15) works correctly — `mcal` loads NYSE calendar and detects holidays. **Production unaffected.**
+- **Verified locally:**
+  - 2026-05-25 (Memorial Day, Mon) → `True` locally (wrong), `False` on 3.11
+  - 2026-12-25 (Christmas, Fri)    → `True` locally (wrong), `False` on 3.11
+- **Workaround in place:** try/except in `utils.is_trading_day` catches `TypeError` and falls through to `weekday() < 5` check.
+- **Fix options:**
+  1. Upgrade local Python to 3.10+
+  2. Pin `pandas_market_calendars` to 3.9-compatible version (e.g., 4.x)
+  3. Hard-code NYSE holidays as static fallback list when `mcal` fails
+- **Files:** `utils.py:75` (is_trading_day), `requirements.txt` (mcal version)
+- **Discovered:** 2026-05-01 evening (during is_trading_day duplicate cleanup, commit 8ae2c88)
+
 ---
 
 ## 🆕 DISCOVERED 2026-04-30
