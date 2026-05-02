@@ -1161,10 +1161,13 @@ def send_email_alert(results):
     passed   = [r for r in results if r.status == PASSED]
     info     = [r for r in results if r.status == INFO]
 
-    if not critical:
-        return False  # Don't send if no critical
-
-    subject = f"🔴 RidingHigh Health Audit — {len(critical)} CRITICAL issue(s)"
+    # Heartbeat mode: always send email, with subject reflecting severity
+    if critical:
+        subject = f"🔴 RidingHigh Health Audit — {len(critical)} CRITICAL issue(s)"
+    elif warnings:
+        subject = f"🟡 RidingHigh Health Audit — {len(warnings)} WARNING(s)"
+    else:
+        subject = f"✅ RidingHigh Health Audit — All clear"
 
     lines = []
     lines.append(f"RidingHigh Pro — Health Audit Report")
@@ -1291,8 +1294,10 @@ def main():
     has_critical = any(r.is_critical() for r in results)
     has_warnings = any(r.is_failure() for r in results)
 
+    # Heartbeat mode: always send email
+    send_email_alert(results)
+
     if has_critical:
-        send_email_alert(results)
         print(f"\n[health_audit] Exit 1 — CRITICAL issues detected")
         return 1
 
