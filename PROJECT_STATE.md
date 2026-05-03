@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-05-03 15:02:09 -05
+**Generated:** 2026-05-03 15:27:55 -05
 **Branch:** `main`
-**Latest commit:** `34d674b` — feat(phase1-m3): The Trader Core Logic
+**Latest commit:** `8b980c5` — feat(phase1-m4): Decision Logger
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `34d674b (HEAD -> main) feat(phase1-m3): The Trader Core Logic`
-- `c7e66cc (origin/main, origin/HEAD) fix(phase1-m2): schema correction — decision_log 40→41 columns`
+- `8b980c5 (HEAD -> main) feat(phase1-m4): Decision Logger`
+- `6de17f2 (origin/main, origin/HEAD) feat(phase1-m3): The Trader Core Logic`
+- `c7e66cc fix(phase1-m2): schema correction — decision_log 40→41 columns`
 - `1092a95 feat(phase1-m2): agent sheets setup`
 - `f0fc1ce feat(phase1-m1): foundation and configuration`
-- `3533555 docs(phase1): add Agent Phase 1 specification (4 files)`
 
 ---
 
@@ -56,14 +56,14 @@ _Months in config: `2026-04`, `2026-05`, `2026-06`_
 | score_tracker | 2 | 2026-05-01 | ✅ |
 | live_trades | 2 | 2026-05-01 | ✅ |
 | ticker_follow_up | 0 | — | ⚠️ empty |
-| decision_log | ? | ? | ❌  |
-| paper_portfolio | ? | ? | ❌  |
-| score_analytics | ? | ? | ❌  |
-| postmortems | ? | ? | ❌  |
-| system_events | ? | ? | ❌  |
-| pending_suggestions | ? | ? | ❌  |
-| config_history | ? | ? | ❌  |
-| borrow_data | ? | ? | ❌  |
+| decision_log | 4 | — | ✅ |
+| paper_portfolio | 0 | — | ⚠️ empty |
+| score_analytics | 0 | — | ⚠️ empty |
+| postmortems | 0 | — | ⚠️ empty |
+| system_events | 0 | — | ⚠️ empty |
+| pending_suggestions | 0 | — | ⚠️ empty |
+| config_history | 0 | — | ⚠️ empty |
+| borrow_data | 0 | — | ⚠️ empty |
 
 ---
 
