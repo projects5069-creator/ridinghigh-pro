@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-05-03 13:01:41 -05
+**Generated:** 2026-05-03 14:08:08 -05
 **Branch:** `main`
-**Latest commit:** `9afcf27` — feat(phase1-m1): foundation and configuration
+**Latest commit:** `01e95e9` — feat(phase1-m2): agent sheets setup
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `9afcf27 (HEAD -> main) feat(phase1-m1): foundation and configuration`
-- `3533555 (origin/main, origin/HEAD) docs(phase1): add Agent Phase 1 specification (4 files)`
+- `01e95e9 (HEAD -> main) feat(phase1-m2): agent sheets setup`
+- `f0fc1ce (origin/main, origin/HEAD) feat(phase1-m1): foundation and configuration`
+- `3533555 docs(phase1): add Agent Phase 1 specification (4 files)`
 - `f9d2fef feat(score-tracker): Score+Price correlation overlay chart`
 - `5a27a5a feat(dashboard): cross-month aggregation for Post Analysis + Portfolio + Score Tracker`
-- `2ca288d fix(provider+scanner): yfinance fallback + cron + Streamlit secrets bridge`
 
 ---
 
@@ -56,6 +56,14 @@ _Months in config: `2026-04`, `2026-05`, `2026-06`_
 | score_tracker | 2 | 2026-05-01 | ✅ |
 | live_trades | 2 | 2026-05-01 | ✅ |
 | ticker_follow_up | 0 | — | ⚠️ empty |
+| decision_log | ? | ? | ❌  |
+| paper_portfolio | ? | ? | ❌  |
+| score_analytics | ? | ? | ❌  |
+| postmortems | ? | ? | ❌  |
+| system_events | ? | ? | ❌  |
+| pending_suggestions | ? | ? | ❌  |
+| config_history | ? | ? | ❌  |
+| borrow_data | ? | ? | ❌  |
 
 ---
 
