@@ -65,6 +65,7 @@ class PositionManager:
         data_provider=None,
         sheet_reader=None,
         sheet_writer=None,
+        postmortem_engine=None,
     ):
         """
         Args:
@@ -72,11 +73,13 @@ class PositionManager:
             data_provider: object with get_current_price(ticker) method
             sheet_reader: callable() → list of position dicts (from paper_portfolio)
             sheet_writer: callable(pos_dict, updates_dict) → None
+            postmortem_engine: optional PostmortemEngine instance (M6)
         """
         self.broker = broker
         self.data_provider = data_provider
         self._sheet_reader = sheet_reader
         self._sheet_writer = sheet_writer
+        self._postmortem_engine = postmortem_engine
 
     def monitor_all(self) -> Dict[str, int]:
         """
@@ -221,7 +224,7 @@ class PositionManager:
 
         # Update sheet
         now = datetime.now(PERU_TZ)
-        self._update_position(pos, {
+        updates = {
             "Status": STATUS_DRY_RUN_CLOSED if is_dry_run else STATUS_CLOSED,
             "ExitPrice": exit_price,
             "ExitDate": now.strftime("%Y-%m-%d"),
@@ -230,7 +233,16 @@ class PositionManager:
             "RealizedPnL": round(realized_pnl, 2),
             "RealizedPnLPct": round(realized_pnl_pct, 2),
             "LastUpdated": now.isoformat(),
-        })
+        }
+        self._update_position(pos, updates)
+
+        # M6: Generate postmortem (optional — only if engine wired)
+        if self._postmortem_engine:
+            try:
+                pos_with_exit = {**pos, **updates}
+                self._postmortem_engine.generate(pos_with_exit)
+            except Exception as e:
+                logger.error("Postmortem generation failed for %s: %s", ticker, e)
 
     def _cancel_bracket_legs(self, pos: Dict[str, Any]):
         """Cancel TP and SL orders when closing position manually/EOD."""

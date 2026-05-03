@@ -290,3 +290,6 @@ AGENT_COLD_START_DAILY_LOSS_ALERT_USD = 200
 # Modes
 AGENT_DRY_RUN = True               # Start in DRY_RUN; switch to False at M10
 AGENT_LIVE_PAPER = False           # Becomes True after M10 approval
+
+# Postmortem schema versioning — bump when score formula changes
+AGENT_SCORE_VERSION = "v2.6"

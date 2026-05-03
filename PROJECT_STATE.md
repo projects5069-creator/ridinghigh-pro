@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-05-03 16:40:51 -05
+**Generated:** 2026-05-03 17:06:02 -05
 **Branch:** `main`
-**Latest commit:** `8624ff7` — feat(phase1-m5): Alpaca Execution Layer
+**Latest commit:** `b6d27ff` — feat(phase1-m6): Postmortem Engine
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `8624ff7 (HEAD -> main) feat(phase1-m5): Alpaca Execution Layer`
-- `c9f6572 (origin/main, origin/HEAD) feat(phase1-m4): Decision Logger`
+- `b6d27ff (HEAD -> main) feat(phase1-m6): Postmortem Engine`
+- `1644b53 (origin/main, origin/HEAD) feat(phase1-m5): Alpaca Execution Layer`
+- `c9f6572 feat(phase1-m4): Decision Logger`
 - `6de17f2 feat(phase1-m3): The Trader Core Logic`
 - `c7e66cc fix(phase1-m2): schema correction — decision_log 40→41 columns`
-- `1092a95 feat(phase1-m2): agent sheets setup`
 
 ---
 
@@ -56,7 +56,7 @@ _Months in config: `2026-04`, `2026-05`, `2026-06`_
 | score_tracker | 2 | 2026-05-01 | ✅ |
 | live_trades | 2 | 2026-05-01 | ✅ |
 | ticker_follow_up | 0 | — | ⚠️ empty |
-| decision_log | 6 | — | ✅ |
+| decision_log | 8 | — | ✅ |
 | paper_portfolio | 0 | — | ⚠️ empty |
 | score_analytics | 0 | — | ⚠️ empty |
 | postmortems | 0 | — | ⚠️ empty |
