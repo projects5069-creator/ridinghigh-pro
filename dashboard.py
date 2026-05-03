@@ -2999,6 +2999,88 @@ def score_tracker_page():
                                       annotation_font_color="#555",
                                       annotation_position="top right")
 
+            # ── Correlation Overlay (Score + Price, dual y-axis) ──────────
+            if "Price" in sdf.columns and sdf["Price"].notna().any():
+                overlay_df = sdf[["dt", "Score", "Price"]].dropna().copy()
+                if gran == "שעות" and not overlay_df.empty:
+                    overlay_df = (overlay_df.set_index("dt")
+                                  .resample("1h")
+                                  .agg({"Score": "mean", "Price": "mean"})
+                                  .dropna()
+                                  .reset_index())
+
+                if not overlay_df.empty:
+                    try:
+                        corr_val = overlay_df["Score"].corr(overlay_df["Price"])
+                        corr_txt = f"r = {corr_val:+.2f}" if pd.notna(corr_val) else "r = n/a"
+                    except Exception:
+                        corr_txt = "r = n/a"
+
+                    fig_overlay = _go.Figure()
+                    fig_overlay.add_trace(_go.Scatter(
+                        x=overlay_df["dt"], y=overlay_df["Score"],
+                        name="Score", mode="lines+markers",
+                        line=dict(color="#1d6fe8", width=2),
+                        marker=dict(size=3),
+                        yaxis="y1",
+                        hovertemplate="%{x|%m/%d %H:%M}<br>Score: %{y:.1f}<extra></extra>",
+                    ))
+                    fig_overlay.add_trace(_go.Scatter(
+                        x=overlay_df["dt"], y=overlay_df["Price"],
+                        name="Price", mode="lines+markers",
+                        line=dict(color="#16a34a", width=2),
+                        marker=dict(size=3),
+                        yaxis="y2",
+                        hovertemplate="%{x|%m/%d %H:%M}<br>$%{y:.2f}<extra></extra>",
+                    ))
+                    if scan_price:
+                        fig_overlay.add_hline(
+                            y=scan_price, line_dash="dot", line_color="#888",
+                            line_width=1, yref="y2",
+                            annotation_text=f"Entry ${scan_price:.2f}",
+                            annotation_position="top left",
+                            annotation_font_color="#555",
+                        )
+                    _add_day_vlines(fig_overlay, overlay_df["dt"])
+                    fig_overlay.update_layout(
+                        height=340,
+                        margin=dict(l=10, r=10, t=40, b=10),
+                        paper_bgcolor="white", plot_bgcolor="white",
+                        font=dict(color="#222", size=11),
+                        title=dict(
+                            text=f"📈 Score vs Price — D0→D3 ({corr_txt})",
+                            font=dict(size=14),
+                        ),
+                        xaxis=dict(gridcolor="#e0e0e0",
+                                   tickformat="%m/%d\n%H:%M"),
+                        yaxis=dict(
+                            title=dict(text="Score (0-100)",
+                                       font=dict(color="#1d6fe8")),
+                            tickfont=dict(color="#1d6fe8"),
+                            range=[0, 100],
+                            gridcolor="#e0e0e0",
+                            side="left",
+                        ),
+                        yaxis2=dict(
+                            title=dict(text="Price ($)",
+                                       font=dict(color="#16a34a")),
+                            tickfont=dict(color="#16a34a"),
+                            overlaying="y",
+                            side="right",
+                            showgrid=False,
+                        ),
+                        legend=dict(orientation="h",
+                                    yanchor="bottom", y=1.02,
+                                    xanchor="right", x=1.0),
+                        showlegend=True,
+                    )
+                    st.plotly_chart(fig_overlay, use_container_width=True,
+                                    key=f"overlay_{tk}_{sd}")
+                    st.caption(
+                        "🔵 Score (משמאל 0-100) | 🟢 Price (מימין $) | "
+                        "r = קורלציית פירסון. r שלילי = Score עולה כש-Price יורד (רצוי בשורט)."
+                    )
+
             col_score, col_price = st.columns(2)
 
             # ── Left: Score Trajectory ────────────────────────────────────
