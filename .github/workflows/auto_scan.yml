@@ -2,7 +2,7 @@ name: RidingHigh Auto Scanner
 
 on:
   schedule:
-    - cron: '* * * * *'
+    - cron: '*/1 13-19 * * 1-5'  # every minute, market hours UTC, Mon-Fri
   workflow_dispatch:
 
 jobs:

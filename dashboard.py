@@ -7,6 +7,30 @@ RidingHigh Pro v14.6 - Score 7 Metrics
 """
 
 import streamlit as st
+import os
+
+# ──────────────────────────────────────────────────────────────
+# Streamlit Cloud secrets bridge (Issue #9 + #N21)
+# Copy required keys from st.secrets → os.environ so that downstream
+# modules (alpaca_provider, gspread auth, etc.) which read from
+# os.environ.get() find their credentials in Cloud deployment too.
+# Idempotent: silently skips when running locally (st.secrets empty).
+# ──────────────────────────────────────────────────────────────
+try:
+    _SECRETS_BRIDGE_KEYS = [
+        "ALPACA_API_KEY_ID",
+        "ALPACA_SECRET_KEY",
+        "ALPACA_BASE_URL",
+        "ALPACA_DATA_URL",
+        "ALPACA_PAPER",
+        "DATA_PROVIDER",
+    ]
+    for _k in _SECRETS_BRIDGE_KEYS:
+        if _k in st.secrets and not os.environ.get(_k):
+            os.environ[_k] = str(st.secrets[_k])
+except Exception:
+    pass
+
 import pandas as pd
 import math
 import time
@@ -19,7 +43,6 @@ from data_logger import DataLogger
 from ta.momentum import RSIIndicator
 from data_provider import get_data_provider, get_fundamentals_provider
 from ta.volatility import AverageTrueRange
-import os
 import shutil
 from gsheets_sync import save_snapshot_to_sheets, save_timeline_to_sheets, save_portfolio_to_sheets, load_portfolio_from_sheets, load_timeline_dates_from_sheets, load_timeline_from_sheets
 import sheets_manager

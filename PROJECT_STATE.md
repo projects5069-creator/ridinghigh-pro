@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-05-02 23:32:41 -05
+**Generated:** 2026-05-03 10:48:39 -05
 **Branch:** `main`
-**Latest commit:** `2b21470` — feat(dashboard): comprehensive System Overview page + restore trading pages
+**Latest commit:** `1993dec` — fix(provider+scanner): yfinance fallback + cron + Streamlit secrets bridge
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `2b21470 (HEAD -> main) feat(dashboard): comprehensive System Overview page + restore trading pages`
-- `29268d2 (origin/main, origin/HEAD) docs: remove DEPRECATED files entirely from active repo`
+- `1993dec (HEAD -> main) fix(provider+scanner): yfinance fallback + cron + Streamlit secrets bridge`
+- `91a72b6 (origin/main, origin/HEAD) feat(dashboard): comprehensive System Overview page + restore trading pages`
+- `29268d2 docs: remove DEPRECATED files entirely from active repo`
 - `cc000a4 docs: remove orphan Hebrew PK file from 2026-03-17`
 - `2f5f88d docs: cleanup — deprecate 3 outdated docs, delete 5 stale, rewrite README`
-- `e656069 docs: PK v2.0 — Master System Reference + Sheets backup + 3 issues`
 
 ---
 
@@ -32,11 +32,11 @@ _See `OPEN_ISSUES.md` for full list_
 
 | Workflow | Status | Conclusion | Started |
 |---|---|---|---|
-| RidingHigh Auto Scanner | completed | ✅ success | 2026-05-02 22:06 UTC |
-| RidingHigh Auto Scanner | completed | ✅ success | 2026-05-02 20:00 UTC |
-| Health Audit | completed | ✅ success | 2026-05-02 19:57 UTC |
-| RidingHigh Auto Scanner | completed | ✅ success | 2026-05-02 17:33 UTC |
-| RidingHigh Auto Scanner | completed | ✅ success | 2026-05-02 15:05 UTC |
+| Health Audit | completed | ✅ success | 2026-05-03 14:15 UTC |
+| RidingHigh Auto Scanner | completed | ✅ success | 2026-05-03 14:15 UTC |
+| RidingHigh Auto Scanner | completed | ✅ success | 2026-05-03 10:34 UTC |
+| Health Audit | completed | ✅ success | 2026-05-03 08:59 UTC |
+| RidingHigh Auto Scanner | completed | ✅ success | 2026-05-03 07:10 UTC |
 
 ---
 

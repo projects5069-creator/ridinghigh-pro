@@ -318,8 +318,18 @@ def get_data_provider(force_provider: Optional[str] = None) -> DataProvider:
         return _data_provider_instance
     
     if provider_name == "alpaca":
-        from providers.alpaca_provider import AlpacaDataProvider
-        instance = AlpacaDataProvider()
+        try:
+            from providers.alpaca_provider import AlpacaDataProvider
+            instance = AlpacaDataProvider()
+            logger.info("Initialized AlpacaDataProvider (primary)")
+        except Exception as alpaca_err:
+            logger.warning(
+                f"Alpaca initialization failed ({type(alpaca_err).__name__}: {alpaca_err}). "
+                f"Falling back to YFinanceDataProvider."
+            )
+            from providers.yfinance_provider import YFinanceDataProvider
+            instance = YFinanceDataProvider()
+            logger.info("Initialized YFinanceDataProvider (fallback)")
     elif provider_name == "yfinance":
         from providers.yfinance_provider import YFinanceDataProvider
         instance = YFinanceDataProvider()
