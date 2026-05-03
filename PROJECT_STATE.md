@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-05-02 22:24:28 -05
+**Generated:** 2026-05-02 23:32:41 -05
 **Branch:** `main`
-**Latest commit:** `fb13266` — docs: remove DEPRECATED files entirely from active repo
+**Latest commit:** `2b21470` — feat(dashboard): comprehensive System Overview page + restore trading pages
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `fb13266 (HEAD -> main) docs: remove DEPRECATED files entirely from active repo`
-- `cc000a4 (origin/main, origin/HEAD) docs: remove orphan Hebrew PK file from 2026-03-17`
+- `2b21470 (HEAD -> main) feat(dashboard): comprehensive System Overview page + restore trading pages`
+- `29268d2 (origin/main, origin/HEAD) docs: remove DEPRECATED files entirely from active repo`
+- `cc000a4 docs: remove orphan Hebrew PK file from 2026-03-17`
 - `2f5f88d docs: cleanup — deprecate 3 outdated docs, delete 5 stale, rewrite README`
 - `e656069 docs: PK v2.0 — Master System Reference + Sheets backup + 3 issues`
-- `c6e8731 docs(open-issues): close #N10 and #6 after Score v1/v2 tagging`
 
 ---
 

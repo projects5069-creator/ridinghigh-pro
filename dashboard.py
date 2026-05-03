@@ -3542,6 +3542,1091 @@ def score_comparison_page():
         st.info("אין עמודות ציון זמינות.")
 
 
+def system_overview_page():
+    """🖥️ דף מבט-על מקיף — ארכיטקטורה, צינור נתונים, ציון, בריאות, runbook.
+    
+    כל סעיף ב-expander לקריאה נקייה.
+    מקור: PK v2.0 (docs/RidingHigh_Pro_PK_v2.md) + קוד חי.
+    """
+    now_peru = datetime.now(PERU_TZ)
+    today_str = now_peru.strftime("%Y-%m-%d")
+    market_open = now_peru.weekday() < 5 and 8*60+30 <= now_peru.hour*60+now_peru.minute <= 15*60
+
+    st.title("🖥️ סטטוס מערכת — מבט כולל")
+
+    # ── Top bar: live status ────────────────────────────────────────────────
+    sb1, sb2, sb3, sb4 = st.columns(4)
+    sb1.metric("🕐 Peru", now_peru.strftime("%H:%M"))
+    if market_open:
+        sb2.success("🟢 שוק פתוח")
+    else:
+        sb2.error("🔴 שוק סגור")
+    sb3.metric("📅 תאריך", today_str)
+    sb4.metric("📍 Owner", "Lima, Peru")
+
+    st.caption(
+        f"מסמך מקור: `docs/RidingHigh_Pro_PK_v2.md` (PK v2.0, 36 sections + 4 appendices) · "
+        f"עודכן: 2026-05-02"
+    )
+
+    st.divider()
+
+    # ═══════════════════════════════════════════════════════════════════════
+    # 1. TL;DR — תמיד פתוח
+    # ═══════════════════════════════════════════════════════════════════════
+    st.markdown("### ⚡ TL;DR")
+    st.info(
+        "**RidingHigh Pro** — מערכת אוטומטית לחקר shorts במניות אמריקאיות. "
+        "סורקת FINVIZ כל דקה, מנקדת 0-100 לפי 7 metrics, "
+        "מסמלצת short trade של $1,000 (TP=−10%, SL=+10%), עוקבת 5 ימי מסחר. "
+        "**שלב 1: איסוף נתונים, ללא כסף אמיתי.**"
+    )
+
+    # Load data once for all sections
+    pa_df = _cached_post_analysis()
+    v2_records = 0
+    v2_days = 0
+    v2_winrate = None
+    if not pa_df.empty:
+        for col in ["TP10_Hit", "MaxDrop%", "Score"]:
+            if col in pa_df.columns:
+                pa_df[col] = pd.to_numeric(pa_df[col], errors="coerce")
+        if "score_version" in pa_df.columns:
+            v2_df = pa_df[pa_df["score_version"] == "v2"].copy()
+            v2_records = len(v2_df)
+            if "ScanDate" in v2_df.columns:
+                v2_days = v2_df["ScanDate"].nunique()
+            v2_with_outcome = v2_df[v2_df["TP10_Hit"].notna()] if "TP10_Hit" in v2_df.columns else pd.DataFrame()
+            v2_winrate = v2_with_outcome["TP10_Hit"].mean() * 100 if not v2_with_outcome.empty else None
+
+    # Phase 1 progress
+    target_records = 100
+    target_days = 30
+    progress_records = min(v2_records / target_records, 1.0) if target_records else 0
+    progress_days = min(v2_days / target_days, 1.0) if target_days else 0
+
+    p1, p2, p3 = st.columns(3)
+    p1.metric("📊 רשומות v2", f"{v2_records}/{target_records}", delta=f"{progress_records*100:.0f}%")
+    p2.metric("📆 ימי מסחר v2", f"{v2_days}/{target_days}", delta=f"{progress_days*100:.0f}%")
+    p3.metric("🎯 TP10 v2", f"{v2_winrate:.1f}%" if v2_winrate else "—")
+
+    st.caption(
+        "🎯 **קריטריוני יציאה לשלב 2:** ≥100 רשומות v2 · ≥30 ימי מסחר · "
+        "TP10 hit rate יציב (±3%) · 18/18 health checks ירוקים 7 ימים"
+    )
+
+    st.divider()
+    st.markdown("### 📚 פירוט מלא — לחץ לפתיחה")
+
+    # ═══════════════════════════════════════════════════════════════════════
+    # 2. Mental Model
+    # ═══════════════════════════════════════════════════════════════════════
+    with st.expander("🧠 מודל מנטלי — *fishing fleet that doesn't fish*"):
+        st.markdown("""
+> **"RidingHigh Pro is like a fishing fleet that doesn't fish."**
+
+צי דייגים שמטיל רשתות בכל דקה אבל לא תופס דגים — מצלם, שוקל, מודד, ומשחרר.
+חודשים אחר כך, הרישומים יחשפו אילו תבניות מנבאות בצורה אמינה איזה דגים שווה לתפוס.
+
+**רק כשהתבניות יוכחו סטטיסטית — ה-boats יתחילו לתפוס בפועל.**
+
+המודל המנטלי מרמז:
+- מהירות תפיסה פחות חשובה משלמות הרישום
+- "השלל" הוא הנתונים, לא הכסף
+- סבלנות היא מבנית
+- Score היא השערה, לא פסק דין
+        """)
+
+    # ═══════════════════════════════════════════════════════════════════════
+    # 3. Architecture — פירוט מלא
+    # ═══════════════════════════════════════════════════════════════════════
+    with st.expander("🏗️ ארכיטקטורת המערכת — 7 שכבות עם פירוט"):
+        st.markdown("""
+המערכת בנויה ב-7 שכבות, כל אחת עם תפקיד מובחן.
+שכבה גבוהה תלויה בשכבה נמוכה, אך לא להפך.
+        """)
+
+        layers_detail = [
+            {
+                "num": "7",
+                "name": "Visualization (תצוגה)",
+                "desc": "המסך שאתה רואה כרגע. Streamlit dashboard עם 8 דפים:",
+                "files": [
+                    "**dashboard.py** (4,111 שורות) — הקובץ העיקרי",
+                    "  • 🏠 Home — סיכום היום",
+                    "  • 💼 Portfolio Tracker — trades פעילים",
+                    "  • 🔬 Post Analysis — מניות עם Score≥60 + 5 ימי מעקב",
+                    "  • ⚡ Live Trades — trades בזמן אמת",
+                    "  • 📈 Score Tracker — מסע Score של מניה ביום",
+                    "  • 📅 Daily Summary — סיכום יומי",
+                    "  • 📦 Timeline Archive — ארכיון timeline_live",
+                    "  • 🖥️ System Overview (זה הדף הזה)",
+                ],
+            },
+            {
+                "num": "6",
+                "name": "Maintenance & Automation (תחזוקה)",
+                "desc": "סקריפטים שרצים אוטומטית לתחזק את המערכת:",
+                "files": [
+                    "**monthly_rotation.py** — מעבר לחודש חדש (1 בחודש 00:01 Peru)",
+                    "**prepare_next_month.py** — יוצר תיקייה+9 sheets לחודש הבא",
+                    "**warm_oauth_token.py** — מרענן OAuth token כל 3 ימים",
+                    "**backup_manager.py** — CSV backup 3 פעמים ביום",
+                    "**mark_score_version.py** — one-shot tagger v1/v2 (רץ פעם אחת)",
+                ],
+            },
+            {
+                "num": "5",
+                "name": "Health & Audit (ניטור)",
+                "desc": "המערכת בודקת את עצמה אוטומטית:",
+                "files": [
+                    "**health_audit.py** (1,377 שורות) — 18 בדיקות, 3×/יום, email על CRITICAL",
+                    "**code_auditor.py** — drift detection (formulas duplicates, hardcoded values)",
+                    "**daily_audit.py** — בדיקה יומית יותר מקיפה",
+                    "**morning_health_check.py** — smoke test לפני שוק",
+                    "**health_check.py** — הכפתור 'Quick Health Check' בHome",
+                ],
+            },
+            {
+                "num": "4",
+                "name": "Collection & Enrichment (איסוף)",
+                "desc": "אחרי סגירת השוק — אוסף ומעבד נתוני 5 ימים:",
+                "files": [
+                    "**post_analysis_collector.py** (v5) — לכל מניה עם Score≥60: D1-D5 OHLC",
+                    "**enrich_post_analysis.py** — נתוני intraday (TP10 בתוך היום, peak score)",
+                    "**enrich_data.py** — fundamentals enrichment",
+                    "**backfill_ohlc.py** — ממלא D1-D5 חסרים מימים קודמים",
+                    "**backfill_fundamentals.py** — sector, industry, float, וכו'",
+                ],
+            },
+            {
+                "num": "3",
+                "name": "Engine (מנוע)",
+                "desc": "הלב של המערכת — הסקאנר:",
+                "files": [
+                    "**auto_scanner.py** (1,317 שורות) — מכיל 7 פונקציות מרכזיות:",
+                    "  • `run_scan()` — סריקה כל דקה",
+                    "  • `analyze_ticker()` — ניתוח מניה אחת",
+                    "  • `run_eod()` — EOD snapshot ב-16:00",
+                    "  • `update_portfolio_live()` — עדכון פוזיציות",
+                    "  • `update_ticker_follow_up()` — מעקב 5 ימים",
+                    "  • `update_live_trades()` — סימולציה של trades",
+                    "  • `sync_score_tracker()` — דגימה כל 5 דקות",
+                ],
+            },
+            {
+                "num": "2",
+                "name": "Data Providers (ספקי נתונים)",
+                "desc": "abstraction layer — מאחורי הקלעים בוחר Alpaca או yfinance:",
+                "files": [
+                    "**data_provider.py** — abstract base class",
+                    "**providers/alpaca_provider.py** — PRIMARY (paper trading)",
+                    "**providers/yfinance_provider.py** — FALLBACK + fundamentals",
+                    "**validate_providers.py** — A/B comparison tool",
+                    "ENV: `DATA_PROVIDER=alpaca` · `ALPACA_PAPER=true`",
+                ],
+            },
+            {
+                "num": "1",
+                "name": "Foundation (תשתית)",
+                "desc": "אבני בניין — נטען על ידי כל היתר:",
+                "files": [
+                    "**config.py** — Single source of truth (weights, caps, thresholds)",
+                    "**formulas.py** (470 שורות) — 18 פונקציות חישוב מטריקות",
+                    "**utils.py** — helpers (time, parsing, market hours)",
+                    "**sheets_manager.py** — Google Sheets I/O + monthly rotation",
+                    "**gsheets_sync.py** — post_analysis save/load",
+                ],
+            },
+        ]
+
+        for layer in layers_detail:
+            st.markdown(f"#### Layer {layer['num']}: {layer['name']}")
+            st.markdown(f"_{layer['desc']}_")
+            for f in layer['files']:
+                st.markdown(f"- {f}")
+            st.markdown("")
+
+        st.markdown("---")
+        st.markdown("**עקרונות ארכיטקטוניים:**")
+        st.markdown("""
+1. **No formula duplication** — כל מטריקה ב-`formulas.py` בלבד
+2. **Provider abstraction** — Code לא יודע אם Alpaca או yfinance
+3. **Config centralization** — כל threshold ב-`config.py`
+4. **Read-once, write-once** — אין מקבילות לאותו sheet
+5. **Idempotent maintenance** — חזרה על rotation/OAuth/backup בטוחה
+        """)
+
+    # ═══════════════════════════════════════════════════════════════════════
+    # 4. Data Pipeline
+    # ═══════════════════════════════════════════════════════════════════════
+    with st.expander("🔄 צינור הנתונים — מה קורה בכל שלב"):
+        st.code("""
+FINVIZ (כל דקה, 08:30-15:00 Peru)
+   ↓ pre-market screener filter
+cron-job.org → GitHub Actions (auto_scan.yml)
+   ↓ trigger every minute
+auto_scanner.py · run_scan()
+   ├─ 1. is_market_hours() — אם לא, יציאה
+   ├─ 2. fetch_finviz() — מביא רשימת מניות מ-FINVIZ
+   ├─ 3. for each ticker:
+   │     ├─ analyze_ticker() — חישוב 7 metrics
+   │     │     ├─ provider.get_daily_bars(252) — Alpaca
+   │     │     ├─ get_fundamentals() — yfinance
+   │     │     ├─ RSI(14), ATR(14), AvgVolume(20)
+   │     │     └─ calculate_score(metrics) → 0-100
+   │     └─ append to results
+   ├─ 4. sort by Score descending
+   ├─ 5. write to timeline_live (every scan)
+   ├─ 6. if 14:59 → daily_snapshot + portfolio + daily_summary
+   ├─ 7. update_portfolio_live() — TP/SL tracking
+   ├─ 8. update_live_trades() — minute-by-minute simulation
+   └─ 9. sync_score_tracker() — every 5 min sample
+
+[16:05 Peru — אחרי סגירת שוק] post_analysis.yml:
+   ↓
+1. auto_scanner.py --eod
+   ├─ קריאת timeline_live של היום
+   ├─ סינון Score≥70 → portfolio
+   └─ daily_summary (סיכום יומי)
+2. post_analysis_collector.py
+   ├─ לכל מניה ב-portfolio
+   ├─ provider.get_daily_bars() — D1-D5 OHLC
+   └─ TP10_Hit, MaxDrop%, SL_Hit_D5
+3. enrich_post_analysis.py
+   ├─ intraday data (5-min bars)
+   ├─ IntraDay_TP10
+   └─ peak score during day
+4. backfill_ohlc.py
+   └─ ממלא D1-D5 חסרים מימים קודמים
+
+→ post_analysis sheet (THE research dataset)
+   ↓
+dashboard.py reads → displays in 8 pages
+        """, language="text")
+
+    # ═══════════════════════════════════════════════════════════════════════
+    # 5. Daily Timeline — פירוט מלא
+    # ═══════════════════════════════════════════════════════════════════════
+    with st.expander("⏱️ לוח זמנים יומי — מה קורה בכל שעה (פירוט מלא)"):
+        st.markdown("""
+**כל הזמנים ב-Peru (UTC-5, ללא DST).** מערכת רצה 24/7, אבל הסקאנר רק 08:30-15:00 בימי מסחר.
+        """)
+
+        timeline_full = [
+            {
+                "time": "00:01",
+                "icon": "🌙",
+                "title": "Monthly Rotation (1 בחודש בלבד)",
+                "what": "monthly_rotation.py מעדכן `sheets_config.json` שהחודש הנוכחי הוא הפעיל",
+                "why": "כותבים בorder יודעים לאיזה sheet לכתוב",
+                "frequency": "פעם בחודש (1 לחודש)",
+            },
+            {
+                "time": "00:05",
+                "icon": "🌙",
+                "title": "Prepare Next Month (1 בחודש בלבד)",
+                "what": "prepare_next_month.py יוצר תיקייה חדשה ב-Drive + 9 sheets ריקים לחודש הבא",
+                "why": "ב-31 בחודש (מחר), הסיבוב יעבור לחודש שכבר הוכן",
+                "frequency": "פעם בחודש (1 לחודש)",
+            },
+            {
+                "time": "06:00",
+                "icon": "🩺",
+                "title": "Health Audit #1 — Pre-market",
+                "what": "מריץ 18 בדיקות (code, data, config) → כותב ל-Health-Audit Sheet → שולח email",
+                "why": "וידוא שהמערכת תקינה לפני פתיחת השוק",
+                "frequency": "כל יום, כולל סוף שבוע",
+            },
+            {
+                "time": "07:00",
+                "icon": "🔑",
+                "title": "Warm OAuth Token (כל 3 ימים)",
+                "what": "warm_oauth_token.py מרענן את ה-Google OAuth refresh token",
+                "why": "Google מבטל refresh tokens אחרי 7 ימי חוסר פעילות (apps in Testing OAuth)",
+                "frequency": "כל 3 ימים",
+            },
+            {
+                "time": "08:30",
+                "icon": "🟢",
+                "title": "NYSE OPEN — Auto Scanner Starts",
+                "what": "cron-job.org יתחיל לטריגר את `auto_scan.yml` כל דקה",
+                "why": "תחילת חלון המסחר של NYSE",
+                "frequency": "Mon-Fri",
+            },
+            {
+                "time": "08:30-15:00",
+                "icon": "⚡",
+                "title": "Auto Scan — כל דקה (~390 פעמים ביום)",
+                "what": (
+                    "1. fetch FINVIZ pre-market screener\n"
+                    "2. לכל מניה — calculate 7 metrics + Score v2\n"
+                    "3. כתיבה ל-`timeline_live` (כל סריקה)\n"
+                    "4. עדכון `portfolio_live` (TP/SL real-time tracking)\n"
+                    "5. עדכון `live_trades` (minute-by-minute simulation)\n"
+                    "6. כל 5 דקות — דגימה ל-`score_tracker`\n"
+                    "7. עדכון `ticker_follow_up` (5-day journey)"
+                ),
+                "why": "איסוף נתוני pump candidates בזמן אמת",
+                "frequency": "כל דקה במהלך שוק (Mon-Fri 08:30-15:00)",
+            },
+            {
+                "time": "12:00",
+                "icon": "🩺",
+                "title": "Health Audit #2 — Mid-day",
+                "what": "אותן 18 בדיקות, באמצע יום המסחר",
+                "why": "תפיסה של בעיות שיכולות להופיע במהלך היום",
+                "frequency": "כל יום",
+            },
+            {
+                "time": "14:59",
+                "icon": "📸",
+                "title": "Daily Snapshot",
+                "what": (
+                    "מתוך `auto_scanner.run_scan()`:\n"
+                    "1. כתיבה ל-`daily_snapshots` — best score per ticker\n"
+                    "2. כתיבה ל-`portfolio` — מניות עם Score≥70\n"
+                    "3. כתיבה ל-`daily_summary` — סיכום יומי"
+                ),
+                "why": "לפני סגירת השוק — לתפוס את ה-state הסופי",
+                "frequency": "Mon-Fri 14:59",
+            },
+            {
+                "time": "15:00",
+                "icon": "🔴",
+                "title": "NYSE CLOSE",
+                "what": "סקאנר ימשיך לרוץ עד שאחת ה-cron-job.org dispatches תזהה שהשוק סגור",
+                "why": "סוף יום המסחר",
+                "frequency": "Mon-Fri",
+            },
+            {
+                "time": "15:07-16:30",
+                "icon": "💼",
+                "title": "Backups (3 פעמים)",
+                "what": "backup_manager.py — CSV של post_analysis → GitHub artifact (90-day retention)",
+                "why": "שכבת גיבוי שלישית (אחרי git + Sheets)",
+                "frequency": "Mon-Fri, 3 פעמים מהשוק 15:07/16:00/16:30",
+            },
+            {
+                "time": "16:05",
+                "icon": "📊",
+                "title": "Post-Analysis Pipeline (4 שלבים)",
+                "what": (
+                    "**שלב 1:** auto_scanner.py --eod — EOD snapshot\n"
+                    "**שלב 2:** post_analysis_collector.py — D1-D5 OHLC לכל מניה\n"
+                    "**שלב 3:** enrich_post_analysis.py — intraday TP10, D0_Drop%\n"
+                    "**שלב 4:** backfill_ohlc.py — ממלא D1-D5 חסרים מימים קודמים"
+                ),
+                "why": "יצירת ה-research dataset העיקרי (post_analysis sheet)",
+                "frequency": "Mon-Fri 16:05 (1 שעה אחרי סגירת שוק)",
+            },
+            {
+                "time": "22:00",
+                "icon": "🩺",
+                "title": "Health Audit #3 — EOD",
+                "what": "אותן 18 בדיקות, אחרי שכל ה-pipelines של היום הסתיימו",
+                "why": "לוודא ש-post_analysis fill rate הצליח",
+                "frequency": "כל יום, כולל סוף שבוע",
+            },
+        ]
+
+        for evt in timeline_full:
+            st.markdown(f"#### {evt['icon']} `{evt['time']}` — {evt['title']}")
+            st.markdown(f"**מה:** {evt['what']}")
+            st.markdown(f"**למה:** {evt['why']}")
+            st.markdown(f"**תדירות:** {evt['frequency']}")
+            st.markdown("---")
+
+    # ═══════════════════════════════════════════════════════════════════════
+    # 6. 9 Sheets Architecture
+    # ═══════════════════════════════════════════════════════════════════════
+    with st.expander("🗄️ ארכיטקטורת ה-Sheets — 9 לחודש × 3 חודשים = 27 קבצים"):
+        st.markdown("""
+המערכת משתמשת ב-9 Google Sheets לכל חודש. בכל זמן נתון יש 3 חודשים פעילים בו-זמנית
+(החודש הנוכחי, החודש הבא שכבר נוצר, וחודש קודם לקריאה היסטורית).
+        """)
+
+        sheets_full = pd.DataFrame([
+            {"Sheet": "timeline_live", "כותב": "auto_scanner.run_scan()", "תדירות": "כל דקה",
+             "מה נכתב": "ScanTime, Ticker, Price, Score, MxV, RunUp, REL_VOL, ATRX, RSI, VWAP, Volume, MarketCap, Float, ScanChange",
+             "שורות/חודש": "~250-300K"},
+            {"Sheet": "daily_snapshots", "כותב": "auto_scanner (best/ticker/day)", "תדירות": "EOD scan (14:59)",
+             "מה נכתב": "Best score per ticker per day — סנפשוט יומי",
+             "שורות/חודש": "~15-20/day"},
+            {"Sheet": "daily_summary", "כותב": "auto_scanner.run_eod()", "תדירות": "scan + EOD",
+             "מה נכתב": "סיכום יומי — TotalScans, UniqueStocks, AvgScore, TopScore, BestTicker",
+             "שורות/חודש": "~50-60/day"},
+            {"Sheet": "post_analysis", "כותב": "post_analysis_collector.py", "תדירות": "16:05 Peru",
+             "מה נכתב": "המחקר הראשי: לכל מניה Score≥60, D0-D5 OHLC, TP10_Hit, MaxDrop%, fundamentals",
+             "שורות/חודש": "~5-15/day"},
+            {"Sheet": "portfolio", "כותב": "auto_scanner.update_live_trades", "תדירות": "כל דקה",
+             "מה נכתב": "PositionKey, Date, Ticker, Score, BuyPrice, Status (Open/TP/SL)",
+             "שורות/חודש": "~5-15/day"},
+            {"Sheet": "portfolio_live", "כותב": "auto_scanner.update_portfolio_live", "תדירות": "כל דקה",
+             "מה נכתב": "Live tracking: EntryPrice, TP10_Price, SL_Price, RunningHigh, RunningLow, Status",
+             "שורות/חודש": "~5-20 active"},
+            {"Sheet": "score_tracker", "כותב": "auto_scanner.sync_score_tracker", "תדירות": "כל 5 דקות",
+             "מה נכתב": "דגימה של score: Ticker, ScanDate, ScanTime, Score, Price",
+             "שורות/חודש": "~800-1000/day"},
+            {"Sheet": "live_trades", "כותב": "auto_scanner.update_live_trades", "תדירות": "כל דקה",
+             "מה נכתב": "Minute-by-minute trades simulation",
+             "שורות/חודש": "~800-1000/day"},
+            {"Sheet": "ticker_follow_up", "כותב": "auto_scanner.update_ticker_follow_up", "תדירות": "כל דקה (5 ימים)",
+             "מה נכתב": "מעקב 5 ימים אחרי הסריקה: D0/D1/D2/D3/D4/D5 prices, drops",
+             "שורות/חודש": "~5-15/day"},
+        ])
+        st.dataframe(sheets_full, hide_index=True, use_container_width=True)
+
+        st.markdown("**Special-purpose sheets** (מחוץ ל-monthly rotation):")
+        st.markdown("""
+- **RidingHigh-Health-Audit** — תוצאות 18 בדיקות בריאות (3 tabs: History, Latest, Failed)
+- **RidingHigh-Pro-System-Reference** — Master backup של PK v2.0
+        """)
+
+    # ═══════════════════════════════════════════════════════════════════════
+    # 7. Score v2 — פירוט מלא לכל מטריקה
+    # ═══════════════════════════════════════════════════════════════════════
+    with st.expander("🧮 Score v2 — פירוט מלא של כל המטריקות והנוסחאות"):
+        st.markdown("""
+Score הוא מספר 0-100 שמשקלל 7 metrics. **סכום המשקלים בדיוק 100.**
+מקור הקוד: `formulas.calculate_score()` ב-`formulas.py` שורה 1034.
+        """)
+
+        # MxV
+        st.markdown("### 1️⃣ MxV — Market Cap vs Volume (משקל: 25%)")
+        st.markdown("**מה זה:** מודד את היחס בין market cap למחזור הדולרי. ערכים שליליים = פאמפ עוצמתי.")
+        st.markdown("**הנוסחה:**")
+        st.code("MxV = (MarketCap - Price × Volume) / MarketCap × 100", language="text")
+        st.markdown("""
+**איך זה משנה לshorts:**
+- כשמחזור דולרי גבוה ביחס למחזור הרגיל של המניה (low cap × huge volume) → MxV שלילי מאוד
+- ככל ש-MxV יותר שלילי → סיגנל פאמפ חזק יותר → ציון גבוה יותר
+- **רק ערכים שליליים מקבלים נקודות** (פאמפ = ירידה אחר כך)
+        """)
+        st.markdown("**Cap לציון:** 200 — `score = min(|MxV| / 200, 1) × 25`")
+        st.markdown("**דוגמה:** MarketCap=$100M · Price=$5 · Volume=50M → MxV = (100M − 250M)/100M × 100 = **−150%** → score: 150/200 × 25 = **18.75 נקודות**")
+        st.markdown("---")
+
+        # RunUp
+        st.markdown("### 2️⃣ RunUp — Intraday Rise (משקל: 25%)")
+        st.markdown("**מה זה:** העלייה האחוזית מ-Open עד המחיר הנוכחי באותו יום.")
+        st.markdown("**הנוסחה:**")
+        st.code("RunUp = (Price - Open) / Open × 100", language="text")
+        st.markdown("""
+**איך זה משנה לshorts:**
+- מניה שעלתה הרבה היום היא candidate לתיקון מחר
+- **רק ערכים חיוביים מקבלים נקודות**
+- Cap 30%: עליות מעבר ל-30% לא מוסיפות עוד ציון
+        """)
+        st.markdown("**Cap לציון:** 30% — `score = min(RunUp / 30, 1) × 25`")
+        st.markdown("**דוגמה:** Open=$10 · Price=$13 → RunUp = 30% → score: **25 נקודות מלאות**")
+        st.markdown("---")
+
+        # ATRX
+        st.markdown("### 3️⃣ ATRX — Volatility Expansion (משקל: 20%)")
+        st.markdown("**מה זה:** טווח היום (high-low) חלקי ATR14 — כפולה של תנודתיות הממוצע.")
+        st.markdown("**הנוסחה:**")
+        st.code("ATRX = (High_today - Low_today) / ATR14", language="text")
+        st.markdown("""
+**איך זה משנה לshorts:**
+- ATRX > 1 → היום תנודתי משמעותית מהממוצע
+- ATRX > 3 → תנודתיות חריגה
+- מניות עם תנודתיות גבוהה נוטות לחזור לממוצע
+
+**ATR14:** Average True Range של 14 הימים האחרונים — מדד תקני לתנודתיות.
+        """)
+        st.markdown("**Cap לציון:** 5x — `score = min(ATRX / 5, 1) × 20`")
+        st.markdown("**דוגמה:** High=$10, Low=$8, ATR14=$1 → ATRX = 2.0 → score: 2/5 × 20 = **8 נקודות**")
+        st.markdown("---")
+
+        # RSI
+        st.markdown("### 4️⃣ RSI — Extreme Overbought (משקל: 10%)")
+        st.markdown("**מה זה:** Relative Strength Index של 14 ימים. מודד momentum.")
+        st.markdown("**הנוסחה:** RSI(14) — קלאסי מ-`ta` library")
+        st.markdown("""
+**שלבים (אחרי מחקר 22/4/2026):**
+- RSI ≥ 90 → **10 נקודות מלאות** (extreme overbought, 100% TP20)
+- RSI ≥ 85 → 7 נקודות
+- RSI ≥ 80 → 4 נקודות
+- RSI < 80 → **0 נקודות**
+
+**שינוי קריטי:** היה bell curve 50-70, אבל המחקר הראה שדווקא RSI 50-70 = הזון הכי חלש.
+RSI 90+ = TP20 hit rate 100%.
+        """)
+        st.markdown("---")
+
+        # VWAP / Typical Price
+        st.markdown("### 5️⃣ VWAP / TypicalPriceDist (משקל: 10%)")
+        st.markdown("**מה זה:** מרחק אחוזי של המחיר מ-Typical Price = (High+Low+Close)/3.")
+        st.markdown("**הנוסחה:**")
+        st.code("TypicalPrice = (High + Low + Close) / 3\nDist = (Price / TypicalPrice - 1) × 100", language="text")
+        st.markdown("""
+**הערה חשובה:** זו לא VWAP אמיתית — VWAP אמיתית דורשת tick-by-tick data שאין לנו.
+Typical Price הוא TA proxy סטנדרטי לדוחות יומיים.
+        """)
+        st.markdown("**Cap:** 8% — רק ערכים חיוביים (price מעל typical) → `min(Dist / 8, 1) × 10`")
+        st.markdown("---")
+
+        # ScanChange
+        st.markdown("### 6️⃣ ScanChange% — Change Since Previous Close (משקל: 5%)")
+        st.markdown("**מה זה:** % השינוי מ-Close של אתמול עד המחיר בזמן הסריקה.")
+        st.markdown("**הנוסחה:**")
+        st.code("ScanChange = (Price - PrevClose) / PrevClose × 100", language="text")
+        st.markdown("**Cap:** 60% — רק חיוביים. `min(ScanChange / 60, 1) × 5`")
+        st.markdown("---")
+
+        # REL_VOL
+        st.markdown("### 7️⃣ REL_VOL — Relative Volume (משקל: 5%)")
+        st.markdown("**מה זה:** מחזור היום לעומת ממוצע 20 ימים.")
+        st.markdown("**הנוסחה:**")
+        st.code("REL_VOL = Volume_today / AvgVolume(20d)", language="text")
+        st.markdown("""
+**Hard cap:** 100x (גם ב-raw data) — מנע outliers מ-yfinance שראינו בעבר 26,794x.
+        """)
+        st.markdown("**Cap לציון:** 15x — `min(REL_VOL / 15, 1) × 5`")
+        st.markdown("---")
+
+        # Tiers
+        st.markdown("### 🎨 רמות הציון (Tiers)")
+        tcol1, tcol2, tcol3, tcol4 = st.columns(4)
+        tcol1.error("🔴 **Critical** ≥85")
+        tcol2.warning("🟠 **High** 60-84")
+        tcol3.info("🟡 **Medium** 40-59")
+        tcol4.success("⚪ **Low** <40")
+
+        st.markdown(f"""
+**ספי פעולה:**
+- `MIN_SCORE_DISPLAY = {MIN_SCORE_DISPLAY}` — מינימום להצגה ב-dashboard
+- `TRADE_ENTRY_MIN_SCORE = {TRADE_ENTRY_MIN_SCORE}` — מינימום לכניסה ל-portfolio simulation
+- `CRITICAL_SCORE = {CRITICAL_SCORE}` — סיגנל הכי חזק
+
+**מקור:** `config.py` — `SCORE_WEIGHTS_V2` ו-`SCORE_CAPS_V2`
+        """)
+
+    # ═══════════════════════════════════════════════════════════════════════
+    # 8. Trade Simulation
+    # ═══════════════════════════════════════════════════════════════════════
+    with st.expander("💼 סימולציית מסחר — איך זה עובד והאם להשאיר"):
+        st.markdown(f"""
+**הסימולציה רצה אקטיבית ויש לה ערך מחקרי גדול.** היא לא מחליפה Alpaca paper trading
+עתידי — היא משלימה אותו.
+
+### למה שתי שכבות?
+
+**🧪 סימולציה פנימית (פעיל היום):**
+- ✅ גמישה — אפשר לשנות TP/SL/window בקלות
+- ✅ זריזה — backtest מיידי על נתונים היסטוריים
+- ✅ multiple strategies במקביל
+- ❌ פחות מציאותי — בלי slippage, fills, spread
+
+**📈 Alpaca paper (עתיד — Phase מתקדם):**
+- ✅ מציאותי — fills, slippage, spread כמו real trading
+- ✅ הכנה ל-real money (Phase 4)
+- ❌ פחות גמיש — אסטרטגיה אחת בלבד
+- ❌ Sequential — לא במקביל
+
+**ההמלצה:** משאירים את שתי השכבות. כעת רק סימולציה פנימית. בעתיד — מוסיפים Alpaca paper.
+
+### איך הסימולציה עובדת
+
+**Position Size:** ${POSITION_SIZE_USD:,} per trade · **TP:** −{TP_THRESHOLD_FRAC*100:.0f}% · **SL:** +{SL_THRESHOLD_FRAC*100:.0f}% · **חלון:** 5 ימי מסחר
+
+```
+לכל מניה עם Score ≥ {TRADE_ENTRY_MIN_SCORE}:
+  Entry:    BORROW & SELL at ScanPrice (סוף היום)
+            ↓
+            wait up to 5 trading days (D1-D5)
+            ↓
+  Watch every minute (live_trades) and EOD (portfolio):
+    IF intraday_low ≤ entry × 0.90  →  TP10 HIT  (WIN, +$100)
+    IF intraday_high ≥ entry × 1.10 →  SL HIT    (LOSS, −$100)
+    IF day 5 ends with neither      →  TIMEOUT (close at D5 close)
+
+SL ALWAYS overrides TP אם שניהם נפגעו באותו bar (שמרני).
+```
+
+### איפה רואים את זה?
+
+- **💼 Portfolio Tracker** — רשימת trades פעילים עם status
+- **⚡ Live Trades** — מעקב minute-by-minute
+- **🔬 Post Analysis** — מה קרה אחרי 5 ימים
+- **📈 Score Tracker** — איך Score השתנה ביום הסריקה
+        """)
+
+    # ═══════════════════════════════════════════════════════════════════════
+    # 9. 18 Health Checks — פירוט מלא
+    # ═══════════════════════════════════════════════════════════════════════
+    with st.expander("🩺 18 Health Checks — פירוט מלא של כל בדיקה"):
+        st.markdown("""
+המערכת בודקת את עצמה אוטומטית 3 פעמים ביום (06:00, 12:00, 22:00 Peru).
+תוצאות נכתבות ל-Health Audit Sheet ונשלחים emails על CRITICAL.
+
+מקור: `health_audit.py` (1,377 שורות).
+        """)
+
+        st.markdown("### 📁 Code Integrity (3 בדיקות)")
+        checks_code = [
+            {"id": "C1", "name": "duplicate_functions",
+             "what": "סריקת כל קבצי .py למציאת פונקציות שמוגדרות בשני מקומות או יותר",
+             "fail": "WARNING — מצאה פונקציה כפולה (חוץ מ-calculate_score, run, now_peru)"},
+            {"id": "C2", "name": "hardcoded_thresholds",
+             "what": "חיפוש regex של 0.07, 0.10, >=60, >=70 בקבצי .py מחוץ ל-config.py",
+             "fail": "WARNING — מצאה ערך שצריך להיות ב-config.py"},
+            {"id": "C3", "name": "imports_consistency",
+             "what": "וידוא ש-dashboard.py מייבא מ-formulas.py ומ-config.py",
+             "fail": "CRITICAL אם dashboard.py חסר · WARNING אם imports חסרים"},
+        ]
+        for c in checks_code:
+            st.markdown(f"**{c['id']} — {c['name']}**")
+            st.markdown(f"  - **מה בודק:** {c['what']}")
+            st.markdown(f"  - **כשנכשל:** {c['fail']}")
+
+        st.markdown("### 📊 Data Freshness (3 בדיקות)")
+        checks_fresh = [
+            {"id": "D1", "name": "timeline_freshness",
+             "what": "תאריך השורה האחרונה ב-timeline_live חייב להיות ≤24 שעות בימי מסחר",
+             "fail": "CRITICAL אם > 24h בלי כתיבה ביום מסחר · WARNING אם sheet ריק"},
+            {"id": "D2", "name": "post_analysis_completeness",
+             "what": "פוסט-אנליסיס מלא לכל יום מסחר עם רשומות (TP10_Hit לא ריק)",
+             "fail": "WARNING על gap של D1-D5 חסרים"},
+            {"id": "D3", "name": "github_actions_health",
+             "what": "API call ל-GitHub: בודק 95%+ workflows הצליחו ב-50 הריצות האחרונות",
+             "fail": "PASSED ≥95% · WARNING ≥80% · CRITICAL <80%"},
+        ]
+        for c in checks_fresh:
+            st.markdown(f"**{c['id']} — {c['name']}**")
+            st.markdown(f"  - **מה בודק:** {c['what']}")
+            st.markdown(f"  - **כשנכשל:** {c['fail']}")
+
+        st.markdown("### 🔢 Data Quality (4 בדיקות)")
+        checks_qual = [
+            {"id": "Q1", "name": "score_range",
+             "what": "כל הציונים ב-post_analysis בטווח [0, 100]",
+             "fail": "CRITICAL אם נמצא score < 0 או > 100"},
+            {"id": "Q2", "name": "required_columns",
+             "what": "Schema integrity: timeline_live חייב Date/ScanTime/Ticker/Price/Score · post_analysis חייב Ticker/ScanDate/Score",
+             "fail": "WARNING על עמודה חסרה · CRITICAL אם sheet לא מוגדר"},
+            {"id": "Q3", "name": "duplicate_post_analysis_rows",
+             "what": "לכל זוג (Ticker, ScanDate) ב-post_analysis צריך להיות שורה אחת בלבד",
+             "fail": "WARNING על כפילויות"},
+            {"id": "Q4", "name": "outliers",
+             "what": "REL_VOL > 100 (cap should prevent) · ScanPrice ≤ 0",
+             "fail": "WARNING על outliers"},
+        ]
+        for c in checks_qual:
+            st.markdown(f"**{c['id']} — {c['name']}**")
+            st.markdown(f"  - **מה בודק:** {c['what']}")
+            st.markdown(f"  - **כשנכשל:** {c['fail']}")
+
+        st.markdown("### ⚙️ Config Consistency (3 בדיקות)")
+        checks_cfg = [
+            {"id": "X1", "name": "sheets_config_current_month",
+             "what": "sheets_config.json מכיל entry לחודש הנוכחי (Peru time)",
+             "fail": "CRITICAL — חסר חודש = sheets לא יעבדו"},
+            {"id": "X2", "name": "score_weights_sum",
+             "what": "סכום SCORE_WEIGHTS_V2 ב-config.py בדיוק 100 (או 1.0)",
+             "fail": "CRITICAL — סכום שונה = ציון שבור"},
+            {"id": "X3", "name": "critical_files",
+             "what": "כל הקבצים החיוניים קיימים: auto_scanner.py, formulas.py, config.py, וכו'",
+             "fail": "CRITICAL — קובץ חסר"},
+        ]
+        for c in checks_cfg:
+            st.markdown(f"**{c['id']} — {c['name']}**")
+            st.markdown(f"  - **מה בודק:** {c['what']}")
+            st.markdown(f"  - **כשנכשל:** {c['fail']}")
+
+        st.markdown("### 🔐 Repo Health (2 בדיקות)")
+        checks_repo = [
+            {"id": "R1", "name": "uncommitted_count",
+             "what": "(local only) מספר נמוך של קבצים לא-committed",
+             "fail": "WARNING על cleanup מומלץ"},
+            {"id": "R2", "name": "gitignore_enforcement",
+             "what": "גילוי שקבצים רגישים כמו google_credentials.json נמצאים ב-.gitignore",
+             "fail": "CRITICAL — secrets exposed"},
+        ]
+        for c in checks_repo:
+            st.markdown(f"**{c['id']} — {c['name']}**")
+            st.markdown(f"  - **מה בודק:** {c['what']}")
+            st.markdown(f"  - **כשנכשל:** {c['fail']}")
+
+        st.markdown("### 🌐 Provider/Stuck Checks (3 בדיקות)")
+        checks_prov = [
+            {"id": "16", "name": "rel_vol_stuck",
+             "what": "האם REL_VOL נתקע (200 שורות אחרונות אותו ערך)",
+             "fail": "WARNING — likely provider issue"},
+            {"id": "17", "name": "fundamentals_provider",
+             "what": "fundamentals provider מחזיר נתונים תקפים ל-AAPL (test ticker)",
+             "fail": "CRITICAL אם provider לא מגיב או מחזיר נתונים שבורים"},
+            {"id": "18", "name": "daily_bars_provider",
+             "what": "Alpaca/yfinance מחזיר daily bars תקינים",
+             "fail": "CRITICAL אם provider לא נגיש"},
+        ]
+        for c in checks_prov:
+            st.markdown(f"**{c['id']} — {c['name']}**")
+            st.markdown(f"  - **מה בודק:** {c['what']}")
+            st.markdown(f"  - **כשנכשל:** {c['fail']}")
+
+        st.markdown("---")
+        st.markdown("""
+**Severity levels:**
+- 🟢 **PASSED** — בדיקה עברה
+- 🟡 **WARNING** — חריגה לא קריטית, גורם לemail צהוב
+- 🔴 **CRITICAL** — בעיה חמורה, email אדום + alert מיידי
+- ⚪ **INFO** — מידע בלבד (e.g., bypass ב-no Sheets access)
+
+**email schedule:**
+- אימיילים נשלחים גם כש-PASSED (heartbeat) — חוסר אימייל = מערכת שבורה
+- 🔴 בנושא = נדרשת התערבות מיידית
+        """)
+
+    # ═══════════════════════════════════════════════════════════════════════
+    # 10. 7 Workflows
+    # ═══════════════════════════════════════════════════════════════════════
+    with st.expander("⚙️ 7 GitHub Actions Workflows — פירוט מלא"):
+        wf_data = [
+            {
+                "name": "auto_scan.yml",
+                "cron": "* * * * *",
+                "peru": "כל דקה",
+                "purpose": "הסקאנר המרכזי — `python auto_scanner.py`",
+                "steps": "Filter market hours → fetch FINVIZ → analyze → write 6 sheets",
+                "timeout": "8 דקות",
+                "env": "Alpaca + Google + ALPACA_PAPER=true",
+            },
+            {
+                "name": "post_analysis.yml",
+                "cron": "5 21 * * 1-5",
+                "peru": "16:05 Mon-Fri",
+                "purpose": "Daily research collector (4 שלבים)",
+                "steps": "EOD snapshot → 5-day OHLC → enrich intraday → backfill gaps",
+                "timeout": "15 דקות",
+                "env": "Alpaca + Google",
+            },
+            {
+                "name": "health_audit.yml",
+                "cron": "0 11,17 * * *  +  0 3 * * *",
+                "peru": "06:00, 12:00, 22:00 כל יום",
+                "purpose": "18 בדיקות בריאות + email alerts",
+                "steps": "run health_audit.py → write to Sheet → send email",
+                "timeout": "10 דקות",
+                "env": "Google + Alpaca + Gmail SMTP",
+            },
+            {
+                "name": "backup.yml",
+                "cron": "7 13-21 * * 1-5  +  7 20 * * 1-5  +  30 21 * * 1-5",
+                "peru": "08:07-16:30 Mon-Fri (3 פעמים)",
+                "purpose": "CSV backups → GH artifact (90-day retention)",
+                "steps": "backup_manager.py → upload artifact",
+                "timeout": "10 דקות",
+                "env": "Google",
+            },
+            {
+                "name": "monthly_rotation.yml",
+                "cron": "1 5 1 * *",
+                "peru": "00:01 ב-1 לחודש",
+                "purpose": "מעבר לחודש פעיל חדש",
+                "steps": "monthly_rotation.py → commit sheets_config.json",
+                "timeout": "10 דקות",
+                "env": "Google + write permissions",
+            },
+            {
+                "name": "prepare_next_month.yml",
+                "cron": "5 5 1 * *",
+                "peru": "00:05 ב-1 לחודש",
+                "purpose": "יצירת תיקייה+9 sheets לחודש הבא (אחרי rotation)",
+                "steps": "prepare_next_month.py → commit config",
+                "timeout": "—",
+                "env": "Google OAuth + write permissions",
+            },
+            {
+                "name": "warm_oauth_token.yml",
+                "cron": "0 12 */3 * *",
+                "peru": "07:00 כל 3 ימים",
+                "purpose": "מניעת ביטול OAuth refresh token (7-day timeout)",
+                "steps": "warm_oauth_token.py → email if fails",
+                "timeout": "—",
+                "env": "Google OAuth + Gmail SMTP",
+            },
+        ]
+
+        for wf in wf_data:
+            st.markdown(f"#### `{wf['name']}`")
+            c1, c2 = st.columns(2)
+            c1.markdown(f"**Cron:** `{wf['cron']}`")
+            c2.markdown(f"**Peru time:** {wf['peru']}")
+            st.markdown(f"**מטרה:** {wf['purpose']}")
+            st.markdown(f"**שלבים:** {wf['steps']}")
+            c3, c4 = st.columns(2)
+            c3.caption(f"Timeout: {wf['timeout']}")
+            c4.caption(f"Env: {wf['env']}")
+            st.markdown("---")
+
+    # ═══════════════════════════════════════════════════════════════════════
+    # 11. Glossary
+    # ═══════════════════════════════════════════════════════════════════════
+    with st.expander("📖 מונחון — מה כל מונח אומר"):
+        glossary = [
+            ("D0", "יום הסריקה (היום שהסיגנל קרה)"),
+            ("D1, D2, ... D5", "1-5 ימי מסחר אחרי D0 (מדלגים על סופי שבוע וחגים)"),
+            ("Table A", "סימולציה עם entry ב-ScanPrice (EOD של D0) — תאורטית"),
+            ("Table B", "סימולציה עם entry ב-D1_Open — מציאותית, כוללת gap risk"),
+            ("TP / TP10", "Take Profit ב-−10% מהentry (short win)"),
+            ("SL", "Stop Loss ב-+10% מהentry (short loss)"),
+            ("MxV", "Market cap minus dollar volume — מודד illiquidity"),
+            ("RunUp", "אחוז עלייה מ-Open עד הnowprice"),
+            ("ATRX", "טווח היום (High-Low) חלקי ATR14 — כפולה של תנודתיות הממוצע"),
+            ("REL_VOL", "מחזור היום חלקי ממוצע 20 ימים (capped 100)"),
+            ("VWAP", "מרחק % מ-Typical Price = (H+L+C)/3"),
+            ("ScanChange%", "אחוז שינוי מ-Close הקודם בזמן הסריקה"),
+            ("Float%", "מחזור כ-% של float shares — turnover"),
+            ("Score", "מספר 0-100 ממוצע משוקלל של 7 metrics (Score v2)"),
+            ("v1 / v2", "v1 = formula ישנה (לפני 11.4) · v2 = formula נוכחית"),
+            ("Critical / High / Med / Low", "tiers של Score: 85+/60-84/40-59/<40"),
+            ("TRADE_ENTRY_MIN_SCORE", "70 — מינימום ל-portfolio simulation"),
+            ("MIN_SCORE_DISPLAY", "60 — מינימום להצגה ב-dashboards"),
+            ("EOD", "End of Day — תהליך אחרי סגירת השוק (16:00-16:30 Peru)"),
+            ("Phase 1/2/3/4", "שלבי המערכת — איסוף → dynamic TP → entry timing → real money"),
+            ("Paper trading", "trades מסומלצים ב-Alpaca ללא כסף אמיתי"),
+            ("SIP / IEX", "U.S. market data feeds (SIP=consolidated, IEX=single venue)"),
+            ("PK", "Project Knowledge — מסמך המקור עליו Claude קורא בכל סשן"),
+            ("ADR", "Architecture Decision Record — תיעוד החלטות טכניות"),
+        ]
+        for term, definition in glossary:
+            st.markdown(f"**{term}** — {definition}")
+
+    # ═══════════════════════════════════════════════════════════════════════
+    # 12. Disaster Recovery
+    # ═══════════════════════════════════════════════════════════════════════
+    with st.expander("💾 התאוששות מאסון (DR Plan)"):
+        st.markdown("""
+### יעדי שירות
+- **RPO (Recovery Point Objective):** איבוד נתונים מקסימלי = **1 יום מסחר**
+- **RTO (Recovery Time Objective):** השבתה מקסימלית = **48 שעות** (סוף שבוע אחד)
+
+### תרחישי אסון
+
+#### 🖥️ Scenario 1: המק שלך מת
+- **השפעה:** אפס על המערכת הרצה. רק כלים מקומיים לא זמינים.
+- **התאוששות:** מק חדש → `git clone` → העתק `google_credentials.json` → `pip install -r requirements.txt`
+- **RTO:** ~2 שעות
+
+#### 📊 Scenario 2: Sheet נמחק בטעות
+- **השפעה:** איבוד נתונים בתהליך, גיבויים חלקיים.
+- **התאוששות:** Drive trash (30 ימים) → CSV backup ב-`backups/` → GitHub artifacts
+- **RTO:** 4-8 שעות
+
+#### 🔐 Scenario 3: GitHub Actions מבוטל / repo נמחק
+- **השפעה:** אין אוטומציה. נתונים קיימים נשמרים ב-Sheets.
+- **התאוששות:** local clone → `git push <new-url>` → re-add secrets → enable Actions
+- **RTO:** 4 שעות
+
+#### 🚫 Scenario 4: חשבון Google מושעה
+- **השפעה:** קטסטרופלי. Sheets, Drive, OAuth — הכל אבוד.
+- **התאוששות:** restore account או חדש → service account חדש → re-create sheets → CSV backups (≤90 ימים)
+- **RTO:** 24-48 שעות
+- **Data loss:** הכל שלא גובה ל-CSV. עד שבועות של נתוני in-Sheets לא נתפסים.
+
+#### 📈 Scenario 5: חשבון Alpaca מושעה
+- **השפעה:** Provider abstraction מתערב — yfinance fallback.
+- **התאוששות:** Alpaca paper account חדש → update env vars
+- **RTO:** 1 שעה
+- **Data loss:** אין
+
+### מה בכל שכבת גיבוי
+| Asset | Primary | Backup | Tertiary |
+|-------|---------|--------|----------|
+| Code | GitHub repo | Local clone | — |
+| post_analysis | Google Sheets | CSV in `backups/` | GH artifacts (90-day) |
+| Other sheets | Google Sheets | Manual export | — |
+| Secrets | GitHub Secrets | (TBD: 1Password) | — |
+| OAuth token | Auto-refreshed every 3d | Manual via `get_oauth_token.py` | — |
+        """)
+
+    # ═══════════════════════════════════════════════════════════════════════
+    # 13. Operational Runbook
+    # ═══════════════════════════════════════════════════════════════════════
+    with st.expander("🚨 Operational Runbook — מה לעשות אם משהו נשבר"):
+        st.markdown("""
+### 🔴 אימייל Health Audit מציג CRITICAL
+
+**אבחון:**
+1. פתח את האימייל — זהה איזו בדיקה נכשלה
+2. פתח את **RidingHigh-Health-Audit Sheet** → "Failed" tab
+3. הסתכל על "Latest" tab למצב מערכת מלא
+
+**טיפול בבעיות נפוצות:**
+- `D1 timeline_freshness` → סקאנר עצר. בדוק GH Actions tab ב-repo. הרץ `auto_scan.yml` ידנית.
+- `D2 post_analysis_completeness` → collector נכשל אתמול. הרץ `python post_analysis_collector.py` מקומית.
+- `Q1 score_range` → נתונים שבורים. בדוק את ה-ticker/date מהאימייל.
+- `X2 score_weights_sum` → ערכי `config.py` נשברו. `cat config.py | grep -A 10 SCORE_WEIGHTS_V2`
+- `X3 critical_files` → קובץ ליבה נמחק. בדוק `git log` של ה-commits האחרונים.
+
+### 🔑 אימייל "OAuth Token EXPIRED"
+
+**שלבים:**
+1. SSH/local למק
+2. `cd ~/RidingHighPro && python3 get_oauth_token.py`
+3. תהליך browser → grant → token נשמר
+4. עתק תוכן הtoken JSON
+5. עדכן GitHub Secret `GOOGLE_OAUTH_TOKEN_JSON`
+6. הפעל `warm_oauth_token.yml` ידנית
+7. המתן ל-health audit הבא
+
+### 📭 אין אימיילים
+
+**אבחון:**
+1. בדוק spam folder
+2. חפש "RidingHigh" ב-Gmail "All Mail"
+3. בדוק `health_audit.yml` ב-GH Actions tab — האם יש runs?
+4. אם הruns מצליחים אבל אין email: secret `GMAIL_APP_PASS` בוטל. צור App Password חדש.
+
+### 🐌 Sheets Quota Exceeded (נדיר)
+
+**טיפול:**
+1. המתן 100 שניות (חלון quota)
+2. נסה את הפעולה שוב ידנית
+3. אם חוזר על עצמו: הקטן refresh frequency של dashboard.
+
+### 📭 post_analysis חסר רשומות היום
+
+**אבחון:**
+- בדוק daily_summary — האם בכלל היו מניות היום?
+- אם היו: הרץ `python post_analysis_collector.py`
+- ואז: `python backfill_ohlc.py`
+
+### 🔄 Dashboard מציג נתונים ישנים
+
+**טיפול:**
+1. לחץ "🗑️ Clear Local Cache" ב-sidebar
+2. לחץ "🔄 Refresh data"
+3. אם עדיין ישן: בדוק את ה-sheet ישירות ב-Drive
+
+### Manual interventions
+| משימה | פקודה |
+|------|--------|
+| הרץ סקאנר עכשיו | `python3 auto_scanner.py` (מקומית) |
+| הרץ EOD עכשיו | `python3 auto_scanner.py --eod` |
+| הרץ health audit עכשיו | `python3 health_audit.py --local` |
+| post-analysis לתאריך מסוים | `python3 post_analysis_collector.py --date 2026-04-30` |
+| Backfill OHLC | `python3 backfill_ohlc.py` |
+| Audit code drift | `python3 code_auditor.py` |
+        """)
+
+    # ═══════════════════════════════════════════════════════════════════════
+    # 14. External Dependencies
+    # ═══════════════════════════════════════════════════════════════════════
+    with st.expander("🔗 תלויות חיצוניות"):
+        deps_data = pd.DataFrame([
+            {"שירות": "FINVIZ", "תפקיד": "Pre-market filter (single point of failure)", "Tier": "Free scrape", "SLA": "אין"},
+            {"שירות": "Alpaca", "תפקיד": "Verification prices, D1-D5 OHLC", "Tier": "Free paper", "SLA": "best effort"},
+            {"שירות": "yfinance", "תפקיד": "Fundamentals + fallback prices", "Tier": "Free public", "SLA": "אין"},
+            {"שירות": "Google Sheets", "תפקיד": "All operational data storage", "Tier": "Free", "SLA": "99.9%"},
+            {"שירות": "GitHub Actions", "תפקיד": "7 workflows automation", "Tier": "Free ~3000 min/mo", "SLA": "varies"},
+            {"שירות": "cron-job.org", "תפקיד": "Triggers auto_scan every minute", "Tier": "Free", "SLA": "אין"},
+            {"שירות": "Streamlit Cloud", "תפקיד": "Dashboard hosting (זה האתר)", "Tier": "Free", "SLA": "best effort"},
+            {"שירות": "Gmail SMTP", "תפקיד": "Health audit email alerts", "Tier": "Free", "SLA": "high"},
+        ])
+        st.dataframe(deps_data, hide_index=True, use_container_width=True)
+
+        st.markdown("**עלות חודשית כוללת: $0**")
+
+        st.markdown("""
+### Single points of failure
+1. **FINVIZ** — אין fallback אוטומטי לscreener
+2. **GitHub** — קוד, secrets, automation הכל שם
+3. **Google account** — Sheets, Drive, OAuth מחוברים לחשבון אחד
+
+אלה risks מקובלים למערכת single-operator.
+        """)
+
+    # ═══════════════════════════════════════════════════════════════════════
+    # 15. Master Backups
+    # ═══════════════════════════════════════════════════════════════════════
+    with st.expander("🛡️ גיבויים — Triple safety net"):
+        bk1, bk2, bk3 = st.columns(3)
+        with bk1:
+            st.markdown("**📦 GitHub Repo**")
+            st.markdown("[`projects5069-creator/ridinghigh-pro`](https://github.com/projects5069-creator/ridinghigh-pro)")
+            st.caption("Source of truth · Git history קבועה")
+        with bk2:
+            st.markdown("**☁️ Google Sheet Master**")
+            st.markdown("[System Reference Sheet](https://docs.google.com/spreadsheets/d/1SuHj0joCfT7kAoSEvrqepJJcUG8uBU5J4zmxkx9e3J0)")
+            st.caption("PK v2.0 mirror · sync via `sync_pk_to_sheet.py`")
+        with bk3:
+            st.markdown("**💼 CSV Backups**")
+            st.markdown("GitHub Actions artifacts (90-day retention)")
+            st.caption("3×/יום במהלך שוק · backup_manager.py")
+
+    # ═══════════════════════════════════════════════════════════════════════
+    # 16. Roadmap
+    # ═══════════════════════════════════════════════════════════════════════
+    with st.expander("🗺️ Roadmap — Phase 1 → 4"):
+        st.markdown("""
+### Phase 1 — Data Accumulation [פעיל, ~50%]
+- ✅ מערכת רצה יומית
+- ✅ 18 health checks חיים
+- ✅ Score v2 פעיל
+- ✅ Provider abstraction (Alpaca + yfinance)
+- ⏳ 100 רשומות v2 (כעת: ~50)
+- ⏳ 30 ימי מסחר v2 (כעת: ~14)
+
+### Phase 2 — Dynamic TP via ATRX [מתוכנן]
+- מטרה: TP threshold לכל מניה לפי ATRX (high-vol stocks need wider TP)
+- דורש: Phase 1 exit criteria מולאו
+- הערכה: סוף מאי 2026
+
+### Phase 3 — Entry Timing Optimization [מתוכנן]
+- מטרה: minute-level data לזיהוי entry timing אופטימלי
+- דורש: Phase 2 stable 4 שבועות
+
+### Phase 4 — Real Money Execution [GATED, אין תאריך]
+- מטרה: `ALPACA_PAPER=false`, deploy small position size
+- Gate criteria:
+  - Phase 3 מראה edge מאומת על תנאי שוק שונים
+  - Independent statistical review
+  - החלטה על capital allocation
+  - Risk limits hardcoded
+        """)
+
+    # ═══════════════════════════════════════════════════════════════════════
+    # 17. Anti-Drift Contract
+    # ═══════════════════════════════════════════════════════════════════════
+    with st.expander("🤝 Anti-Drift Maintenance Contract"):
+        st.markdown("""
+**חוזה מחייב על Claude בכל סשן עתידי:**
+
+כשClaude עוזר במשימה ש-:
+1. מוסיפה / משנה / מסירה Python file ב-repo
+2. מוסיפה / משנה / מסירה workflow ב-`.github/workflows/`
+3. מוסיפה / משנה / מסירה sheet ב-`sheets_config.json`
+4. מוסיפה / משנה / מסירה constant ב-`config.py`
+5. מוסיפה / משנה / מסירה metric, formula, או weight
+6. מוסיפה / משנה / מסירה health check
+7. מוסיפה / משנה / מסירה email alert או schedule
+8. מוסיפה / משנה / מסירה phase, KPI, או known issue
+9. סוגרת או פותחת issue ב-`OPEN_ISSUES.md`
+
+**אז, לפני git commit/push הסופי, Claude חייב:**
+- ✓ לזהות אילו סעיפי PK מושפעים
+- ✓ לעדכן את הסעיפים עם המציאות החדשה
+- ✓ להגדיל גרסה (v2.0 → v2.0.1 patch · → v2.1 minor)
+- ✓ להוסיף שורת changelog ב-§1
+- ✓ להריץ `python3 sync_pk_to_sheet.py` לעדכון Sheet master
+- ✓ להודיע לעמיחי ("עדכנתי PK §X לשקף Y")
+        """)
+
+    st.divider()
+
+    # ═══ Footer ═══════════════════════════════════════════════════════════════
+    st.caption(
+        f"🌍 **Owner:** Amihay Levy · Lima, Peru (UTC-5, no DST) · "
+        f"📅 **PK v2.0:** 2026-05-02 · "
+        f"📚 **Full reference:** `docs/RidingHigh_Pro_PK_v2.md` (2,052 שורות, 36+4 sections)"
+    )
+
+
+
+
 def dashboard_home_page():
     now_peru  = datetime.now(PERU_TZ)
     today_str = now_peru.strftime("%Y-%m-%d")
@@ -3671,8 +4756,12 @@ def dashboard_home_page():
 def main():
     _PAGE_NAMES = [
         "🏠 Home",
+        "💼 Portfolio Tracker",
+        "🔬 Post Analysis",
+        "📈 Score Tracker",
         "📅 Daily Summary",
         "📦 Timeline Archive",
+        "🖥️ System Overview",
     ]
 
     # Session-state key "nav_page" drives the radio (allows Home buttons to switch pages)
@@ -3697,10 +4786,18 @@ def main():
 
     if page == "🏠 Home":
         dashboard_home_page()
+    elif page == "💼 Portfolio Tracker":
+        portfolio_tracker_page()
+    elif page == "🔬 Post Analysis":
+        post_analysis_page()
+    elif page == "📈 Score Tracker":
+        score_tracker_page()
     elif page == "📅 Daily Summary":
         daily_summary_page()
     elif page == "📦 Timeline Archive":
         timeline_archive_page()
+    elif page == "🖥️ System Overview":
+        system_overview_page()
 
 if __name__ == "__main__":
     main()
