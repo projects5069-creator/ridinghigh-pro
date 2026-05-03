@@ -255,3 +255,38 @@ if __name__ == "__main__":
     print("\n" + "=" * 60)
     print("Configuration loaded ✅")
     print("=" * 60)
+
+
+# ═══════════════════════════════════════════════════════════════════════
+# AGENT MODULE CONFIGURATION (Phase 1)
+# Added: 2026-05-03 by Phase 1 implementation
+# See: agent/ directory, FINAL-SPEC v2.0
+# ═══════════════════════════════════════════════════════════════════════
+
+# Entry criteria — DIFFERENT from scanner (intentionally)
+AGENT_MIN_SCORE = 60               # Liberal threshold for learning (scanner=70)
+AGENT_MXV_MAX = -100               # Must be very negative
+AGENT_RUNUP_MIN = 30               # %, intraday rise
+AGENT_VOLUME_MIN = 100_000         # Liquidity floor
+AGENT_MARKET_CAP_MIN = 5_000_000   # $5M minimum
+AGENT_MARKET_CAP_MAX = 2_000_000_000  # $2B maximum
+
+# Exit criteria — same as scanner except no time limit
+AGENT_TP_PCT = 10                  # Same as TP_THRESHOLD_PCT
+AGENT_SL_PCT = 10                  # Same as SL_THRESHOLD_PCT
+AGENT_NO_TIME_LIMIT = True         # ⚠️ DIFFERENT from MAX_HOLDING_DAYS=5
+AGENT_EOD_CLOSE_MIN_BEFORE = 5     # Close 5 min before market close
+
+# Position sizing
+AGENT_POSITION_SIZE_USD = 1000     # Same as POSITION_SIZE_USD
+
+# Cold Start Mode (first 30 days)
+AGENT_COLD_START_ENABLED = True
+AGENT_COLD_START_DAYS = 30
+AGENT_COLD_START_MAX_CONCURRENT = 5
+AGENT_COLD_START_MAX_DAILY = 10
+AGENT_COLD_START_DAILY_LOSS_ALERT_USD = 200
+
+# Modes
+AGENT_DRY_RUN = True               # Start in DRY_RUN; switch to False at M10
+AGENT_LIVE_PAPER = False           # Becomes True after M10 approval
