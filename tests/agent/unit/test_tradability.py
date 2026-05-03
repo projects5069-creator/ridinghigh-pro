@@ -3,10 +3,11 @@
 import sys
 import os
 import pytest
+from unittest.mock import MagicMock, patch
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))))
 
-from agent.perception.tradability import check_tradability, MOCK_DEFAULTS
+from agent.perception.tradability import check_tradability, MOCK_DEFAULTS, clear_cache
 
 
 def test_returns_dict_with_required_keys():
@@ -58,3 +59,21 @@ def test_returned_dict_is_independent_copy():
     fresh = check_tradability("TEST2")
     assert fresh["is_shortable"] is True
     assert fresh["borrow_fee_pct"] == 12.5
+
+
+# ════════════════════════════════════════════════════════════════════════
+# M5 broker-aware tests
+# ════════════════════════════════════════════════════════════════════════
+
+class TestBrokerIntegration:
+    def test_no_broker_uses_mock(self):
+        """No broker passed → mock fallback."""
+        result = check_tradability("AAPL")
+        assert result["locate_status"] == "MOCK"
+
+    def test_broker_with_dry_run_uses_mock(self):
+        """Broker passed but AGENT_DRY_RUN=True → mock fallback."""
+        broker = MagicMock()
+        result = check_tradability("AAPL", broker=broker)
+        assert result["locate_status"] == "MOCK"
+        broker.is_shortable.assert_not_called()

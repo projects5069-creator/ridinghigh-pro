@@ -1,58 +1,102 @@
 """
-Tradability checker — determines if a stock is shortable and at what borrow fee.
+agent/perception/tradability.py
+─────────────────────────────────
+Tradability checker — determines if a stock is shortable.
 
-M3 IMPLEMENTATION IS A MOCK.
-This module currently returns hardcoded "always shortable" values.
-The Alpaca paper environment generally allows shorting most US stocks,
-so the mock is reasonable for DRY_RUN testing.
+M5 update: now broker-aware. Falls back to mock if no broker provided
+or if AGENT_DRY_RUN is True.
 
-# TODO M5: Replace _mock_check() with real Alpaca API call:
-#   - alpaca.get_asset(ticker).shortable
-#   - alpaca.get_asset(ticker).easy_to_borrow
-#   - Cache results to borrow_data sheet to reduce API calls
+Usage (M3-compatible):
+    is_tradable = check_tradability("AAPL")  # mock-only
+
+Usage (M5+):
+    is_tradable = check_tradability("AAPL", broker=alpaca_broker)
 
 Used by: decision_logic.py (M3), alpaca_broker.py (M5)
 """
 
-from typing import Any
+import sys
+import os
+import time
+from typing import Any, Dict, Optional
 
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
-# Mock defaults — replaced in M5
+from config import AGENT_DRY_RUN
+
+# Mock defaults (M3, kept for fallback)
 MOCK_DEFAULTS = {
     "is_shortable": True,
     "borrow_fee_pct": 12.5,
     "borrow_available": True,
-    "locate_status": "MOCK",  # M5 will use: AVAILABLE / UNAVAILABLE / NEEDED
+    "locate_status": "MOCK",
 }
 
+# Session cache for real broker calls (TTL = 1 hour)
+_CACHE: Dict[str, Dict[str, Any]] = {}
+_CACHE_TTL_SECONDS = 3600
 
-def check_tradability(ticker: str) -> dict[str, Any]:
+
+def check_tradability(ticker: str, broker=None) -> Dict[str, Any]:
     """
-    Check if a ticker is shortable and at what borrow fee.
+    Check if a ticker is shortable.
 
     Args:
         ticker: stock symbol (uppercase, e.g. "AAPL")
+        broker: optional AlpacaBroker instance. If None or AGENT_DRY_RUN → mock.
 
     Returns:
         dict with:
             - is_shortable: bool
             - borrow_fee_pct: float (annualized %)
-            - borrow_available: bool (HTB locate available)
-            - locate_status: str ("MOCK" in M3; "AVAILABLE"/"UNAVAILABLE"/"NEEDED" in M5)
+            - borrow_available: bool
+            - locate_status: str ("MOCK" / "AVAILABLE" / "UNAVAILABLE")
 
     Raises:
         ValueError: If ticker is empty or not a string.
-
-    NOTE (M3): This is a MOCK. Always returns shortable=True with
-    fee 12.5%. For real shortability check, see TODO M5 in module docstring.
     """
-    # TODO M5: Replace this mock with real Alpaca API call
-    return _mock_check(ticker)
-
-
-def _mock_check(ticker: str) -> dict[str, Any]:
-    """Mock implementation — returns hardcoded MOCK_DEFAULTS."""
     if not ticker or not isinstance(ticker, str):
         raise ValueError(f"Invalid ticker: {ticker!r}")
 
-    return dict(MOCK_DEFAULTS)  # copy, not reference
+    # Mock fallback
+    if broker is None or AGENT_DRY_RUN:
+        return _mock_check(ticker)
+
+    # Real check via broker (with cache)
+    return _real_check_cached(ticker, broker)
+
+
+def _mock_check(ticker: str) -> Dict[str, Any]:
+    """Mock implementation — returns hardcoded MOCK_DEFAULTS."""
+    return dict(MOCK_DEFAULTS)
+
+
+def _real_check_cached(ticker: str, broker) -> Dict[str, Any]:
+    """Real check via broker, with 1-hour cache."""
+    now = time.time()
+
+    if ticker in _CACHE:
+        cached = _CACHE[ticker]
+        if now - cached["_cached_at"] < _CACHE_TTL_SECONDS:
+            return {k: v for k, v in cached.items() if k != "_cached_at"}
+
+    # Cache miss or expired — fetch fresh
+    try:
+        is_shortable = broker.is_shortable(ticker)
+        asset_info = broker.get_asset_info(ticker) if hasattr(broker, "get_asset_info") else {}
+        result = {
+            "is_shortable": is_shortable,
+            "borrow_fee_pct": 0.0,  # Alpaca paper doesn't expose real fees
+            "borrow_available": asset_info.get("easy_to_borrow", is_shortable),
+            "locate_status": "AVAILABLE" if is_shortable else "UNAVAILABLE",
+        }
+        _CACHE[ticker] = {**result, "_cached_at": now}
+        return result
+    except Exception:
+        # On failure, fall back to mock
+        return _mock_check(ticker)
+
+
+def clear_cache():
+    """Clear the tradability cache (for tests and session reset)."""
+    _CACHE.clear()
