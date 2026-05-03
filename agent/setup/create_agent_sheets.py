@@ -43,28 +43,32 @@ AGENT_SHEET_NAMES = [
     "borrow_data",
 ]
 
-# Headers for each sheet (column count must match spec: 40, 22, 25, 17, 7, 14, 10, 9)
+# Headers for each sheet (column count: 41, 22, 25, 17, 7, 14, 10, 9)
 AGENT_SHEET_HEADERS = {
     "decision_log": [
         # Identity (5)
         "DecisionID", "Timestamp", "Ticker", "SignalSource", "AgentMode",
+        # Action (3)
+        "Action", "Reason", "SkipReason",
         # Signal data (7)
         "Price", "Volume", "MarketCap", "Float", "Open", "High", "Low",
-        # Metrics (7)
+        # Metrics (9)
         "Score", "MxV", "RunUp", "ATRX", "RSI", "TypicalPriceDist", "REL_VOL",
-        # Additional metrics (2)
         "ScanChange", "FloatPct",
-        # Decision (5)
-        "Decision", "Reason", "SkipReason", "ConfidenceScore", "DecisionTimeMs",
+        # Decision timing (1)
+        "DecisionTimeMs",
+        # Quality (1)
+        "ConfidenceScore",
         # Tradability (4)
         "IsShortable", "BorrowFee", "BorrowAvailable", "LocateStatus",
         # Position calc (4)
         "PositionSizeUSD", "Quantity", "TPPrice", "SLPrice",
-        # Safety (3)
-        "ExistingPosition", "BuyingPower", "ColdStartRemaining",
+        # Safety (4)
+        "ExistingPosition", "BuyingPower",
+        "ColdStartConcurrentLeft", "ColdStartDailyLeft",
         # Execution (3)
         "OrderID", "OrderStatus", "ExecutionPrice",
-    ],  # 40 columns
+    ],  # 41 columns
 
     "paper_portfolio": [
         # Identity (4)
