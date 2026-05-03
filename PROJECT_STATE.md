@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-05-02 22:08:14 -05
+**Generated:** 2026-05-02 22:18:35 -05
 **Branch:** `main`
-**Latest commit:** `d9de000` — docs: cleanup — deprecate 3 outdated docs, delete 5 stale, rewrite README
+**Latest commit:** `0a1eaf4` — docs: remove orphan Hebrew PK file from 2026-03-17
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `d9de000 (HEAD -> main) docs: cleanup — deprecate 3 outdated docs, delete 5 stale, rewrite README`
-- `e656069 (origin/main, origin/HEAD) docs: PK v2.0 — Master System Reference + Sheets backup + 3 issues`
+- `0a1eaf4 (HEAD -> main) docs: remove orphan Hebrew PK file from 2026-03-17`
+- `2f5f88d (origin/main, origin/HEAD) docs: cleanup — deprecate 3 outdated docs, delete 5 stale, rewrite README`
+- `e656069 docs: PK v2.0 — Master System Reference + Sheets backup + 3 issues`
 - `c6e8731 docs(open-issues): close #N10 and #6 after Score v1/v2 tagging`
 - `bf2892b feat(score-version): tag v1/v2 records (issue #N10)`
-- `040d2f1 docs(open-issues): add #N23 — pandas_market_calendars Python 3.9 incompatibility`
 
 ---
 
