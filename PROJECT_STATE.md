@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-05-03 10:48:39 -05
+**Generated:** 2026-05-03 11:12:07 -05
 **Branch:** `main`
-**Latest commit:** `1993dec` — fix(provider+scanner): yfinance fallback + cron + Streamlit secrets bridge
+**Latest commit:** `ea221b9` — feat(dashboard): cross-month aggregation for Post Analysis + Portfolio + Score Tracker
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `1993dec (HEAD -> main) fix(provider+scanner): yfinance fallback + cron + Streamlit secrets bridge`
-- `91a72b6 (origin/main, origin/HEAD) feat(dashboard): comprehensive System Overview page + restore trading pages`
+- `ea221b9 (HEAD -> main) feat(dashboard): cross-month aggregation for Post Analysis + Portfolio + Score Tracker`
+- `2ca288d (origin/main, origin/HEAD) fix(provider+scanner): yfinance fallback + cron + Streamlit secrets bridge`
+- `91a72b6 feat(dashboard): comprehensive System Overview page + restore trading pages`
 - `29268d2 docs: remove DEPRECATED files entirely from active repo`
 - `cc000a4 docs: remove orphan Hebrew PK file from 2026-03-17`
-- `2f5f88d docs: cleanup — deprecate 3 outdated docs, delete 5 stale, rewrite README`
 
 ---
 

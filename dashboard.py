@@ -972,21 +972,27 @@ def _cached_daily_snapshots() -> pd.DataFrame:
 
 @st.cache_data(ttl=3600)
 def _cached_portfolio() -> pd.DataFrame:
-    """portfolio → DataFrame with numeric cols. Refreshes every 60 min."""
+    """portfolio cross-month (Issue #PORT-MONTH). Refreshes every 60 min.
+    Reads from EVERY month in sheets_config.json. Falls back to single-month
+    if cross_month_loaders is unavailable."""
     try:
-        gc = _get_gc()
-        if not gc: return pd.DataFrame()
-        ws = sheets_manager.get_worksheet("portfolio", gc=gc)
-        if not ws: return pd.DataFrame()
-        data = ws.get_all_values()
-        if len(data) <= 1: return pd.DataFrame()
-        df = pd.DataFrame(data[1:], columns=data[0])
-        for col in ["Score", "BuyPrice", "CurrentPrice", "Change%", "P/L"]:
-            if col in df.columns:
-                df[col] = pd.to_numeric(df[col], errors="coerce")
-        return df
+        from cross_month_loaders import load_portfolio_all_months
+        return load_portfolio_all_months()
     except Exception:
-        return pd.DataFrame()
+        try:
+            gc = _get_gc()
+            if not gc: return pd.DataFrame()
+            ws = sheets_manager.get_worksheet("portfolio", gc=gc)
+            if not ws: return pd.DataFrame()
+            data = ws.get_all_values()
+            if len(data) <= 1: return pd.DataFrame()
+            df = pd.DataFrame(data[1:], columns=data[0])
+            for col in ["Score", "BuyPrice", "CurrentPrice", "Change%", "P/L"]:
+                if col in df.columns:
+                    df[col] = pd.to_numeric(df[col], errors="coerce")
+            return df
+        except Exception:
+            return pd.DataFrame()
 
 
 def calc_score_v2(row):
@@ -1026,9 +1032,15 @@ def calc_score_v2(row):
 
 @st.cache_data(ttl=60)
 def _cached_post_analysis() -> pd.DataFrame:
-    """post_analysis → DataFrame via gsheets_sync. Refreshes every 5 min."""
-    from gsheets_sync import load_post_analysis_from_sheets
-    return load_post_analysis_from_sheets()
+    """post_analysis cross-month (Issue #PORT-MONTH).
+    Reads from EVERY month in sheets_config.json, filtered to score_version=v2.
+    Falls back to single-month loader if cross_month_loaders is unavailable."""
+    try:
+        from cross_month_loaders import load_post_analysis_all_months
+        return load_post_analysis_all_months()
+    except Exception:
+        from gsheets_sync import load_post_analysis_from_sheets
+        return load_post_analysis_from_sheets()
 
 
 @st.cache_data(ttl=60)
@@ -2806,27 +2818,38 @@ def score_tracker_page():
 
     @st.cache_data(ttl=60)
     def _load_data():
+        """Score Tracker data — cross-month (Issue #PORT-MONTH).
+        Falls back to single-month logic if cross-month loaders fail."""
         try:
-            gc = sheets_manager._get_gc()
-            if gc is None:
-                return pd.DataFrame(), pd.DataFrame()
-
-            ws_port = sheets_manager.get_worksheet("portfolio", gc=gc)
-            port = ws_port.get_all_values() if ws_port else []
-            port_df = pd.DataFrame(port[1:], columns=port[0]) if len(port) > 1 else pd.DataFrame()
-
-            ws_st = sheets_manager.get_worksheet("score_tracker", gc=gc)
-            raw = ws_st.get_all_values() if ws_st else []
-            if len(raw) > 1:
-                tracker_df = pd.DataFrame(raw[1:], columns=raw[0])
-                tracker_df["Score"] = pd.to_numeric(tracker_df["Score"], errors="coerce")
-            else:
-                tracker_df = pd.DataFrame()
-
+            from cross_month_loaders import (
+                load_portfolio_all_months,
+                load_score_tracker_all_months,
+            )
+            port_df    = load_portfolio_all_months()
+            tracker_df = load_score_tracker_all_months()
             return port_df, tracker_df
-        except Exception as e:
-            st.error(f"Load error: {e}")
-            return pd.DataFrame(), pd.DataFrame()
+        except Exception:
+            try:
+                gc = sheets_manager._get_gc()
+                if gc is None:
+                    return pd.DataFrame(), pd.DataFrame()
+
+                ws_port = sheets_manager.get_worksheet("portfolio", gc=gc)
+                port = ws_port.get_all_values() if ws_port else []
+                port_df = pd.DataFrame(port[1:], columns=port[0]) if len(port) > 1 else pd.DataFrame()
+
+                ws_st = sheets_manager.get_worksheet("score_tracker", gc=gc)
+                raw = ws_st.get_all_values() if ws_st else []
+                if len(raw) > 1:
+                    tracker_df = pd.DataFrame(raw[1:], columns=raw[0])
+                    tracker_df["Score"] = pd.to_numeric(tracker_df["Score"], errors="coerce")
+                else:
+                    tracker_df = pd.DataFrame()
+
+                return port_df, tracker_df
+            except Exception as e:
+                st.error(f"Load error: {e}")
+                return pd.DataFrame(), pd.DataFrame()
 
     with st.spinner("טוען נתונים..."):
         port_df, tracker_df = _load_data()
