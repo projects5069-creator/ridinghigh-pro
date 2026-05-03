@@ -448,6 +448,68 @@
 
 ---
 
+## 🆕 DISCOVERED 2026-05-02
+
+### #N24: D1_Open mean gap = 80.84% — outlier-distorted
+- **Background:** Statistical analysis on 2026-05-02 showed D1_Open vs ScanPrice
+  has a mean gap of +80.84% but a median of -4.24%. The discrepancy indicates
+  ≥1 extreme outlier row distorting the mean.
+- **Why this matters:** Any analysis using mean gap is misleading. Phase 2
+  decisions on entry timing (Table A vs Table B) depend on accurate gap
+  statistics.
+- **What to check:**
+  1. Identify which post_analysis row(s) have absurd D1_Open or ScanPrice values
+  2. Determine root cause: data error, corporate action (split/dividend), or
+     legitimate but rare gap event
+  3. Decide treatment: clean, annotate, or filter from analyses
+- **Effort:** 30-60 min investigation
+- **Priority:** P2 (data integrity, but not blocking)
+- **Discovered:** 2026-05-02 during PK v2.0 reality check
+- **Owner:** TBD (next session)
+
+### #N25: DropsLab integration as data source
+- **Background:** DropsLab (separate repo `Ambroseius/DropsLab`) is a
+  companion system that scans daily for stocks dropping -10%+. It has run
+  since 2026-04-04 and accumulates ~71+ records per day. Currently no
+  integration with RidingHigh.
+- **Vision:** RidingHigh sees pumps; DropsLab sees drops. Together they
+  map extreme moves on both sides of the market. DropsLab data should
+  inform RidingHigh's understanding of mean reversion (e.g., sector
+  concentration of drops as market regime indicator).
+- **Plan:**
+  1. Reality Check on DropsLab codebase (parallel to what we did for RidingHigh)
+  2. Create dedicated `DropsLab_PK.md` for that system
+  3. Define which DropsLab fields useful for RidingHigh import
+  4. Build daily import script: `import_dropslab.py`
+  5. New sheet in RidingHigh: `dropslab_daily` (per-day summary)
+  6. New workflow runs after DropsLab collection (~17:00 Peru)
+  7. Add to dashboard System Overview page
+  8. Add health check (#25 area) to verify feed freshness
+- **Effort:** 3 sessions (investigation, design, implementation)
+- **Priority:** P2 (enrichment, not critical path)
+- **Discovered:** 2026-05-02
+- **Owner:** TBD (sessions over coming week)
+
+### #N26: System Overview page in dashboard
+- **Background:** Per session 2026-05-02 planning, dashboard needs a 4th
+  page that renders this PK content live: full system reference with
+  diagrams, schedules, KPIs, schema, etc. Visible from the Streamlit
+  dashboard sidebar.
+- **Design:** New separate file `system_overview.py`, imported into
+  `dashboard.py`. 36+ sections matching PK structure. Mix of static
+  content and live data (record counts, latest commit, health status).
+  5-minute cache for live data.
+- **Anti-drift mechanism:** New health audit check (`check_25`) compares
+  what System Overview claims against actual state (file counts, workflow
+  counts, sheet counts, config values). If drift detected → email alert.
+- **Effort:** 2-3 hours (page) + 45 min (check_25)
+- **Priority:** P1
+- **Discovered:** 2026-05-02
+- **Owner:** TBD (next session or one after)
+- **Related:** #N25 (DropsLab integration would add to this page)
+
+---
+
 ## 🆕 DISCOVERED 2026-04-30
 
 ### #N11: Improve check_C2 to suppress false positive thresholds
