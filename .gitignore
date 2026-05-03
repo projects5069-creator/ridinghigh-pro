@@ -60,3 +60,6 @@ archive_*/
 .env.local
 provider_validation_report.md
 provider_validation_report.json
+
+# Local archives (do not commit)
+.archive_*/

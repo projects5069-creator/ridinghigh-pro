@@ -1,24 +1,33 @@
-> ⚠️ **OUTDATED** - see PROJECT_KB.md for current system state ⚠️
+# 🚀 RidingHigh Pro
 
-# 🚀 RidingHigh Pro v14.1
+Automated short-selling research and analysis system for US equities.
 
-**Advanced Stock Scanner for Short-Selling Opportunities**
+**Status:** Phase 1 — data accumulation & validation. No real-money trading.
 
-## 📊 Features
+## 📚 Documentation
 
-- **Live Scanner**: Real-time monitoring with 10 weighted metrics
-- **Portfolio Tracker**: Auto-saves stocks with score 60+
-- **Timeline Grid**: Complete intraday tracking
-- **Smart Market Cap Cache**: 5-layer fallback system
+The complete system reference is in **[`docs/RidingHigh_Pro_PK_v2.md`](docs/RidingHigh_Pro_PK_v2.md)** — a 36-section production-grade master document covering architecture, data pipelines, scoring, health monitoring, runbooks, ADRs, and the disaster recovery plan.
 
-## 🎯 Scoring System
+For specific topics:
+- **Open issues:** [`OPEN_ISSUES.md`](OPEN_ISSUES.md)
+- **Health audit system:** [`README_health_audit.md`](README_health_audit.md)
+- **Code conventions:** [`CLAUDE.md`](CLAUDE.md)
+- **Auto-generated state:** [`PROJECT_STATE.md`](PROJECT_STATE.md)
 
-10 metrics weighted to 100 points for short-selling analysis.
+## 🔧 Quick Links
 
-## 📅 Market Hours
+- **Dashboard (live):** [ridinghigh-pro-v2.streamlit.app](https://ridinghigh-pro-v2.streamlit.app)
+- **Master backup (Google Sheet):** [System Reference Sheet](https://docs.google.com/spreadsheets/d/1SuHj0joCfT7kAoSEvrqepJJcUG8uBU5J4zmxkx9e3J0)
+- **Companion system:** [Ambroseius/DropsLab](https://github.com/Ambroseius/DropsLab)
 
-Trading: 08:30 - 15:00 Peru Time (UTC-5)
+## 🌍 Owner
+
+Amihay Levy · Lima, Peru (UTC-5)
+
+## 📦 Repository conventions
+
+Files prefixed `DEPRECATED_YYYY-MM-DD_*` are historical reference only. They reflect prior versions of the system and should not be used as authoritative documentation. Always defer to the file paths listed under "Documentation" above.
 
 ---
 
-**Trading tool - Use at your own risk.**
+*This README is intentionally short. For depth, see the [PK document](docs/RidingHigh_Pro_PK_v2.md).*

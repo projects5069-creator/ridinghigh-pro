@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-05-02 21:42:45 -05
+**Generated:** 2026-05-02 22:08:14 -05
 **Branch:** `main`
-**Latest commit:** `523a7f5` — docs: PK v2.0 — Master System Reference + Sheets backup + 3 issues
+**Latest commit:** `d9de000` — docs: cleanup — deprecate 3 outdated docs, delete 5 stale, rewrite README
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `523a7f5 (HEAD -> main) docs: PK v2.0 — Master System Reference + Sheets backup + 3 issues`
-- `c6e8731 (origin/main, origin/HEAD) docs(open-issues): close #N10 and #6 after Score v1/v2 tagging`
+- `d9de000 (HEAD -> main) docs: cleanup — deprecate 3 outdated docs, delete 5 stale, rewrite README`
+- `e656069 (origin/main, origin/HEAD) docs: PK v2.0 — Master System Reference + Sheets backup + 3 issues`
+- `c6e8731 docs(open-issues): close #N10 and #6 after Score v1/v2 tagging`
 - `bf2892b feat(score-version): tag v1/v2 records (issue #N10)`
 - `040d2f1 docs(open-issues): add #N23 — pandas_market_calendars Python 3.9 incompatibility`
-- `8ae2c88 refactor(health-audit): C1 — eliminate duplicate functions`
 
 ---
 
