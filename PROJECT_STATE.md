@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-05-03 20:29:43 -05
+**Generated:** 2026-05-04 18:08:27 -05
 **Branch:** `main`
-**Latest commit:** `07ac4d2` — feat(phase1-m9): Streamlit Dashboard Pages 9-10
+**Latest commit:** `841952b` — feat(phase1-m9-m10): Streamlit Dashboard + Production Deployment
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `07ac4d2 (HEAD -> main) feat(phase1-m9): Streamlit Dashboard Pages 9-10`
-- `af66416 (origin/main, origin/HEAD) feat(phase1-m7): Score Analytics System`
+- `841952b (HEAD -> main) feat(phase1-m9-m10): Streamlit Dashboard + Production Deployment`
+- `a011116 (origin/main, origin/HEAD) feat(phase1-m9): Streamlit Dashboard Pages 9-10`
+- `af66416 feat(phase1-m7): Score Analytics System`
 - `cd76389 feat(phase1-m6): Postmortem Engine`
 - `1644b53 feat(phase1-m5): Alpaca Execution Layer`
-- `c9f6572 feat(phase1-m4): Decision Logger`
 
 ---
 
@@ -32,11 +32,11 @@ _See `OPEN_ISSUES.md` for full list_
 
 | Workflow | Status | Conclusion | Started |
 |---|---|---|---|
-| Health Audit | completed | ✅ success | 2026-05-03 19:57 UTC |
-| Health Audit | completed | ✅ success | 2026-05-03 14:15 UTC |
-| RidingHigh Auto Scanner | completed | ✅ success | 2026-05-03 14:15 UTC |
-| RidingHigh Auto Scanner | completed | ✅ success | 2026-05-03 10:34 UTC |
-| Health Audit | completed | ✅ success | 2026-05-03 08:59 UTC |
+| Daily Backup — post_analysis | completed | ✅ success | 2026-05-04 21:46 UTC |
+| RidingHigh Auto Scanner | completed | ✅ success | 2026-05-04 21:46 UTC |
+| RidingHigh Auto Scanner | completed | ✅ success | 2026-05-04 20:59 UTC |
+| RidingHigh Auto Scanner | completed | ✅ success | 2026-05-04 20:58 UTC |
+| RidingHigh Auto Scanner | completed | ✅ success | 2026-05-04 20:57 UTC |
 
 ---
 
@@ -47,16 +47,16 @@ _Months in config: `2026-04`, `2026-05`, `2026-06`_
 
 | Sheet | Total rows | Last date | Status |
 |---|---|---|---|
-| timeline_live | 19,903 | 2026-05-01 | ✅ |
-| daily_snapshots | 70 | 2026-05-01 | ✅ |
-| daily_summary | 79 | 2026-05-01 | ✅ |
+| timeline_live | 40,898 | 2026-05-04 | ✅ |
+| daily_snapshots | 148 | 2026-05-04 | ✅ |
+| daily_summary | 167 | 2026-05-04 | ✅ |
 | post_analysis | 2 | 2026-05-01 | ✅ |
-| portfolio | 5 | 2026-05-01 | ✅ |
-| portfolio_live | 2 | 2026-05-01 | ✅ |
-| score_tracker | 2 | 2026-05-01 | ✅ |
-| live_trades | 2 | 2026-05-01 | ✅ |
-| ticker_follow_up | 0 | — | ⚠️ empty |
-| decision_log | 12 | — | ✅ |
+| portfolio | 9 | 2026-05-04 | ✅ |
+| portfolio_live | 9 | 2026-05-04 | ✅ |
+| score_tracker | 376 | 2026-05-04 | ✅ |
+| live_trades | 376 | 2026-05-04 | ✅ |
+| ticker_follow_up | 4,922 | 2026-05-04 | ✅ |
+| decision_log | 16 | — | ✅ |
 | paper_portfolio | 0 | — | ⚠️ empty |
 | score_analytics | 0 | — | ⚠️ empty |
 | postmortems | 0 | — | ⚠️ empty |
