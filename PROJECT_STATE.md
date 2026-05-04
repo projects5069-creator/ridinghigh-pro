@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-05-03 19:43:09 -05
+**Generated:** 2026-05-03 20:29:43 -05
 **Branch:** `main`
-**Latest commit:** `d6851c4` — feat(phase1-m7): Score Analytics System
+**Latest commit:** `07ac4d2` — feat(phase1-m9): Streamlit Dashboard Pages 9-10
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `d6851c4 (HEAD -> main) feat(phase1-m7): Score Analytics System`
-- `cd76389 (origin/main, origin/HEAD) feat(phase1-m6): Postmortem Engine`
+- `07ac4d2 (HEAD -> main) feat(phase1-m9): Streamlit Dashboard Pages 9-10`
+- `af66416 (origin/main, origin/HEAD) feat(phase1-m7): Score Analytics System`
+- `cd76389 feat(phase1-m6): Postmortem Engine`
 - `1644b53 feat(phase1-m5): Alpaca Execution Layer`
 - `c9f6572 feat(phase1-m4): Decision Logger`
-- `6de17f2 feat(phase1-m3): The Trader Core Logic`
 
 ---
 
@@ -56,7 +56,7 @@ _Months in config: `2026-04`, `2026-05`, `2026-06`_
 | score_tracker | 2 | 2026-05-01 | ✅ |
 | live_trades | 2 | 2026-05-01 | ✅ |
 | ticker_follow_up | 0 | — | ⚠️ empty |
-| decision_log | 10 | — | ✅ |
+| decision_log | 12 | — | ✅ |
 | paper_portfolio | 0 | — | ⚠️ empty |
 | score_analytics | 0 | — | ⚠️ empty |
 | postmortems | 0 | — | ⚠️ empty |
@@ -69,8 +69,8 @@ _Months in config: `2026-04`, `2026-05`, `2026-06`_
 
 ## 🩺 Health
 
-- ⚠️ 3 uncommitted file(s):
--    - 3 new/untracked
+- ⚠️ 4 uncommitted file(s):
+-    - 4 new/untracked
 
 ---
 
