@@ -15,7 +15,8 @@ from agent.logging.decision_id_generator import (
 
 def test_id_format_matches_pattern():
     """Generated IDs must match DEC-YYYY-MM-DD-NNNNN format."""
-    with patch.object(DecisionIDGenerator, '_initialize'):
+    with patch.object(DecisionIDGenerator, '_initialize'), \
+         patch.object(DecisionIDGenerator, '_today_peru', return_value='2026-05-03'):
         gen = DecisionIDGenerator(sheet_id="fake")
         gen._current_date = "2026-05-03"
         gen._counter = 0
@@ -27,7 +28,8 @@ def test_id_format_matches_pattern():
 
 def test_counter_increments():
     """Sequential calls produce sequential IDs."""
-    with patch.object(DecisionIDGenerator, '_initialize'):
+    with patch.object(DecisionIDGenerator, '_initialize'), \
+         patch.object(DecisionIDGenerator, '_today_peru', return_value='2026-05-03'):
         gen = DecisionIDGenerator(sheet_id="fake")
         gen._current_date = "2026-05-03"
         gen._counter = 0
@@ -57,7 +59,8 @@ def test_counter_resets_on_new_date():
 
 def test_max_counter_raises():
     """Counter > MAX_COUNTER raises RuntimeError."""
-    with patch.object(DecisionIDGenerator, '_initialize'):
+    with patch.object(DecisionIDGenerator, '_initialize'), \
+         patch.object(DecisionIDGenerator, '_today_peru', return_value='2026-05-03'):
         gen = DecisionIDGenerator(sheet_id="fake")
         gen._current_date = "2026-05-03"
         gen._counter = MAX_COUNTER  # at limit

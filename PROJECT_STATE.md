@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-05-04 18:08:27 -05
+**Generated:** 2026-05-04 18:32:51 -05
 **Branch:** `main`
-**Latest commit:** `841952b` — feat(phase1-m9-m10): Streamlit Dashboard + Production Deployment
+**Latest commit:** `b8673a8` — fix(tests): mock _today_peru in decision_id_generator tests
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `841952b (HEAD -> main) feat(phase1-m9-m10): Streamlit Dashboard + Production Deployment`
-- `a011116 (origin/main, origin/HEAD) feat(phase1-m9): Streamlit Dashboard Pages 9-10`
+- `b8673a8 (HEAD -> main) fix(tests): mock _today_peru in decision_id_generator tests`
+- `cbdb327 (origin/main, origin/HEAD) feat(phase1-m9-m10): Streamlit Dashboard + Production Deployment`
+- `a011116 feat(phase1-m9): Streamlit Dashboard Pages 9-10`
 - `af66416 feat(phase1-m7): Score Analytics System`
 - `cd76389 feat(phase1-m6): Postmortem Engine`
-- `1644b53 feat(phase1-m5): Alpaca Execution Layer`
 
 ---
 
@@ -32,11 +32,11 @@ _See `OPEN_ISSUES.md` for full list_
 
 | Workflow | Status | Conclusion | Started |
 |---|---|---|---|
+| Agent — Every Minute (DRY_RUN) | completed | ✅ success | 2026-05-04 23:30 UTC |
+| Agent — End of Day | completed | ✅ success | 2026-05-04 23:25 UTC |
+| Agent — Every Minute (DRY_RUN) | completed | ✅ success | 2026-05-04 23:21 UTC |
+| Daily Backup — post_analysis | completed | ✅ success | 2026-05-04 23:14 UTC |
 | Daily Backup — post_analysis | completed | ✅ success | 2026-05-04 21:46 UTC |
-| RidingHigh Auto Scanner | completed | ✅ success | 2026-05-04 21:46 UTC |
-| RidingHigh Auto Scanner | completed | ✅ success | 2026-05-04 20:59 UTC |
-| RidingHigh Auto Scanner | completed | ✅ success | 2026-05-04 20:58 UTC |
-| RidingHigh Auto Scanner | completed | ✅ success | 2026-05-04 20:57 UTC |
 
 ---
 
@@ -56,14 +56,14 @@ _Months in config: `2026-04`, `2026-05`, `2026-06`_
 | score_tracker | 376 | 2026-05-04 | ✅ |
 | live_trades | 376 | 2026-05-04 | ✅ |
 | ticker_follow_up | 4,922 | 2026-05-04 | ✅ |
-| decision_log | 16 | — | ✅ |
+| decision_log | 18 | — | ✅ |
 | paper_portfolio | 0 | — | ⚠️ empty |
 | score_analytics | 0 | — | ⚠️ empty |
 | postmortems | 0 | — | ⚠️ empty |
 | system_events | 0 | — | ⚠️ empty |
 | pending_suggestions | 0 | — | ⚠️ empty |
 | config_history | 0 | — | ⚠️ empty |
-| borrow_data | 0 | — | ⚠️ empty |
+| borrow_data | ? | ? | ❌ APIError: [503]: The service is currentl |
 
 ---
 
