@@ -190,7 +190,13 @@ def _load_all_months(
         before = len(combined)
         # Keep rows that match the filter OR have empty/missing score_version
         # (legacy rows pre-tagging — caller can opt out by setting filter to None)
-        mask = (combined["score_version"].astype(str).str.strip() == score_version_filter)
+        sv_str = combined["score_version"].astype(str).str.strip()
+        mask = (
+            (sv_str == score_version_filter) |
+            (sv_str == "") |
+            (sv_str == "nan") |
+            (combined["score_version"].isna())
+        )
         combined = combined[mask].reset_index(drop=True)
         print(f"[CrossMonth] {tab_name}: score_version filter '{score_version_filter}' "
               f"kept {len(combined)}/{before} rows")
