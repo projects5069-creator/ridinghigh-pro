@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-05-04 21:20:55 -05
+**Generated:** 2026-05-04 21:37:51 -05
 **Branch:** `main`
-**Latest commit:** `c0888b0` — Fix cross_month_loaders score_version filter to accept legacy/empty rows
+**Latest commit:** `6626a22` — Tag every new post_analysis row with score_version=v2
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `c0888b0 (HEAD -> main) Fix cross_month_loaders score_version filter to accept legacy/empty rows`
-- `3a3c583 (origin/main, origin/HEAD) Add D4 health check: post_analysis ran today`
+- `6626a22 (HEAD -> main) Tag every new post_analysis row with score_version=v2`
+- `7f0369c (origin/main, origin/HEAD) Fix cross_month_loaders score_version filter to accept legacy/empty rows`
+- `3a3c583 Add D4 health check: post_analysis ran today`
 - `f7c5c76 feat(phase1-m8): Email System - morning brief + daily brief + urgent alerts`
 - `254b768 fix(tests): mock _today_peru in decision_id_generator tests`
-- `cbdb327 feat(phase1-m9-m10): Streamlit Dashboard + Production Deployment`
 
 ---
 
@@ -32,11 +32,11 @@ _See `OPEN_ISSUES.md` for full list_
 
 | Workflow | Status | Conclusion | Started |
 |---|---|---|---|
+| Agent — End of Day | completed | ✅ success | 2026-05-05 02:30 UTC |
+| Agent — Daily Brief Email | completed | ✅ success | 2026-05-05 02:30 UTC |
 | Agent — End of Day | completed | ✅ success | 2026-05-05 02:15 UTC |
 | Agent — End of Day | completed | ✅ success | 2026-05-05 02:00 UTC |
 | Agent — Every Minute (DRY_RUN) | completed | ✅ success | 2026-05-05 01:45 UTC |
-| Agent — Every Minute (DRY_RUN) | completed | ✅ success | 2026-05-05 01:30 UTC |
-| Agent — Every Minute (DRY_RUN) | completed | ✅ success | 2026-05-05 01:15 UTC |
 
 ---
 

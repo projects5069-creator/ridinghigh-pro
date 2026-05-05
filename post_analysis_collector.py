@@ -52,6 +52,11 @@ CATALYST_CATEGORIES = [
 MIN_SCORE   = MIN_SCORE_DISPLAY
 DAYS_FORWARD = 5
 
+# ─────────────────────────────────────────────────────────────
+# Score algorithm version tag (written to every new row)
+# ─────────────────────────────────────────────────────────────
+SCORE_VERSION = "v2"
+
 
 # ── Catalyst analysis (unchanged from v4) ────────────────────────────────────
 def fetch_finviz_news(ticker: str, scan_date: str) -> list:
@@ -530,6 +535,7 @@ def run(target_date: str = None):
             **d0_fund,
             **tl_stats,
             "audit_flag": audit_flag,
+            "score_version": SCORE_VERSION,
         }
         new_rows.append(new_row)
         time.sleep(0.3)
