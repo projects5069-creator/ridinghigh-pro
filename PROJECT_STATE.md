@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-05-04 21:37:51 -05
+**Generated:** 2026-05-05 17:41:00 -05
 **Branch:** `main`
-**Latest commit:** `6626a22` — Tag every new post_analysis row with score_version=v2
+**Latest commit:** `c47f64a` — config: lower AGENT_MIN_SCORE from 60 to 50
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `6626a22 (HEAD -> main) Tag every new post_analysis row with score_version=v2`
-- `7f0369c (origin/main, origin/HEAD) Fix cross_month_loaders score_version filter to accept legacy/empty rows`
+- `c47f64a (HEAD -> main) config: lower AGENT_MIN_SCORE from 60 to 50`
+- `3d36d9d (origin/main, origin/HEAD) Tag every new post_analysis row with score_version=v2`
+- `7f0369c Fix cross_month_loaders score_version filter to accept legacy/empty rows`
 - `3a3c583 Add D4 health check: post_analysis ran today`
 - `f7c5c76 feat(phase1-m8): Email System - morning brief + daily brief + urgent alerts`
-- `254b768 fix(tests): mock _today_peru in decision_id_generator tests`
 
 ---
 
@@ -32,11 +32,11 @@ _See `OPEN_ISSUES.md` for full list_
 
 | Workflow | Status | Conclusion | Started |
 |---|---|---|---|
-| Agent — End of Day | completed | ✅ success | 2026-05-05 02:30 UTC |
-| Agent — Daily Brief Email | completed | ✅ success | 2026-05-05 02:30 UTC |
-| Agent — End of Day | completed | ✅ success | 2026-05-05 02:15 UTC |
-| Agent — End of Day | completed | ✅ success | 2026-05-05 02:00 UTC |
-| Agent — Every Minute (DRY_RUN) | completed | ✅ success | 2026-05-05 01:45 UTC |
+| Agent — Every Minute (DRY_RUN) | completed | ✅ success | 2026-05-05 22:30 UTC |
+| Agent — Every Minute (DRY_RUN) | completed | ✅ success | 2026-05-05 22:15 UTC |
+| Agent — Every Minute (DRY_RUN) | completed | ✅ success | 2026-05-05 22:00 UTC |
+| Agent — Every Minute (DRY_RUN) | completed | ✅ success | 2026-05-05 21:45 UTC |
+| Daily Backup — post_analysis | completed | ✅ success | 2026-05-05 21:41 UTC |
 
 ---
 
@@ -47,16 +47,16 @@ _Months in config: `2026-04`, `2026-05`, `2026-06`_
 
 | Sheet | Total rows | Last date | Status |
 |---|---|---|---|
-| timeline_live | 40,898 | 2026-05-04 | ✅ |
-| daily_snapshots | 148 | 2026-05-04 | ✅ |
-| daily_summary | 167 | 2026-05-04 | ✅ |
+| timeline_live | 54,731 | 2026-05-05 | ✅ |
+| daily_snapshots | 223 | 2026-05-05 | ✅ |
+| daily_summary | 245 | 2026-05-05 | ✅ |
 | post_analysis | 8 | 2026-05-04 | ✅ |
-| portfolio | 11 | 2026-05-04 | ✅ |
-| portfolio_live | 9 | 2026-05-04 | ✅ |
-| score_tracker | 376 | 2026-05-04 | ✅ |
-| live_trades | 376 | 2026-05-04 | ✅ |
-| ticker_follow_up | 4,922 | 2026-05-04 | ✅ |
-| decision_log | 20 | — | ✅ |
+| portfolio | ? | ? | ❌ APIError: [500]: Internal error encounte |
+| portfolio_live | 12 | 2026-05-05 | ✅ |
+| score_tracker | 818 | 2026-05-05 | ✅ |
+| live_trades | 818 | 2026-05-05 | ✅ |
+| ticker_follow_up | 9,549 | 2026-05-05 | ✅ |
+| decision_log | 352 | — | ✅ |
 | paper_portfolio | 0 | — | ⚠️ empty |
 | score_analytics | 0 | — | ⚠️ empty |
 | postmortems | 0 | — | ⚠️ empty |
@@ -69,8 +69,8 @@ _Months in config: `2026-04`, `2026-05`, `2026-06`_
 
 ## 🩺 Health
 
-- ⚠️ 5 uncommitted file(s):
--    - 5 new/untracked
+- ⚠️ 4 uncommitted file(s):
+-    - 4 new/untracked
 
 ---
 

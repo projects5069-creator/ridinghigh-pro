@@ -264,7 +264,7 @@ if __name__ == "__main__":
 # ═══════════════════════════════════════════════════════════════════════
 
 # Entry criteria — DIFFERENT from scanner (intentionally)
-AGENT_MIN_SCORE = 60               # Liberal threshold for learning (scanner=70)
+AGENT_MIN_SCORE = 50               # Lowered from 60 — admits micro-cap pumps scoring 50-59
 AGENT_MXV_MAX = -100               # Must be very negative
 AGENT_RUNUP_MIN = 30               # %, intraday rise
 AGENT_VOLUME_MIN = 100_000         # Liquidity floor
