@@ -93,6 +93,21 @@ def run() -> Dict[str, Any]:
             summary["errors"] += 1
             logger.error("Weekly analytics failed: %s", e, exc_info=True)
 
+    # Send urgent alert if any errors occurred
+    if summary["errors"] > 0:
+        try:
+            from agent.notifications.email_sender import send_alert
+            send_alert(
+                f"{summary['errors']} error(s) in EOD orchestrator",
+                f"Run at {summary['timestamp']}\n"
+                f"Reconciler drift: {summary['reconciler_drift']}\n"
+                f"Daily analytics: {summary['daily_analytics']}\n"
+                f"Weekly suggestions: {summary['weekly_suggestions']}\n"
+                f"Errors: {summary['errors']}"
+            )
+        except Exception as e:
+            logger.error("Failed to send alert: %s", e)
+
     logger.info("EOD complete: errors=%d", summary["errors"])
     return summary
 

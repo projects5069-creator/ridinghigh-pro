@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-05-04 18:32:51 -05
+**Generated:** 2026-05-04 19:13:54 -05
 **Branch:** `main`
-**Latest commit:** `b8673a8` — fix(tests): mock _today_peru in decision_id_generator tests
+**Latest commit:** `b4b96e4` — feat(phase1-m8): Email System - morning brief + daily brief + urgent alerts
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `b8673a8 (HEAD -> main) fix(tests): mock _today_peru in decision_id_generator tests`
-- `cbdb327 (origin/main, origin/HEAD) feat(phase1-m9-m10): Streamlit Dashboard + Production Deployment`
+- `b4b96e4 (HEAD -> main) feat(phase1-m8): Email System - morning brief + daily brief + urgent alerts`
+- `254b768 (origin/main, origin/HEAD) fix(tests): mock _today_peru in decision_id_generator tests`
+- `cbdb327 feat(phase1-m9-m10): Streamlit Dashboard + Production Deployment`
 - `a011116 feat(phase1-m9): Streamlit Dashboard Pages 9-10`
 - `af66416 feat(phase1-m7): Score Analytics System`
-- `cd76389 feat(phase1-m6): Postmortem Engine`
 
 ---
 
@@ -32,11 +32,11 @@ _See `OPEN_ISSUES.md` for full list_
 
 | Workflow | Status | Conclusion | Started |
 |---|---|---|---|
-| Agent — Every Minute (DRY_RUN) | completed | ✅ success | 2026-05-04 23:30 UTC |
-| Agent — End of Day | completed | ✅ success | 2026-05-04 23:25 UTC |
-| Agent — Every Minute (DRY_RUN) | completed | ✅ success | 2026-05-04 23:21 UTC |
-| Daily Backup — post_analysis | completed | ✅ success | 2026-05-04 23:14 UTC |
-| Daily Backup — post_analysis | completed | ✅ success | 2026-05-04 21:46 UTC |
+| Daily Backup — post_analysis | completed | ✅ success | 2026-05-05 00:13 UTC |
+| Post Analysis Collector | completed | ✅ success | 2026-05-05 00:11 UTC |
+| Post Analysis Collector | completed | ✅ success | 2026-05-05 00:04 UTC |
+| Agent — Every Minute (DRY_RUN) | completed | ✅ success | 2026-05-05 00:00 UTC |
+| Agent — Every Minute (DRY_RUN) | completed | ✅ success | 2026-05-04 23:45 UTC |
 
 ---
 
@@ -50,20 +50,20 @@ _Months in config: `2026-04`, `2026-05`, `2026-06`_
 | timeline_live | 40,898 | 2026-05-04 | ✅ |
 | daily_snapshots | 148 | 2026-05-04 | ✅ |
 | daily_summary | 167 | 2026-05-04 | ✅ |
-| post_analysis | 2 | 2026-05-01 | ✅ |
-| portfolio | 9 | 2026-05-04 | ✅ |
+| post_analysis | 8 | 2026-05-04 | ✅ |
+| portfolio | 11 | 2026-05-04 | ✅ |
 | portfolio_live | 9 | 2026-05-04 | ✅ |
 | score_tracker | 376 | 2026-05-04 | ✅ |
 | live_trades | 376 | 2026-05-04 | ✅ |
 | ticker_follow_up | 4,922 | 2026-05-04 | ✅ |
-| decision_log | 18 | — | ✅ |
+| decision_log | 20 | — | ✅ |
 | paper_portfolio | 0 | — | ⚠️ empty |
 | score_analytics | 0 | — | ⚠️ empty |
 | postmortems | 0 | — | ⚠️ empty |
 | system_events | 0 | — | ⚠️ empty |
 | pending_suggestions | 0 | — | ⚠️ empty |
 | config_history | 0 | — | ⚠️ empty |
-| borrow_data | ? | ? | ❌ APIError: [503]: The service is currentl |
+| borrow_data | 0 | — | ⚠️ empty |
 
 ---
 

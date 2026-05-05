@@ -346,6 +346,21 @@ def run() -> Dict[str, Any]:
             logger.error("EOD close failed: %s", e, exc_info=True)
             summary["errors"] += 1
 
+    # Send urgent alert if any errors occurred this run
+    if summary["errors"] > 0:
+        try:
+            from agent.notifications.email_sender import send_alert
+            send_alert(
+                f"{summary['errors']} error(s) in agent run",
+                f"Run at {summary['timestamp']}\n"
+                f"Signals: {summary['signals']}\n"
+                f"Decisions: {summary['decisions']} (ENTER={summary['enters']}, SKIP={summary['skips']})\n"
+                f"Errors: {summary['errors']}\n"
+                f"Check GitHub Actions logs for details."
+            )
+        except Exception as e:
+            logger.error("Failed to send alert: %s", e)
+
     # Summary
     logger.info(
         "Run complete: signals=%d, decisions=%d (ENTER=%d, SKIP=%d), errors=%d",
