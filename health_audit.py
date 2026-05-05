@@ -528,6 +528,78 @@ def check_06_github_actions_health():
                            WARNING, f"API query failed: {e}")
 
 
+def check_22_post_analysis_today_ran():
+    """D4: post_analysis.yml ran successfully today (catches cron drift)."""
+    repo = os.environ.get("GITHUB_REPO", "projects5069-creator/ridinghigh-pro")
+    token = os.environ.get("GITHUB_TOKEN", "")
+
+    # Only check on trading days
+    today = datetime.utcnow().date()
+    if not is_trading_day(today):
+        return CheckResult("D4", "Post-analysis ran today", "Data freshness",
+                           PASSED, "Non-trading day — skipped")
+
+    try:
+        import urllib.request
+        url = (f"https://api.github.com/repos/{repo}/actions/workflows/"
+               f"post_analysis.yml/runs?per_page=20")
+        req = urllib.request.Request(url, headers={"Accept": "application/vnd.github+json"})
+        if token:
+            req.add_header("Authorization", f"Bearer {token}")
+        with urllib.request.urlopen(req, timeout=10) as resp:
+            data = json.loads(resp.read())
+
+        today_str = today.isoformat()
+        today_runs = []
+        for run in data.get("workflow_runs", []):
+            try:
+                started = run.get("run_started_at", "")
+                if started.startswith(today_str):
+                    today_runs.append(run)
+            except Exception:
+                continue
+
+        successes = [r for r in today_runs if r.get("conclusion") == "success"]
+        in_progress = [r for r in today_runs if r.get("status") in ("in_progress", "queued")]
+
+        # Cron is scheduled for 21:05 UTC. Allow 90 min for drift before alarming.
+        now_utc = datetime.utcnow()
+        scheduled_time = now_utc.replace(hour=21, minute=5, second=0, microsecond=0)
+        grace_period_end = scheduled_time + timedelta(minutes=90)  # 22:35 UTC
+
+        if successes:
+            last = successes[0]
+            return CheckResult("D4", "Post-analysis ran today", "Data freshness",
+                               PASSED,
+                               f"Ran successfully today (run #{last.get('run_number')})",
+                               f"started: {last.get('run_started_at')}")
+
+        if in_progress:
+            return CheckResult("D4", "Post-analysis ran today", "Data freshness",
+                               PASSED,
+                               f"Currently running (run #{in_progress[0].get('run_number')})")
+
+        # No successful run yet — decide severity based on time of day
+        if now_utc < scheduled_time:
+            return CheckResult("D4", "Post-analysis ran today", "Data freshness",
+                               PASSED, "Before scheduled time — not expected to run yet")
+
+        if now_utc < grace_period_end:
+            return CheckResult("D4", "Post-analysis ran today", "Data freshness",
+                               WARNING,
+                               f"Not run yet (scheduled 21:05 UTC, now {now_utc.strftime('%H:%M')} UTC) — possible drift")
+
+        # Past grace period — this is a real problem
+        return CheckResult("D4", "Post-analysis ran today", "Data freshness",
+                           CRITICAL,
+                           f"Did not run today (it is {now_utc.strftime('%H:%M')} UTC, scheduled was 21:05)",
+                           "Run manually via workflow_dispatch")
+
+    except Exception as e:
+        return CheckResult("D4", "Post-analysis ran today", "Data freshness",
+                           WARNING, f"API query failed: {e}")
+
+
 # ============================================================================
 # CHECKS — Category 3: Data Quality
 # ============================================================================
@@ -1318,6 +1390,7 @@ def main():
     results.append(check_04_timeline_freshness(gc))
     results.append(check_05_post_analysis_completeness(gc))
     results.append(check_06_github_actions_health())
+    results.append(check_22_post_analysis_today_ran())
 
     # Data quality
     results.append(check_07_score_range(gc))
