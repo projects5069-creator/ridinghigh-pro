@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-05-05 17:41:00 -05
+**Generated:** 2026-05-05 19:52:50 -05
 **Branch:** `main`
-**Latest commit:** `c47f64a` — config: lower AGENT_MIN_SCORE from 60 to 50
+**Latest commit:** `739adf5` — fix(dashboard): raise cache TTLs to prevent Sheets API quota 429
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `c47f64a (HEAD -> main) config: lower AGENT_MIN_SCORE from 60 to 50`
-- `3d36d9d (origin/main, origin/HEAD) Tag every new post_analysis row with score_version=v2`
+- `739adf5 (HEAD -> main) fix(dashboard): raise cache TTLs to prevent Sheets API quota 429`
+- `976e91b (origin/main, origin/HEAD) config: lower AGENT_MIN_SCORE from 60 to 50`
+- `3d36d9d Tag every new post_analysis row with score_version=v2`
 - `7f0369c Fix cross_month_loaders score_version filter to accept legacy/empty rows`
 - `3a3c583 Add D4 health check: post_analysis ran today`
-- `f7c5c76 feat(phase1-m8): Email System - morning brief + daily brief + urgent alerts`
 
 ---
 
@@ -32,11 +32,11 @@ _See `OPEN_ISSUES.md` for full list_
 
 | Workflow | Status | Conclusion | Started |
 |---|---|---|---|
-| Agent — Every Minute (DRY_RUN) | completed | ✅ success | 2026-05-05 22:30 UTC |
-| Agent — Every Minute (DRY_RUN) | completed | ✅ success | 2026-05-05 22:15 UTC |
-| Agent — Every Minute (DRY_RUN) | completed | ✅ success | 2026-05-05 22:00 UTC |
-| Agent — Every Minute (DRY_RUN) | completed | ✅ success | 2026-05-05 21:45 UTC |
-| Daily Backup — post_analysis | completed | ✅ success | 2026-05-05 21:41 UTC |
+| Agent — Every Minute (DRY_RUN) | completed | ✅ success | 2026-05-06 00:45 UTC |
+| Agent — Every Minute (DRY_RUN) | completed | ✅ success | 2026-05-06 00:30 UTC |
+| Agent — Every Minute (DRY_RUN) | completed | ✅ success | 2026-05-06 00:15 UTC |
+| Daily Backup — post_analysis | completed | ✅ success | 2026-05-06 00:10 UTC |
+| Agent — Daily Brief Email | completed | ✅ success | 2026-05-06 00:09 UTC |
 
 ---
 
@@ -50,8 +50,8 @@ _Months in config: `2026-04`, `2026-05`, `2026-06`_
 | timeline_live | 54,731 | 2026-05-05 | ✅ |
 | daily_snapshots | 223 | 2026-05-05 | ✅ |
 | daily_summary | 245 | 2026-05-05 | ✅ |
-| post_analysis | 8 | 2026-05-04 | ✅ |
-| portfolio | ? | ? | ❌ APIError: [500]: Internal error encounte |
+| post_analysis | 10 | 2026-05-05 | ✅ |
+| portfolio | 16 | 2026-05-05 | ✅ |
 | portfolio_live | 12 | 2026-05-05 | ✅ |
 | score_tracker | 818 | 2026-05-05 | ✅ |
 | live_trades | 818 | 2026-05-05 | ✅ |
@@ -69,8 +69,8 @@ _Months in config: `2026-04`, `2026-05`, `2026-06`_
 
 ## 🩺 Health
 
-- ⚠️ 4 uncommitted file(s):
--    - 4 new/untracked
+- ⚠️ 10 uncommitted file(s):
+-    - 10 new/untracked
 
 ---
 

@@ -1031,7 +1031,7 @@ def calc_score_v2(row):
     return round(s, 2)
 
 
-@st.cache_data(ttl=60)
+@st.cache_data(ttl=600)
 def _cached_post_analysis() -> pd.DataFrame:
     """post_analysis cross-month (Issue #PORT-MONTH).
     Reads from EVERY month in sheets_config.json, filtered to score_version=v2.
@@ -1044,7 +1044,7 @@ def _cached_post_analysis() -> pd.DataFrame:
         return load_post_analysis_from_sheets()
 
 
-@st.cache_data(ttl=60)
+@st.cache_data(ttl=120)
 def _cached_ticker_follow_up() -> pd.DataFrame:
     """Load ticker_follow_up sheet. Cached 60s.
     Issue #39 — minute-by-minute D1-D3 follow-up data per ticker.
@@ -1064,7 +1064,7 @@ def _cached_ticker_follow_up() -> pd.DataFrame:
         return pd.DataFrame()
 
 
-@st.cache_data(ttl=60)
+@st.cache_data(ttl=120)
 def _cached_tl_today() -> pd.DataFrame:
     """Today's timeline_live rows with canonical column names. Refreshes every 60s."""
     try:
@@ -1083,7 +1083,7 @@ def _cached_tl_today() -> pd.DataFrame:
         return pd.DataFrame()
 
 
-@st.cache_data(ttl=30)
+@st.cache_data(ttl=120)
 def _cached_live_trades() -> pd.DataFrame:
     """live_trades sheet → DataFrame. Refreshes every 30s."""
     try:
@@ -1107,7 +1107,7 @@ def _cached_live_trades() -> pd.DataFrame:
         return pd.DataFrame()
 
 
-@st.cache_data(ttl=60)
+@st.cache_data(ttl=120)
 def _cached_portfolio_live() -> pd.DataFrame:
     """portfolio_live tab — RunningHigh/RunningLow per pending stock. Refreshes every 60s."""
     try:
@@ -2817,7 +2817,7 @@ def score_tracker_page():
                 days.append(d.strftime("%Y-%m-%d"))
         return days
 
-    @st.cache_data(ttl=60)
+    @st.cache_data(ttl=120)
     def _load_data():
         """Score Tracker data — cross-month (Issue #PORT-MONTH).
         Falls back to single-month logic if cross-month loaders fail."""
