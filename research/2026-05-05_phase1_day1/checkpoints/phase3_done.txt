@@ -1,0 +1,8 @@
+Phase 3 completed at 2026-05-05T18:09:06.813093
+Metrics analyzed: 23
+Top 5 by AUC:
+  D1_Gap%: AUC=0.838
+  Float%: AUC=0.667
+  MinToClose: AUC=0.623
+  D0_Drop%: AUC=0.616
+  RSI: AUC=0.603

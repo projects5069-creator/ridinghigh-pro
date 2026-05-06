@@ -1,0 +1,4 @@
+*.pkl
+*.pickle
+*.parquet
+__pycache__/

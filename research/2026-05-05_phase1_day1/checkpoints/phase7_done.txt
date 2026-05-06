@@ -1,0 +1,10 @@
+Phase 7 completed at 2026-05-05T18:13:42.852912
+RF CV AUC: 0.766
+LR CV AUC: 0.486
+RF (no D1_Gap%) CV AUC: 0.629
+Top 5 features (combined rank):
+  RSI: avg_rank=3.5
+  D1_Gap%: avg_rank=4.0
+  REL_VOL: avg_rank=6.5
+  MxV: avg_rank=7.0
+  ScanChange%: avg_rank=7.5

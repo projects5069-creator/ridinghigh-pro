@@ -1,0 +1,11 @@
+pair,best_bucket,tp_rate,n
+ATRX x RunUp,"ATRX=Q3, RunUp=Q4",0.5714,7
+ATRX x Volume,"ATRX=Q4, Volume=Q3",0.6667,6
+ATRX x MarketCap,"ATRX=Q4, MarketCap=Q4",0.7778,9
+REL_VOL x RunUp,"REL_VOL=Q3, RunUp=Q4",0.6364,11
+RunUp x Volume,"RunUp=Q3, Volume=Q4",0.6,5
+RunUp x MarketCap,"RunUp=Q4, MarketCap=Q4",0.5455,11
+Volume x MarketCap,"Volume=Q2, MarketCap=Q4",0.5,8
+MarketCap_strat,<$50M,0.3482,112
+MarketCap_strat,$50M-$500M,0.3913,23
+MarketCap_strat,$500M-$5B,0.0,5

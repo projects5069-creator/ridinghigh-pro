@@ -1,0 +1,9 @@
+Phase 2 completed at 2026-05-05T18:07:18.992094
+Records: 154
+Outcome distribution:
+  BOTH: 69
+  TP_HIT: 47
+  SL_HIT: 28
+  OPEN: 10
+hit_tp10 rate: 75.3%
+hit_sl7 rate: 63.0%

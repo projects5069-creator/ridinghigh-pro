@@ -1,0 +1,582 @@
+================================================================================
+DATA INVENTORY — RidingHigh Pro Deep Research
+================================================================================
+
+
+────────────────────────────────────────────────────────────
+Sheet: RidingHigh/2026-04/post_analysis
+Tab: גיליון1
+────────────────────────────────────────────────────────────
+  Rows: 154
+  Duplicate keys: 0
+  Date range (ScanDate): 2026-03-23 .. 2026-04-30
+  Date range (PeakScoreTime): 08:30 .. nan
+  Date range (FirstScanTime): 08:45 .. nan
+  Date range (LastScanTime): 08:55 .. nan
+  Date range (Score_recalc_date): 2026-04-16 20:05 .. nan
+
+  Column                         Type       Missing%   Outliers  
+  ────────────────────────────── ────────── ────────── ──────────
+  Ticker                         text       0.0        0         
+  ScanDate                       text       0.0        0         
+  Score                          numeric    0.0        0         
+  MxV                            numeric    0.0        24        
+  RunUp                          numeric    0.0        9         
+  RSI                            numeric    0.0        19        
+  ATRX                           numeric    0.0        0         
+  REL_VOL                        numeric    0.0        0         
+  Gap                            numeric    0.0        15        
+  TypicalPriceDist               numeric    0.0        1         
+  Volume                         numeric    0.0        0         
+  MarketCap                      numeric    0.0        0         
+  Float%                         numeric    0.0        0         
+  PriceToHigh                    numeric    0.0        0         
+  PriceTo52WHigh                 numeric    0.0        0         
+  ScanPrice                      numeric    0.0        16        
+  ScanChange%                    numeric    0.0        14        
+  IntraHigh                      numeric    0.0        0         
+  IntraLow                       numeric    0.0        0         
+  DayRunUp%                      numeric    0.0        0         
+  PeakScoreTime                  text       0.0        0         
+  PeakScorePrice                 numeric    0.0        0         
+  CurrentPrice                   numeric    0.0        0         
+  EntryChange%                   numeric    0.0        0         
+  MaxDrop%                       numeric    0.0        0         
+  BestDay                        numeric    0.0        0         
+  TP10_Hit                       numeric    0.0        0         
+  TP15_Hit                       numeric    0.0        0         
+  TP20_Hit                       numeric    0.0        0         
+  Volume_raw                     numeric    0.0        0         
+  MarketCap_raw                  numeric    0.0        0         
+  Float_pct_raw                  numeric    0.0        0         
+  PriceToHigh_raw                numeric    0.0        0         
+  PriceTo52WHigh_raw             numeric    0.0        0         
+  MxV_calc                       numeric    0.0        0         
+  REL_VOL_calc                   numeric    0.0        0         
+  Open_price_raw                 numeric    0.0        0         
+  PrevClose_raw                  numeric    0.0        0         
+  High_today_raw                 numeric    0.0        0         
+  Low_today_raw                  numeric    0.0        0         
+  TypicalPrice_raw               numeric    0.0        0         
+  ATR14_raw                      numeric    0.0        0         
+  Week52High_raw                 numeric    0.0        0         
+  AvgVolume_raw                  numeric    0.0        0         
+  FloatShares_raw                numeric    0.0        0         
+  SharesOutstanding_raw          numeric    0.0        0         
+  ATRX_calc                      numeric    0.0        6         
+  RunUp_calc                     numeric    0.0        0         
+  Gap_calc                       numeric    0.0        0         
+  TypicalPriceDist_calc          numeric    0.0        0         
+  cat_merger_acquisition         numeric    0.0        0         
+  cat_fda_approval               numeric    0.0        0         
+  cat_clinical_trial             numeric    0.0        0         
+  cat_marketing_announcement     numeric    0.0        0         
+  cat_earnings_report            numeric    0.0        0         
+  cat_regulatory_compliance      numeric    0.0        0         
+  cat_lawsuit                    numeric    0.0        0         
+  cat_share_dilution             numeric    0.0        0         
+  cat_reverse_split              numeric    0.0        0         
+  cat_no_clear_reason            numeric    0.0        0         
+  D1_Gap%                        numeric    0.0        0         
+  FirstScanTime                  text       0.0        0         
+  LastScanTime                   text       0.0        0         
+  ScanCount                      numeric    0.0        0         
+  ScoreAtFirst                   numeric    0.0        0         
+  ScoreAtLast                    numeric    0.0        0         
+  ScoreMax                       numeric    0.0        0         
+  ScoreMin                       numeric    0.0        0         
+  ScoreStd                       numeric    0.0        0         
+  Score_I                        numeric    0.0        0         
+  Score_B                        numeric    0.0        0         
+  Score_C                        numeric    0.0        0         
+  Score_D                        numeric    0.0        0         
+  Score_E                        numeric    0.0        0         
+  Score_F                        numeric    0.0        0         
+  Score_G                        numeric    0.0        0         
+  Score_H                        numeric    0.0        0         
+  PeakScore                      numeric    0.0        0         
+  D0_Close                       numeric    0.0        0         
+  D0_Volume                      numeric    0.0        0         
+  D0_Drop%                       numeric    0.0        0         
+  IntraDay_TP10                  numeric    0.0        0         
+  SL_Hit_D0                      numeric    0.0        0         
+  MinToClose                     numeric    0.0        0         
+  D1_Open                        numeric    0.0        0         
+  D1_High                        numeric    0.0        0         
+  D1_Low                         numeric    0.0        0         
+  D1_Close                       numeric    0.0        0         
+  D2_Open                        numeric    0.0        0         
+  D2_High                        numeric    0.0        0         
+  D2_Low                         numeric    0.0        0         
+  D2_Close                       numeric    0.0        0         
+  SL_Hit_D5                      numeric    0.0        0         
+  IntraDay_SL                    numeric    0.0        0         
+  D0_Open                        numeric    0.0        0         
+  D0_High                        numeric    0.0        0         
+  D0_Low                         numeric    0.0        0         
+  D0_Drop%_from_High             numeric    0.0        0         
+  Price_vs_SMA20                 numeric    0.0        0         
+  Consecutive_Up                 numeric    0.0        0         
+  RealFloat                      numeric    0.0        0         
+  RealFloat_M                    numeric    0.0        0         
+  Sector                         text       0.0        0         
+  Industry                       text       0.0        0         
+  MarketCapCategory              text       0.0        0         
+  EntryScore                     numeric    0.0        0         
+  D3_Open                        numeric    0.0        0         
+  D3_High                        numeric    0.0        0         
+  D3_Low                         numeric    0.0        0         
+  D3_Close                       numeric    0.0        0         
+  D4_Open                        numeric    0.0        0         
+  D4_High                        numeric    0.0        0         
+  D4_Low                         numeric    0.0        0         
+  D4_Close                       numeric    0.0        0         
+  D5_Open                        numeric    0.0        0         
+  D5_High                        numeric    0.0        0         
+  D5_Low                         numeric    0.0        0         
+  D5_Close                       numeric    0.0        0         
+  audit_flag                     text       0.0        0         
+  Score_recalc_date              text       0.0        0         
+  DaysSinceIPO                   numeric    0.0        0         
+  score_version                  text       0.0        0         
+
+────────────────────────────────────────────────────────────
+Sheet: RidingHigh/2026-04/daily_snapshots
+Tab: גיליון1
+────────────────────────────────────────────────────────────
+  Rows: 343
+  Duplicate keys: 0
+  Date range (Date): 2026-04-23 .. 2026-04-30
+
+  Column                         Type       Missing%   Outliers  
+  ────────────────────────────── ────────── ────────── ──────────
+  Date                           text       0.0        0         
+  Ticker                         text       0.0        0         
+  Price                          numeric    0.0        50        
+  Change                         numeric    0.0        38        
+  Volume                         numeric    0.0        58        
+  MarketCap                      numeric    0.0        57        
+  Score                          numeric    0.0        16        
+  MxV                            numeric    0.0        60        
+  RunUp                          numeric    0.0        22        
+  RSI                            numeric    0.0        1         
+  ATRX                           numeric    0.0        18        
+  REL_VOL                        numeric    0.0        43        
+  Gap                            numeric    0.0        18        
+  TypicalPriceDist               numeric    0.0        15        
+  PriceToHigh                    numeric    0.0        30        
+  PriceTo52WHigh                 numeric    0.0        0         
+  Float%                         numeric    0.0        12        
+  Open_price                     numeric    0.0        49        
+  PrevClose                      numeric    0.0        47        
+  High_today                     numeric    0.0        51        
+  Low_today                      numeric    0.0        49        
+  TypicalPrice                   numeric    0.0        50        
+  ATR14_raw                      numeric    0.0        43        
+  Week52High                     numeric    0.0        49        
+  SharesOutstanding              numeric    0.0        41        
+  AvgVolume                      numeric    0.0        36        
+  FloatShares                    numeric    0.0        42        
+  score_version                  text       0.0        0         
+
+────────────────────────────────────────────────────────────
+Sheet: RidingHigh/2026-04/timeline_live
+Tab: גיליון1
+────────────────────────────────────────────────────────────
+  Rows: 263774
+  Duplicate keys: 262636
+  Date range (Date): 2026-04-08 .. 2026-04-30
+  Date range (ScanTime): 08:45 .. 9:59
+
+  Column                         Type       Missing%   Outliers  
+  ────────────────────────────── ────────── ────────── ──────────
+  Date                           text       0.0        0         
+  ScanTime                       text       0.0        0         
+  Ticker                         text       0.0        0         
+  Price                          numeric    0.0        31179     
+  Volume                         numeric    77.4       10008     
+  MarketCap                      numeric    77.4       9734      
+  Score                          numeric    0.0        5980      
+  MxV                            numeric    15.3       36110     
+  RunUp                          numeric    15.3       13485     
+  REL_VOL                        numeric    17.3       29886     
+  Change                         numeric    59.5       10184     
+  RSI                            numeric    59.5       961       
+  ATRX                           numeric    59.5       6038      
+  Gap                            numeric    59.5       6210      
+  TypicalPriceDist               numeric    59.5       5495      
+  PriceToHigh                    numeric    59.5       7018      
+  PriceTo52WHigh                 numeric    59.5       0         
+  Float%                         numeric    59.5       4541      
+  Open_price                     numeric    77.4       9325      
+  PrevClose                      numeric    77.4       8693      
+  High_today                     numeric    77.4       9113      
+  Low_today                      numeric    77.4       8693      
+  TypicalPrice                   numeric    77.4       9101      
+  ATR14_raw                      numeric    77.4       9100      
+  Week52High                     numeric    77.4       9442      
+  SharesOutstanding              numeric    77.4       6684      
+  AvgVolume                      numeric    77.4       5692      
+  FloatShares                    numeric    77.4       6090      
+
+────────────────────────────────────────────────────────────
+Sheet: RidingHigh/2026-04/score_tracker
+Tab: גיליון1
+────────────────────────────────────────────────────────────
+  Rows: 15900
+  Duplicate keys: 15656
+  Date range (Date): 2026-04-13 .. 2026-04-28
+  Date range (ScanTime): 08:45 .. 14:55
+  Date range (ScanDate): 2026-04-08 .. 2026-04-27
+
+  Column                         Type       Missing%   Outliers  
+  ────────────────────────────── ────────── ────────── ──────────
+  Date                           text       0.0        0         
+  ScanTime                       text       0.0        0         
+  Ticker                         text       0.0        0         
+  ScanDate                       text       0.0        0         
+  Price                          numeric    0.0        1038      
+  Score                          numeric    0.0        1486      
+  MxV                            numeric    0.0        1776      
+  RunUp                          numeric    0.0        980       
+  REL_VOL                        numeric    0.0        1344      
+  RSI                            numeric    0.0        999       
+  ATRX                           numeric    0.0        723       
+  Gap                            numeric    0.0        1765      
+  TypicalPriceDist               numeric    0.0        685       
+  Volume                         numeric    0.0        2029      
+  High                           numeric    0.0        1037      
+  Low                            numeric    0.0        1076      
+  Open                           numeric    0.0        1036      
+  PrevClose                      numeric    0.0        1110      
+
+────────────────────────────────────────────────────────────
+Sheet: RidingHigh/2026-04/daily_summary
+Tab: גיליון1
+────────────────────────────────────────────────────────────
+  Rows: 1138
+  Duplicate keys: 0
+  Date range (Date): 2026-04-08 .. 2026-04-30
+  Date range (FirstScanTime): 08:45 .. 9:36
+  Date range (LastScanTime): 08:51 .. 9:59
+
+  Column                         Type       Missing%   Outliers  
+  ────────────────────────────── ────────── ────────── ──────────
+  Date                           text       0.0        0         
+  Ticker                         text       0.0        0         
+  Score                          numeric    0.0        39        
+  Price                          numeric    0.0        138       
+  MxV                            numeric    17.6       164       
+  RunUp                          numeric    17.6       94        
+  REL_VOL                        numeric    19.6       127       
+  ScanCount                      numeric    0.0        0         
+  FirstScanTime                  text       0.0        0         
+  LastScanTime                   text       0.0        0         
+
+────────────────────────────────────────────────────────────
+Sheet: RidingHigh/2026-04/portfolio
+Tab: גיליון1
+────────────────────────────────────────────────────────────
+  Rows: 190
+  Duplicate keys: 0
+  Date range (Date): 2026-03-18 .. 2026-04-30
+
+  Column                         Type       Missing%   Outliers  
+  ────────────────────────────── ────────── ────────── ──────────
+  PositionKey                    text       0.0        0         
+  Date                           text       0.0        0         
+  Ticker                         text       0.0        0         
+  Score                          numeric    0.0        0         
+  BuyPrice                       numeric    0.0        17        
+  Status                         text       0.0        0         
+
+────────────────────────────────────────────────────────────
+Sheet: RidingHigh/2026-05/post_analysis
+Tab: Sheet1
+────────────────────────────────────────────────────────────
+  Rows: 8
+  Duplicate keys: 0
+  Date range (ScanDate): 2026-05-01 .. 2026-05-04
+  Date range (FirstScanTime): 08:45 .. 12:50
+  Date range (LastScanTime): 14:59 .. 14:59
+  Date range (PeakScoreTime): 08:47 .. 14:45
+
+  Column                         Type       Missing%   Outliers  
+  ────────────────────────────── ────────── ────────── ──────────
+  Ticker                         text       0.0        0         
+  ScanDate                       text       0.0        0         
+  Score                          numeric    0.0        0         
+  ScanPrice                      numeric    0.0        0         
+  ScanChange%                    numeric    0.0        0         
+  MxV                            numeric    0.0        0         
+  RunUp                          numeric    0.0        0         
+  RSI                            numeric    0.0        0         
+  ATRX                           numeric    0.0        0         
+  REL_VOL                        numeric    0.0        0         
+  Gap                            numeric    0.0        0         
+  TypicalPriceDist               numeric    0.0        0         
+  PriceToHigh                    numeric    0.0        0         
+  PriceTo52WHigh                 numeric    0.0        0         
+  Float%                         numeric    0.0        0         
+  Volume_raw                     numeric    0.0        0         
+  MarketCap_raw                  numeric    0.0        0         
+  AvgVolume_raw                  numeric    0.0        0         
+  FloatShares_raw                numeric    0.0        0         
+  SharesOutstanding_raw          numeric    0.0        0         
+  Open_price_raw                 numeric    0.0        0         
+  PrevClose_raw                  numeric    0.0        0         
+  High_today_raw                 numeric    0.0        0         
+  Low_today_raw                  numeric    0.0        0         
+  TypicalPrice_raw               numeric    0.0        0         
+  ATR14_raw                      numeric    0.0        0         
+  Week52High_raw                 numeric    0.0        0         
+  MxV_calc                       numeric    0.0        0         
+  REL_VOL_calc                   numeric    0.0        0         
+  RunUp_calc                     numeric    0.0        0         
+  Gap_calc                       numeric    0.0        0         
+  ATRX_calc                      numeric    0.0        0         
+  TypicalPriceDist_calc          numeric    0.0        0         
+  cat_merger_acquisition         numeric    0.0        0         
+  cat_fda_approval               numeric    0.0        0         
+  cat_clinical_trial             numeric    0.0        0         
+  cat_marketing_announcement     numeric    0.0        0         
+  cat_earnings_report            numeric    0.0        0         
+  cat_regulatory_compliance      numeric    0.0        0         
+  cat_lawsuit                    numeric    0.0        0         
+  cat_share_dilution             numeric    0.0        0         
+  cat_reverse_split              numeric    0.0        0         
+  cat_no_clear_reason            numeric    0.0        0         
+  MaxDrop%                       numeric    75.0       0         
+  BestDay                        numeric    75.0       0         
+  TP10_Hit                       numeric    75.0       0         
+  TP15_Hit                       numeric    75.0       0         
+  TP20_Hit                       numeric    75.0       0         
+  D1_Gap%                        numeric    75.0       0         
+  SL_Hit_D5                      numeric    75.0       0         
+  IntraDay_SL                    numeric    75.0       0         
+  FirstScanTime                  text       0.0        0         
+  LastScanTime                   text       0.0        0         
+  ScanCount                      numeric    0.0        0         
+  ScoreAtFirst                   numeric    0.0        0         
+  ScoreAtLast                    numeric    0.0        0         
+  ScoreMax                       numeric    0.0        0         
+  ScoreMin                       numeric    0.0        0         
+  ScoreStd                       numeric    0.0        0         
+  audit_flag                     text       0.0        0         
+  IntraHigh                      numeric    0.0        0         
+  IntraLow                       numeric    0.0        0         
+  PeakScoreTime                  text       0.0        0         
+  PeakScorePrice                 numeric    0.0        0         
+  PeakScore                      numeric    0.0        0         
+  DayRunUp%                      numeric    0.0        0         
+  D0_Close                       numeric    0.0        0         
+  D0_Volume                      numeric    0.0        0         
+  D0_Drop%                       numeric    0.0        0         
+  IntraDay_TP10                  numeric    0.0        0         
+  SL_Hit_D0                      numeric    0.0        0         
+  MinToClose                     numeric    0.0        0         
+  D1_Open                        numeric    75.0       0         
+  D1_High                        numeric    75.0       0         
+  D1_Low                         numeric    75.0       0         
+  D1_Close                       numeric    75.0       0         
+  D0_Open                        numeric    75.0       0         
+  D0_High                        numeric    75.0       0         
+  D0_Low                         numeric    75.0       0         
+  D0_Drop%_from_High             numeric    75.0       0         
+  Price_vs_SMA20                 numeric    75.0       0         
+  Consecutive_Up                 numeric    75.0       0         
+  RealFloat                      numeric    75.0       0         
+  RealFloat_M                    numeric    75.0       0         
+  Sector                         text       75.0       0         
+  Industry                       text       75.0       0         
+  MarketCapCategory              text       75.0       0         
+  DaysSinceIPO                   numeric    75.0       0         
+  score_version                  text       0.0        0         
+
+────────────────────────────────────────────────────────────
+Sheet: RidingHigh/2026-05/daily_snapshots
+Tab: Sheet1
+────────────────────────────────────────────────────────────
+  Rows: 223
+  Duplicate keys: 0
+  Date range (Date): 2026-05-01 .. 2026-05-05
+
+  Column                         Type       Missing%   Outliers  
+  ────────────────────────────── ────────── ────────── ──────────
+  Date                           text       0.0        0         
+  Ticker                         text       0.0        0         
+  Price                          numeric    0.0        28        
+  Change                         numeric    0.0        24        
+  Volume                         numeric    0.0        40        
+  MarketCap                      numeric    0.0        34        
+  Score                          numeric    0.0        8         
+  MxV                            numeric    0.0        29        
+  RunUp                          numeric    0.0        8         
+  RSI                            numeric    0.0        2         
+  ATRX                           numeric    0.0        13        
+  REL_VOL                        numeric    0.0        29        
+  Gap                            numeric    0.0        22        
+  TypicalPriceDist               numeric    0.0        17        
+  PriceToHigh                    numeric    0.0        27        
+  PriceTo52WHigh                 numeric    0.0        0         
+  Float%                         numeric    0.0        16        
+  Open_price                     numeric    0.0        27        
+  PrevClose                      numeric    0.0        29        
+  High_today                     numeric    0.0        26        
+  Low_today                      numeric    0.0        27        
+  TypicalPrice                   numeric    0.0        27        
+  ATR14_raw                      numeric    0.0        31        
+  Week52High                     numeric    0.0        26        
+  SharesOutstanding              numeric    0.0        19        
+  AvgVolume                      numeric    0.0        26        
+  FloatShares                    numeric    0.0        27        
+
+────────────────────────────────────────────────────────────
+Sheet: RidingHigh/2026-05/timeline_live
+Tab: Sheet1
+────────────────────────────────────────────────────────────
+  Rows: 54731
+  Duplicate keys: 54486
+  Date range (Date): 2026-05-01 .. 2026-05-05
+  Date range (ScanTime): 08:45 .. 14:59
+
+  Column                         Type       Missing%   Outliers  
+  ────────────────────────────── ────────── ────────── ──────────
+  Date                           text       0.0        0         
+  ScanTime                       text       0.0        0         
+  Ticker                         text       0.0        0         
+  Price                          numeric    0.0        6174      
+  Volume                         numeric    0.0        9649      
+  MarketCap                      numeric    0.0        8765      
+  Score                          numeric    0.0        1984      
+  MxV                            numeric    0.0        8653      
+  RunUp                          numeric    0.0        2630      
+  REL_VOL                        numeric    0.0        8440      
+  Change                         numeric    0.0        7805      
+  RSI                            numeric    0.0        518       
+  ATRX                           numeric    0.0        3568      
+  Gap                            numeric    0.0        5764      
+  TypicalPriceDist               numeric    0.0        4917      
+  PriceToHigh                    numeric    0.0        5669      
+  PriceTo52WHigh                 numeric    0.0        37        
+  Float%                         numeric    0.0        2838      
+  Open_price                     numeric    0.0        6632      
+  PrevClose                      numeric    0.0        6403      
+  High_today                     numeric    0.0        6112      
+  Low_today                      numeric    0.0        6632      
+  TypicalPrice                   numeric    0.0        6140      
+  ATR14_raw                      numeric    0.0        8226      
+  Week52High                     numeric    0.0        6145      
+  SharesOutstanding              numeric    0.0        4121      
+  AvgVolume                      numeric    0.0        5965      
+  FloatShares                    numeric    0.0        6832      
+
+────────────────────────────────────────────────────────────
+Sheet: RidingHigh/2026-05/score_tracker
+Tab: Sheet1
+────────────────────────────────────────────────────────────
+  Rows: 818
+  Duplicate keys: 795
+  Date range (Date): 2026-05-01 .. 2026-05-05
+  Date range (ScanTime): 08:45 .. 14:55
+  Date range (ScanDate): 2026-05-01 .. 2026-05-05
+
+  Column                         Type       Missing%   Outliers  
+  ────────────────────────────── ────────── ────────── ──────────
+  Date                           text       0.0        0         
+  ScanTime                       text       0.0        0         
+  Ticker                         text       0.0        0         
+  ScanDate                       text       0.0        0         
+  Price                          numeric    0.0        0         
+  Score                          numeric    0.0        26        
+  MxV                            numeric    0.0        68        
+  RunUp                          numeric    0.0        13        
+  REL_VOL                        numeric    0.0        89        
+  RSI                            numeric    0.0        58        
+  ATRX                           numeric    0.0        13        
+  Gap                            numeric    0.0        42        
+  TypicalPriceDist               numeric    0.0        8         
+  Volume                         numeric    0.0        51        
+  High                           numeric    0.0        0         
+  Low                            numeric    0.0        0         
+  Open                           numeric    0.0        0         
+  PrevClose                      numeric    0.0        0         
+
+────────────────────────────────────────────────────────────
+Sheet: RidingHigh/2026-05/daily_summary
+Tab: Sheet1
+────────────────────────────────────────────────────────────
+  Rows: 245
+  Duplicate keys: 0
+  Date range (Date): 2026-05-01 .. 2026-05-05
+  Date range (FirstScanTime): 08:45 .. 14:59
+  Date range (LastScanTime): 08:54 .. 14:59
+
+  Column                         Type       Missing%   Outliers  
+  ────────────────────────────── ────────── ────────── ──────────
+  Date                           text       0.0        0         
+  Ticker                         text       0.0        0         
+  Score                          numeric    0.0        8         
+  Price                          numeric    0.0        27        
+  MxV                            numeric    0.0        40        
+  RunUp                          numeric    0.0        19        
+  REL_VOL                        numeric    0.0        31        
+  ScanCount                      numeric    0.0        0         
+  FirstScanTime                  text       0.0        0         
+  LastScanTime                   text       0.0        0         
+
+────────────────────────────────────────────────────────────
+Sheet: RidingHigh/2026-05/portfolio
+Tab: Sheet1
+────────────────────────────────────────────────────────────
+  Rows: 12
+  Duplicate keys: 0
+  Date range (Date): 2026-05-01 .. 2026-05-05
+
+  Column                         Type       Missing%   Outliers  
+  ────────────────────────────── ────────── ────────── ──────────
+  PositionKey                    text       0.0        0         
+  Date                           text       0.0        0         
+  Ticker                         text       0.0        0         
+  Score                          numeric    0.0        1         
+  BuyPrice                       numeric    0.0        1         
+  Status                         text       0.0        0         
+
+────────────────────────────────────────────────────────────
+Sheet: RidingHigh/2026-06/post_analysis
+────────────────────────────────────────────────────────────
+  ERROR: no data rows
+
+────────────────────────────────────────────────────────────
+Sheet: RidingHigh/2026-06/daily_snapshots
+────────────────────────────────────────────────────────────
+  ERROR: no data rows
+
+────────────────────────────────────────────────────────────
+Sheet: RidingHigh/2026-06/timeline_live
+────────────────────────────────────────────────────────────
+  ERROR: no data rows
+
+────────────────────────────────────────────────────────────
+Sheet: RidingHigh/2026-06/score_tracker
+────────────────────────────────────────────────────────────
+  ERROR: no data rows
+
+────────────────────────────────────────────────────────────
+Sheet: RidingHigh/2026-06/daily_summary
+────────────────────────────────────────────────────────────
+  ERROR: no data rows
+
+────────────────────────────────────────────────────────────
+Sheet: RidingHigh/2026-06/portfolio
+────────────────────────────────────────────────────────────
+  ERROR: no data rows
+
+────────────────────────────────────────────────────────────
+Sheet: DropsLab/DropsLab-Data
+────────────────────────────────────────────────────────────
+  ERROR: 
+
+
+================================================================================
+END OF INVENTORY

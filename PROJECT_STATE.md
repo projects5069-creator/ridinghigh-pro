@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-05-05 19:52:50 -05
+**Generated:** 2026-05-05 19:55:16 -05
 **Branch:** `main`
-**Latest commit:** `739adf5` — fix(dashboard): raise cache TTLs to prevent Sheets API quota 429
+**Latest commit:** `0a705a3` — docs: Phase 1 Day 1 research artifacts + session handoff
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `739adf5 (HEAD -> main) fix(dashboard): raise cache TTLs to prevent Sheets API quota 429`
-- `976e91b (origin/main, origin/HEAD) config: lower AGENT_MIN_SCORE from 60 to 50`
+- `0a705a3 (HEAD -> main) docs: Phase 1 Day 1 research artifacts + session handoff`
+- `728c9ac (origin/main, origin/HEAD) fix(dashboard): raise cache TTLs to prevent Sheets API quota 429`
+- `976e91b config: lower AGENT_MIN_SCORE from 60 to 50`
 - `3d36d9d Tag every new post_analysis row with score_version=v2`
 - `7f0369c Fix cross_month_loaders score_version filter to accept legacy/empty rows`
-- `3a3c583 Add D4 health check: post_analysis ran today`
 
 ---
 
@@ -69,8 +69,8 @@ _Months in config: `2026-04`, `2026-05`, `2026-06`_
 
 ## 🩺 Health
 
-- ⚠️ 10 uncommitted file(s):
--    - 10 new/untracked
+- ⚠️ 8 uncommitted file(s):
+-    - 8 new/untracked
 
 ---
 

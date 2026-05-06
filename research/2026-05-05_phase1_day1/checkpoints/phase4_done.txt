@@ -1,0 +1,4 @@
+Phase 4 completed at 2026-05-05T18:10:19.888632
+Interactions analyzed: 45
+Top pair: Float% × MxV (spread=66.7%)
+Multicollinear pairs: 5
