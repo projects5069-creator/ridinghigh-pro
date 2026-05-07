@@ -231,6 +231,8 @@ class OrderManager:
             order.id,                         # EntryOrderID
             tp_order_id,                      # TPOrderID
             sl_order_id,                      # SLOrderID
+            decision.tp_price,                # TPPrice
+            decision.sl_price,                # SLPrice
             "",                               # CurrentPrice
             "",                               # UnrealizedPnL
             "",                               # UnrealizedPnLPct

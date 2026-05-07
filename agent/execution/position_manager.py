@@ -155,6 +155,24 @@ class PositionManager:
         if current_price is None:
             return "updated"  # graceful skip
 
+        # DRY_RUN: simulate TP/SL via price comparison (no real bracket fills)
+        status = str(pos.get("Status", "")).upper()
+        if status == "DRY_RUN_OPEN":
+            try:
+                tp_price = float(pos.get("TPPrice", 0) or 0)
+                sl_price = float(pos.get("SLPrice", 0) or 0)
+            except (ValueError, TypeError):
+                tp_price = sl_price = 0
+            # Short position: SL triggers if price RISES, TP triggers if price DROPS
+            if sl_price > 0 and current_price >= sl_price:
+                self._update_position(pos, {"CurrentPrice": current_price})
+                self._close_position(pos, EXIT_SL_HIT)
+                return "closed_sl"
+            if tp_price > 0 and current_price <= tp_price:
+                self._update_position(pos, {"CurrentPrice": current_price})
+                self._close_position(pos, EXIT_TP_HIT)
+                return "closed_tp"
+
         entry_price = float(pos.get("EntryPrice", 0))
         qty = int(pos.get("Quantity", 0))
         # Short PnL: (entry - current) × qty

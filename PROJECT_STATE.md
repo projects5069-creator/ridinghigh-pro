@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-05-07 13:41:32 -05
+**Generated:** 2026-05-07 13:49:21 -05
 **Branch:** `main`
-**Latest commit:** `dd9cd3b` — fix(backfill): skip OHLC keys not present in post_analysis schema
+**Latest commit:** `4084403` — fix(agent): write TP/SL prices to portfolio + simulate TP/SL exits in DRY_RUN
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `dd9cd3b (HEAD -> main) fix(backfill): skip OHLC keys not present in post_analysis schema`
-- `48cf095 (origin/main, origin/HEAD) docs: Phase 1 Day 1 research artifacts + session handoff`
+- `4084403 (HEAD -> main) fix(agent): write TP/SL prices to portfolio + simulate TP/SL exits in DRY_RUN`
+- `c30a896 (origin/main, origin/HEAD) fix(backfill): skip OHLC keys not present in post_analysis schema`
+- `48cf095 docs: Phase 1 Day 1 research artifacts + session handoff`
 - `728c9ac fix(dashboard): raise cache TTLs to prevent Sheets API quota 429`
 - `976e91b config: lower AGENT_MIN_SCORE from 60 to 50`
-- `3d36d9d Tag every new post_analysis row with score_version=v2`
 
 ---
 
@@ -32,11 +32,11 @@ _See `OPEN_ISSUES.md` for full list_
 
 | Workflow | Status | Conclusion | Started |
 |---|---|---|---|
-| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-05-07 18:41 UTC |
-| Agent — Every Minute (DRY_RUN) | in_progress | ⏳ — | 2026-05-07 18:41 UTC |
-| Agent — Every Minute (DRY_RUN) | in_progress | ⏳ — | 2026-05-07 18:40 UTC |
-| RidingHigh Auto Scanner | completed | ✅ success | 2026-05-07 18:40 UTC |
-| Agent — Every Minute (DRY_RUN) | completed | ✅ success | 2026-05-07 18:39 UTC |
+| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-05-07 18:49 UTC |
+| Agent — Every Minute (DRY_RUN) | in_progress | ⏳ — | 2026-05-07 18:49 UTC |
+| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-05-07 18:48 UTC |
+| Agent — Every Minute (DRY_RUN) | in_progress | ⏳ — | 2026-05-07 18:48 UTC |
+| Agent — Every Minute (DRY_RUN) | completed | ✅ success | 2026-05-07 18:47 UTC |
 
 ---
 
