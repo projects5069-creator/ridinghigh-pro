@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-05-07 14:19:05 -05
+**Generated:** 2026-05-07 14:50:04 -05
 **Branch:** `main`
-**Latest commit:** `70a1c74` — fix(agent): prevent duplicate ENTER via decision_log dual-source check
+**Latest commit:** `bce3a71` — fix(agent): wire sheet_writer to position_manager for live updates
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `70a1c74 (HEAD -> main) fix(agent): prevent duplicate ENTER via decision_log dual-source check`
-- `bec3fb2 (origin/main, origin/HEAD) feat(dashboard): add Today's Trades section with P&L summary`
+- `bce3a71 (HEAD -> main) fix(agent): wire sheet_writer to position_manager for live updates`
+- `1a6c024 (origin/main, origin/HEAD) fix(agent): prevent duplicate ENTER via decision_log dual-source check`
+- `bec3fb2 feat(dashboard): add Today's Trades section with P&L summary`
 - `072fb4f fix(agent): write TP/SL prices to portfolio + simulate TP/SL exits in DRY_RUN`
 - `c30a896 fix(backfill): skip OHLC keys not present in post_analysis schema`
-- `48cf095 docs: Phase 1 Day 1 research artifacts + session handoff`
 
 ---
 
@@ -32,11 +32,11 @@ _See `OPEN_ISSUES.md` for full list_
 
 | Workflow | Status | Conclusion | Started |
 |---|---|---|---|
-| RidingHigh Auto Scanner | queued | ⏳ — | 2026-05-07 19:19 UTC |
-| Agent — Every Minute (DRY_RUN) | queued | ⏳ — | 2026-05-07 19:19 UTC |
-| Agent — Every Minute (DRY_RUN) | completed | ✅ success | 2026-05-07 19:18 UTC |
-| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-05-07 19:18 UTC |
-| Agent — Every Minute (DRY_RUN) | completed | ✅ success | 2026-05-07 19:17 UTC |
+| RidingHigh Auto Scanner | queued | ⏳ — | 2026-05-07 19:50 UTC |
+| Agent — Every Minute (DRY_RUN) | queued | ⏳ — | 2026-05-07 19:50 UTC |
+| Agent — Every Minute (DRY_RUN) | in_progress | ⏳ — | 2026-05-07 19:49 UTC |
+| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-05-07 19:49 UTC |
+| Agent — Every Minute (DRY_RUN) | completed | ✅ success | 2026-05-07 19:48 UTC |
 
 ---
 
@@ -47,23 +47,23 @@ _Months in config: `2026-04`, `2026-05`, `2026-06`_
 
 | Sheet | Total rows | Last date | Status |
 |---|---|---|---|
-| timeline_live | 96,161 | 2026-05-07 | ✅ |
-| daily_snapshots | 352 | 2026-05-06 | ✅ |
-| daily_summary | 383 | 2026-05-06 | ✅ |
-| post_analysis | 14 | 2026-05-06 | ✅ |
+| timeline_live | 98,099 | 2026-05-07 | ✅ |
+| daily_snapshots | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| daily_summary | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| post_analysis | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
 | portfolio | 21 | 2026-05-06 | ✅ |
-| portfolio_live | 21 | 2026-05-06 | ✅ |
-| score_tracker | 1,058 | 2026-05-07 | ✅ |
-| live_trades | 1,058 | 2026-05-07 | ✅ |
-| ticker_follow_up | 11,528 | 2026-05-07 | ✅ |
-| decision_log | 9,588 | — | ✅ |
-| paper_portfolio | 10 | — | ✅ |
-| score_analytics | 0 | — | ⚠️ empty |
-| postmortems | 0 | — | ⚠️ empty |
-| system_events | 0 | — | ⚠️ empty |
-| pending_suggestions | 0 | — | ⚠️ empty |
-| config_history | 0 | — | ⚠️ empty |
-| borrow_data | 0 | — | ⚠️ empty |
+| portfolio_live | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| score_tracker | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| live_trades | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| ticker_follow_up | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| decision_log | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| paper_portfolio | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| score_analytics | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| postmortems | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| system_events | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| pending_suggestions | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| config_history | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| borrow_data | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
 
 ---
 

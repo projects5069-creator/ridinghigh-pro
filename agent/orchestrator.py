@@ -293,9 +293,59 @@ def run() -> Dict[str, Any]:
         order_manager = OrderManager(broker)
         data_provider = get_data_provider()
         postmortem_engine = PostmortemEngine(data_provider=data_provider)
+
+        # ── Sheet writer for position_manager ──────────────────────
+        # Wires position updates (CurrentPrice, UnrealizedPnL, TP/SL closes)
+        # back into the paper_portfolio sheet. Cache header at init to
+        # minimise quota usage. Uses gspread A1 helper for >26 cols safety.
+        from gspread.utils import rowcol_to_a1 as _rowcol_to_a1
+        _portfolio_ws = sheets_manager.get_worksheet("paper_portfolio")
+        _portfolio_hdr = _portfolio_ws.row_values(1) if _portfolio_ws else []
+        _portfolio_pid_col = (
+            _portfolio_hdr.index("PositionID") if "PositionID" in _portfolio_hdr else 0
+        )
+
+        def _portfolio_sheet_writer(pos: dict, updates: dict):
+            """Write position updates to paper_portfolio. Header is cached."""
+            if not _portfolio_ws or not _portfolio_hdr:
+                logger.error("paper_portfolio not available for update")
+                return
+            pos_id = pos.get("PositionID", "")
+            if not pos_id:
+                logger.warning("No PositionID in pos dict")
+                return
+            try:
+                # Locate the target row (single API read)
+                col_values = _portfolio_ws.col_values(_portfolio_pid_col + 1)
+                target_row = None
+                for row_idx, val in enumerate(col_values[1:], start=2):
+                    if val == pos_id:
+                        target_row = row_idx
+                        break
+                if target_row is None:
+                    logger.warning("PositionID %s not in sheet", pos_id)
+                    return
+
+                # Build batch update
+                cells = []
+                for col_name, value in updates.items():
+                    if col_name in _portfolio_hdr:
+                        col_idx_1 = _portfolio_hdr.index(col_name) + 1
+                        a1 = _rowcol_to_a1(target_row, col_idx_1)
+                        cells.append({"range": a1, "values": [[value]]})
+                if cells:
+                    _portfolio_ws.batch_update(
+                        cells, value_input_option="USER_ENTERED"
+                    )
+            except Exception as e:
+                logger.error(
+                    "Failed to update position %s: %s", pos.get("Ticker"), e
+                )
+
         position_manager = PositionManager(
             broker=broker,
             data_provider=data_provider,
+            sheet_writer=_portfolio_sheet_writer,
             postmortem_engine=postmortem_engine,
         )
     except Exception as e:
