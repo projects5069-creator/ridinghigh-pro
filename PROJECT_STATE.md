@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-05-05 19:55:16 -05
+**Generated:** 2026-05-07 13:41:32 -05
 **Branch:** `main`
-**Latest commit:** `0a705a3` — docs: Phase 1 Day 1 research artifacts + session handoff
+**Latest commit:** `dd9cd3b` — fix(backfill): skip OHLC keys not present in post_analysis schema
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `0a705a3 (HEAD -> main) docs: Phase 1 Day 1 research artifacts + session handoff`
-- `728c9ac (origin/main, origin/HEAD) fix(dashboard): raise cache TTLs to prevent Sheets API quota 429`
+- `dd9cd3b (HEAD -> main) fix(backfill): skip OHLC keys not present in post_analysis schema`
+- `48cf095 (origin/main, origin/HEAD) docs: Phase 1 Day 1 research artifacts + session handoff`
+- `728c9ac fix(dashboard): raise cache TTLs to prevent Sheets API quota 429`
 - `976e91b config: lower AGENT_MIN_SCORE from 60 to 50`
 - `3d36d9d Tag every new post_analysis row with score_version=v2`
-- `7f0369c Fix cross_month_loaders score_version filter to accept legacy/empty rows`
 
 ---
 
@@ -32,38 +32,30 @@ _See `OPEN_ISSUES.md` for full list_
 
 | Workflow | Status | Conclusion | Started |
 |---|---|---|---|
-| Agent — Every Minute (DRY_RUN) | completed | ✅ success | 2026-05-06 00:45 UTC |
-| Agent — Every Minute (DRY_RUN) | completed | ✅ success | 2026-05-06 00:30 UTC |
-| Agent — Every Minute (DRY_RUN) | completed | ✅ success | 2026-05-06 00:15 UTC |
-| Daily Backup — post_analysis | completed | ✅ success | 2026-05-06 00:10 UTC |
-| Agent — Daily Brief Email | completed | ✅ success | 2026-05-06 00:09 UTC |
+| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-05-07 18:41 UTC |
+| Agent — Every Minute (DRY_RUN) | in_progress | ⏳ — | 2026-05-07 18:41 UTC |
+| Agent — Every Minute (DRY_RUN) | in_progress | ⏳ — | 2026-05-07 18:40 UTC |
+| RidingHigh Auto Scanner | completed | ✅ success | 2026-05-07 18:40 UTC |
+| Agent — Every Minute (DRY_RUN) | completed | ✅ success | 2026-05-07 18:39 UTC |
 
 ---
 
-## 📊 Google Sheets — showing month `2026-05`
+## 📊 Google Sheets — showing month `2026-06`
 
-_Selection: current Peru month (2026-05) has data_
+_Selection: most recent month with data (2026-06)_
 _Months in config: `2026-04`, `2026-05`, `2026-06`_
 
 | Sheet | Total rows | Last date | Status |
 |---|---|---|---|
-| timeline_live | 54,731 | 2026-05-05 | ✅ |
-| daily_snapshots | 223 | 2026-05-05 | ✅ |
-| daily_summary | 245 | 2026-05-05 | ✅ |
-| post_analysis | 10 | 2026-05-05 | ✅ |
-| portfolio | 16 | 2026-05-05 | ✅ |
-| portfolio_live | 12 | 2026-05-05 | ✅ |
-| score_tracker | 818 | 2026-05-05 | ✅ |
-| live_trades | 818 | 2026-05-05 | ✅ |
-| ticker_follow_up | 9,549 | 2026-05-05 | ✅ |
-| decision_log | 352 | — | ✅ |
-| paper_portfolio | 0 | — | ⚠️ empty |
-| score_analytics | 0 | — | ⚠️ empty |
-| postmortems | 0 | — | ⚠️ empty |
-| system_events | 0 | — | ⚠️ empty |
-| pending_suggestions | 0 | — | ⚠️ empty |
-| config_history | 0 | — | ⚠️ empty |
-| borrow_data | 0 | — | ⚠️ empty |
+| timeline_live | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| daily_snapshots | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| daily_summary | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| post_analysis | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| portfolio | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| portfolio_live | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| score_tracker | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| live_trades | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| ticker_follow_up | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
 
 ---
 

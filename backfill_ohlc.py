@@ -102,6 +102,8 @@ def run():
         stats = calculate_stats(scan_price, ohlc)
 
         for k, v in {**ohlc, **stats}.items():
+            if k not in df.columns:
+                continue  # skip columns not present in post_analysis schema (e.g. D4/D5)
             df[k] = df[k].astype(object); df.at[idx, k] = str(v) if v is not None else None
 
         updated += 1
