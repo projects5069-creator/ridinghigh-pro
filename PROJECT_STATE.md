@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-05-07 15:21:38 -05
+**Generated:** 2026-05-07 15:33:25 -05
 **Branch:** `main`
-**Latest commit:** `a24c682` — feat(dashboard): live P&L % via yfinance fallback for OPEN positions
+**Latest commit:** `0d2c78b` — polish(dashboard): add % sign to P&L % column + swap Quantity/EntryPrice
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `a24c682 (HEAD -> main) feat(dashboard): live P&L % via yfinance fallback for OPEN positions`
-- `f39b466 (origin/main, origin/HEAD) feat(dashboard): add CurrentPrice + reorder Today's Trades columns`
+- `0d2c78b (HEAD -> main) polish(dashboard): add % sign to P&L % column + swap Quantity/EntryPrice`
+- `079634d (origin/main, origin/HEAD) feat(dashboard): live P&L % via yfinance fallback for OPEN positions`
+- `f39b466 feat(dashboard): add CurrentPrice + reorder Today's Trades columns`
 - `dd93d74 fix(agent): use get_latest_bar/quote instead of missing get_current_price`
 - `5cb73d4 fix(agent): wire sheet_writer to position_manager for live updates`
-- `1a6c024 fix(agent): prevent duplicate ENTER via decision_log dual-source check`
 
 ---
 
@@ -32,11 +32,11 @@ _See `OPEN_ISSUES.md` for full list_
 
 | Workflow | Status | Conclusion | Started |
 |---|---|---|---|
-| RidingHigh Auto Scanner | completed | ✅ success | 2026-05-07 20:21 UTC |
-| Agent — Every Minute (DRY_RUN) | in_progress | ⏳ — | 2026-05-07 20:21 UTC |
-| RidingHigh Auto Scanner | completed | ✅ success | 2026-05-07 20:20 UTC |
-| Agent — Every Minute (DRY_RUN) | completed | ✅ success | 2026-05-07 20:20 UTC |
-| Agent — Every Minute (DRY_RUN) | completed | ✅ success | 2026-05-07 20:19 UTC |
+| Agent — Every Minute (DRY_RUN) | in_progress | ⏳ — | 2026-05-07 20:33 UTC |
+| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-05-07 20:33 UTC |
+| Agent — Every Minute (DRY_RUN) | completed | ✅ success | 2026-05-07 20:32 UTC |
+| RidingHigh Auto Scanner | completed | ✅ success | 2026-05-07 20:32 UTC |
+| Agent — Every Minute (DRY_RUN) | completed | ✅ success | 2026-05-07 20:31 UTC |
 
 ---
 

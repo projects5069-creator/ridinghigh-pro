@@ -333,12 +333,15 @@ def _render_today_trades(df: pd.DataFrame):
         return reason or status
 
     display_df["P&L $"] = display_df.apply(_pnl_value, axis=1).round(2)
-    display_df["P&L %"] = display_df.apply(_pnl_pct, axis=1).round(2)
+    _pnl_pct_numeric = display_df.apply(_pnl_pct, axis=1).round(2)
+    display_df["P&L %"] = _pnl_pct_numeric.apply(
+        lambda v: f"{v:+.2f}%" if pd.notna(v) and v != 0 else "—"
+    )
     display_df["Status"] = display_df.apply(_status_badge, axis=1)
 
     cols_to_show = [
         c for c in [
-            "Ticker", "EntryTime", "EntryPrice", "Quantity",
+            "Ticker", "EntryTime", "Quantity", "EntryPrice",
             "TPPrice", "SLPrice", "CurrentPrice", "P&L %",
             "ExitTime", "ExitPrice", "P&L $", "Status",
         ] if c in display_df.columns
