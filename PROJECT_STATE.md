@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-05-07 15:08:57 -05
+**Generated:** 2026-05-07 15:21:38 -05
 **Branch:** `main`
-**Latest commit:** `e412237` — feat(dashboard): add CurrentPrice + reorder Today's Trades columns
+**Latest commit:** `a24c682` — feat(dashboard): live P&L % via yfinance fallback for OPEN positions
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `e412237 (HEAD -> main) feat(dashboard): add CurrentPrice + reorder Today's Trades columns`
-- `dd93d74 (origin/main, origin/HEAD) fix(agent): use get_latest_bar/quote instead of missing get_current_price`
+- `a24c682 (HEAD -> main) feat(dashboard): live P&L % via yfinance fallback for OPEN positions`
+- `f39b466 (origin/main, origin/HEAD) feat(dashboard): add CurrentPrice + reorder Today's Trades columns`
+- `dd93d74 fix(agent): use get_latest_bar/quote instead of missing get_current_price`
 - `5cb73d4 fix(agent): wire sheet_writer to position_manager for live updates`
 - `1a6c024 fix(agent): prevent duplicate ENTER via decision_log dual-source check`
-- `bec3fb2 feat(dashboard): add Today's Trades section with P&L summary`
 
 ---
 
@@ -32,11 +32,11 @@ _See `OPEN_ISSUES.md` for full list_
 
 | Workflow | Status | Conclusion | Started |
 |---|---|---|---|
-| RidingHigh Auto Scanner | completed | ✅ success | 2026-05-07 20:08 UTC |
-| Agent — Every Minute (DRY_RUN) | completed | ✅ success | 2026-05-07 20:08 UTC |
-| RidingHigh Auto Scanner | completed | ✅ success | 2026-05-07 20:07 UTC |
-| Agent — Every Minute (DRY_RUN) | completed | ✅ success | 2026-05-07 20:07 UTC |
-| RidingHigh Auto Scanner | completed | ✅ success | 2026-05-07 20:06 UTC |
+| RidingHigh Auto Scanner | completed | ✅ success | 2026-05-07 20:21 UTC |
+| Agent — Every Minute (DRY_RUN) | in_progress | ⏳ — | 2026-05-07 20:21 UTC |
+| RidingHigh Auto Scanner | completed | ✅ success | 2026-05-07 20:20 UTC |
+| Agent — Every Minute (DRY_RUN) | completed | ✅ success | 2026-05-07 20:20 UTC |
+| Agent — Every Minute (DRY_RUN) | completed | ✅ success | 2026-05-07 20:19 UTC |
 
 ---
 

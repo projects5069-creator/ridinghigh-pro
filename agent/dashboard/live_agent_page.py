@@ -202,6 +202,34 @@ def _render_today_decisions(df: pd.DataFrame):
     st.dataframe(display_df[cols_to_show].head(50), use_container_width=True, hide_index=True)
 
 
+@st.cache_data(ttl=120)
+def _fetch_live_prices(tickers: tuple) -> dict:
+    """Fetch current/last close prices for tickers via yfinance.
+    Cached 120s to avoid hammering. Returns {ticker: price}."""
+    import yfinance as yf
+    out = {}
+    if not tickers:
+        return out
+    try:
+        data = yf.download(
+            list(tickers), period="1d", interval="1m",
+            progress=False, group_by="ticker", auto_adjust=False,
+        )
+        for tk in tickers:
+            try:
+                if len(tickers) == 1:
+                    closes = data["Close"].dropna()
+                else:
+                    closes = data[tk]["Close"].dropna()
+                if len(closes) > 0:
+                    out[tk] = float(closes.iloc[-1])
+            except (KeyError, IndexError):
+                pass
+    except Exception:
+        pass
+    return out
+
+
 def _render_today_trades(df: pd.DataFrame):
     """Render today's trades table — combined view of open + closed positions from today."""
     today_str = datetime.now(PERU_TZ).strftime("%Y-%m-%d")
@@ -246,15 +274,48 @@ def _render_today_trades(df: pd.DataFrame):
     display_df = today_df.copy()
 
     # Compute P&L column (Realized if closed, Unrealized otherwise)
+    # ── Live price enrichment via yfinance ──────────────────────
+    # If CurrentPrice is empty in Sheet (Agent didn't update yet),
+    # fetch live close from yfinance so OPEN positions show real-time P&L %.
+    open_tickers = tuple(
+        display_df[
+            display_df["Status"].astype(str).str.upper().isin(
+                [s.upper() for s in OPEN_STATUSES]
+            )
+        ]["Ticker"].dropna().unique().tolist()
+    )
+    live_prices = _fetch_live_prices(open_tickers) if open_tickers else {}
+
+    def _resolved_current_price(row):
+        # Prefer Sheet's CurrentPrice; fall back to yfinance live price
+        cp = pd.to_numeric(row.get("CurrentPrice", 0), errors="coerce")
+        if cp and cp > 0:
+            return cp
+        tk = str(row.get("Ticker", "")).strip().upper()
+        return live_prices.get(tk, 0)
+
+    display_df["CurrentPrice"] = display_df.apply(_resolved_current_price, axis=1).round(4)
+
     def _pnl_value(row):
         status = str(row.get("Status", "")).upper()
         if status in [s.upper() for s in OPEN_STATUSES]:
+            # Compute live for OPEN: short → (entry - current) * qty
+            entry = pd.to_numeric(row.get("EntryPrice", 0), errors="coerce")
+            qty = pd.to_numeric(row.get("Quantity", 0), errors="coerce")
+            curr = pd.to_numeric(row.get("CurrentPrice", 0), errors="coerce")
+            if entry and curr and qty:
+                return (entry - curr) * qty
             return pd.to_numeric(row.get("UnrealizedPnL", 0), errors="coerce")
         return pd.to_numeric(row.get("RealizedPnL", 0), errors="coerce")
 
     def _pnl_pct(row):
         status = str(row.get("Status", "")).upper()
         if status in [s.upper() for s in OPEN_STATUSES]:
+            # Compute live for OPEN: short → (entry - current) / entry * 100
+            entry = pd.to_numeric(row.get("EntryPrice", 0), errors="coerce")
+            curr = pd.to_numeric(row.get("CurrentPrice", 0), errors="coerce")
+            if entry and curr:
+                return (entry - curr) / entry * 100
             return pd.to_numeric(row.get("UnrealizedPnLPct", 0), errors="coerce")
         return pd.to_numeric(row.get("RealizedPnLPct", 0), errors="coerce")
 
