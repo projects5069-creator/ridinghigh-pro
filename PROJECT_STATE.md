@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-05-07 15:33:25 -05
+**Generated:** 2026-05-07 17:15:37 -05
 **Branch:** `main`
-**Latest commit:** `0d2c78b` — polish(dashboard): add % sign to P&L % column + swap Quantity/EntryPrice
+**Latest commit:** `aaff153` — fix(agent): use live market price for DRY_RUN entry + recalc TP/SL
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `0d2c78b (HEAD -> main) polish(dashboard): add % sign to P&L % column + swap Quantity/EntryPrice`
-- `079634d (origin/main, origin/HEAD) feat(dashboard): live P&L % via yfinance fallback for OPEN positions`
+- `aaff153 (HEAD -> main) fix(agent): use live market price for DRY_RUN entry + recalc TP/SL`
+- `5607b3a (origin/main, origin/HEAD) polish(dashboard): add % sign to P&L % column + swap Quantity/EntryPrice`
+- `079634d feat(dashboard): live P&L % via yfinance fallback for OPEN positions`
 - `f39b466 feat(dashboard): add CurrentPrice + reorder Today's Trades columns`
 - `dd93d74 fix(agent): use get_latest_bar/quote instead of missing get_current_price`
-- `5cb73d4 fix(agent): wire sheet_writer to position_manager for live updates`
 
 ---
 
@@ -32,11 +32,11 @@ _See `OPEN_ISSUES.md` for full list_
 
 | Workflow | Status | Conclusion | Started |
 |---|---|---|---|
-| Agent — Every Minute (DRY_RUN) | in_progress | ⏳ — | 2026-05-07 20:33 UTC |
-| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-05-07 20:33 UTC |
-| Agent — Every Minute (DRY_RUN) | completed | ✅ success | 2026-05-07 20:32 UTC |
-| RidingHigh Auto Scanner | completed | ✅ success | 2026-05-07 20:32 UTC |
-| Agent — Every Minute (DRY_RUN) | completed | ✅ success | 2026-05-07 20:31 UTC |
+| RidingHigh Auto Scanner | completed | ✅ success | 2026-05-07 21:37 UTC |
+| Agent — Every Minute (DRY_RUN) | completed | ✅ success | 2026-05-07 21:35 UTC |
+| Agent — Daily Brief Email | completed | ✅ success | 2026-05-07 21:30 UTC |
+| Agent — Every Minute (DRY_RUN) | completed | ✅ success | 2026-05-07 20:59 UTC |
+| RidingHigh Auto Scanner | completed | ✅ success | 2026-05-07 20:59 UTC |
 
 ---
 

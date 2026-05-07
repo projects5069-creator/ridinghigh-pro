@@ -28,7 +28,7 @@ from datetime import datetime
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
-from config import AGENT_DRY_RUN
+from config import AGENT_DRY_RUN, AGENT_TP_PCT, AGENT_SL_PCT
 from agent.execution.alpaca_broker import AlpacaBroker, SimulatedOrder
 from agent.trader.decision_logic import Decision
 
@@ -69,15 +69,18 @@ class OrderManager:
     Sheet (paper_portfolio) and Alpaca (positions).
     """
 
-    def __init__(self, broker: AlpacaBroker, sheet_writer=None):
+    def __init__(self, broker: AlpacaBroker, sheet_writer=None, data_provider=None):
         """
         Args:
             broker: AlpacaBroker instance (DRY_RUN or live)
             sheet_writer: callable(row: list) to append row to paper_portfolio.
                           If None, uses sheets_manager.get_worksheet().
+            data_provider: optional data provider with get_latest_bar(ticker).
+                          Used to get real-time price for DRY_RUN entry price.
         """
         self.broker = broker
         self._sheet_writer = sheet_writer
+        self._data_provider = data_provider
 
     def execute(self, decision: Decision) -> Decision:
         """
@@ -118,6 +121,19 @@ class OrderManager:
             float(final_order.filled_avg_price)
             if final_order.filled_avg_price else decision.price
         )
+
+        # DRY_RUN: override with live market price for realistic entry
+        if isinstance(final_order, SimulatedOrder) and self._data_provider:
+            try:
+                bar = self._data_provider.get_latest_bar(decision.ticker)
+                if bar and bar.get("close"):
+                    live_price = float(bar["close"])
+                    decision.execution_price = live_price
+                    # Recalculate TP/SL from live price
+                    decision.tp_price = round(live_price * (1 - AGENT_TP_PCT / 100), 4)
+                    decision.sl_price = round(live_price * (1 + AGENT_SL_PCT / 100), 4)
+            except Exception as e:
+                logger.warning("DRY_RUN live price lookup failed for %s: %s", decision.ticker, e)
 
         # Extract TP/SL order IDs from bracket legs
         tp_order_id, sl_order_id = self._extract_leg_ids(final_order)

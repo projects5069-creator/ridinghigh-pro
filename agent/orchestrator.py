@@ -290,8 +290,8 @@ def run() -> Dict[str, Any]:
         decision_logger = DecisionLogger(
             sheet_id=sheets_manager.get_sheet_id("decision_log"),
         )
-        order_manager = OrderManager(broker)
         data_provider = get_data_provider()
+        order_manager = OrderManager(broker, data_provider=data_provider)
         postmortem_engine = PostmortemEngine(data_provider=data_provider)
 
         # ── Sheet writer for position_manager ──────────────────────
