@@ -278,8 +278,8 @@ def _render_today_trades(df: pd.DataFrame):
     cols_to_show = [
         c for c in [
             "Ticker", "EntryTime", "EntryPrice", "Quantity",
-            "TPPrice", "SLPrice", "ExitTime", "ExitPrice",
-            "P&L $", "P&L %", "Status",
+            "TPPrice", "SLPrice", "CurrentPrice", "P&L %",
+            "ExitTime", "ExitPrice", "P&L $", "Status",
         ] if c in display_df.columns
     ]
 
