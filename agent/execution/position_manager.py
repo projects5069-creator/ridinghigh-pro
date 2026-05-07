@@ -202,11 +202,20 @@ class PositionManager:
             return False
 
     def _get_current_price(self, ticker: str) -> Optional[float]:
-        """Get current price via data_provider."""
+        """Get current price via data_provider (bar close or quote mid)."""
         if self.data_provider is None:
             return None
         try:
-            return float(self.data_provider.get_current_price(ticker))
+            bar = self.data_provider.get_latest_bar(ticker)
+            if bar and bar.get("close"):
+                return float(bar["close"])
+            quote = self.data_provider.get_latest_quote(ticker)
+            if quote:
+                bid = quote.get("bid_price") or 0
+                ask = quote.get("ask_price") or 0
+                if bid and ask:
+                    return float((bid + ask) / 2)
+            return None
         except Exception as e:
             logger.warning("Failed to get price for %s: %s", ticker, e)
             return None
