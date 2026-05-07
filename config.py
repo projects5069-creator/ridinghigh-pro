@@ -275,6 +275,12 @@ AGENT_MARKET_CAP_MAX = 2_000_000_000  # $2B maximum
 AGENT_TP_PCT = 10                  # Same as TP_THRESHOLD_PCT
 AGENT_SL_PCT = 10                  # Same as SL_THRESHOLD_PCT
 AGENT_NO_TIME_LIMIT = True         # ⚠️ DIFFERENT from MAX_HOLDING_DAYS=5
+
+# Force-close all OPEN positions at 14:55-14:59 Peru (just before market close).
+# Disabled 2026-05-07 — real trader cannot trade after market close, so simulating
+# EOD close at 15:00 with stale price corrupts TP_HIT/SL_HIT classification.
+# Open positions roll over to next trading day.
+AGENT_FORCE_EOD_CLOSE = False
 AGENT_EOD_CLOSE_MIN_BEFORE = 5     # Close 5 min before market close
 
 # Position sizing

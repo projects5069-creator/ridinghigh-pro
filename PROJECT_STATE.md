@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-05-07 17:15:37 -05
+**Generated:** 2026-05-07 17:37:08 -05
 **Branch:** `main`
-**Latest commit:** `aaff153` — fix(agent): use live market price for DRY_RUN entry + recalc TP/SL
+**Latest commit:** `0de8673` — feat(agent): gate EOD force-close behind AGENT_FORCE_EOD_CLOSE flag
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `aaff153 (HEAD -> main) fix(agent): use live market price for DRY_RUN entry + recalc TP/SL`
-- `5607b3a (origin/main, origin/HEAD) polish(dashboard): add % sign to P&L % column + swap Quantity/EntryPrice`
+- `0de8673 (HEAD -> main) feat(agent): gate EOD force-close behind AGENT_FORCE_EOD_CLOSE flag`
+- `3f4f95d (origin/main, origin/HEAD) fix(agent): use live market price for DRY_RUN entry + recalc TP/SL`
+- `5607b3a polish(dashboard): add % sign to P&L % column + swap Quantity/EntryPrice`
 - `079634d feat(dashboard): live P&L % via yfinance fallback for OPEN positions`
 - `f39b466 feat(dashboard): add CurrentPrice + reorder Today's Trades columns`
-- `dd93d74 fix(agent): use get_latest_bar/quote instead of missing get_current_price`
 
 ---
 

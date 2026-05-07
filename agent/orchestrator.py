@@ -96,7 +96,10 @@ def is_market_hours(now: Optional[datetime] = None) -> bool:
 
 
 def is_eod_window(now: Optional[datetime] = None) -> bool:
-    """True if 14:55-14:59 Peru — time to close positions before market close."""
+    """True if 14:55-14:59 Peru AND AGENT_FORCE_EOD_CLOSE is enabled."""
+    from config import AGENT_FORCE_EOD_CLOSE
+    if not AGENT_FORCE_EOD_CLOSE:
+        return False
     if now is None:
         now = datetime.now(PERU_TZ)
     return now.hour == 14 and now.minute >= 55
