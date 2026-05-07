@@ -67,6 +67,12 @@ def render_live_agent():
 
     st.divider()
 
+    # ── Section C2: Today's Trades Summary ──────────────────
+    st.subheader("📊 Today's Trades")
+    _render_today_trades(portfolio_df)
+
+    st.divider()
+
     # ── Section D: Today's Decisions ─────────────────────────
     st.subheader("📜 Today's Decisions")
     _render_today_decisions(decisions_df)
@@ -194,6 +200,93 @@ def _render_today_decisions(df: pd.DataFrame):
         display_df = display_df.sort_values("Timestamp", ascending=False)
 
     st.dataframe(display_df[cols_to_show].head(50), use_container_width=True, hide_index=True)
+
+
+def _render_today_trades(df: pd.DataFrame):
+    """Render today's trades table — combined view of open + closed positions from today."""
+    today_str = datetime.now(PERU_TZ).strftime("%Y-%m-%d")
+
+    if df.empty:
+        st.info("No trades today yet.")
+        return
+
+    # Filter to today's trades: EntryDate == today OR (still open from previous days)
+    today_mask = df.get("EntryDate", pd.Series(dtype=str)) == today_str
+    today_df = df[today_mask].copy()
+
+    if today_df.empty:
+        st.info("No trades today yet. Agent is waiting for signals.")
+        return
+
+    # ── Stats row ──
+    total = len(today_df)
+    open_count = today_df["Status"].isin(OPEN_STATUSES).sum() if "Status" in today_df.columns else 0
+    closed_df = today_df[~today_df["Status"].isin(OPEN_STATUSES)] if "Status" in today_df.columns else today_df.iloc[0:0]
+
+    wins = 0
+    losses = 0
+    realized_pnl = 0.0
+    if not closed_df.empty and "RealizedPnL" in closed_df.columns:
+        pnl_num = pd.to_numeric(closed_df["RealizedPnL"], errors="coerce")
+        wins = (pnl_num > 0).sum()
+        losses = (pnl_num < 0).sum()
+        realized_pnl = pnl_num.sum()
+
+    closed_count = len(closed_df)
+    win_rate = (wins / closed_count * 100) if closed_count > 0 else 0.0
+
+    col1, col2, col3, col4, col5 = st.columns(5)
+    col1.metric("🎯 Trades", total)
+    col2.metric("✅ Wins", int(wins))
+    col3.metric("❌ Losses", int(losses))
+    col4.metric("⏳ Open", int(open_count))
+    col5.metric("📊 Win Rate", f"{win_rate:.1f}%" if closed_count else "—")
+
+    # ── Trades table ──
+    display_df = today_df.copy()
+
+    # Compute P&L column (Realized if closed, Unrealized otherwise)
+    def _pnl_value(row):
+        status = str(row.get("Status", "")).upper()
+        if status in [s.upper() for s in OPEN_STATUSES]:
+            return pd.to_numeric(row.get("UnrealizedPnL", 0), errors="coerce")
+        return pd.to_numeric(row.get("RealizedPnL", 0), errors="coerce")
+
+    def _pnl_pct(row):
+        status = str(row.get("Status", "")).upper()
+        if status in [s.upper() for s in OPEN_STATUSES]:
+            return pd.to_numeric(row.get("UnrealizedPnLPct", 0), errors="coerce")
+        return pd.to_numeric(row.get("RealizedPnLPct", 0), errors="coerce")
+
+    def _status_badge(row):
+        reason = str(row.get("ExitReason", "")).upper()
+        status = str(row.get("Status", "")).upper()
+        if "TP" in reason:
+            return "🟢 TP_HIT"
+        if "SL" in reason:
+            return "🔴 SL_HIT"
+        if "EOD" in reason or "EOD_CLOSE" in reason:
+            return "🟡 EOD_CLOSED"
+        if status in [s.upper() for s in OPEN_STATUSES]:
+            return "⏳ OPEN"
+        return reason or status
+
+    display_df["P&L $"] = display_df.apply(_pnl_value, axis=1).round(2)
+    display_df["P&L %"] = display_df.apply(_pnl_pct, axis=1).round(2)
+    display_df["Status"] = display_df.apply(_status_badge, axis=1)
+
+    cols_to_show = [
+        c for c in [
+            "Ticker", "EntryTime", "EntryPrice", "Quantity",
+            "TPPrice", "SLPrice", "ExitTime", "ExitPrice",
+            "P&L $", "P&L %", "Status",
+        ] if c in display_df.columns
+    ]
+
+    if "EntryTime" in display_df.columns:
+        display_df = display_df.sort_values("EntryTime", ascending=False)
+
+    st.dataframe(display_df[cols_to_show], use_container_width=True, hide_index=True)
 
 
 def _render_emergency_stop():
