@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-05-07 13:58:01 -05
+**Generated:** 2026-05-07 14:19:05 -05
 **Branch:** `main`
-**Latest commit:** `ddbd40e` — feat(dashboard): add Today's Trades section with P&L summary
+**Latest commit:** `70a1c74` — fix(agent): prevent duplicate ENTER via decision_log dual-source check
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `ddbd40e (HEAD -> main) feat(dashboard): add Today's Trades section with P&L summary`
-- `072fb4f (origin/main, origin/HEAD) fix(agent): write TP/SL prices to portfolio + simulate TP/SL exits in DRY_RUN`
+- `70a1c74 (HEAD -> main) fix(agent): prevent duplicate ENTER via decision_log dual-source check`
+- `bec3fb2 (origin/main, origin/HEAD) feat(dashboard): add Today's Trades section with P&L summary`
+- `072fb4f fix(agent): write TP/SL prices to portfolio + simulate TP/SL exits in DRY_RUN`
 - `c30a896 fix(backfill): skip OHLC keys not present in post_analysis schema`
 - `48cf095 docs: Phase 1 Day 1 research artifacts + session handoff`
-- `728c9ac fix(dashboard): raise cache TTLs to prevent Sheets API quota 429`
 
 ---
 
@@ -32,11 +32,11 @@ _See `OPEN_ISSUES.md` for full list_
 
 | Workflow | Status | Conclusion | Started |
 |---|---|---|---|
-| Agent — Every Minute (DRY_RUN) | queued | ⏳ — | 2026-05-07 18:58 UTC |
-| RidingHigh Auto Scanner | queued | ⏳ — | 2026-05-07 18:58 UTC |
-| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-05-07 18:57 UTC |
-| Agent — Every Minute (DRY_RUN) | completed | ✅ success | 2026-05-07 18:57 UTC |
-| RidingHigh Auto Scanner | completed | ✅ success | 2026-05-07 18:56 UTC |
+| RidingHigh Auto Scanner | queued | ⏳ — | 2026-05-07 19:19 UTC |
+| Agent — Every Minute (DRY_RUN) | queued | ⏳ — | 2026-05-07 19:19 UTC |
+| Agent — Every Minute (DRY_RUN) | completed | ✅ success | 2026-05-07 19:18 UTC |
+| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-05-07 19:18 UTC |
+| Agent — Every Minute (DRY_RUN) | completed | ✅ success | 2026-05-07 19:17 UTC |
 
 ---
 
@@ -47,7 +47,7 @@ _Months in config: `2026-04`, `2026-05`, `2026-06`_
 
 | Sheet | Total rows | Last date | Status |
 |---|---|---|---|
-| timeline_live | 94,972 | 2026-05-07 | ✅ |
+| timeline_live | 96,161 | 2026-05-07 | ✅ |
 | daily_snapshots | 352 | 2026-05-06 | ✅ |
 | daily_summary | 383 | 2026-05-06 | ✅ |
 | post_analysis | 14 | 2026-05-06 | ✅ |
@@ -56,7 +56,7 @@ _Months in config: `2026-04`, `2026-05`, `2026-06`_
 | score_tracker | 1,058 | 2026-05-07 | ✅ |
 | live_trades | 1,058 | 2026-05-07 | ✅ |
 | ticker_follow_up | 11,528 | 2026-05-07 | ✅ |
-| decision_log | 9,358 | — | ✅ |
+| decision_log | 9,588 | — | ✅ |
 | paper_portfolio | 10 | — | ✅ |
 | score_analytics | 0 | — | ⚠️ empty |
 | postmortems | 0 | — | ⚠️ empty |

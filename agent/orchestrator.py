@@ -157,14 +157,32 @@ def build_account_state(broker=None) -> Dict[str, Any]:
         state["cold_start_concurrent_used"] = len(state["existing_positions"])
 
         # Today's ENTER decisions from decision_log
+        # ALSO add tickers to existing_positions to prevent duplicate ENTER
+        # when paper_portfolio sheet write hasn't propagated yet (race condition fix)
         ws_dl = sheets_manager.get_worksheet("decision_log")
         if ws_dl:
             records = ws_dl.get_all_records()
             today = datetime.now(PERU_TZ).strftime("%Y-%m-%d")
+            # Build set of tickers that exited today (so we can re-enter them)
+            exited_today = set()
+            ws_pf2 = sheets_manager.get_worksheet("paper_portfolio")
+            if ws_pf2:
+                pf_records = ws_pf2.get_all_records()
+                for pf_row in pf_records:
+                    exit_date = str(pf_row.get("ExitDate", "")).strip()
+                    status = str(pf_row.get("Status", "")).upper()
+                    if exit_date == today and status not in ("OPEN", "DRY_RUN_OPEN"):
+                        ticker = str(pf_row.get("Ticker", "")).strip().upper()
+                        if ticker:
+                            exited_today.add(ticker)
+            # Add today's ENTER tickers to existing_positions UNLESS they exited today
             for row in records:
                 ts = str(row.get("Timestamp", ""))
                 if ts.startswith(today) and str(row.get("Action", "")).upper() == "ENTER":
                     state["cold_start_daily_used"] += 1
+                    ticker = str(row.get("Ticker", "")).strip().upper()
+                    if ticker and ticker not in exited_today:
+                        state["existing_positions"].add(ticker)
     except Exception as e:
         logger.warning("Could not build full account_state: %s", e)
 
