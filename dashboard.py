@@ -74,7 +74,7 @@ from config import (
     SL_THRESHOLD_FRAC,
     DATA_CUTOFF_DATE,
 )
-from agent.dashboard import render_live_agent, render_score_brain
+from agent.dashboard import render_live_agent, render_trade_history, render_score_brain
 
 st.set_page_config(
     page_title="RidingHigh Pro v14.6",
@@ -4892,6 +4892,7 @@ def main():
         "📦 Timeline Archive",
         "🖥️ System Overview",
         "🤖 Live Agent",
+        "📊 Trade History",
         "🧠 Score Brain",
     ]
 
@@ -4931,6 +4932,8 @@ def main():
         system_overview_page()
     elif page == "🤖 Live Agent":
         render_live_agent()
+    elif page == "📊 Trade History":
+        render_trade_history()
     elif page == "🧠 Score Brain":
         render_score_brain()
 

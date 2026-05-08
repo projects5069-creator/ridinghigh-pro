@@ -11,5 +11,6 @@ Both pages registered in main dashboard.py via the navigation radio.
 
 from agent.dashboard.live_agent_page import render_live_agent
 from agent.dashboard.score_brain_page import render_score_brain
+from agent.dashboard.trade_history_page import render_trade_history
 
-__all__ = ["render_live_agent", "render_score_brain"]
+__all__ = ["render_live_agent", "render_trade_history", "render_score_brain"]

@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-05-08 17:53:45 -05
+**Generated:** 2026-05-08 18:27:08 -05
 **Branch:** `main`
-**Latest commit:** `219bee7` — fix(agent): add warning logs for silent None prices in position_manager
+**Latest commit:** `ba48774` — feat(dashboard): new Trade History page with audit trail + KPIs + cumulative P&L
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `219bee7 (HEAD -> main) fix(agent): add warning logs for silent None prices in position_manager`
-- `fc05fe4 (origin/main, origin/HEAD) feat(agent): gate EOD force-close behind AGENT_FORCE_EOD_CLOSE flag`
+- `ba48774 (HEAD -> main) feat(dashboard): new Trade History page with audit trail + KPIs + cumulative P&L`
+- `e5860ac fix(agent): add warning logs for silent None prices in position_manager`
+- `fc05fe4 feat(agent): gate EOD force-close behind AGENT_FORCE_EOD_CLOSE flag`
 - `3f4f95d fix(agent): use live market price for DRY_RUN entry + recalc TP/SL`
 - `5607b3a polish(dashboard): add % sign to P&L % column + swap Quantity/EntryPrice`
-- `079634d feat(dashboard): live P&L % via yfinance fallback for OPEN positions`
 
 ---
 
@@ -32,11 +32,11 @@ _See `OPEN_ISSUES.md` for full list_
 
 | Workflow | Status | Conclusion | Started |
 |---|---|---|---|
+| Daily Backup — post_analysis | completed | ✅ success | 2026-05-08 23:15 UTC |
 | Daily Backup — post_analysis | completed | ✅ success | 2026-05-08 21:38 UTC |
 | Agent — Daily Brief Email | completed | ✅ success | 2026-05-08 21:30 UTC |
 | Agent — End of Day | completed | ✅ success | 2026-05-08 21:00 UTC |
 | Agent — Every Minute (DRY_RUN) | completed | ✅ success | 2026-05-08 20:59 UTC |
-| RidingHigh Auto Scanner | completed | ✅ success | 2026-05-08 20:59 UTC |
 
 ---
 
@@ -62,7 +62,7 @@ _Months in config: `2026-04`, `2026-05`, `2026-06`_
 | postmortems | 66 | — | ✅ |
 | system_events | 0 | — | ⚠️ empty |
 | pending_suggestions | 0 | — | ⚠️ empty |
-| config_history | ? | ? | ❌ APIError: [503]: The service is currentl |
+| config_history | 0 | — | ⚠️ empty |
 | borrow_data | 0 | — | ⚠️ empty |
 
 ---
