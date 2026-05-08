@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-05-08 18:27:08 -05
+**Generated:** 2026-05-08 18:54:52 -05
 **Branch:** `main`
-**Latest commit:** `ba48774` — feat(dashboard): new Trade History page with audit trail + KPIs + cumulative P&L
+**Latest commit:** `494597a` — fix(dashboard): resolve Arrow ValueError from mixed-type columns in Trade History table
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `ba48774 (HEAD -> main) feat(dashboard): new Trade History page with audit trail + KPIs + cumulative P&L`
-- `e5860ac fix(agent): add warning logs for silent None prices in position_manager`
+- `494597a (HEAD -> main) fix(dashboard): resolve Arrow ValueError from mixed-type columns in Trade History table`
+- `128bebe (origin/main, origin/HEAD) feat(dashboard): new Trade History page with audit trail + KPIs + cumulative P&L`
+- `9b641b5 fix(agent): add warning logs for silent None prices in position_manager`
+- `219bee7 fix(agent): add warning logs for silent None prices in position_manager`
 - `fc05fe4 feat(agent): gate EOD force-close behind AGENT_FORCE_EOD_CLOSE flag`
-- `3f4f95d fix(agent): use live market price for DRY_RUN entry + recalc TP/SL`
-- `5607b3a polish(dashboard): add % sign to P&L % column + swap Quantity/EntryPrice`
 
 ---
 
@@ -32,11 +32,11 @@ _See `OPEN_ISSUES.md` for full list_
 
 | Workflow | Status | Conclusion | Started |
 |---|---|---|---|
+| Agent — Every Minute (DRY_RUN) | completed | ✅ success | 2026-05-08 23:41 UTC |
 | Daily Backup — post_analysis | completed | ✅ success | 2026-05-08 23:15 UTC |
 | Daily Backup — post_analysis | completed | ✅ success | 2026-05-08 21:38 UTC |
 | Agent — Daily Brief Email | completed | ✅ success | 2026-05-08 21:30 UTC |
 | Agent — End of Day | completed | ✅ success | 2026-05-08 21:00 UTC |
-| Agent — Every Minute (DRY_RUN) | completed | ✅ success | 2026-05-08 20:59 UTC |
 
 ---
 

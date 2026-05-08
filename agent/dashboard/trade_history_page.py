@@ -299,30 +299,43 @@ def _render_trades_table(df: pd.DataFrame):
     # Compute columns
     display["Status_Badge"] = display.apply(_status_badge, axis=1)
     display["_current_price"] = display.apply(_current_price, axis=1)
-    display["HoldDuration"] = display.apply(_hold_duration, axis=1)
-    display["P&L $"] = display.apply(_pnl_dollar, axis=1).round(2)
+    display["HoldDuration"] = display.apply(_hold_duration, axis=1).fillna("—").replace("", "—")
+    pnl_dollar_raw = display.apply(_pnl_dollar, axis=1).round(2)
     pnl_pct_raw = display.apply(_pnl_pct, axis=1).round(2)
+
+    # Format P&L columns as strings to avoid mixed-type Arrow errors
+    display["P&L $"] = pnl_dollar_raw.apply(
+        lambda v: f"${v:+,.2f}" if pd.notna(v) and v != 0 else "—"
+    )
     display["P&L %"] = pnl_pct_raw.apply(
         lambda v: f"{v:+.2f}%" if pd.notna(v) and v != 0 else "—"
     )
 
-    # Format prices
+    # Format price columns as strings
+    def _fmt_price(series, allow_zero=True):
+        return pd.to_numeric(series, errors="coerce").apply(
+            lambda v: f"${v:.2f}" if pd.notna(v) and (allow_zero or v != 0) else "—"
+        )
+
     if "EntryPrice" in display.columns:
-        display["EntryPrice"] = pd.to_numeric(display["EntryPrice"], errors="coerce").apply(
-            lambda v: f"${v:.2f}" if pd.notna(v) else ""
-        )
+        display["EntryPrice"] = _fmt_price(display["EntryPrice"])
     if "TPPrice" in display.columns:
-        display["TPPrice"] = pd.to_numeric(display["TPPrice"], errors="coerce").apply(
-            lambda v: f"${v:.2f}" if pd.notna(v) else ""
-        )
+        display["TPPrice"] = _fmt_price(display["TPPrice"])
     if "SLPrice" in display.columns:
-        display["SLPrice"] = pd.to_numeric(display["SLPrice"], errors="coerce").apply(
-            lambda v: f"${v:.2f}" if pd.notna(v) else ""
-        )
+        display["SLPrice"] = _fmt_price(display["SLPrice"])
     if "ExitPrice" in display.columns:
-        display["ExitPrice"] = pd.to_numeric(display["ExitPrice"], errors="coerce").apply(
-            lambda v: f"${v:.2f}" if pd.notna(v) and v != 0 else ""
+        display["ExitPrice"] = _fmt_price(display["ExitPrice"], allow_zero=False)
+
+    # Format Quantity as string
+    if "Quantity" in display.columns:
+        display["Quantity"] = pd.to_numeric(display["Quantity"], errors="coerce").apply(
+            lambda v: str(int(v)) if pd.notna(v) else "—"
         )
+
+    # Fill NaN/empty in remaining text columns to ensure uniform string dtype
+    for col in ("EntryDate", "EntryTime", "ExitDate", "ExitTime", "ExitReason"):
+        if col in display.columns:
+            display[col] = display[col].fillna("—").replace("", "—").astype(str)
 
     # Rename for display
     display = display.rename(columns={"Status_Badge": "Status"})
