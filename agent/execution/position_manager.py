@@ -153,6 +153,11 @@ class PositionManager:
         # Update current price + PnL
         current_price = self._get_current_price(ticker)
         if current_price is None:
+            logger.warning(
+                "Skipping price update for %s (position %s): "
+                "_get_current_price returned None — CurrentPrice will NOT be written to sheet",
+                ticker, pos.get("PositionID", "?"),
+            )
             return "updated"  # graceful skip
 
         # DRY_RUN: simulate TP/SL via price comparison (no real bracket fills)
@@ -215,6 +220,13 @@ class PositionManager:
                 ask = quote.get("ask_price") or 0
                 if bid and ask:
                     return float((bid + ask) / 2)
+            # Both methods failed — log which ones returned nothing
+            bar_status = "empty/None" if not bar else "no 'close' key"
+            quote_status = "empty/None" if not quote else "no valid bid/ask"
+            logger.warning(
+                "All price sources failed for %s: get_latest_bar=%s, get_latest_quote=%s",
+                ticker, bar_status, quote_status,
+            )
             return None
         except Exception as e:
             logger.warning("Failed to get price for %s: %s", ticker, e)
