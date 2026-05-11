@@ -105,10 +105,10 @@ class DataSentinel:
             from agent.sentinel.checks.price_sanity import check_price_sanity
             self._checks.append(("price_sanity", check_price_sanity))
 
-        # Phase 3 (next):
-        # SENTINEL_CHECK_PRICE_FRESHNESS (Alpaca call)
-        # SENTINEL_CHECK_QUOTA (writes/min counter)
-        # SENTINEL_CHECK_PROVIDER (heartbeat)
+        from config import SENTINEL_CHECK_PRICE_FRESHNESS
+        if SENTINEL_CHECK_PRICE_FRESHNESS:
+            from agent.sentinel.checks.price_freshness import check_price_freshness
+            self._checks.append(("price_freshness", check_price_freshness))
 
     def check_signal(self, signal: Dict[str, Any],
                      market_state: Optional[Dict[str, Any]] = None) -> SentinelResult:
@@ -172,30 +172,57 @@ class DataSentinel:
         )
 
     def check_system(self, account_state: Dict[str, Any],
-                     today_enters: int = 0) -> SentinelResult:
+                     today_enters: int = 0,
+                     market_state: Optional[Dict[str, Any]] = None) -> SentinelResult:
         """
-        System-level check (runs once per orchestrator run, not per signal).
-
-        Validates global state: paper_portfolio integrity, etc.
+        System-level checks (run once per orchestrator run).
         Returns BLOCK if entire run should HALT.
+
+        Checks: position_sync, quota_health, provider_heartbeat.
+        Returns worst severity across all.
         """
         if not self.enabled or self.mode == "off":
             return SentinelResult(decision="ALLOW", reason="SENTINEL_DISABLED")
 
-        from config import SENTINEL_CHECK_POSITION_SYNC
+        from config import (
+            SENTINEL_CHECK_POSITION_SYNC,
+            SENTINEL_CHECK_QUOTA,
+            SENTINEL_CHECK_PROVIDER,
+        )
+
+        market_state = market_state or {}
+        results = []
 
         if SENTINEL_CHECK_POSITION_SYNC:
             from agent.sentinel.checks.position_sync import check_position_sync
-            result = check_position_sync(account_state, today_enters)
+            results.append(("position_sync", check_position_sync(account_state, today_enters)))
 
-            # Shadow mode override
-            if self.mode == "shadow" and result.decision == "BLOCK":
-                logger.info("[SHADOW] System check would HALT: %s", result.reason)
-                return SentinelResult(decision="ALLOW", reason=f"SHADOW_{result.reason}",
-                                      details=result.details)
-            return result
+        if SENTINEL_CHECK_QUOTA:
+            from agent.sentinel.checks.quota_health import check_quota_health
+            results.append(("quota_health", check_quota_health()))
 
-        return SentinelResult(decision="ALLOW", reason="NO_SYSTEM_CHECKS")
+        if SENTINEL_CHECK_PROVIDER:
+            from agent.sentinel.checks.provider_heartbeat import check_provider_heartbeat
+            results.append(("provider_heartbeat", check_provider_heartbeat(market_state)))
+
+        if not results:
+            return SentinelResult(decision="ALLOW", reason="NO_SYSTEM_CHECKS")
+
+        # Worst severity wins (BLOCK > WARN > ALLOW)
+        worst = SentinelResult(decision="ALLOW", reason="OK")
+        for name, r in results:
+            if r.decision == "BLOCK":
+                worst = r
+                break  # BLOCK is final
+            elif r.decision == "WARN" and worst.decision == "ALLOW":
+                worst = r
+
+        # Shadow mode override
+        if self.mode == "shadow" and worst.decision == "BLOCK":
+            logger.info("[SHADOW] System check would HALT: %s", worst.reason)
+            return SentinelResult(decision="ALLOW", reason=f"SHADOW_{worst.reason}",
+                                  details=worst.details)
+        return worst
 
 
 # ────────────────────────────────────────────────────────────────────

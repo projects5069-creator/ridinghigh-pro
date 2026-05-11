@@ -376,7 +376,11 @@ def run() -> Dict[str, Any]:
 
     # System-level check (HALT entire run if fails)
     today_enters_count = len([p for p in account_state.get("existing_positions", set())])
-    sys_result = sentinel.check_system(account_state, today_enters=today_enters_count)
+    sys_result = sentinel.check_system(
+        account_state,
+        today_enters=today_enters_count,
+        market_state={"data_provider": data_provider} if 'data_provider' in dir() else None,
+    )
     if sys_result.is_block:
         logger.error("Sentinel SYSTEM HALT: %s — skipping run. Details: %s",
                      sys_result.reason, sys_result.details)
@@ -401,6 +405,7 @@ def run() -> Dict[str, Any]:
                 # Data Sentinel gate (shadow mode by default)
                 sentinel_result = sentinel.check_signal(signal, market_state={
                     "account_state": account_state,
+                    "data_provider": data_provider if 'data_provider' in dir() else None,
                 })
                 if sentinel_result.is_block:
                     sentinel_blocks += 1

@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-05-11 15:06:09 -05
+**Generated:** 2026-05-11 18:14:07 -05
 **Branch:** `main`
-**Latest commit:** `5861dce` — feat(sentinel): Phase 2 — 4 real checks (completeness, scan, price, position)
+**Latest commit:** `79c9d5d` — feat(sentinel): Phase 3 — 3 advanced checks with API integration
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `5861dce (HEAD -> main) feat(sentinel): Phase 2 — 4 real checks (completeness, scan, price, position)`
-- `dd878cc (origin/main, origin/HEAD) feat(sentinel): DataSentinel Phase 1 Foundation (shadow mode)`
+- `79c9d5d (HEAD -> main) feat(sentinel): Phase 3 — 3 advanced checks with API integration`
+- `52cec3c (origin/main, origin/HEAD) feat(sentinel): Phase 2 — 4 real checks (completeness, scan, price, position)`
+- `dd878cc feat(sentinel): DataSentinel Phase 1 Foundation (shadow mode)`
 - `8379d9b fix: filter NaN from FirstScanTime/LastScanTime, add Q8 health check`
 - `810a799 Add files via upload`
-- `b1a4e4f fix(agent): SKIP decisions to stdout, count Sheet write errors`
 
 ---
 
@@ -32,11 +32,11 @@ _See `OPEN_ISSUES.md` for full list_
 
 | Workflow | Status | Conclusion | Started |
 |---|---|---|---|
-| RidingHigh Auto Scanner | queued | ⏳ — | 2026-05-11 20:06 UTC |
-| Agent — Every Minute (DRY_RUN) | in_progress | ⏳ — | 2026-05-11 20:06 UTC |
-| RidingHigh Auto Scanner | completed | ✅ success | 2026-05-11 20:05 UTC |
-| Agent — Every Minute (DRY_RUN) | completed | ✅ success | 2026-05-11 20:05 UTC |
-| RidingHigh Auto Scanner | completed | ✅ success | 2026-05-11 20:04 UTC |
+| Agent — Every Minute (DRY_RUN) | completed | ✅ success | 2026-05-11 22:38 UTC |
+| RidingHigh Auto Scanner | completed | ✅ success | 2026-05-11 22:38 UTC |
+| Health Audit | completed | ✅ success | 2026-05-11 21:51 UTC |
+| Agent — Daily Brief Email | completed | ✅ success | 2026-05-11 21:30 UTC |
+| Agent — End of Day | completed | ✅ success | 2026-05-11 21:00 UTC |
 
 ---
 
@@ -69,8 +69,8 @@ _Months in config: `2026-04`, `2026-05`, `2026-06`_
 
 ## 🩺 Health
 
-- ⚠️ 20 uncommitted file(s):
--    - 20 new/untracked
+- ⚠️ 22 uncommitted file(s):
+-    - 22 new/untracked
 
 ---
 
