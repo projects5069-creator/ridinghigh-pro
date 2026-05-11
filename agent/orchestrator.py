@@ -374,6 +374,23 @@ def run() -> Dict[str, Any]:
     sentinel = get_sentinel()
     sentinel_blocks = 0
 
+    # System-level check (HALT entire run if fails)
+    today_enters_count = len([p for p in account_state.get("existing_positions", set())])
+    sys_result = sentinel.check_system(account_state, today_enters=today_enters_count)
+    if sys_result.is_block:
+        logger.error("Sentinel SYSTEM HALT: %s — skipping run. Details: %s",
+                     sys_result.reason, sys_result.details)
+        summary["errors"] += 1
+        try:
+            from agent.notifications.email_sender import send_alert
+            send_alert(
+                f"Sentinel HALT: {sys_result.reason}",
+                f"Reason: {sys_result.reason}\nDetails: {sys_result.details}\nRun at {summary['timestamp']}",
+            )
+        except Exception as e:
+            logger.error("Failed to send HALT alert: %s", e)
+        return summary
+
     if not signals:
         logger.info("No signals to process this minute")
     else:

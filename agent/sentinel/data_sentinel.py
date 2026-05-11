@@ -86,14 +86,29 @@ class DataSentinel:
                     self.enabled, self.mode, len(self._checks))
 
     def _load_checks(self):
-        """Load enabled checks from config. Phase 1: only dummy check."""
-        from agent.sentinel.checks.dummy_allow import check_dummy_allow
-        self._checks.append(("dummy_allow", check_dummy_allow))
+        """Load enabled per-signal checks from config."""
+        from config import (
+            SENTINEL_CHECK_COMPLETENESS,
+            SENTINEL_CHECK_SCAN_FRESHNESS,
+            SENTINEL_CHECK_PRICE_SANITY,
+        )
 
-        # Phase 2 (next session):
-        # from agent.sentinel.checks.completeness import check_completeness
-        # self._checks.append(("completeness", check_completeness))
-        # ... etc
+        if SENTINEL_CHECK_COMPLETENESS:
+            from agent.sentinel.checks.completeness import check_completeness
+            self._checks.append(("completeness", check_completeness))
+
+        if SENTINEL_CHECK_SCAN_FRESHNESS:
+            from agent.sentinel.checks.scan_freshness import check_scan_freshness
+            self._checks.append(("scan_freshness", check_scan_freshness))
+
+        if SENTINEL_CHECK_PRICE_SANITY:
+            from agent.sentinel.checks.price_sanity import check_price_sanity
+            self._checks.append(("price_sanity", check_price_sanity))
+
+        # Phase 3 (next):
+        # SENTINEL_CHECK_PRICE_FRESHNESS (Alpaca call)
+        # SENTINEL_CHECK_QUOTA (writes/min counter)
+        # SENTINEL_CHECK_PROVIDER (heartbeat)
 
     def check_signal(self, signal: Dict[str, Any],
                      market_state: Optional[Dict[str, Any]] = None) -> SentinelResult:
@@ -155,6 +170,32 @@ class DataSentinel:
             checks_run=checks_run,
             checks_failed=checks_failed,
         )
+
+    def check_system(self, account_state: Dict[str, Any],
+                     today_enters: int = 0) -> SentinelResult:
+        """
+        System-level check (runs once per orchestrator run, not per signal).
+
+        Validates global state: paper_portfolio integrity, etc.
+        Returns BLOCK if entire run should HALT.
+        """
+        if not self.enabled or self.mode == "off":
+            return SentinelResult(decision="ALLOW", reason="SENTINEL_DISABLED")
+
+        from config import SENTINEL_CHECK_POSITION_SYNC
+
+        if SENTINEL_CHECK_POSITION_SYNC:
+            from agent.sentinel.checks.position_sync import check_position_sync
+            result = check_position_sync(account_state, today_enters)
+
+            # Shadow mode override
+            if self.mode == "shadow" and result.decision == "BLOCK":
+                logger.info("[SHADOW] System check would HALT: %s", result.reason)
+                return SentinelResult(decision="ALLOW", reason=f"SHADOW_{result.reason}",
+                                      details=result.details)
+            return result
+
+        return SentinelResult(decision="ALLOW", reason="NO_SYSTEM_CHECKS")
 
 
 # ────────────────────────────────────────────────────────────────────
