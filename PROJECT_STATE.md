@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-05-11 14:21:00 -05
+**Generated:** 2026-05-11 14:50:44 -05
 **Branch:** `main`
-**Latest commit:** `1e63296` — fix: filter NaN from FirstScanTime/LastScanTime, add Q8 health check
+**Latest commit:** `e22ed92` — feat(sentinel): DataSentinel Phase 1 Foundation (shadow mode)
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `1e63296 (HEAD -> main) fix: filter NaN from FirstScanTime/LastScanTime, add Q8 health check`
-- `b1a4e4f (origin/main, origin/HEAD) fix(agent): SKIP decisions to stdout, count Sheet write errors`
+- `e22ed92 (HEAD -> main) feat(sentinel): DataSentinel Phase 1 Foundation (shadow mode)`
+- `8379d9b (origin/main, origin/HEAD) fix: filter NaN from FirstScanTime/LastScanTime, add Q8 health check`
+- `810a799 Add files via upload`
+- `b1a4e4f fix(agent): SKIP decisions to stdout, count Sheet write errors`
 - `f46b570 fix(dashboard): bullet-proof Trade History table rebuild as pure string DataFrame`
-- `978e3be fix(dashboard): cast Trade History columns to string before st.dataframe`
-- `8a9da52 fix(dashboard): resolve Arrow ValueError from mixed-type columns in Trade History table`
 
 ---
 
@@ -32,11 +32,11 @@ _See `OPEN_ISSUES.md` for full list_
 
 | Workflow | Status | Conclusion | Started |
 |---|---|---|---|
-| Agent — Morning Brief Email | in_progress | ⏳ — | 2026-05-11 19:20 UTC |
-| Agent — Every Minute (DRY_RUN) | in_progress | ⏳ — | 2026-05-11 19:20 UTC |
-| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-05-11 19:20 UTC |
-| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-05-11 19:19 UTC |
-| Agent — Every Minute (DRY_RUN) | completed | ✅ success | 2026-05-11 19:19 UTC |
+| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-05-11 19:50 UTC |
+| Agent — Every Minute (DRY_RUN) | in_progress | ⏳ — | 2026-05-11 19:50 UTC |
+| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-05-11 19:49 UTC |
+| Agent — Every Minute (DRY_RUN) | completed | ✅ success | 2026-05-11 19:49 UTC |
+| Agent — Every Minute (DRY_RUN) | completed | ✅ success | 2026-05-11 19:48 UTC |
 
 ---
 
@@ -47,30 +47,30 @@ _Months in config: `2026-04`, `2026-05`, `2026-06`_
 
 | Sheet | Total rows | Last date | Status |
 |---|---|---|---|
-| timeline_live | 132,241 | 2026-05-11 | ✅ |
+| timeline_live | 134,736 | 2026-05-11 | ✅ |
 | daily_snapshots | 560 | 2026-05-08 | ✅ |
 | daily_summary | 599 | 2026-05-08 | ✅ |
-| post_analysis | 21 | 2026-05-08 | ✅ |
-| portfolio | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| post_analysis | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| portfolio | 28 | 2026-05-08 | ✅ |
 | portfolio_live | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
 | score_tracker | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
 | live_trades | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| ticker_follow_up | 12,477 | 2026-05-08 | ✅ |
+| ticker_follow_up | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
 | decision_log | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
 | paper_portfolio | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| score_analytics | 0 | — | ⚠️ empty |
-| postmortems | 163 | — | ✅ |
+| score_analytics | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| postmortems | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
 | system_events | 0 | — | ⚠️ empty |
 | pending_suggestions | 0 | — | ⚠️ empty |
-| config_history | 0 | — | ⚠️ empty |
-| borrow_data | 0 | — | ⚠️ empty |
+| config_history | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| borrow_data | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
 
 ---
 
 ## 🩺 Health
 
-- ⚠️ 16 uncommitted file(s):
--    - 16 new/untracked
+- ⚠️ 18 uncommitted file(s):
+-    - 18 new/untracked
 
 ---
 

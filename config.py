@@ -299,3 +299,28 @@ AGENT_LIVE_PAPER = False           # Becomes True after M10 approval
 
 # Postmortem schema versioning — bump when score formula changes
 AGENT_SCORE_VERSION = "v2.6"
+
+
+# ════════════════════════════════════════════════════════════════════
+# Data Sentinel — gatekeeper layer (Phase 1 added 2026-05-11)
+# ════════════════════════════════════════════════════════════════════
+DATA_SENTINEL_ENABLED = True
+SENTINEL_MODE = "shadow"  # "shadow" (log only) | "active" (block) | "off"
+
+# Per-check enable flags (Phase 2 + 3 use these)
+SENTINEL_CHECK_PRICE_FRESHNESS = True       # FINVIZ vs Alpaca delta
+SENTINEL_CHECK_COMPLETENESS = True          # 7 required metrics
+SENTINEL_CHECK_SCAN_FRESHNESS = True        # scan age in minutes
+SENTINEL_CHECK_QUOTA = True                 # Sheets writes/min
+SENTINEL_CHECK_PROVIDER = True              # heartbeat to Alpaca
+SENTINEL_CHECK_PRICE_SANITY = True          # min/max USD bounds
+SENTINEL_CHECK_POSITION_SYNC = True         # paper_portfolio integrity
+
+# Thresholds
+SENTINEL_PRICE_DELTA_MAX_PCT = 2.0          # 2% gap = stale
+SENTINEL_SCAN_MAX_AGE_MINUTES = 3           # warn at 3 min
+SENTINEL_SCAN_MAX_AGE_BLOCK_MINUTES = 5     # block at 5 min
+SENTINEL_QUOTA_DEFENSIVE_THRESHOLD = 50     # writes/min → defensive
+SENTINEL_QUOTA_HALT_THRESHOLD = 60          # writes/min → halt
+SENTINEL_PRICE_MIN_USD = 0.01
+SENTINEL_PRICE_MAX_USD = 10000.0

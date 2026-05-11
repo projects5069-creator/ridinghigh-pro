@@ -280,6 +280,7 @@ def run() -> Dict[str, Any]:
     # Initialize components
     try:
         from agent.trader.trader import Trader
+        from agent.sentinel.data_sentinel import get_sentinel
         from agent.logging.decision_logger import DecisionLogger
         from agent.execution.alpaca_broker import AlpacaBroker
         from agent.execution.order_manager import OrderManager
@@ -370,6 +371,9 @@ def run() -> Dict[str, Any]:
     signals = read_latest_signals()
     summary["signals"] = len(signals)
 
+    sentinel = get_sentinel()
+    sentinel_blocks = 0
+
     if not signals:
         logger.info("No signals to process this minute")
     else:
@@ -377,6 +381,18 @@ def run() -> Dict[str, Any]:
         for signal in signals:
             ticker = signal.get("ticker", "?")
             try:
+                # Data Sentinel gate (shadow mode by default)
+                sentinel_result = sentinel.check_signal(signal, market_state={
+                    "account_state": account_state,
+                })
+                if sentinel_result.is_block:
+                    sentinel_blocks += 1
+                    logger.info("Sentinel BLOCK %s: %s", ticker, sentinel_result.reason)
+                    summary["skips"] += 1
+                    continue
+                if sentinel_result.is_warn:
+                    logger.warning("Sentinel WARN %s: %s", ticker, sentinel_result.reason)
+
                 decision = trader.evaluate(signal, account_state)
                 log_result = decision_logger.log(decision)
                 if log_result is None:
@@ -442,9 +458,10 @@ def run() -> Dict[str, Any]:
 
     # Summary
     logger.info(
-        "Run complete: signals=%d, decisions=%d (ENTER=%d, SKIP=%d), errors=%d",
+        "Run complete: signals=%d, decisions=%d (ENTER=%d, SKIP=%d), errors=%d, sentinel_blocks=%d",
         summary["signals"], summary["decisions"],
         summary["enters"], summary["skips"], summary["errors"],
+        sentinel_blocks,
     )
     return summary
 
