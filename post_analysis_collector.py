@@ -265,9 +265,12 @@ def fetch_timeline_stats(ticker: str, scan_date: str, tl_df: pd.DataFrame) -> di
         day = day.dropna(subset=["Score"])
         if day.empty: return result
         if "ScanTime" in day.columns:
-            times = day["ScanTime"].tolist()
-            result["FirstScanTime"] = times[0]
-            result["LastScanTime"]  = times[-1]
+            # Bugfix 2026-05-11: filter NaN/empty before taking first/last
+            # Previously wrote 'nan' string to Sheets when ScanTime had NaN values
+            times = [t for t in day["ScanTime"].tolist()
+                     if t and not pd.isna(t) and str(t).strip().lower() not in ("nan", "none", "")]
+            result["FirstScanTime"] = times[0] if times else ""
+            result["LastScanTime"]  = times[-1] if times else ""
         result["ScanCount"]    = len(day)
         result["ScoreAtFirst"] = round(day["Score"].iloc[0], 2)
         result["ScoreAtLast"]  = round(day["Score"].iloc[-1], 2)

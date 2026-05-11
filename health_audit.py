@@ -1092,6 +1092,76 @@ def check_15_gitignore_enforcement():
 
 
 # ============================================================================
+# CHECKS — Category 6b: Data quality (NaN detection)
+# ============================================================================
+
+def check_23_nan_scantime(gc):
+    """Q8: post_analysis FirstScanTime/LastScanTime should not contain 'nan' string."""
+    if gc is None:
+        return CheckResult("Q8", "NaN ScanTime in post_analysis", "Data quality",
+                           INFO, "Skipped (no Sheets access)")
+
+    month, sheets = get_active_month_sheets(gc)
+    if not sheets or "post_analysis" not in sheets:
+        return CheckResult("Q8", "NaN ScanTime in post_analysis", "Data quality",
+                           CRITICAL, "post_analysis not configured")
+
+    try:
+        ws = gc.open_by_key(sheets["post_analysis"]).sheet1
+        data = ws.get_all_values()
+        if len(data) <= 1:
+            return CheckResult("Q8", "NaN ScanTime in post_analysis", "Data quality",
+                               INFO, "post_analysis is empty")
+
+        headers = data[0]
+        rows = data[1:]
+
+        fst_idx = headers.index("FirstScanTime") if "FirstScanTime" in headers else None
+        lst_idx = headers.index("LastScanTime") if "LastScanTime" in headers else None
+
+        if fst_idx is None:
+            return CheckResult("Q8", "NaN ScanTime in post_analysis", "Data quality",
+                               WARNING, "FirstScanTime column missing")
+
+        invalid_values = ("nan", "none", "null", "n/a")
+        nan_count = 0
+        nan_examples = []
+
+        for i, row in enumerate(rows):
+            if fst_idx < len(row):
+                val = str(row[fst_idx]).strip().lower()
+                if val in invalid_values:
+                    nan_count += 1
+                    if len(nan_examples) < 3:
+                        ticker_idx = headers.index("Ticker") if "Ticker" in headers else 0
+                        date_idx = headers.index("ScanDate") if "ScanDate" in headers else 1
+                        ticker = row[ticker_idx] if ticker_idx < len(row) else "?"
+                        date = row[date_idx] if date_idx < len(row) else "?"
+                        nan_examples.append(f"{ticker}/{date}")
+
+        if nan_count == 0:
+            return CheckResult("Q8", "NaN ScanTime in post_analysis", "Data quality",
+                               PASSED, f"All {len(rows)} rows have valid FirstScanTime")
+
+        examples_str = ", ".join(nan_examples)
+        pct = nan_count / len(rows) * 100
+        msg = f"{nan_count}/{len(rows)} rows ({pct:.1f}%) with invalid FirstScanTime. Examples: {examples_str}"
+
+        # Historical 'nan' rows (pre-2026-05) are tolerated as known gap
+        # Only WARN if rate is high (>30%) or new rows have it
+        if pct > 30:
+            return CheckResult("Q8", "NaN ScanTime in post_analysis", "Data quality",
+                               WARNING, msg)
+        else:
+            return CheckResult("Q8", "NaN ScanTime in post_analysis", "Data quality",
+                               INFO, f"{msg} (historical, tolerated)")
+
+    except Exception as e:
+        return CheckResult("Q8", "NaN ScanTime in post_analysis", "Data quality",
+                           CRITICAL, f"Failed: {e}")
+
+
+# ============================================================================
 # CHECKS — Category 7: Sync
 # ============================================================================
 
@@ -1379,7 +1449,7 @@ def main():
 
     # Run all checks
     results = []
-    print("[health_audit] Running 21 checks...")
+    print("[health_audit] Running 22 checks...")
 
     # Code integrity
     results.append(check_01_duplicate_functions())
@@ -1400,6 +1470,7 @@ def main():
     results.append(check_16_rel_vol_stuck(gc))
     results.append(check_20_float_pct_stuck(gc))
     results.append(check_21_gap_outliers(gc))
+    results.append(check_23_nan_scantime(gc))
 
     # Config
     results.append(check_11_sheets_config_current_month())

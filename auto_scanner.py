@@ -521,8 +521,8 @@ def _save_daily_summary(gc, today: str, ws_timeline):
                 "RunUp":         round(float(peak_row.get("RunUp", 0) or 0), 2),
                 "REL_VOL":       round(float(peak_row.get("REL_VOL", 0) or 0), 2),
                 "ScanCount":     len(grp),
-                "FirstScanTime": grp["ScanTime"].iloc[0] if "ScanTime" in grp.columns else "",
-                "LastScanTime":  grp["ScanTime"].iloc[-1] if "ScanTime" in grp.columns else "",
+                "FirstScanTime": _safe_scantime(grp, "first"),
+                "LastScanTime":  _safe_scantime(grp, "last"),
             })
 
         if not summary_rows:
@@ -1225,6 +1225,17 @@ def sync_score_tracker(gc, now_peru):
 
     except Exception as e:
         print(f"[ScoreTracker] ⚠️ {e}")
+
+
+def _safe_scantime(grp, position="first"):
+    """Return first/last valid ScanTime, or empty string if none. Bugfix 2026-05-11."""
+    if "ScanTime" not in grp.columns:
+        return ""
+    times = [t for t in grp["ScanTime"].tolist()
+             if t and not pd.isna(t) and str(t).strip().lower() not in ("nan", "none", "")]
+    if not times:
+        return ""
+    return times[0] if position == "first" else times[-1]
 
 
 def run_eod():
