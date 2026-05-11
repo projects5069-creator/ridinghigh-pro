@@ -356,7 +356,18 @@ def _render_trades_table(df: pd.DataFrame):
             ascending=False,
         )
 
-    st.dataframe(display[cols_to_show], use_container_width=True, hide_index=True)
+    # Defensive: cast all displayed columns to string to avoid Arrow conversion errors
+    # (mixed-type columns from OPEN positions with None/NaN values)
+    display_safe = display[cols_to_show].copy()
+    for col in display_safe.columns:
+        display_safe[col] = (
+            display_safe[col]
+            .fillna("—")
+            .astype(str)
+            .replace("nan", "—")
+            .replace("None", "—")
+        )
+    st.dataframe(display_safe, use_container_width=True, hide_index=True)
 
 
 def _render_cumulative_pnl(df: pd.DataFrame):

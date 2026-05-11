@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-05-08 18:54:52 -05
+**Generated:** 2026-05-10 20:02:02 -05
 **Branch:** `main`
-**Latest commit:** `494597a` — fix(dashboard): resolve Arrow ValueError from mixed-type columns in Trade History table
+**Latest commit:** `5dc2bd3` — fix(dashboard): cast Trade History columns to string before st.dataframe
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `494597a (HEAD -> main) fix(dashboard): resolve Arrow ValueError from mixed-type columns in Trade History table`
-- `128bebe (origin/main, origin/HEAD) feat(dashboard): new Trade History page with audit trail + KPIs + cumulative P&L`
+- `5dc2bd3 (HEAD -> main) fix(dashboard): cast Trade History columns to string before st.dataframe`
+- `8a9da52 (origin/main, origin/HEAD) fix(dashboard): resolve Arrow ValueError from mixed-type columns in Trade History table`
+- `128bebe feat(dashboard): new Trade History page with audit trail + KPIs + cumulative P&L`
 - `9b641b5 fix(agent): add warning logs for silent None prices in position_manager`
 - `219bee7 fix(agent): add warning logs for silent None prices in position_manager`
-- `fc05fe4 feat(agent): gate EOD force-close behind AGENT_FORCE_EOD_CLOSE flag`
 
 ---
 
@@ -32,11 +32,11 @@ _See `OPEN_ISSUES.md` for full list_
 
 | Workflow | Status | Conclusion | Started |
 |---|---|---|---|
-| Agent — Every Minute (DRY_RUN) | completed | ✅ success | 2026-05-08 23:41 UTC |
-| Daily Backup — post_analysis | completed | ✅ success | 2026-05-08 23:15 UTC |
-| Daily Backup — post_analysis | completed | ✅ success | 2026-05-08 21:38 UTC |
-| Agent — Daily Brief Email | completed | ✅ success | 2026-05-08 21:30 UTC |
-| Agent — End of Day | completed | ✅ success | 2026-05-08 21:00 UTC |
+| Warm OAuth Token | completed | ✅ success | 2026-05-11 00:26 UTC |
+| Health Audit | completed | ✅ success | 2026-05-10 20:03 UTC |
+| Warm OAuth Token | completed | ❌ failure | 2026-05-10 15:32 UTC |
+| Health Audit | completed | ✅ success | 2026-05-10 14:38 UTC |
+| Health Audit | completed | ✅ success | 2026-05-10 09:15 UTC |
 
 ---
 
@@ -50,8 +50,8 @@ _Months in config: `2026-04`, `2026-05`, `2026-06`_
 | timeline_live | 115,130 | 2026-05-08 | ✅ |
 | daily_snapshots | 560 | 2026-05-08 | ✅ |
 | daily_summary | 599 | 2026-05-08 | ✅ |
-| post_analysis | 19 | 2026-05-07 | ✅ |
-| portfolio | 25 | 2026-05-08 | ✅ |
+| post_analysis | 21 | 2026-05-08 | ✅ |
+| portfolio | 28 | 2026-05-08 | ✅ |
 | portfolio_live | 25 | 2026-05-08 | ✅ |
 | score_tracker | 1,110 | 2026-05-08 | ✅ |
 | live_trades | 1,110 | 2026-05-08 | ✅ |
@@ -69,8 +69,8 @@ _Months in config: `2026-04`, `2026-05`, `2026-06`_
 
 ## 🩺 Health
 
-- ⚠️ 8 uncommitted file(s):
--    - 8 new/untracked
+- ⚠️ 9 uncommitted file(s):
+-    - 9 new/untracked
 
 ---
 
