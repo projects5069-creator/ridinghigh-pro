@@ -356,17 +356,27 @@ def _render_trades_table(df: pd.DataFrame):
             ascending=False,
         )
 
-    # Defensive: cast all displayed columns to string to avoid Arrow conversion errors
-    # (mixed-type columns from OPEN positions with None/NaN values)
-    display_safe = display[cols_to_show].copy()
-    for col in display_safe.columns:
-        display_safe[col] = (
-            display_safe[col]
-            .fillna("—")
-            .astype(str)
-            .replace("nan", "—")
-            .replace("None", "—")
-        )
+    # Bullet-proof: rebuild DataFrame from scratch as pure string dict
+    # Some object columns (timestamps, mixed pd.NA/np.nan/None) still trip Arrow
+    # even after fillna+astype. This rebuild forces a clean str-only schema.
+    import pandas as pd
+    safe_data = {}
+    for col in cols_to_show:
+        if col not in display.columns:
+            continue
+        vals = []
+        for v in display[col].tolist():
+            if v is None or (isinstance(v, float) and pd.isna(v)):
+                vals.append("—")
+            else:
+                s = str(v)
+                if s.lower() in ("nan", "none", "nat", ""):
+                    vals.append("—")
+                else:
+                    vals.append(s)
+        safe_data[col] = vals
+
+    display_safe = pd.DataFrame(safe_data)
     st.dataframe(display_safe, use_container_width=True, hide_index=True)
 
 

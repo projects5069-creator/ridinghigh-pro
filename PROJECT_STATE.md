@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-05-10 20:02:02 -05
+**Generated:** 2026-05-10 20:08:30 -05
 **Branch:** `main`
-**Latest commit:** `5dc2bd3` — fix(dashboard): cast Trade History columns to string before st.dataframe
+**Latest commit:** `adcb408` — fix(dashboard): bullet-proof Trade History table rebuild as pure string DataFrame
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `5dc2bd3 (HEAD -> main) fix(dashboard): cast Trade History columns to string before st.dataframe`
-- `8a9da52 (origin/main, origin/HEAD) fix(dashboard): resolve Arrow ValueError from mixed-type columns in Trade History table`
+- `adcb408 (HEAD -> main) fix(dashboard): bullet-proof Trade History table rebuild as pure string DataFrame`
+- `978e3be (origin/main, origin/HEAD) fix(dashboard): cast Trade History columns to string before st.dataframe`
+- `8a9da52 fix(dashboard): resolve Arrow ValueError from mixed-type columns in Trade History table`
 - `128bebe feat(dashboard): new Trade History page with audit trail + KPIs + cumulative P&L`
 - `9b641b5 fix(agent): add warning logs for silent None prices in position_manager`
-- `219bee7 fix(agent): add warning logs for silent None prices in position_manager`
 
 ---
 
