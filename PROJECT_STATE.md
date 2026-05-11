@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-05-10 20:08:30 -05
+**Generated:** 2026-05-11 11:36:03 -05
 **Branch:** `main`
-**Latest commit:** `adcb408` — fix(dashboard): bullet-proof Trade History table rebuild as pure string DataFrame
+**Latest commit:** `6e4391a` — fix(agent): SKIP decisions to stdout, count Sheet write errors
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `adcb408 (HEAD -> main) fix(dashboard): bullet-proof Trade History table rebuild as pure string DataFrame`
-- `978e3be (origin/main, origin/HEAD) fix(dashboard): cast Trade History columns to string before st.dataframe`
+- `6e4391a (HEAD -> main) fix(agent): SKIP decisions to stdout, count Sheet write errors`
+- `f46b570 (origin/main, origin/HEAD) fix(dashboard): bullet-proof Trade History table rebuild as pure string DataFrame`
+- `978e3be fix(dashboard): cast Trade History columns to string before st.dataframe`
 - `8a9da52 fix(dashboard): resolve Arrow ValueError from mixed-type columns in Trade History table`
 - `128bebe feat(dashboard): new Trade History page with audit trail + KPIs + cumulative P&L`
-- `9b641b5 fix(agent): add warning logs for silent None prices in position_manager`
 
 ---
 
@@ -32,11 +32,11 @@ _See `OPEN_ISSUES.md` for full list_
 
 | Workflow | Status | Conclusion | Started |
 |---|---|---|---|
-| Warm OAuth Token | completed | ✅ success | 2026-05-11 00:26 UTC |
-| Health Audit | completed | ✅ success | 2026-05-10 20:03 UTC |
-| Warm OAuth Token | completed | ❌ failure | 2026-05-10 15:32 UTC |
-| Health Audit | completed | ✅ success | 2026-05-10 14:38 UTC |
-| Health Audit | completed | ✅ success | 2026-05-10 09:15 UTC |
+| Agent — Every Minute (DRY_RUN) | queued | ⏳ — | 2026-05-11 16:36 UTC |
+| RidingHigh Auto Scanner | queued | ⏳ — | 2026-05-11 16:36 UTC |
+| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-05-11 16:35 UTC |
+| Agent — Every Minute (DRY_RUN) | completed | ✅ success | 2026-05-11 16:35 UTC |
+| Agent — Every Minute (DRY_RUN) | completed | ✅ success | 2026-05-11 16:34 UTC |
 
 ---
 
@@ -47,19 +47,19 @@ _Months in config: `2026-04`, `2026-05`, `2026-06`_
 
 | Sheet | Total rows | Last date | Status |
 |---|---|---|---|
-| timeline_live | 115,130 | 2026-05-08 | ✅ |
+| timeline_live | 118,657 | 2026-05-11 | ✅ |
 | daily_snapshots | 560 | 2026-05-08 | ✅ |
 | daily_summary | 599 | 2026-05-08 | ✅ |
 | post_analysis | 21 | 2026-05-08 | ✅ |
 | portfolio | 28 | 2026-05-08 | ✅ |
-| portfolio_live | 25 | 2026-05-08 | ✅ |
+| portfolio_live | 28 | 2026-05-08 | ✅ |
 | score_tracker | 1,110 | 2026-05-08 | ✅ |
 | live_trades | 1,110 | 2026-05-08 | ✅ |
 | ticker_follow_up | 12,477 | 2026-05-08 | ✅ |
-| decision_log | 14,106 | — | ✅ |
+| decision_log | 16,153 | — | ✅ |
 | paper_portfolio | 12 | — | ✅ |
 | score_analytics | 0 | — | ⚠️ empty |
-| postmortems | 66 | — | ✅ |
+| postmortems | 163 | — | ✅ |
 | system_events | 0 | — | ⚠️ empty |
 | pending_suggestions | 0 | — | ⚠️ empty |
 | config_history | 0 | — | ⚠️ empty |
@@ -69,8 +69,8 @@ _Months in config: `2026-04`, `2026-05`, `2026-06`_
 
 ## 🩺 Health
 
-- ⚠️ 9 uncommitted file(s):
--    - 9 new/untracked
+- ⚠️ 11 uncommitted file(s):
+-    - 11 new/untracked
 
 ---
 

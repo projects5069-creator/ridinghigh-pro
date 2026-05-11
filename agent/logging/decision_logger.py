@@ -151,11 +151,27 @@ class DecisionLogger:
             return None
 
         # Write to Sheet
+        # Route B: SKIP decisions go to stdout only (audit in Actions logs).
+        # Rationale: ~80-100 SKIPs/minute were blowing Sheets API quota (429).
+        # Only ENTER decisions reach the sheet — those are rare and meaningful.
+        action = str(getattr(decision, "action", "")).upper()
+        if action != "ENTER":
+            ticker = getattr(decision, "ticker", "?")
+            score = getattr(decision, "score", "?")
+            reason = getattr(decision, "skip_reason", "") or getattr(decision, "reason", "")
+            print(
+                f"[SKIP] {decision.decision_id} {ticker} Score={score} -> {reason}",
+                file=sys.stdout,
+                flush=True,
+            )
+            return decision.decision_id  # success — NOT an error
+
+        # ENTER decisions: write to sheet (rare event, only when we actually enter)
         try:
             gc = sheets_manager._get_gc()
             ws = gc.open_by_key(self.sheet_id).sheet1
             ws.append_row(row, value_input_option="USER_ENTERED")
             return decision.decision_id
         except Exception as e:
-            print(f"[DecisionLogger] Sheet write failed: {e}", file=sys.stderr)
+            print(f"[DecisionLogger] Sheet write failed for ENTER {decision.decision_id}: {e}", file=sys.stderr)
             return None

@@ -378,7 +378,15 @@ def run() -> Dict[str, Any]:
             ticker = signal.get("ticker", "?")
             try:
                 decision = trader.evaluate(signal, account_state)
-                decision_logger.log(decision)
+                log_result = decision_logger.log(decision)
+                if log_result is None:
+                    # Sheet write failed (likely 429 quota) — count as error for visibility
+                    summary["errors"] += 1
+                    logger.warning(
+                        "Decision log failed for %s %s (likely quota 429)",
+                        getattr(decision, "action", "?"),
+                        getattr(decision, "ticker", "?"),
+                    )
                 summary["decisions"] += 1
 
                 if decision.action == "ENTER":
