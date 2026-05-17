@@ -1144,6 +1144,21 @@ def _cached_daily_summary() -> pd.DataFrame:
         return pd.DataFrame()
 
 
+@st.cache_data(ttl=300)
+def _cached_agent_scorecard() -> pd.DataFrame:
+    """agent_scorecard → raw DataFrame. Refreshes every 5 min."""
+    try:
+        gc = _get_gc()
+        if not gc: return pd.DataFrame()
+        ws = sheets_manager.get_worksheet("agent_scorecard", gc=gc)
+        if not ws: return pd.DataFrame()
+        data = ws.get_all_values()
+        if len(data) <= 1: return pd.DataFrame()
+        return pd.DataFrame(data[1:], columns=data[0])
+    except Exception:
+        return pd.DataFrame()
+
+
 def load_latest_from_sheets():
     try:
         df = _cached_timeline_live()
@@ -4935,6 +4950,84 @@ SL ALWAYS overrides TP אם שניהם נפגעו באותו bar (שמרני).
 
 
 
+def render_agent_scorecard():
+    """🏆 דירוג סוכנים — The Critic's daily scorecard view."""
+    st.title("🏆 דירוג סוכנים")
+
+    df = _cached_agent_scorecard()
+    if df.empty:
+        st.info(
+            "סוכן המבקר עדיין לא רץ. "
+            "נתונים יופיעו אחרי יום המסחר הראשון שבו המבקר מחובר."
+        )
+        return
+
+    # Ensure numeric columns
+    for col in ["Anomaly_Count", "Anomaly_High"]:
+        if col in df.columns:
+            df[col] = pd.to_numeric(df[col], errors="coerce").fillna(0).astype(int)
+
+    # ── 1. Summary per agent ────────────────────────────────────────
+    st.subheader("📊 סיכום לפי סוכן")
+    if "Agent" in df.columns and "Anomaly_Count" in df.columns:
+        summary = df.groupby("Agent").agg(
+            days=("Date", "nunique"),
+            total_anomalies=("Anomaly_Count", "sum"),
+            high_anomalies=("Anomaly_High", "sum"),
+        ).reset_index()
+        cols = st.columns(len(summary))
+        for i, row in summary.iterrows():
+            with cols[i % len(cols)]:
+                st.metric(row["Agent"], f"{int(row['days'])} ימים")
+                st.caption(
+                    f"חריגות: {int(row['total_anomalies'])} "
+                    f"(HIGH: {int(row['high_anomalies'])})"
+                )
+
+    st.divider()
+
+    # ── 2. Anomaly table ────────────────────────────────────────────
+    st.subheader("🚨 חריגות שזוהו")
+    anom_df = df[df["Anomaly_Count"] > 0].copy() if "Anomaly_Count" in df.columns else pd.DataFrame()
+    if anom_df.empty:
+        st.success("אין חריגות — כל הסוכנים פועלים תקין.")
+    else:
+        display_cols = ["Date", "Agent", "Anomaly_Count", "Anomaly_High", "Anomaly_Detail"]
+        available = [c for c in display_cols if c in anom_df.columns]
+        anom_display = anom_df[available].sort_values("Date", ascending=False)
+
+        def _highlight_high(row):
+            if row.get("Anomaly_High", 0) > 0:
+                return ["background-color: #ffcccc"] * len(row)
+            return [""] * len(row)
+
+        st.dataframe(
+            anom_display.style.apply(_highlight_high, axis=1),
+            hide_index=True,
+            use_container_width=True,
+        )
+
+    st.divider()
+
+    # ── 3. Pie chart — anomalies by agent ───────────────────────────
+    st.subheader("🥧 התפלגות חריגות לפי סוכן")
+    if "Agent" in df.columns and "Anomaly_Count" in df.columns:
+        pie_data = df.groupby("Agent")["Anomaly_Count"].sum()
+        pie_data = pie_data[pie_data > 0]
+        if pie_data.empty:
+            st.info("אין חריגות להצגה.")
+        else:
+            import plotly.express as px
+            fig = px.pie(
+                values=pie_data.values,
+                names=pie_data.index,
+                title="חריגות לפי סוכן",
+            )
+            st.plotly_chart(fig, use_container_width=True)
+    else:
+        st.info("אין מספיק נתונים לתרשים.")
+
+
 def dashboard_home_page():
     now_peru  = datetime.now(PERU_TZ)
     today_str = now_peru.strftime("%Y-%m-%d")
@@ -5074,6 +5167,7 @@ def main():
         "📊 Trade History",
         "🧠 Score Brain",
         "🛡️ Sentinel Events",
+        "🏆 דירוג סוכנים",
     ]
 
     # Session-state key "nav_page" drives the radio (allows Home buttons to switch pages)
@@ -5118,6 +5212,8 @@ def main():
         render_score_brain()
     elif page == "🛡️ Sentinel Events":
         render_sentinel_events()
+    elif page == "🏆 דירוג סוכנים":
+        render_agent_scorecard()
 
 if __name__ == "__main__":
     main()

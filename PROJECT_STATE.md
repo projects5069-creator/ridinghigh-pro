@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-05-17 17:50:34 -05
+**Generated:** 2026-05-17 18:13:26 -05
 **Branch:** `main`
-**Latest commit:** `e8c0adc` — feat(critic): add unified_positions() — cross-agent stance table
+**Latest commit:** `4197693` — feat(critic): add "Agent Scorecard" dashboard page
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `e8c0adc (HEAD -> main) feat(critic): add unified_positions() — cross-agent stance table`
-- `d195d4d (origin/main, origin/HEAD) feat(critic): add agent_scorecard sheet + write_scorecard()`
+- `4197693 (HEAD -> main) feat(critic): add "Agent Scorecard" dashboard page`
+- `50ab76b (origin/main, origin/HEAD) feat(critic): add unified_positions() — cross-agent stance table`
+- `d195d4d feat(critic): add agent_scorecard sheet + write_scorecard()`
 - `3b9acfe feat(critic): add daily_facts() — daily documentation + anomalies`
 - `88c45fe feat(critic): add Critic Agent v1 — skeleton + trade review`
-- `b210ed3 feat(news_detective): wire agent #4 into orchestrator`
 
 ---
 
@@ -72,8 +72,8 @@ _Months in config: `2026-04`, `2026-05`, `2026-06`_
 
 ## 🩺 Health
 
-- ⚠️ 54 uncommitted file(s):
--    - 54 new/untracked
+- ⚠️ 55 uncommitted file(s):
+-    - 55 new/untracked
 
 ---
 
