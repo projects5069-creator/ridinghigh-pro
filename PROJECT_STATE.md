@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-05-17 16:03:16 -05
+**Generated:** 2026-05-17 16:33:43 -05
 **Branch:** `main`
-**Latest commit:** `4836639` — feat(news_detective): wire agent #4 into orchestrator
+**Latest commit:** `37e0143` — feat(critic): add Critic Agent v1 — skeleton + trade review
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `4836639 (HEAD -> main) feat(news_detective): wire agent #4 into orchestrator`
-- `38e5c9b (origin/main, origin/HEAD) feat(news_detective): add news_findings sheet + write_findings()`
+- `37e0143 (HEAD -> main) feat(critic): add Critic Agent v1 — skeleton + trade review`
+- `b210ed3 (origin/main, origin/HEAD) feat(news_detective): wire agent #4 into orchestrator`
+- `38e5c9b feat(news_detective): add news_findings sheet + write_findings()`
 - `d470b4e feat(news_detective): add News Detective Agent v1 — skeleton`
 - `7b84f29 docs(dashboard): refresh Architecture expander — pages + agent layer`
-- `5522e36 docs(dashboard): refresh Roadmap expander + fix stale check count`
 
 ---
 
