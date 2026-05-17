@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-05-17 18:13:26 -05
+**Generated:** 2026-05-17 18:27:22 -05
 **Branch:** `main`
-**Latest commit:** `4197693` — feat(critic): add "Agent Scorecard" dashboard page
+**Latest commit:** `0d20659` — feat(critic): add daily critic orchestrator + workflow
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `4197693 (HEAD -> main) feat(critic): add "Agent Scorecard" dashboard page`
-- `50ab76b (origin/main, origin/HEAD) feat(critic): add unified_positions() — cross-agent stance table`
+- `0d20659 (HEAD -> main) feat(critic): add daily critic orchestrator + workflow`
+- `285b0af (origin/main, origin/HEAD) feat(critic): add "Agent Scorecard" dashboard page`
+- `50ab76b feat(critic): add unified_positions() — cross-agent stance table`
 - `d195d4d feat(critic): add agent_scorecard sheet + write_scorecard()`
 - `3b9acfe feat(critic): add daily_facts() — daily documentation + anomalies`
-- `88c45fe feat(critic): add Critic Agent v1 — skeleton + trade review`
 
 ---
 
@@ -66,7 +66,7 @@ _Months in config: `2026-04`, `2026-05`, `2026-06`_
 | borrow_data | 0 | — | ⚠️ empty |
 | market_context | 3 | — | ✅ |
 | news_findings | 1 | — | ✅ |
-| agent_scorecard | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| agent_scorecard | 8 | 2026-05-17 | ✅ |
 
 ---
 
