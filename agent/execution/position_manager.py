@@ -183,11 +183,11 @@ class PositionManager:
             # Short position: SL triggers if price RISES, TP triggers if price DROPS
             if sl_price > 0 and current_price >= sl_price:
                 self._update_position(pos, {"CurrentPrice": current_price})
-                self._close_position(pos, EXIT_SL_HIT)
+                self._close_position(pos, EXIT_SL_HIT, exit_price=current_price)
                 return "closed_sl"
             if tp_price > 0 and current_price <= tp_price:
                 self._update_position(pos, {"CurrentPrice": current_price})
-                self._close_position(pos, EXIT_TP_HIT)
+                self._close_position(pos, EXIT_TP_HIT, exit_price=current_price)
                 return "closed_tp"
 
         entry_price = float(pos.get("EntryPrice", 0))
@@ -244,13 +244,27 @@ class PositionManager:
             logger.warning("Failed to get price for %s: %s", ticker, e)
             return None
 
-    def _close_position(self, pos: Dict[str, Any], exit_reason: str):
-        """Mark position as closed with exit details."""
+    def _close_position(self, pos: Dict[str, Any], exit_reason: str,
+                        exit_price: Optional[float] = None):
+        """Mark position as closed with exit details.
+
+        Args:
+            pos: the position row dict.
+            exit_reason: EXIT_SL_HIT / EXIT_TP_HIT / EXIT_EOD_CLOSE.
+            exit_price: the price that triggered the exit. When provided
+                (DRY_RUN TP/SL paths), it is used directly so RealizedPnL,
+                ExitPrice and the CurrentPrice already written all agree.
+                When None (Alpaca bracket fills, EOD), price is re-fetched.
+                Re-fetching after hours can return a stale/wrong value —
+                hence callers that already hold the trigger price pass it
+                in (Bug #1 fix 2026-05-16).
+        """
         ticker = pos.get("Ticker")
         is_dry_run = pos.get("Status") == STATUS_DRY_RUN_OPEN
 
-        # Get exit price
-        exit_price = self._get_current_price(ticker)
+        # Use the trigger price if the caller supplied it; else re-fetch.
+        if exit_price is None:
+            exit_price = self._get_current_price(ticker)
         if exit_price is None:
             exit_price = float(pos.get("EntryPrice", 0))
 
