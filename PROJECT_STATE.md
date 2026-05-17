@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-05-17 12:17:10 -05
+**Generated:** 2026-05-17 12:26:03 -05
 **Branch:** `main`
-**Latest commit:** `d50c90d` — docs(dashboard): refresh Sheets architecture expander — 9→18
+**Latest commit:** `bc48d43` — docs(dashboard): refresh Workflows expander — 7→12
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `d50c90d (HEAD -> main) docs(dashboard): refresh Sheets architecture expander — 9→18`
-- `828961a (origin/main, origin/HEAD) feat(dashboard): add Trading Agents expander to System Overview`
+- `bc48d43 (HEAD -> main) docs(dashboard): refresh Workflows expander — 7→12`
+- `e343aaf (origin/main, origin/HEAD) docs(dashboard): refresh Sheets architecture expander — 9→18`
+- `828961a feat(dashboard): add Trading Agents expander to System Overview`
 - `47b7ae9 feat(market_context): hourly workflow + standalone entry point`
 - `14a019c feat(market_context): add market_context sheet + write_context()`
-- `85452ad feat(market_context): add Market Context Agent v1 — regime detection`
 
 ---
 
@@ -63,15 +63,15 @@ _Months in config: `2026-04`, `2026-05`, `2026-06`_
 | system_events | 0 | — | ⚠️ empty |
 | pending_suggestions | 0 | — | ⚠️ empty |
 | config_history | 0 | — | ⚠️ empty |
-| borrow_data | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| borrow_data | 0 | — | ⚠️ empty |
 | market_context | 3 | — | ✅ |
 
 ---
 
 ## 🩺 Health
 
-- ⚠️ 41 uncommitted file(s):
--    - 41 new/untracked
+- ⚠️ 42 uncommitted file(s):
+-    - 42 new/untracked
 
 ---
 

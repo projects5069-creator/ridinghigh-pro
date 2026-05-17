@@ -4506,8 +4506,53 @@ SL ALWAYS overrides TP אם שניהם נפגעו באותו bar (שמרני).
     # ═══════════════════════════════════════════════════════════════════════
     # 10. 7 Workflows
     # ═══════════════════════════════════════════════════════════════════════
-    with st.expander("⚙️ 7 GitHub Actions Workflows — פירוט מלא"):
+    with st.expander("⚙️ 12 GitHub Actions Workflows — פירוט מלא"):
         wf_data = [
+            {
+                "name": "agent_minute.yml",
+                "cron": "*/1 13-20 * * 1-5",
+                "peru": "כל דקה 08:00-15:00 ב'-ו'",
+                "purpose": "הסוכן הראשי The Trader — `python -m agent.orchestrator`",
+                "steps": "בניית account_state → קריאת signals → Sentinel gate → החלטות ENTER/SKIP",
+                "timeout": "5 דקות",
+                "env": "Alpaca + Google + ALPACA_PAPER=true",
+            },
+            {
+                "name": "agent_eod.yml",
+                "cron": "0 21 * * 1-6",
+                "peru": "16:00 ב'-ו' (cron 1-6 כי שישי בלילה פרו = שבת UTC)",
+                "purpose": "עיבוד סוף יום — `python -m agent.orchestrator_eod`",
+                "steps": "Reconciler → Daily Analytics → Postmortems (לא סוגר פוזיציות)",
+                "timeout": "10 דקות",
+                "env": "Alpaca + Google",
+            },
+            {
+                "name": "agent_market_context.yml",
+                "cron": "30 13 + 0 14-20 * * 1-5",
+                "peru": "08:30 פתיחה + כל שעה עד 15:00 (8x ביום מסחר)",
+                "purpose": "סוכן #3 Market Context — `python -m agent.market_context.run_market_context`",
+                "steps": "שליפת SPY/IWM/VIX → גזירת regime → כתיבת שורה ל-market_context",
+                "timeout": "5 דקות",
+                "env": "Alpaca + Google",
+            },
+            {
+                "name": "agent_email_morning.yml",
+                "cron": "30 13 * * 1-5",
+                "peru": "08:30 ב'-ו'",
+                "purpose": "מייל תקציר בוקר — `python -m agent.orchestrator_email_morning`",
+                "steps": "בניית morning brief → שליחת email",
+                "timeout": "5 דקות",
+                "env": "Google + Gmail SMTP",
+            },
+            {
+                "name": "agent_email_daily.yml",
+                "cron": "30 21 * * 1-5",
+                "peru": "16:30 ב'-ו'",
+                "purpose": "מייל סיכום יומי — `python -m agent.orchestrator_email_daily`",
+                "steps": "בניית daily brief → שליחת email",
+                "timeout": "5 דקות",
+                "env": "Google + Gmail SMTP",
+            },
             {
                 "name": "auto_scan.yml",
                 "cron": "* * * * *",
