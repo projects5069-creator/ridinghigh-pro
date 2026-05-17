@@ -4380,12 +4380,12 @@ SL ALWAYS overrides TP אם שניהם נפגעו באותו bar (שמרני).
     # ═══════════════════════════════════════════════════════════════════════
     # 9. 18 Health Checks — פירוט מלא
     # ═══════════════════════════════════════════════════════════════════════
-    with st.expander("🩺 18 Health Checks — פירוט מלא של כל בדיקה"):
+    with st.expander("🩺 24 Health Checks — פירוט מלא של כל בדיקה"):
         st.markdown("""
 המערכת בודקת את עצמה אוטומטית 3 פעמים ביום (06:00, 12:00, 22:00 Peru).
-תוצאות נכתבות ל-Health Audit Sheet ונשלחים emails על CRITICAL.
+24 בדיקות ב-7 קטגוריות. תוצאות נכתבות ל-Health Audit Sheet ונשלחים emails על CRITICAL.
 
-מקור: `health_audit.py` (1,377 שורות).
+מקור: `health_audit.py`.
         """)
 
         st.markdown("### 📁 Code Integrity (3 בדיקות)")
@@ -4405,7 +4405,7 @@ SL ALWAYS overrides TP אם שניהם נפגעו באותו bar (שמרני).
             st.markdown(f"  - **מה בודק:** {c['what']}")
             st.markdown(f"  - **כשנכשל:** {c['fail']}")
 
-        st.markdown("### 📊 Data Freshness (3 בדיקות)")
+        st.markdown("### 📊 Data Freshness (4 בדיקות)")
         checks_fresh = [
             {"id": "D1", "name": "timeline_freshness",
              "what": "תאריך השורה האחרונה ב-timeline_live חייב להיות ≤24 שעות בימי מסחר",
@@ -4416,13 +4416,16 @@ SL ALWAYS overrides TP אם שניהם נפגעו באותו bar (שמרני).
             {"id": "D3", "name": "github_actions_health",
              "what": "API call ל-GitHub: בודק 95%+ workflows הצליחו ב-50 הריצות האחרונות",
              "fail": "PASSED ≥95% · WARNING ≥80% · CRITICAL <80%"},
+            {"id": "D4", "name": "post_analysis_ran_today",
+             "what": "שואל את GitHub API אם post_analysis.yml רץ בהצלחה היום — תופס cron drift",
+             "fail": "CRITICAL אם לא רץ אחרי 22:35 UTC · WARNING אם איחור בתוך טווח החסד"},
         ]
         for c in checks_fresh:
             st.markdown(f"**{c['id']} — {c['name']}**")
             st.markdown(f"  - **מה בודק:** {c['what']}")
             st.markdown(f"  - **כשנכשל:** {c['fail']}")
 
-        st.markdown("### 🔢 Data Quality (4 בדיקות)")
+        st.markdown("### 🔢 Data Quality (7 בדיקות)")
         checks_qual = [
             {"id": "Q1", "name": "score_range",
              "what": "כל הציונים ב-post_analysis בטווח [0, 100]",
@@ -4436,6 +4439,15 @@ SL ALWAYS overrides TP אם שניהם נפגעו באותו bar (שמרני).
             {"id": "Q4", "name": "outliers",
              "what": "REL_VOL > 100 (cap should prevent) · ScanPrice ≤ 0",
              "fail": "WARNING על outliers"},
+            {"id": "Q5b", "name": "Float% Sanity",
+             "what": "בודק אם Float% תקוע על אותו ערך ב-200 השורות האחרונות (שונות < 0.01)",
+             "fail": "WARNING — Float% תקוע, ככל הנראה תקלה במקור הנתונים. לא חוסם מסחר (Float% לא ב-Score v2)"},
+            {"id": "Q5c", "name": "Gap Outliers",
+             "what": "בודק אם יש ערכי Gap חריגים מעל 500% ב-200 השורות האחרונות",
+             "fail": "WARNING — חריגים, ככל הנראה reverse splits (Alpaca מחזיר PrevClose לא מתואם). לא משפיע על מסחר (Gap לא ב-Score v2)"},
+            {"id": "Q8", "name": "NaN ScanTime",
+             "what": "בודק שעמודת FirstScanTime ב-post_analysis לא מכילה ערכי 'nan'/'none'/'null'",
+             "fail": "WARNING אם מעל 30% מהשורות · INFO אם מעט (שורות היסטוריות נסבלות)"},
         ]
         for c in checks_qual:
             st.markdown(f"**{c['id']} — {c['name']}**")
@@ -4486,6 +4498,28 @@ SL ALWAYS overrides TP אם שניהם נפגעו באותו bar (שמרני).
              "fail": "CRITICAL אם provider לא נגיש"},
         ]
         for c in checks_prov:
+            st.markdown(f"**{c['id']} — {c['name']}**")
+            st.markdown(f"  - **מה בודק:** {c['what']}")
+            st.markdown(f"  - **כשנכשל:** {c['fail']}")
+
+        st.markdown("### 🔄 Sync (בדיקה אחת)")
+        checks_sync = [
+            {"id": "S-Sync", "name": "PK sync",
+             "what": "מאמת שהריפו המקומי מסונכרן עם origin/main, ובודק עקביות תיעוד",
+             "fail": "CRITICAL אם diverged או ahead מעל 24 שעות · WARNING אם behind או ahead מעל 6 שעות. מדולג ב-CI"},
+        ]
+        for c in checks_sync:
+            st.markdown(f"**{c['id']} — {c['name']}**")
+            st.markdown(f"  - **מה בודק:** {c['what']}")
+            st.markdown(f"  - **כשנכשל:** {c['fail']}")
+
+        st.markdown("### 🤖 Agents (בדיקה אחת)")
+        checks_agents = [
+            {"id": "S1", "name": "Data Sentinel health",
+             "what": "בודק שמודול Data Sentinel תקין — 9 קבצי הסוכן קיימים, SENTINEL_MODE חוקי, גישה ל-system_events וספירת אירועים",
+             "fail": "CRITICAL אם חסרים קבצים · WARNING אם config לא תקין"},
+        ]
+        for c in checks_agents:
             st.markdown(f"**{c['id']} — {c['name']}**")
             st.markdown(f"  - **מה בודק:** {c['what']}")
             st.markdown(f"  - **כשנכשל:** {c['fail']}")
