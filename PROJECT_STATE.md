@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-05-17 16:57:58 -05
+**Generated:** 2026-05-17 17:35:32 -05
 **Branch:** `main`
-**Latest commit:** `1068bee` — feat(critic): add daily_facts() — daily documentation + anomalies
+**Latest commit:** `5390908` — feat(critic): add agent_scorecard sheet + write_scorecard()
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `1068bee (HEAD -> main) feat(critic): add daily_facts() — daily documentation + anomalies`
-- `88c45fe (origin/main, origin/HEAD) feat(critic): add Critic Agent v1 — skeleton + trade review`
+- `5390908 (HEAD -> main) feat(critic): add agent_scorecard sheet + write_scorecard()`
+- `3b9acfe (origin/main, origin/HEAD) feat(critic): add daily_facts() — daily documentation + anomalies`
+- `88c45fe feat(critic): add Critic Agent v1 — skeleton + trade review`
 - `b210ed3 feat(news_detective): wire agent #4 into orchestrator`
 - `38e5c9b feat(news_detective): add news_findings sheet + write_findings()`
-- `d470b4e feat(news_detective): add News Detective Agent v1 — skeleton`
 
 ---
 
@@ -66,13 +66,14 @@ _Months in config: `2026-04`, `2026-05`, `2026-06`_
 | borrow_data | 0 | — | ⚠️ empty |
 | market_context | 3 | — | ✅ |
 | news_findings | 1 | — | ✅ |
+| agent_scorecard | 4 | 2026-05-15 | ✅ |
 
 ---
 
 ## 🩺 Health
 
-- ⚠️ 51 uncommitted file(s):
--    - 51 new/untracked
+- ⚠️ 53 uncommitted file(s):
+-    - 53 new/untracked
 
 ---
 

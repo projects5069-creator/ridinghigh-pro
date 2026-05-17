@@ -368,3 +368,52 @@ class CriticAgent:
             "anomalies": anomalies,
             "errors": errors,
         }
+
+    def write_scorecard(self, date_str: Optional[str] = None) -> bool:
+        """Run daily_facts and write 4 rows (one per agent) to agent_scorecard.
+
+        Returns True on success, False on failure.
+        Failures are swallowed (logged) — never break the calling loop.
+        """
+        try:
+            import json as _json
+            import pytz as _pytz
+            import sheets_manager as sm
+            from datetime import datetime as _dt
+
+            peru = _pytz.timezone("America/Lima")
+            facts = self.daily_facts(date_str)
+            generated_at = _dt.now(peru).isoformat()
+            anomalies = facts.get("anomalies", [])
+
+            agent_map = {
+                "Trader": facts["trader"],
+                "Sentinel": facts["sentinel"],
+                "Market Context": facts["market_context"],
+                "News Detective": facts["news_detective"],
+            }
+
+            ws = sm.get_worksheet("agent_scorecard")
+
+            for agent_name, agent_facts in agent_map.items():
+                agent_anomalies = [a for a in anomalies if a.get("agent") == agent_name]
+                # Also include "System" anomalies in the first agent (Trader) for visibility
+                if agent_name == "Trader":
+                    agent_anomalies += [a for a in anomalies if a.get("agent") == "System"]
+
+                row = [
+                    facts["date"],
+                    agent_name,
+                    _json.dumps(agent_facts, ensure_ascii=False, default=str),
+                    len(agent_anomalies),
+                    sum(1 for a in agent_anomalies if a.get("severity") == "HIGH"),
+                    " | ".join(a.get("description", "") for a in agent_anomalies) if agent_anomalies else "",
+                    generated_at,
+                ]
+                ws.append_row(row, value_input_option="USER_ENTERED")
+
+            logger.info("Wrote scorecard for %s: %d anomalies", facts["date"], len(anomalies))
+            return True
+        except Exception as e:
+            logger.warning("Failed to write scorecard: %s", e)
+            return False
