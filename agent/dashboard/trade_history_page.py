@@ -337,7 +337,9 @@ def _render_trades_table(df: pd.DataFrame):
         if col in display.columns:
             display[col] = display[col].fillna("—").replace("", "—").astype(str)
 
-    # Rename for display
+    # Rename for display — drop original Status first to avoid duplicates
+    if "Status" in display.columns:
+        display = display.drop(columns=["Status"])
     display = display.rename(columns={"Status_Badge": "Status"})
 
     cols_to_show = [
@@ -359,7 +361,6 @@ def _render_trades_table(df: pd.DataFrame):
     # Bullet-proof: rebuild DataFrame from scratch as pure string dict
     # Some object columns (timestamps, mixed pd.NA/np.nan/None) still trip Arrow
     # even after fillna+astype. This rebuild forces a clean str-only schema.
-    import pandas as pd
     safe_data = {}
     for col in cols_to_show:
         if col not in display.columns:
