@@ -4136,13 +4136,18 @@ dashboard.py reads → displays in 8 pages
     # ═══════════════════════════════════════════════════════════════════════
     # 6. 9 Sheets Architecture
     # ═══════════════════════════════════════════════════════════════════════
-    with st.expander("🗄️ ארכיטקטורת ה-Sheets — 9 לחודש × 3 חודשים = 27 קבצים"):
+    with st.expander("🗄️ ארכיטקטורת ה-Sheets — 18 לחודש (9 סקאנר + 9 סוכנים)"):
         st.markdown("""
-המערכת משתמשת ב-9 Google Sheets לכל חודש. בכל זמן נתון יש 3 חודשים פעילים בו-זמנית
+המערכת משתמשת ב-**18 Google Sheets לכל חודש**, מחולקים לשתי משפחות:
+- **9 גיליונות סקאנר** — מזינים את צינור הנתונים הקלאסי (סריקה, ניתוח, מעקב).
+- **9 גיליונות סוכנים** — משרתים את מערכת הסוכנים (החלטות, ביצוע, ניטור, הקשר).
+
+בכל זמן נתון יש 3 חודשים פעילים בו-זמנית
 (החודש הנוכחי, החודש הבא שכבר נוצר, וחודש קודם לקריאה היסטורית).
         """)
 
-        sheets_full = pd.DataFrame([
+        st.markdown("#### 📡 גיליונות הסקאנר (9)")
+        scanner_sheets = pd.DataFrame([
             {"Sheet": "timeline_live", "כותב": "auto_scanner.run_scan()", "תדירות": "כל דקה",
              "מה נכתב": "ScanTime, Ticker, Price, Score, MxV, RunUp, REL_VOL, ATRX, RSI, VWAP, Volume, MarketCap, Float, ScanChange",
              "שורות/חודש": "~250-300K"},
@@ -4171,7 +4176,30 @@ dashboard.py reads → displays in 8 pages
              "מה נכתב": "מעקב 5 ימים אחרי הסריקה: D0/D1/D2/D3/D4/D5 prices, drops",
              "שורות/חודש": "~5-15/day"},
         ])
-        st.dataframe(sheets_full, hide_index=True, use_container_width=True)
+        st.dataframe(scanner_sheets, hide_index=True, use_container_width=True)
+
+        st.markdown("#### 🤖 גיליונות מערכת הסוכנים (9)")
+        agent_sheets = pd.DataFrame([
+            {"Sheet": "decision_log", "כותב": "agent/trader/ + orchestrator", "תדירות": "לכל ENTER",
+             "מה נכתב": "לוג החלטות הסוכן (ENTER/SKIP, ~5/יום)"},
+            {"Sheet": "paper_portfolio", "כותב": "agent/execution/", "תדירות": "לכל פוזיציה",
+             "מה נכתב": "פוזיציות paper trading, TP/SL, סטטוס"},
+            {"Sheet": "score_analytics", "כותב": "agent/analytics/", "תדירות": "EOD",
+             "מה נכתב": "ניתוח ביצועי הניקוד"},
+            {"Sheet": "postmortems", "כותב": "agent/analytics/postmortem_engine", "תדירות": "EOD",
+             "מה נכתב": "ניתוח predicted מול actual לכל עסקה"},
+            {"Sheet": "system_events", "כותב": "agent/sentinel/", "תדירות": "לפי אירוע",
+             "מה נכתב": "אירועי BLOCK/WARN של Data Sentinel"},
+            {"Sheet": "market_context", "כותב": "agent/market_context/", "תדירות": "8x ביום מסחר",
+             "מה נכתב": "SPY/IWM/VIX + תווית RISK regime (11 עמודות)"},
+            {"Sheet": "pending_suggestions", "כותב": "agent/analytics/", "תדירות": "לפי הצעה",
+             "מה נכתב": "הצעות שינוי ניקוד הממתינות לאישור"},
+            {"Sheet": "config_history", "כותב": "—", "תדירות": "—",
+             "מה נכתב": "היסטוריית שינויי config (מוכן, טרם בשימוש)"},
+            {"Sheet": "borrow_data", "כותב": "—", "תדירות": "—",
+             "מה נכתב": "נתוני borrow rate למניות (מוכן, טרם בשימוש)"},
+        ])
+        st.dataframe(agent_sheets, hide_index=True, use_container_width=True)
 
         st.markdown("**Special-purpose sheets** (מחוץ ל-monthly rotation):")
         st.markdown("""
