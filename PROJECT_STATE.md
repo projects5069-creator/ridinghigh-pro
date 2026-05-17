@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-05-17 11:24:39 -05
+**Generated:** 2026-05-17 12:01:51 -05
 **Branch:** `main`
-**Latest commit:** `cac24bb` — feat(market_context): hourly workflow + standalone entry point
+**Latest commit:** `f6e996c` — feat(dashboard): add Trading Agents expander to System Overview
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `cac24bb (HEAD -> main) feat(market_context): hourly workflow + standalone entry point`
-- `14a019c (origin/main, origin/HEAD) feat(market_context): add market_context sheet + write_context()`
+- `f6e996c (HEAD -> main) feat(dashboard): add Trading Agents expander to System Overview`
+- `47b7ae9 (origin/main, origin/HEAD) feat(market_context): hourly workflow + standalone entry point`
+- `14a019c feat(market_context): add market_context sheet + write_context()`
 - `85452ad feat(market_context): add Market Context Agent v1 — regime detection`
 - `ca7c70a fix(dashboard): remove local 'import pandas as pd' shadowing global`
-- `019e9da docs(pk): v2.13 — add §A15 Data Sentinel (agent #2)`
 
 ---
 
@@ -32,11 +32,11 @@ _See `OPEN_ISSUES.md` for full list_
 
 | Workflow | Status | Conclusion | Started |
 |---|---|---|---|
+| Agent — Market Context (Hourly) | completed | ✅ success | 2026-05-17 16:28 UTC |
 | Health Audit | completed | ✅ success | 2026-05-17 14:45 UTC |
 | Health Audit | completed | ✅ success | 2026-05-17 09:23 UTC |
 | Agent — End of Day | completed | ✅ success | 2026-05-16 23:36 UTC |
 | Health Audit | completed | ✅ success | 2026-05-16 20:06 UTC |
-| Warm OAuth Token | completed | ✅ success | 2026-05-16 15:38 UTC |
 
 ---
 
@@ -64,14 +64,14 @@ _Months in config: `2026-04`, `2026-05`, `2026-06`_
 | pending_suggestions | 0 | — | ⚠️ empty |
 | config_history | 0 | — | ⚠️ empty |
 | borrow_data | 0 | — | ⚠️ empty |
-| market_context | 2 | — | ✅ |
+| market_context | 3 | — | ✅ |
 
 ---
 
 ## 🩺 Health
 
-- ⚠️ 39 uncommitted file(s):
--    - 39 new/untracked
+- ⚠️ 40 uncommitted file(s):
+-    - 40 new/untracked
 
 ---
 

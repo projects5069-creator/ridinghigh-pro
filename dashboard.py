@@ -3887,6 +3887,73 @@ def system_overview_page():
         """)
 
     # ═══════════════════════════════════════════════════════════════════════
+    # 3b. Trading Agents
+    # ═══════════════════════════════════════════════════════════════════════
+    with st.expander("🤖 ארכיטקטורת הסוכנים — Trading Agents"):
+        st.markdown("""
+המערכת מפעילה 3 סוכנים אוטונומיים בייצור. כל סוכן מבצע תפקיד מוגדר
+ורץ בלתי-תלוי בשאר — כישלון של אחד לא מפיל את האחרים.
+        """)
+
+        active_agents = [
+            {
+                "num": "#1",
+                "icon": "💼",
+                "name": "The Trader",
+                "role": "מקבל החלטות ENTER/SKIP לכל סיגנל שעובר את סף הציון",
+                "code": "`agent/orchestrator.py` + `agent/trader/`",
+                "status": "DRY_RUN (כותב לגיליון בלבד, לא מבצע פקודות אמיתיות)",
+                "schedule": "כל דקה בשעות שוק (08:30–15:00 Peru) — `agent_minute.yml`",
+            },
+            {
+                "num": "#2",
+                "icon": "🛡️",
+                "name": "Data Sentinel",
+                "role": "שומר סף — 7 בדיקות תקינות נתונים לפני שסיגנל מגיע ל-Trader",
+                "code": "`agent/sentinel/` — 7 checks: completeness, scan_freshness, price_sanity, position_sync, price_freshness, provider_heartbeat, quota_health",
+                "status": "SHADOW mode (מתעד BLOCK/WARN אך לא חוסם בפועל)",
+                "schedule": "חלק מהרצת ה-orchestrator — רץ על כל סיגנל",
+            },
+            {
+                "num": "#3",
+                "icon": "🌍",
+                "name": "Market Context Agent",
+                "role": "מתעד מצב שוק רחב — SPY/IWM (Alpaca) + VIX (yfinance) → RISK_ON / NEUTRAL / RISK_OFF",
+                "code": "`agent/market_context/` — כתיבה לגיליון `market_context` (11 עמודות)",
+                "status": "תיעוד בלבד (לא משפיע על החלטות Trader עדיין)",
+                "schedule": "workflow נפרד `agent_market_context.yml` — 8 הרצות ביום מסחר (13:30–20:00 UTC)",
+            },
+        ]
+
+        st.markdown("### ⚡ סוכנים פעילים בייצור")
+        for ag in active_agents:
+            st.markdown(f"#### {ag['icon']} {ag['num']} — {ag['name']}")
+            st.markdown(f"**תפקיד:** {ag['role']}")
+            st.markdown(f"**קוד:** {ag['code']}")
+            st.markdown(f"**מצב:** {ag['status']}")
+            st.markdown(f"**לוח זמנים:** {ag['schedule']}")
+            st.markdown("---")
+
+        st.markdown("### 🗺️ מפת דרכים — סוכנים מתוכננים")
+
+        roadmap_data = pd.DataFrame([
+            {"קבוצה": "הבאים בתור", "סוכן": "#4 News Detective", "תנאי": "לא תלוי בנתונים"},
+            {"קבוצה": "הבאים בתור", "סוכן": "#5 Devil's Advocate", "תנאי": "לא תלוי בנתונים"},
+            {"קבוצה": "הבאים בתור", "סוכן": "#6 Risk Sentinel", "תנאי": "לא תלוי בנתונים"},
+            {"קבוצה": "נעולים (200+ עסקאות)", "סוכן": "Pattern Hunter", "תנאי": "דורש נתוני trades"},
+            {"קבוצה": "נעולים (200+ עסקאות)", "סוכן": "TP/SL Optimizer", "תנאי": "דורש נתוני trades"},
+            {"קבוצה": "נעולים (200+ עסקאות)", "סוכן": "Exit Strategy", "תנאי": "דורש נתוני trades"},
+            {"קבוצה": "נעולים (200+ עסקאות)", "סוכן": "Timing Agent", "תנאי": "דורש נתוני trades"},
+            {"קבוצה": "נעולים (200+ עסקאות)", "סוכן": "Entry Score Optimizer", "תנאי": "דורש נתוני trades"},
+            {"קבוצה": "נעולים (200+ עסקאות)", "סוכן": "Direct Filter Engine", "תנאי": "דורש נתוני trades"},
+            {"קבוצה": "חזון רחוק", "סוכן": "Multiple Personalities", "תנאי": "—"},
+            {"קבוצה": "חזון רחוק", "סוכן": "מטא-סוכנים", "תנאי": "—"},
+            {"קבוצה": "חזון רחוק", "סוכן": "Data Scout", "תנאי": "—"},
+        ])
+        st.dataframe(roadmap_data, hide_index=True, use_container_width=True)
+        st.caption("סדר ותוכן עשויים להשתנות עם התקדמות המערכת.")
+
+    # ═══════════════════════════════════════════════════════════════════════
     # 4. Data Pipeline
     # ═══════════════════════════════════════════════════════════════════════
     with st.expander("🔄 צינור הנתונים — מה קורה בכל שלב"):
