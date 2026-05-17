@@ -74,7 +74,7 @@ from config import (
     SL_THRESHOLD_FRAC,
     DATA_CUTOFF_DATE,
 )
-from agent.dashboard import render_live_agent, render_trade_history, render_score_brain
+from agent.dashboard import render_live_agent, render_trade_history, render_score_brain, render_sentinel_events
 
 st.set_page_config(
     page_title="RidingHigh Pro v14.6",
@@ -4894,6 +4894,7 @@ def main():
         "🤖 Live Agent",
         "📊 Trade History",
         "🧠 Score Brain",
+        "🛡️ Sentinel Events",
     ]
 
     # Session-state key "nav_page" drives the radio (allows Home buttons to switch pages)
@@ -4936,6 +4937,8 @@ def main():
         render_trade_history()
     elif page == "🧠 Score Brain":
         render_score_brain()
+    elif page == "🛡️ Sentinel Events":
+        render_sentinel_events()
 
 if __name__ == "__main__":
     main()

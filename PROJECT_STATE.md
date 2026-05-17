@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-05-16 20:40:04 -05
+**Generated:** 2026-05-16 20:53:16 -05
 **Branch:** `main`
-**Latest commit:** `81e5e5c` — feat(sentinel): log BLOCK/WARN events to system_events sheet
+**Latest commit:** `99166fa` — feat(dashboard): add Sentinel Events page
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `81e5e5c (HEAD -> main) feat(sentinel): log BLOCK/WARN events to system_events sheet`
-- `2081466 (origin/main, origin/HEAD) docs(pk): v2.12 — document the 5-bug fix session (Anti-Drift Contract)`
+- `99166fa (HEAD -> main) feat(dashboard): add Sentinel Events page`
+- `c9a963b (origin/main, origin/HEAD) feat(sentinel): log BLOCK/WARN events to system_events sheet`
+- `2081466 docs(pk): v2.12 — document the 5-bug fix session (Anti-Drift Contract)`
 - `ee38536 feat(agent): add DataQuality column to paper_portfolio schema`
 - `8b8360c fix(agent): real concurrent count + per-ticker re-entry cap — Bugs #4/#5`
-- `ede7fe2 fix(agent): pass trigger price to _close_position — Bug #1`
 
 ---
 
@@ -69,8 +69,8 @@ _Months in config: `2026-04`, `2026-05`, `2026-06`_
 
 ## 🩺 Health
 
-- ⚠️ 34 uncommitted file(s):
--    - 34 new/untracked
+- ⚠️ 36 uncommitted file(s):
+-    - 36 new/untracked
 
 ---
 
