@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-05-17 15:42:28 -05
+**Generated:** 2026-05-17 15:53:25 -05
 **Branch:** `main`
-**Latest commit:** `9c3661c` — feat(news_detective): add News Detective Agent v1 — skeleton
+**Latest commit:** `9ee057f` — feat(news_detective): add news_findings sheet + write_findings()
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `9c3661c (HEAD -> main) feat(news_detective): add News Detective Agent v1 — skeleton`
-- `7b84f29 (origin/main, origin/HEAD) docs(dashboard): refresh Architecture expander — pages + agent layer`
+- `9ee057f (HEAD -> main) feat(news_detective): add news_findings sheet + write_findings()`
+- `d470b4e (origin/main, origin/HEAD) feat(news_detective): add News Detective Agent v1 — skeleton`
+- `7b84f29 docs(dashboard): refresh Architecture expander — pages + agent layer`
 - `5522e36 docs(dashboard): refresh Roadmap expander + fix stale check count`
 - `d7b1876 docs(dashboard): refresh Health Checks expander — 18→24`
-- `bf3d98d docs(dashboard): refresh Workflows expander — 7→12`
 
 ---
 
@@ -65,13 +65,14 @@ _Months in config: `2026-04`, `2026-05`, `2026-06`_
 | config_history | 0 | — | ⚠️ empty |
 | borrow_data | 0 | — | ⚠️ empty |
 | market_context | 3 | — | ✅ |
+| news_findings | 1 | — | ✅ |
 
 ---
 
 ## 🩺 Health
 
-- ⚠️ 46 uncommitted file(s):
--    - 46 new/untracked
+- ⚠️ 48 uncommitted file(s):
+-    - 48 new/untracked
 
 ---
 

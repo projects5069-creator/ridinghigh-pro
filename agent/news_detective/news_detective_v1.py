@@ -236,3 +236,37 @@ class NewsDetectiveAgent:
                      ticker, len(edgar_filings), len(finnhub_news), material)
 
         return result
+
+    def write_findings(self, ticker: str) -> bool:
+        """Check ticker and append one row to the news_findings sheet.
+
+        Returns True on success, False on failure.
+        Failures are swallowed (logged) — never break the calling loop.
+        """
+        try:
+            import sheets_manager as sm
+
+            ctx = self.check_ticker(ticker)
+            filings = ctx["edgar_filings"]
+            news = ctx["finnhub_news"]
+
+            row = [
+                ctx["checked_at"],
+                ctx["ticker"],
+                str(ctx["has_material_news"]),
+                len(filings),
+                filings[0]["form_type"] if filings else "",
+                filings[0]["filed_date"] if filings else "",
+                "; ".join(f"{f['form_type']}@{f['filed_date']}" for f in filings),
+                len(news),
+                news[0]["headline"][:200] if news else "",
+                " | ".join(n["headline"][:100] for n in news),
+                "; ".join(ctx["errors"]) if ctx["errors"] else "",
+            ]
+            ws = sm.get_worksheet("news_findings")
+            ws.append_row(row, value_input_option="USER_ENTERED")
+            logger.info("Wrote news findings for %s: material=%s", ticker, ctx["has_material_news"])
+            return True
+        except Exception as e:
+            logger.warning("Failed to write news findings for %s: %s", ticker, e)
+            return False
