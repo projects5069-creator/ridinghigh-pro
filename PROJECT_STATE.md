@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-05-16 19:14:35 -05
+**Generated:** 2026-05-16 19:22:35 -05
 **Branch:** `main`
-**Latest commit:** `d797d8f` — fix(agent): pass trigger price to _close_position — Bug #1
+**Latest commit:** `9a118e9` — fix(agent): real concurrent count + per-ticker re-entry cap — Bugs #4/#5
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `d797d8f (HEAD -> main) fix(agent): pass trigger price to _close_position — Bug #1`
+- `9a118e9 (HEAD -> main) fix(agent): real concurrent count + per-ticker re-entry cap — Bugs #4/#5`
+- `ede7fe2 fix(agent): pass trigger price to _close_position — Bug #1`
 - `8f9b76e fix(agent): target sheet row by number, not PositionID — Bug #2`
 - `6bc930c fix(agent): collision-proof PositionID — timestamp+ticker, Bug #3`
 - `a977057 (origin/main, origin/HEAD) feat(sentinel): Phase 3 — 3 advanced checks with API integration`
-- `52cec3c feat(sentinel): Phase 2 — 4 real checks (completeness, scan, price, position)`
 
 ---
 
@@ -69,8 +69,8 @@ _Months in config: `2026-04`, `2026-05`, `2026-06`_
 
 ## 🩺 Health
 
-- ⚠️ 27 uncommitted file(s):
--    - 27 new/untracked
+- ⚠️ 30 uncommitted file(s):
+-    - 30 new/untracked
 
 ---
 

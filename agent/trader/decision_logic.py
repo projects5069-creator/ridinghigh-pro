@@ -33,7 +33,7 @@ from config import (
     AGENT_VOLUME_MIN, AGENT_MARKET_CAP_MIN, AGENT_MARKET_CAP_MAX,
     AGENT_TP_PCT, AGENT_SL_PCT, AGENT_POSITION_SIZE_USD,
     AGENT_COLD_START_ENABLED, AGENT_COLD_START_MAX_CONCURRENT,
-    AGENT_COLD_START_MAX_DAILY,
+    AGENT_COLD_START_MAX_DAILY, AGENT_MAX_REENTRIES_PER_TICKER,
 )
 from agent.trader.score_calculator import calculate_agent_score
 from agent.perception.data_quality import validate as validate_quality
@@ -98,11 +98,12 @@ class Decision:
     tp_price: Optional[float] = None
     sl_price: Optional[float] = None
 
-    # Safety (4)
+    # Safety (5)
     existing_position: bool = False
     buying_power: Optional[float] = None
     cold_start_concurrent_remaining: Optional[int] = None
     cold_start_daily_remaining: Optional[int] = None
+    reentries_used_today: Optional[int] = None  # Bug #5: same-ticker entries today
 
     # Execution (3) — filled by M5
     order_id: Optional[str] = None
@@ -218,6 +219,10 @@ def evaluate_signal(
         d.buying_power = account_state.get("buying_power")
         d.existing_position = signal.get("ticker", "") in account_state.get("existing_positions", [])
 
+        # Bug #5: how many times this ticker has already been entered today.
+        _entries_by_ticker = account_state.get("entries_today_by_ticker", {})
+        d.reentries_used_today = _entries_by_ticker.get(signal.get("ticker", ""), 0)
+
         # ── Decision tree ──
         skip_reason = _check_filters(d, signal, quality)
 
@@ -298,7 +303,12 @@ def _check_filters(d: Decision, signal: Dict[str, Any], quality: Dict[str, Any])
         if d.cold_start_daily_remaining is not None and d.cold_start_daily_remaining <= 0:
             return f"COLD_START_DAILY_LIMIT: {AGENT_COLD_START_MAX_DAILY} trades already today"
 
-    # Filter 9: Buying power
+    # Filter 9: Re-entry limit per ticker (Bug #5 fix)
+    if d.reentries_used_today is not None and d.reentries_used_today >= AGENT_MAX_REENTRIES_PER_TICKER:
+        return (f"REENTRY_LIMIT: {d.ticker} already entered {d.reentries_used_today}x today "
+                f"(max {AGENT_MAX_REENTRIES_PER_TICKER})")
+
+    # Filter 10: Buying power
     if d.buying_power is not None and d.buying_power < AGENT_POSITION_SIZE_USD:
         return f"INSUFFICIENT_BUYING_POWER: ${d.buying_power:.2f} < ${AGENT_POSITION_SIZE_USD}"
 

@@ -142,22 +142,36 @@ def build_account_state(broker=None) -> Dict[str, Any]:
         "buying_power": 100000.0,  # default for DRY_RUN
         "cold_start_concurrent_used": 0,
         "cold_start_daily_used": 0,
+        # Bug #2/#4 fix: count actual OPEN rows, not unique tickers.
+        "open_position_count": 0,
+        # Bug #5 fix: per-ticker entry count for today (re-entry limit).
+        "entries_today_by_ticker": {},
     }
 
     try:
         import sheets_manager
         # Open positions from paper_portfolio
         ws_pf = sheets_manager.get_worksheet("paper_portfolio")
+        today = datetime.now(PERU_TZ).strftime("%Y-%m-%d")
         if ws_pf:
             records = ws_pf.get_all_records()
             for row in records:
                 status = str(row.get("Status", "")).upper()
+                ticker = str(row.get("Ticker", "")).strip().upper()
                 if status in ("OPEN", "DRY_RUN_OPEN"):
-                    ticker = str(row.get("Ticker", "")).strip().upper()
                     if ticker:
                         state["existing_positions"].add(ticker)
+                    # Count every OPEN row — duplicate tickers count separately.
+                    state["open_position_count"] += 1
+                # Count today's entries per ticker (for re-entry limit).
+                entry_date = str(row.get("EntryDate", "")).strip()[:10]
+                if ticker and entry_date == today:
+                    state["entries_today_by_ticker"][ticker] = (
+                        state["entries_today_by_ticker"].get(ticker, 0) + 1
+                    )
 
-        state["cold_start_concurrent_used"] = len(state["existing_positions"])
+        # cold_start cap now reflects real concurrent positions, not unique tickers.
+        state["cold_start_concurrent_used"] = state["open_position_count"]
 
         # Today's ENTER decisions from decision_log
         # ALSO add tickers to existing_positions to prevent duplicate ENTER

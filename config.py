@@ -292,6 +292,10 @@ AGENT_COLD_START_DAYS = 30
 AGENT_COLD_START_MAX_CONCURRENT = 5
 AGENT_COLD_START_MAX_DAILY = 10
 AGENT_COLD_START_DAILY_LOSS_ALERT_USD = 200
+# Max times the agent may re-enter the SAME ticker in one day. Re-entry
+# after a same-day SL/TP exit is intentional (volatile pumps give repeat
+# setups) but must be bounded to limit churn / single-ticker exposure.
+AGENT_MAX_REENTRIES_PER_TICKER = 3
 
 # Modes
 AGENT_DRY_RUN = True               # Start in DRY_RUN; switch to False at M10
