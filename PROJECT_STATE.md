@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-05-17 16:33:43 -05
+**Generated:** 2026-05-17 16:57:58 -05
 **Branch:** `main`
-**Latest commit:** `37e0143` — feat(critic): add Critic Agent v1 — skeleton + trade review
+**Latest commit:** `1068bee` — feat(critic): add daily_facts() — daily documentation + anomalies
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `37e0143 (HEAD -> main) feat(critic): add Critic Agent v1 — skeleton + trade review`
-- `b210ed3 (origin/main, origin/HEAD) feat(news_detective): wire agent #4 into orchestrator`
+- `1068bee (HEAD -> main) feat(critic): add daily_facts() — daily documentation + anomalies`
+- `88c45fe (origin/main, origin/HEAD) feat(critic): add Critic Agent v1 — skeleton + trade review`
+- `b210ed3 feat(news_detective): wire agent #4 into orchestrator`
 - `38e5c9b feat(news_detective): add news_findings sheet + write_findings()`
 - `d470b4e feat(news_detective): add News Detective Agent v1 — skeleton`
-- `7b84f29 docs(dashboard): refresh Architecture expander — pages + agent layer`
 
 ---
 
@@ -71,8 +71,8 @@ _Months in config: `2026-04`, `2026-05`, `2026-06`_
 
 ## 🩺 Health
 
-- ⚠️ 50 uncommitted file(s):
--    - 50 new/untracked
+- ⚠️ 51 uncommitted file(s):
+-    - 51 new/untracked
 
 ---
 

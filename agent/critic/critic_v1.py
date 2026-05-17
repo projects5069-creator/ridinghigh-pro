@@ -185,3 +185,186 @@ class CriticAgent:
             "all": _stats(trades),
             "clean": _stats(clean),
         }
+
+    def daily_facts(self, date_str: Optional[str] = None) -> Dict[str, Any]:
+        """Collect dry facts about what each agent did on a given day.
+
+        No judgments — just counts and facts from each agent's output sheet.
+        Each source is independently try/excepted so one failure doesn't
+        prevent the others from reporting.
+
+        Args:
+            date_str: "YYYY-MM-DD". Defaults to today in America/Lima.
+
+        Returns dict with keys: date, trader, sentinel, market_context,
+        news_detective, errors.
+        """
+        import pytz
+        import sheets_manager as sm
+        from datetime import datetime
+
+        peru = pytz.timezone("America/Lima")
+        if date_str is None:
+            date_str = datetime.now(peru).strftime("%Y-%m-%d")
+
+        errors = []
+
+        # --- 1. THE TRADER (decision_log) ---
+        # Note: SKIP rows were written to decision_log only until 2026-05-11.
+        # From 2026-05-12 onward (commit b1a4e4f), SKIP goes to stdout only.
+        # So skips=0 after that date means "not recorded", not "none happened".
+        trader_facts: Dict[str, Any] = {
+            "enters": 0, "skips": None, "skip_data_available": False,
+            "entered_tickers": [], "entered_tickers_unique": {},
+        }
+        try:
+            ws = sm.get_worksheet("decision_log")
+            rows = ws.get_all_values()
+            if len(rows) > 1:
+                header = rows[0]
+                ts_idx = header.index("Timestamp") if "Timestamp" in header else None
+                act_idx = header.index("Action") if "Action" in header else None
+                tk_idx = header.index("Ticker") if "Ticker" in header else None
+
+                skip_count = 0
+                if ts_idx is not None and act_idx is not None:
+                    for r in rows[1:]:
+                        if ts_idx < len(r) and r[ts_idx].startswith(date_str):
+                            action = r[act_idx] if act_idx < len(r) else ""
+                            if action == "ENTER":
+                                trader_facts["enters"] += 1
+                                ticker = r[tk_idx] if tk_idx is not None and tk_idx < len(r) else "?"
+                                trader_facts["entered_tickers"].append(ticker)
+                            elif action == "SKIP":
+                                skip_count += 1
+
+                if skip_count > 0:
+                    trader_facts["skips"] = skip_count
+                    trader_facts["skip_data_available"] = True
+                # else: skips stays None, skip_data_available stays False
+
+                # Build unique ticker counts — derived from entered_tickers
+                # so both fields are always consistent
+                from collections import Counter as _Counter
+                trader_facts["entered_tickers_unique"] = dict(
+                    _Counter(trader_facts["entered_tickers"])
+                )
+                # Sanity: enters must equal len(entered_tickers)
+                trader_facts["enters"] = len(trader_facts["entered_tickers"])
+        except Exception as e:
+            logger.warning("daily_facts: decision_log failed: %s", e)
+            errors.append(f"decision_log: {e}")
+
+        # --- 2. DATA SENTINEL (system_events) ---
+        sentinel_facts = {"blocks": 0, "warns": 0}
+        try:
+            ws = sm.get_worksheet("system_events")
+            rows = ws.get_all_values()
+            if len(rows) > 1:
+                header = rows[0]
+                ts_idx = header.index("Timestamp") if "Timestamp" in header else 0
+                evt_idx = header.index("EventType") if "EventType" in header else None
+
+                if evt_idx is not None:
+                    for r in rows[1:]:
+                        if ts_idx < len(r) and r[ts_idx].startswith(date_str):
+                            evt = r[evt_idx] if evt_idx < len(r) else ""
+                            if "BLOCK" in evt:
+                                sentinel_facts["blocks"] += 1
+                            elif "WARN" in evt:
+                                sentinel_facts["warns"] += 1
+        except Exception as e:
+            logger.warning("daily_facts: system_events failed: %s", e)
+            errors.append(f"system_events: {e}")
+
+        # --- 3. MARKET CONTEXT (market_context) ---
+        mc_facts: Dict[str, Any] = {"regime": None, "changed_during_day": False}
+        try:
+            ws = sm.get_worksheet("market_context")
+            rows = ws.get_all_values()
+            if len(rows) > 1:
+                header = rows[0]
+                ts_idx = header.index("Timestamp") if "Timestamp" in header else 0
+                reg_idx = header.index("Market_Regime") if "Market_Regime" in header else None
+
+                if reg_idx is not None:
+                    day_regimes = []
+                    for r in rows[1:]:
+                        if ts_idx < len(r) and r[ts_idx].startswith(date_str):
+                            regime = r[reg_idx] if reg_idx < len(r) else ""
+                            if regime:
+                                day_regimes.append(regime)
+
+                    if day_regimes:
+                        mc_facts["regime"] = day_regimes[-1]
+                        mc_facts["changed_during_day"] = len(set(day_regimes)) > 1
+        except Exception as e:
+            logger.warning("daily_facts: market_context failed: %s", e)
+            errors.append(f"market_context: {e}")
+
+        # --- 4. NEWS DETECTIVE (news_findings) ---
+        nd_facts = {"tickers_checked": 0, "material_news_count": 0}
+        try:
+            ws = sm.get_worksheet("news_findings")
+            rows = ws.get_all_values()
+            if len(rows) > 1:
+                header = rows[0]
+                ts_idx = header.index("Timestamp") if "Timestamp" in header else 0
+                mat_idx = header.index("Has_Material_News") if "Has_Material_News" in header else None
+
+                for r in rows[1:]:
+                    if ts_idx < len(r) and r[ts_idx].startswith(date_str):
+                        nd_facts["tickers_checked"] += 1
+                        if mat_idx is not None and mat_idx < len(r):
+                            if r[mat_idx].upper() == "TRUE":
+                                nd_facts["material_news_count"] += 1
+        except Exception as e:
+            logger.warning("daily_facts: news_findings failed: %s", e)
+            errors.append(f"news_findings: {e}")
+
+        # --- Anomaly detection ---
+        # Each rule is a callable that receives the collected facts and
+        # returns a list of anomaly dicts. Easy to extend with new rules.
+        anomalies: List[Dict[str, str]] = []
+
+        _MAX_ENTRIES_PER_TICKER = 3
+
+        anomaly_rules = [
+            # Rule 1: excessive entries for the same ticker
+            lambda: [
+                {"severity": "HIGH", "agent": "Trader",
+                 "description": f"ריבוי כניסות — {tk} נכנסה {n} פעמים ביום אחד (סף תקין: {_MAX_ENTRIES_PER_TICKER})",
+                 "detail": f"ticker={tk}, count={n}"}
+                for tk, n in trader_facts["entered_tickers_unique"].items()
+                if n > _MAX_ENTRIES_PER_TICKER
+            ],
+            # Rule 2: SKIP data missing
+            lambda: [
+                {"severity": "MEDIUM", "agent": "Trader",
+                 "description": "נתוני SKIP חסרים בגיליון ליום זה",
+                 "detail": "skip_data_available=False, SKIP not recorded since 2026-05-12"}
+            ] if not trader_facts["skip_data_available"] and trader_facts["enters"] > 0 else [],
+            # Rule 3: collection errors
+            lambda: [
+                {"severity": "MEDIUM", "agent": "System",
+                 "description": f"שגיאת איסוף נתונים: {err}",
+                 "detail": err}
+                for err in errors
+            ],
+        ]
+
+        for rule in anomaly_rules:
+            try:
+                anomalies.extend(rule())
+            except Exception as e:
+                logger.warning("Anomaly rule failed: %s", e)
+
+        return {
+            "date": date_str,
+            "trader": trader_facts,
+            "sentinel": sentinel_facts,
+            "market_context": mc_facts,
+            "news_detective": nd_facts,
+            "anomalies": anomalies,
+            "errors": errors,
+        }
