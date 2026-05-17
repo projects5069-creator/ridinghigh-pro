@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-05-16 20:58:26 -05
+**Generated:** 2026-05-16 21:04:47 -05
 **Branch:** `main`
-**Latest commit:** `855861d` — feat(health): add check_24_sentinel_health (S1)
+**Latest commit:** `69ea314` — docs(pk): v2.13 — add §A15 Data Sentinel (agent #2)
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `855861d (HEAD -> main) feat(health): add check_24_sentinel_health (S1)`
-- `7638ddb (origin/main, origin/HEAD) feat(dashboard): add Sentinel Events page`
+- `69ea314 (HEAD -> main) docs(pk): v2.13 — add §A15 Data Sentinel (agent #2)`
+- `f40314a (origin/main, origin/HEAD) feat(health): add check_24_sentinel_health (S1)`
+- `7638ddb feat(dashboard): add Sentinel Events page`
 - `c9a963b feat(sentinel): log BLOCK/WARN events to system_events sheet`
 - `2081466 docs(pk): v2.12 — document the 5-bug fix session (Anti-Drift Contract)`
-- `ee38536 feat(agent): add DataQuality column to paper_portfolio schema`
 
 ---
 
@@ -69,8 +69,8 @@ _Months in config: `2026-04`, `2026-05`, `2026-06`_
 
 ## 🩺 Health
 
-- ⚠️ 37 uncommitted file(s):
--    - 37 new/untracked
+- ⚠️ 38 uncommitted file(s):
+-    - 38 new/untracked
 
 ---
 

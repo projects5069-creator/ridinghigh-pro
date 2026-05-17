@@ -20,6 +20,7 @@
 
 ### Document Changelog
 ```
+v2.13 (2026-05-16): Added §A15 — Data Sentinel (agent #2, gatekeeper).
 v2.12 (2026-05-16): Bug-fix sweep — 5 critical trading-agent bugs.
                     Bug #1: _close_position uses trigger price (no stale re-fetch).
                     Bug #2: sheet writer targets row by number (not PositionID).
@@ -2797,7 +2798,77 @@ GitHub Actions secrets (SMTP_HOST/PORT/USER/PASSWORD + EMAIL_TO).
 
 ---
 
+## §A15: Data Sentinel — Agent #2 (Gatekeeper)
+
+**Goal:** A validation layer that runs before The Trader, catching bad signals
+and broken system state before they corrupt trading decisions. Born from a week
+of silent-failure bugs (stale prices, 429 quota, None prices).
+
+**Mental model:** Data Sentinel is a security guard at the entrance. Every signal
+from FINVIZ passes through Sentinel's checks before The Trader evaluates it.
+If something is wrong, Sentinel can BLOCK the signal (in active mode) or just
+log it (in shadow mode).
+
+**Two agents in production:**
+1. The Trader — `agent/orchestrator.py` + `agent/trader/` — makes ENTER/SKIP decisions
+2. Data Sentinel — `agent/sentinel/` — gatekeeper, runs before Trader
+
+**Files:**
+- `agent/sentinel/data_sentinel.py` — `DataSentinel` class, `SentinelResult` dataclass, `_log_sentinel_event()`, `get_sentinel()` singleton.
+- `agent/sentinel/checks/` — 7 check modules.
+
+**The 7 checks:**
+
+Per-signal (4) — run on every signal:
+- `completeness.py` — 7 required metrics present (ticker, score, price, mxv, run_up, atrx, rsi)
+- `scan_freshness.py` — scan age: WARN at 3 min, BLOCK at 5 min
+- `price_sanity.py` — price within [$0.01, $10,000] + OHLC consistency (low ≤ price ≤ high)
+- `price_freshness.py` — FINVIZ price vs Alpaca live, BLOCK if delta > 2%. 60s in-memory cache.
+
+System-level (3) — run once per orchestrator run:
+- `position_sync.py` — if today_enters > 0 but open_positions = 0 → HALT (paper_portfolio failed to load)
+- `quota_health.py` — Sheets writes/min: WARN at 50, BLOCK at 60
+- `provider_heartbeat.py` — AAPL canary fetch, 3 consecutive failures within 5 min → HALT
+
+**Modes (config.SENTINEL_MODE):**
+- `shadow` — checks run, decisions logged to system_events, but NEVER block (DEFAULT)
+- `active` — BLOCK actually prevents trader.evaluate()
+- `off` — Sentinel disabled entirely
+
+**Config flags (config.py):**
+- `DATA_SENTINEL_ENABLED` (bool), `SENTINEL_MODE` (shadow/active/off)
+- 7 per-check toggles: `SENTINEL_CHECK_*`
+- Thresholds: `SENTINEL_PRICE_DELTA_MAX_PCT=2.0`, `SENTINEL_SCAN_MAX_AGE_MINUTES=3`,
+  `SENTINEL_SCAN_MAX_AGE_BLOCK_MINUTES=5`, `SENTINEL_QUOTA_DEFENSIVE_THRESHOLD=50`,
+  `SENTINEL_QUOTA_HALT_THRESHOLD=60`, `SENTINEL_PRICE_MIN_USD=0.01`, `SENTINEL_PRICE_MAX_USD=10000.0`
+
+**Observability:**
+- Events written to `system_events` sheet (schema: Timestamp, EventType, Severity, Component, Message, Details, ActionTaken). Only BLOCK/WARN written (never ALLOW — quota).
+- Dashboard page "🛡️ Sentinel Events" — KPIs, events table, breakdown by check/reason.
+- Health check S1 (`check_24_sentinel_health`) — verifies 9 files, config flags, system_events reachability.
+
+**Integration in orchestrator.py:**
+- `sentinel.check_system()` runs once after build_account_state — HALT if BLOCK
+- `sentinel.check_signal()` runs per signal before `trader.evaluate()` — skip signal if BLOCK
+- Counter `sentinel_blocks` in run summary
+
+**Activation path (shadow → active):**
+- Currently SHADOW mode since 2026-05-11.
+- Decision criterion: after several days of clean shadow logs (low false-positive
+  BLOCK rate, ideally < 5% of signals), switch SENTINEL_MODE='active'.
+- Active mode means bad signals are actually blocked before reaching The Trader.
+
+**Iron Rule additions:**
+- Sentinel checks MUST never raise — exceptions caught, treated as WARN, never block the loop
+- Sentinel writes MUST be graceful — system_events write failure logged, never breaks trading
+- Only BLOCK/WARN written to system_events — ALLOW never written (quota protection)
+
+**Status:** Built 2026-05-11 (Phase 1-3). Observability completed 2026-05-16
+(system_events logging + dashboard page + health check). Running in SHADOW mode.
+
+---
+
 *— END OF DOCUMENT —*
 
-*Total length: ~2800 lines · Sections: 43 · Generated: 2026-05-02 · Updated: 2026-05-04*
+*Total length: ~2900 lines · Sections: 44 · Generated: 2026-05-02 · Updated: 2026-05-16*
 *Next review: when first PK section drifts from reality (per check_25 future addition)*
