@@ -1092,6 +1092,63 @@ def check_15_gitignore_enforcement():
 
 
 # ============================================================================
+# CHECKS — Category 7: Agent subsystems
+# ============================================================================
+
+def check_24_sentinel_health(gc):
+    """S1: Data Sentinel module health — files, config, recent events."""
+    import os as _os
+    SENTINEL_DIR = _os.path.join(_os.path.dirname(_os.path.abspath(__file__)),
+                                 "agent", "sentinel")
+    # 1. Required files exist
+    required = ["data_sentinel.py", "__init__.py",
+                "checks/completeness.py", "checks/scan_freshness.py",
+                "checks/price_sanity.py", "checks/position_sync.py",
+                "checks/price_freshness.py", "checks/quota_health.py",
+                "checks/provider_heartbeat.py"]
+    missing = [f for f in required if not _os.path.exists(_os.path.join(SENTINEL_DIR, f))]
+    if missing:
+        return CheckResult("S1", "Data Sentinel health", "Agents",
+                           CRITICAL, f"Missing Sentinel files: {missing}")
+
+    # 2. Config flags present
+    try:
+        import importlib
+        import config as _cfg
+        importlib.reload(_cfg)
+        mode = getattr(_cfg, "SENTINEL_MODE", None)
+        enabled = getattr(_cfg, "DATA_SENTINEL_ENABLED", None)
+        if mode not in ("shadow", "active", "off"):
+            return CheckResult("S1", "Data Sentinel health", "Agents",
+                               WARNING, f"SENTINEL_MODE invalid: {mode}")
+        if enabled is None:
+            return CheckResult("S1", "Data Sentinel health", "Agents",
+                               WARNING, "DATA_SENTINEL_ENABLED missing from config")
+    except Exception as e:
+        return CheckResult("S1", "Data Sentinel health", "Agents",
+                           WARNING, f"Config read failed: {e}")
+
+    # 3. system_events sheet reachable + recent event count
+    event_info = ""
+    if gc is not None:
+        try:
+            month, sheets = get_active_month_sheets(gc)
+            if sheets and "system_events" in sheets:
+                ws = gc.open_by_key(sheets["system_events"]).sheet1
+                rows = ws.get_all_values()
+                sentinel_rows = [r for r in rows[1:]
+                                 if r and len(r) > 1 and str(r[1]).startswith("SENTINEL_")]
+                event_info = f", {len(sentinel_rows)} sentinel events logged"
+            else:
+                event_info = ", system_events not configured"
+        except Exception as e:
+            event_info = f", system_events read failed: {e}"
+
+    return CheckResult("S1", "Data Sentinel health", "Agents",
+                       PASSED, f"All 9 files OK, mode={mode}, enabled={enabled}{event_info}")
+
+
+# ============================================================================
 # CHECKS — Category 6b: Data quality (NaN detection)
 # ============================================================================
 
@@ -1449,7 +1506,7 @@ def main():
 
     # Run all checks
     results = []
-    print("[health_audit] Running 22 checks...")
+    print("[health_audit] Running 23 checks...")
 
     # Code integrity
     results.append(check_01_duplicate_functions())
@@ -1471,6 +1528,7 @@ def main():
     results.append(check_20_float_pct_stuck(gc))
     results.append(check_21_gap_outliers(gc))
     results.append(check_23_nan_scantime(gc))
+    results.append(check_24_sentinel_health(gc))
 
     # Config
     results.append(check_11_sheets_config_current_month())
