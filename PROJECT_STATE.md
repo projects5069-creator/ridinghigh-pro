@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-05-17 09:12:56 -05
+**Generated:** 2026-05-17 10:49:37 -05
 **Branch:** `main`
-**Latest commit:** `d46b985` — fix(dashboard): remove local 'import pandas as pd' shadowing global
+**Latest commit:** `d33cd1e` — feat(market_context): add Market Context Agent v1 — regime detection
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `d46b985 (HEAD -> main) fix(dashboard): remove local 'import pandas as pd' shadowing global`
-- `019e9da (origin/main, origin/HEAD) docs(pk): v2.13 — add §A15 Data Sentinel (agent #2)`
+- `d33cd1e (HEAD -> main) feat(market_context): add Market Context Agent v1 — regime detection`
+- `ca7c70a (origin/main, origin/HEAD) fix(dashboard): remove local 'import pandas as pd' shadowing global`
+- `019e9da docs(pk): v2.13 — add §A15 Data Sentinel (agent #2)`
 - `f40314a feat(health): add check_24_sentinel_health (S1)`
 - `7638ddb feat(dashboard): add Sentinel Events page`
-- `c9a963b feat(sentinel): log BLOCK/WARN events to system_events sheet`
 
 ---
 
@@ -32,11 +32,11 @@ _See `OPEN_ISSUES.md` for full list_
 
 | Workflow | Status | Conclusion | Started |
 |---|---|---|---|
+| Health Audit | completed | ✅ success | 2026-05-17 14:45 UTC |
 | Health Audit | completed | ✅ success | 2026-05-17 09:23 UTC |
 | Agent — End of Day | completed | ✅ success | 2026-05-16 23:36 UTC |
 | Health Audit | completed | ✅ success | 2026-05-16 20:06 UTC |
 | Warm OAuth Token | completed | ✅ success | 2026-05-16 15:38 UTC |
-| Health Audit | completed | ✅ success | 2026-05-16 14:42 UTC |
 
 ---
 
