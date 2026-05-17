@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-05-17 11:12:40 -05
+**Generated:** 2026-05-17 11:24:39 -05
 **Branch:** `main`
-**Latest commit:** `31b9d63` — feat(market_context): add market_context sheet + write_context()
+**Latest commit:** `cac24bb` — feat(market_context): hourly workflow + standalone entry point
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `31b9d63 (HEAD -> main) feat(market_context): add market_context sheet + write_context()`
-- `85452ad (origin/main, origin/HEAD) feat(market_context): add Market Context Agent v1 — regime detection`
+- `cac24bb (HEAD -> main) feat(market_context): hourly workflow + standalone entry point`
+- `14a019c (origin/main, origin/HEAD) feat(market_context): add market_context sheet + write_context()`
+- `85452ad feat(market_context): add Market Context Agent v1 — regime detection`
 - `ca7c70a fix(dashboard): remove local 'import pandas as pd' shadowing global`
 - `019e9da docs(pk): v2.13 — add §A15 Data Sentinel (agent #2)`
-- `f40314a feat(health): add check_24_sentinel_health (S1)`
 
 ---
 
@@ -64,7 +64,7 @@ _Months in config: `2026-04`, `2026-05`, `2026-06`_
 | pending_suggestions | 0 | — | ⚠️ empty |
 | config_history | 0 | — | ⚠️ empty |
 | borrow_data | 0 | — | ⚠️ empty |
-| market_context | 1 | — | ✅ |
+| market_context | 2 | — | ✅ |
 
 ---
 
