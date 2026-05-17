@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-05-16 19:22:35 -05
+**Generated:** 2026-05-16 19:42:40 -05
 **Branch:** `main`
-**Latest commit:** `9a118e9` — fix(agent): real concurrent count + per-ticker re-entry cap — Bugs #4/#5
+**Latest commit:** `607f95a` — feat(agent): add DataQuality column to paper_portfolio schema
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `9a118e9 (HEAD -> main) fix(agent): real concurrent count + per-ticker re-entry cap — Bugs #4/#5`
+- `607f95a (HEAD -> main) feat(agent): add DataQuality column to paper_portfolio schema`
+- `8b8360c fix(agent): real concurrent count + per-ticker re-entry cap — Bugs #4/#5`
 - `ede7fe2 fix(agent): pass trigger price to _close_position — Bug #1`
 - `8f9b76e fix(agent): target sheet row by number, not PositionID — Bug #2`
 - `6bc930c fix(agent): collision-proof PositionID — timestamp+ticker, Bug #3`
-- `a977057 (origin/main, origin/HEAD) feat(sentinel): Phase 3 — 3 advanced checks with API integration`
 
 ---
 
@@ -59,7 +59,7 @@ _Months in config: `2026-04`, `2026-05`, `2026-06`_
 | decision_log | 16,212 | — | ✅ |
 | paper_portfolio | 71 | — | ✅ |
 | score_analytics | 0 | — | ⚠️ empty |
-| postmortems | 1,466 | — | ✅ |
+| postmortems | 54 | — | ✅ |
 | system_events | 0 | — | ⚠️ empty |
 | pending_suggestions | 0 | — | ⚠️ empty |
 | config_history | 0 | — | ⚠️ empty |
@@ -69,8 +69,8 @@ _Months in config: `2026-04`, `2026-05`, `2026-06`_
 
 ## 🩺 Health
 
-- ⚠️ 30 uncommitted file(s):
--    - 30 new/untracked
+- ⚠️ 32 uncommitted file(s):
+-    - 32 new/untracked
 
 ---
 

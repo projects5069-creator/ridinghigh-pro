@@ -228,13 +228,13 @@ class OrderManager:
         entry_date = now.strftime("%Y-%m-%d")
         entry_time = now.strftime("%H:%M:%S")
 
-        # paper_portfolio schema (22 cols):
+        # paper_portfolio schema (25 cols):
         # PositionID, Ticker, EntryDate, EntryTime,
         # EntryPrice, Quantity, PositionSizeUSD, Side,
-        # EntryOrderID, TPOrderID, SLOrderID,
+        # EntryOrderID, TPOrderID, SLOrderID, TPPrice, SLPrice,
         # CurrentPrice, UnrealizedPnL, UnrealizedPnLPct, Status,
         # ExitPrice, ExitDate, ExitTime, ExitReason,
-        # RealizedPnL, RealizedPnLPct, LastUpdated
+        # RealizedPnL, RealizedPnLPct, LastUpdated, DataQuality
         row = [
             decision.decision_id or "",       # PositionID (same as DecisionID)
             decision.ticker,                  # Ticker
@@ -260,6 +260,7 @@ class OrderManager:
             "",                               # RealizedPnL
             "",                               # RealizedPnLPct
             now.isoformat(),                  # LastUpdated
+            "CLEAN",                          # DataQuality (post-2026-05-16 bug fixes)
         ]
 
         if self._sheet_writer:

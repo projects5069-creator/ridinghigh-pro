@@ -83,9 +83,9 @@ AGENT_SHEET_HEADERS = {
         "ExitPrice", "ExitDate", "ExitTime", "ExitReason",
         # Results (2)
         "RealizedPnL", "RealizedPnLPct",
-        # Meta (1)
-        "LastUpdated",
-    ],  # 22 columns
+        # Meta (2)
+        "LastUpdated", "DataQuality",
+    ],  # 25 columns
 
     "score_analytics": [
         # Identity (3)
