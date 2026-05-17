@@ -3741,7 +3741,7 @@ def system_overview_page():
 
     st.caption(
         "🎯 **קריטריוני יציאה לשלב 2:** ≥100 רשומות v2 · ≥30 ימי מסחר · "
-        "TP10 hit rate יציב (±3%) · 18/18 health checks ירוקים 7 ימים"
+        "TP10 hit rate יציב (±3%) · 24/24 health checks ירוקים 7 ימים"
     )
 
     st.divider()
@@ -4865,30 +4865,31 @@ SL ALWAYS overrides TP אם שניהם נפגעו באותו bar (שמרני).
     # ═══════════════════════════════════════════════════════════════════════
     with st.expander("🗺️ Roadmap — Phase 1 → 4"):
         st.markdown("""
-### Phase 1 — Data Accumulation [פעיל, ~50%]
+### Phase 1 — Data Accumulation [פעיל]
 - ✅ מערכת רצה יומית
-- ✅ 18 health checks חיים
+- ✅ 24 health checks חיים
 - ✅ Score v2 פעיל
 - ✅ Provider abstraction (Alpaca + yfinance)
-- ⏳ 100 רשומות v2 (כעת: ~50)
-- ⏳ 30 ימי מסחר v2 (כעת: ~14)
+- ✅ 3 סוכנים בייצור (ראה expander "ארכיטקטורת הסוכנים")
+- ⏳ צבירת רשומות v2 — היעד והמצב הנוכחי מוצגים בראש הדף (TL;DR)
 
-### Phase 2 — Dynamic TP via ATRX [מתוכנן]
-- מטרה: TP threshold לכל מניה לפי ATRX (high-vol stocks need wider TP)
-- דורש: Phase 1 exit criteria מולאו
-- הערכה: סוף מאי 2026
+### Phase 2 — Agent Build-Out [פעיל במקביל]
+- מטרה: בניית סוכני הליבה שלא תלויים בנתונים (News Detective, Devil's Advocate, Risk Sentinel)
+- פירוט מלא: ראה expander "🤖 ארכיטקטורת הסוכנים"
+- מתבצע במקביל ל-Phase 1 — סוכנים שלא דורשים נתונים נבנים בזמן שהנתונים מצטברים
 
-### Phase 3 — Entry Timing Optimization [מתוכנן]
-- מטרה: minute-level data לזיהוי entry timing אופטימלי
-- דורש: Phase 2 stable 4 שבועות
+### Phase 3 — Data-Driven Optimization [נעול]
+- מטרה: סוכנים שלומדים מנתונים (Pattern Hunter, TP/SL Optimizer, Exit Strategy ועוד)
+- דורש: 200+ עסקאות נקיות
+- נעול עד שיצטבר מספיק מדגם
 
 ### Phase 4 — Real Money Execution [GATED, אין תאריך]
-- מטרה: `ALPACA_PAPER=false`, deploy small position size
+- מטרה: `AGENT_DRY_RUN=False`, deploy בגודל פוזיציה קטן
 - Gate criteria:
-  - Phase 3 מראה edge מאומת על תנאי שוק שונים
-  - Independent statistical review
-  - החלטה על capital allocation
-  - Risk limits hardcoded
+  - Edge מאומת על תנאי שוק שונים
+  - סקירה סטטיסטית עצמאית
+  - החלטת capital allocation
+  - Risk limits מקודדים
         """)
 
     # ═══════════════════════════════════════════════════════════════════════

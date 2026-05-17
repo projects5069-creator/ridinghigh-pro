@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-05-17 12:37:32 -05
+**Generated:** 2026-05-17 13:10:41 -05
 **Branch:** `main`
-**Latest commit:** `fd05097` — docs(dashboard): refresh Health Checks expander — 18→24
+**Latest commit:** `7f5d6ac` — docs(dashboard): refresh Roadmap expander + fix stale check count
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `fd05097 (HEAD -> main) docs(dashboard): refresh Health Checks expander — 18→24`
-- `bf3d98d (origin/main, origin/HEAD) docs(dashboard): refresh Workflows expander — 7→12`
+- `7f5d6ac (HEAD -> main) docs(dashboard): refresh Roadmap expander + fix stale check count`
+- `d7b1876 (origin/main, origin/HEAD) docs(dashboard): refresh Health Checks expander — 18→24`
+- `bf3d98d docs(dashboard): refresh Workflows expander — 7→12`
 - `e343aaf docs(dashboard): refresh Sheets architecture expander — 9→18`
 - `828961a feat(dashboard): add Trading Agents expander to System Overview`
-- `47b7ae9 feat(market_context): hourly workflow + standalone entry point`
 
 ---
 
@@ -64,14 +64,14 @@ _Months in config: `2026-04`, `2026-05`, `2026-06`_
 | pending_suggestions | 0 | — | ⚠️ empty |
 | config_history | 0 | — | ⚠️ empty |
 | borrow_data | 0 | — | ⚠️ empty |
-| market_context | ? | ? | ❌ APIError: [500]: Internal error encounte |
+| market_context | 3 | — | ✅ |
 
 ---
 
 ## 🩺 Health
 
-- ⚠️ 43 uncommitted file(s):
--    - 43 new/untracked
+- ⚠️ 44 uncommitted file(s):
+-    - 44 new/untracked
 
 ---
 
