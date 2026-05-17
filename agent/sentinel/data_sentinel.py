@@ -27,6 +27,40 @@ logger = logging.getLogger("agent.sentinel")
 DecisionType = Literal["ALLOW", "WARN", "BLOCK"]
 
 
+def _log_sentinel_event(decision: str, component: str, reason: str,
+                        details: dict, action_taken: str) -> None:
+    """
+    Write a Sentinel BLOCK/WARN event to the system_events sheet.
+
+    Schema: [Timestamp, EventType, Severity, Component, Message, Details, ActionTaken]
+    Only called for BLOCK/WARN (never ALLOW) to keep Sheets quota low.
+    Failures are swallowed (logged) — never break the trading loop.
+    """
+    try:
+        import json
+        from datetime import datetime
+        import pytz
+        import sheets_manager as sm
+
+        peru = pytz.timezone("America/Lima")
+        event_type = f"SENTINEL_{decision}"  # SENTINEL_BLOCK / SENTINEL_WARN
+        severity = "CRITICAL" if decision == "BLOCK" else "WARNING"
+
+        row = [
+            datetime.now(peru).isoformat(),   # Timestamp
+            event_type,                        # EventType
+            severity,                          # Severity
+            component,                         # Component (check name)
+            reason,                            # Message (reason code)
+            json.dumps(details, default=str)[:500],  # Details
+            action_taken,                      # ActionTaken
+        ]
+        ws = sm.get_worksheet("system_events")
+        ws.append_row(row, value_input_option="USER_ENTERED")
+    except Exception as e:
+        logger.warning("Failed to log sentinel event to system_events: %s", e)
+
+
 @dataclass
 class SentinelResult:
     """Result from running all sentinel checks on a signal."""
@@ -163,6 +197,22 @@ class DataSentinel:
                         signal.get("ticker", "?"), worst_reason)
             effective_decision = "ALLOW"
 
+        # Log BLOCK/WARN events to system_events (not ALLOW — quota)
+        if worst_decision in ("BLOCK", "WARN"):
+            action = "SHADOW_LOGGED" if self.mode == "shadow" else (
+                "BLOCKED" if worst_decision == "BLOCK" else "WARNED")
+            failed = ",".join(checks_failed) if checks_failed else "?"
+            event_details = dict(worst_details)
+            event_details["ticker"] = signal.get("ticker", "?")
+            event_details["mode"] = self.mode
+            _log_sentinel_event(
+                decision=worst_decision,
+                component=failed,
+                reason=worst_reason,
+                details=event_details,
+                action_taken=action,
+            )
+
         return SentinelResult(
             decision=effective_decision,
             reason=worst_reason,
@@ -216,6 +266,18 @@ class DataSentinel:
                 break  # BLOCK is final
             elif r.decision == "WARN" and worst.decision == "ALLOW":
                 worst = r
+
+        # Log system-level BLOCK/WARN to system_events
+        if worst.decision in ("BLOCK", "WARN"):
+            action = "SHADOW_LOGGED" if self.mode == "shadow" else (
+                "HALTED" if worst.decision == "BLOCK" else "WARNED")
+            _log_sentinel_event(
+                decision=worst.decision,
+                component="system_check",
+                reason=worst.reason,
+                details=dict(worst.details),
+                action_taken=action,
+            )
 
         # Shadow mode override
         if self.mode == "shadow" and worst.decision == "BLOCK":
