@@ -38,6 +38,7 @@ def run() -> Dict[str, Any]:
         "scorecard_ok": False,
         "total_tickers": 0,
         "conflict_count": 0,
+        "email_sent": False,
         "errors": 0,
     }
 
@@ -57,6 +58,7 @@ def run() -> Dict[str, Any]:
         logger.error("write_scorecard failed: %s", e, exc_info=True)
 
     # 2. Unified positions (cross-agent stance table)
+    positions = {}
     try:
         positions = critic.unified_positions(today)
         summary["total_tickers"] = positions.get("summary", {}).get("total_tickers", 0)
@@ -70,6 +72,19 @@ def run() -> Dict[str, Any]:
     except Exception as e:
         summary["errors"] += 1
         logger.error("unified_positions failed: %s", e, exc_info=True)
+
+    # 3. Send daily Critic email
+    try:
+        facts = critic.daily_facts(today)
+        from agent.notifications.templates.critic_brief import render_critic_email
+        from agent.notifications.email_sender import send_email
+        subject, html = render_critic_email(facts, positions)
+        sent = send_email(subject, html)
+        summary["email_sent"] = sent
+        logger.info("Critic email: %s", "sent" if sent else "not sent (SMTP not configured?)")
+    except Exception as e:
+        summary["errors"] += 1
+        logger.error("Critic email failed: %s", e, exc_info=True)
 
     logger.info("Critic complete: errors=%d", summary["errors"])
     return summary

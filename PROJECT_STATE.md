@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-05-17 18:27:22 -05
+**Generated:** 2026-05-17 18:45:52 -05
 **Branch:** `main`
-**Latest commit:** `0d20659` — feat(critic): add daily critic orchestrator + workflow
+**Latest commit:** `72fea6e` — feat(critic): add daily critic email
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `0d20659 (HEAD -> main) feat(critic): add daily critic orchestrator + workflow`
-- `285b0af (origin/main, origin/HEAD) feat(critic): add "Agent Scorecard" dashboard page`
+- `72fea6e (HEAD -> main) feat(critic): add daily critic email`
+- `f6b65fe (origin/main, origin/HEAD) feat(critic): add daily critic orchestrator + workflow`
+- `285b0af feat(critic): add "Agent Scorecard" dashboard page`
 - `50ab76b feat(critic): add unified_positions() — cross-agent stance table`
 - `d195d4d feat(critic): add agent_scorecard sheet + write_scorecard()`
-- `3b9acfe feat(critic): add daily_facts() — daily documentation + anomalies`
 
 ---
 
@@ -32,11 +32,11 @@ _See `OPEN_ISSUES.md` for full list_
 
 | Workflow | Status | Conclusion | Started |
 |---|---|---|---|
+| Agent — Critic (daily) | completed | ✅ success | 2026-05-17 23:33 UTC |
 | Health Audit | completed | ✅ success | 2026-05-17 20:09 UTC |
 | Agent — Market Context (Hourly) | completed | ✅ success | 2026-05-17 16:28 UTC |
 | Health Audit | completed | ✅ success | 2026-05-17 14:45 UTC |
 | Health Audit | completed | ✅ success | 2026-05-17 09:23 UTC |
-| Agent — End of Day | completed | ✅ success | 2026-05-16 23:36 UTC |
 
 ---
 
@@ -66,14 +66,14 @@ _Months in config: `2026-04`, `2026-05`, `2026-06`_
 | borrow_data | 0 | — | ⚠️ empty |
 | market_context | 3 | — | ✅ |
 | news_findings | 1 | — | ✅ |
-| agent_scorecard | 8 | 2026-05-17 | ✅ |
+| agent_scorecard | 16 | 2026-05-17 | ✅ |
 
 ---
 
 ## 🩺 Health
 
-- ⚠️ 55 uncommitted file(s):
--    - 55 new/untracked
+- ⚠️ 56 uncommitted file(s):
+-    - 56 new/untracked
 
 ---
 
