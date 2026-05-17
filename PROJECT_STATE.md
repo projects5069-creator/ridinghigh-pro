@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-05-17 17:35:32 -05
+**Generated:** 2026-05-17 17:50:34 -05
 **Branch:** `main`
-**Latest commit:** `5390908` — feat(critic): add agent_scorecard sheet + write_scorecard()
+**Latest commit:** `e8c0adc` — feat(critic): add unified_positions() — cross-agent stance table
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `5390908 (HEAD -> main) feat(critic): add agent_scorecard sheet + write_scorecard()`
-- `3b9acfe (origin/main, origin/HEAD) feat(critic): add daily_facts() — daily documentation + anomalies`
+- `e8c0adc (HEAD -> main) feat(critic): add unified_positions() — cross-agent stance table`
+- `d195d4d (origin/main, origin/HEAD) feat(critic): add agent_scorecard sheet + write_scorecard()`
+- `3b9acfe feat(critic): add daily_facts() — daily documentation + anomalies`
 - `88c45fe feat(critic): add Critic Agent v1 — skeleton + trade review`
 - `b210ed3 feat(news_detective): wire agent #4 into orchestrator`
-- `38e5c9b feat(news_detective): add news_findings sheet + write_findings()`
 
 ---
 
@@ -66,14 +66,14 @@ _Months in config: `2026-04`, `2026-05`, `2026-06`_
 | borrow_data | 0 | — | ⚠️ empty |
 | market_context | 3 | — | ✅ |
 | news_findings | 1 | — | ✅ |
-| agent_scorecard | 4 | 2026-05-15 | ✅ |
+| agent_scorecard | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
 
 ---
 
 ## 🩺 Health
 
-- ⚠️ 53 uncommitted file(s):
--    - 53 new/untracked
+- ⚠️ 54 uncommitted file(s):
+-    - 54 new/untracked
 
 ---
 

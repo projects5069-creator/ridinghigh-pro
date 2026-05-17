@@ -417,3 +417,155 @@ class CriticAgent:
         except Exception as e:
             logger.warning("Failed to write scorecard: %s", e)
             return False
+
+    def unified_positions(self, date_str: Optional[str] = None) -> Dict[str, Any]:
+        """Build a per-ticker table merging all agents' views for a given day.
+
+        Each agent source is defined declaratively — adding a future agent
+        means appending one dict to SOURCES, no logic changes needed.
+
+        Returns dict with keys: date, regime, positions (dict keyed by ticker),
+        conflicts (list of tickers with ENTER + material news), summary.
+        """
+        import pytz as _pytz
+        import sheets_manager as sm
+        from datetime import datetime as _dt
+        from collections import defaultdict
+
+        peru = _pytz.timezone("America/Lima")
+        if date_str is None:
+            date_str = _dt.now(peru).strftime("%Y-%m-%d")
+
+        # ── Declarative source definitions ──────────────────────────────
+        # Each source: agent name, sheet key, ticker column, timestamp column,
+        # and list of fields to extract.
+        SOURCES = [
+            {
+                "agent": "Trader",
+                "sheet": "decision_log",
+                "ticker_col": "Ticker",
+                "ts_col": "Timestamp",
+                "fields": ["Action", "Score", "Reason", "SkipReason"],
+            },
+            {
+                "agent": "News Detective",
+                "sheet": "news_findings",
+                "ticker_col": "Ticker",
+                "ts_col": "Timestamp",
+                "fields": ["Has_Material_News", "EDGAR_Latest_Form", "Finnhub_Latest_Headline"],
+            },
+        ]
+
+        errors = []
+        # positions[ticker][agent] = {count, last_values}
+        positions: Dict[str, Dict[str, Any]] = defaultdict(dict)
+
+        # ── Read each source ────────────────────────────────────────────
+        for src in SOURCES:
+            agent = src["agent"]
+            try:
+                ws = sm.get_worksheet(src["sheet"])
+                rows = ws.get_all_values()
+                if len(rows) <= 1:
+                    continue
+
+                header = rows[0]
+                tk_idx = header.index(src["ticker_col"]) if src["ticker_col"] in header else None
+                ts_idx = header.index(src["ts_col"]) if src["ts_col"] in header else None
+                field_idxs = {}
+                for f in src["fields"]:
+                    if f in header:
+                        field_idxs[f] = header.index(f)
+
+                if tk_idx is None or ts_idx is None:
+                    continue
+
+                for r in rows[1:]:
+                    if ts_idx >= len(r) or not r[ts_idx].startswith(date_str):
+                        continue
+                    ticker = r[tk_idx] if tk_idx < len(r) else "?"
+                    vals = {f: r[i] if i < len(r) else "" for f, i in field_idxs.items()}
+
+                    existing = positions[ticker].get(agent)
+                    if existing is None:
+                        positions[ticker][agent] = {"count": 1, "last": vals}
+                    else:
+                        existing["count"] += 1
+                        existing["last"] = vals  # keep latest
+
+            except Exception as e:
+                logger.warning("unified_positions: %s failed: %s", agent, e)
+                errors.append(f"{agent}: {e}")
+
+        # ── Market context (market-wide, not per-ticker) ────────────────
+        regime = None
+        try:
+            ws = sm.get_worksheet("market_context")
+            rows = ws.get_all_values()
+            if len(rows) > 1:
+                header = rows[0]
+                ts_idx = header.index("Timestamp") if "Timestamp" in header else 0
+                reg_idx = header.index("Market_Regime") if "Market_Regime" in header else None
+                if reg_idx is not None:
+                    for r in rows[1:]:
+                        if ts_idx < len(r) and r[ts_idx].startswith(date_str):
+                            regime = r[reg_idx] if reg_idx < len(r) else regime
+        except Exception as e:
+            logger.warning("unified_positions: market_context failed: %s", e)
+            errors.append(f"market_context: {e}")
+
+        # ── Derive computed fields per ticker ───────────────────────────
+        result_positions = {}
+        conflicts = []
+
+        for ticker, agents in positions.items():
+            pos: Dict[str, Any] = {"ticker": ticker, "regime": regime}
+
+            # Trader stance
+            trader = agents.get("Trader")
+            if trader:
+                actions = set()
+                # We only have the last action, but count tells us how many
+                last_action = trader["last"].get("Action", "")
+                pos["trader_count"] = trader["count"]
+                pos["trader_last_action"] = last_action
+                pos["trader_score"] = _safe_float(trader["last"].get("Score", ""))
+                # For stance, check if all entries were ENTER (decision_log
+                # only records ENTER post-2026-05-12, so if it's there it's ENTER)
+                pos["trader_stance"] = last_action if last_action else "NONE"
+            else:
+                pos["trader_stance"] = "NONE"
+                pos["trader_count"] = 0
+                pos["trader_score"] = None
+
+            # News flag
+            nd = agents.get("News Detective")
+            if nd:
+                mat = nd["last"].get("Has_Material_News", "")
+                pos["news_flag"] = mat.upper() == "TRUE"
+                pos["news_edgar"] = nd["last"].get("EDGAR_Latest_Form", "")
+                pos["news_headline"] = nd["last"].get("Finnhub_Latest_Headline", "")
+            else:
+                pos["news_flag"] = None  # not checked
+
+            # Conflict detection
+            pos["conflict"] = (
+                pos["trader_stance"] == "ENTER"
+                and pos.get("news_flag") is True
+            )
+            if pos["conflict"]:
+                conflicts.append(ticker)
+
+            result_positions[ticker] = pos
+
+        return {
+            "date": date_str,
+            "regime": regime,
+            "positions": result_positions,
+            "conflicts": conflicts,
+            "summary": {
+                "total_tickers": len(result_positions),
+                "conflict_count": len(conflicts),
+            },
+            "errors": errors,
+        }
