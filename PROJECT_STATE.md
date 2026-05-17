@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-05-16 19:42:40 -05
+**Generated:** 2026-05-16 19:55:02 -05
 **Branch:** `main`
-**Latest commit:** `607f95a` — feat(agent): add DataQuality column to paper_portfolio schema
+**Latest commit:** `52d633f` — docs(pk): v2.12 — document the 5-bug fix session (Anti-Drift Contract)
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `607f95a (HEAD -> main) feat(agent): add DataQuality column to paper_portfolio schema`
+- `52d633f (HEAD -> main) docs(pk): v2.12 — document the 5-bug fix session (Anti-Drift Contract)`
+- `ee38536 feat(agent): add DataQuality column to paper_portfolio schema`
 - `8b8360c fix(agent): real concurrent count + per-ticker re-entry cap — Bugs #4/#5`
 - `ede7fe2 fix(agent): pass trigger price to _close_position — Bug #1`
 - `8f9b76e fix(agent): target sheet row by number, not PositionID — Bug #2`
-- `6bc930c fix(agent): collision-proof PositionID — timestamp+ticker, Bug #3`
 
 ---
 
@@ -69,8 +69,8 @@ _Months in config: `2026-04`, `2026-05`, `2026-06`_
 
 ## 🩺 Health
 
-- ⚠️ 32 uncommitted file(s):
--    - 32 new/untracked
+- ⚠️ 33 uncommitted file(s):
+-    - 33 new/untracked
 
 ---
 
