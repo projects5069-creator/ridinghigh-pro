@@ -295,6 +295,7 @@ def run() -> Dict[str, Any]:
     try:
         from agent.trader.trader import Trader
         from agent.sentinel.data_sentinel import get_sentinel
+        from agent.news_detective import NewsDetectiveAgent
         from agent.logging.decision_logger import DecisionLogger
         from agent.execution.alpaca_broker import AlpacaBroker
         from agent.execution.order_manager import OrderManager
@@ -311,6 +312,7 @@ def run() -> Dict[str, Any]:
         data_provider = get_data_provider()
         order_manager = OrderManager(broker, data_provider=data_provider)
         postmortem_engine = PostmortemEngine(data_provider=data_provider)
+        news_detective = NewsDetectiveAgent()
 
         # ── Sheet writer for position_manager ──────────────────────
         # Wires position updates (CurrentPrice, UnrealizedPnL, TP/SL closes)
@@ -441,6 +443,12 @@ def run() -> Dict[str, Any]:
                     continue
                 if sentinel_result.is_warn:
                     logger.warning("Sentinel WARN %s: %s", ticker, sentinel_result.reason)
+
+                # News Detective — log-only, never blocks
+                try:
+                    news_detective.write_findings(ticker)
+                except Exception as e:
+                    logger.warning("News Detective failed for %s: %s", ticker, e)
 
                 decision = trader.evaluate(signal, account_state)
                 log_result = decision_logger.log(decision)

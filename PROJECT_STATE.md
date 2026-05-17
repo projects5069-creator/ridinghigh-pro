@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-05-17 15:53:25 -05
+**Generated:** 2026-05-17 16:03:16 -05
 **Branch:** `main`
-**Latest commit:** `9ee057f` — feat(news_detective): add news_findings sheet + write_findings()
+**Latest commit:** `4836639` — feat(news_detective): wire agent #4 into orchestrator
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `9ee057f (HEAD -> main) feat(news_detective): add news_findings sheet + write_findings()`
-- `d470b4e (origin/main, origin/HEAD) feat(news_detective): add News Detective Agent v1 — skeleton`
+- `4836639 (HEAD -> main) feat(news_detective): wire agent #4 into orchestrator`
+- `38e5c9b (origin/main, origin/HEAD) feat(news_detective): add news_findings sheet + write_findings()`
+- `d470b4e feat(news_detective): add News Detective Agent v1 — skeleton`
 - `7b84f29 docs(dashboard): refresh Architecture expander — pages + agent layer`
 - `5522e36 docs(dashboard): refresh Roadmap expander + fix stale check count`
-- `d7b1876 docs(dashboard): refresh Health Checks expander — 18→24`
 
 ---
 
@@ -71,8 +71,8 @@ _Months in config: `2026-04`, `2026-05`, `2026-06`_
 
 ## 🩺 Health
 
-- ⚠️ 48 uncommitted file(s):
--    - 48 new/untracked
+- ⚠️ 50 uncommitted file(s):
+-    - 50 new/untracked
 
 ---
 

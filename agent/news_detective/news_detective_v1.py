@@ -240,13 +240,21 @@ class NewsDetectiveAgent:
     def write_findings(self, ticker: str) -> bool:
         """Check ticker and append one row to the news_findings sheet.
 
-        Returns True on success, False on failure.
+        Skips the sheet write if the result came from cache (avoids duplicate
+        rows when the same ticker appears in consecutive orchestrator runs).
+
+        Returns True on success (or cache-skip), False on failure.
         Failures are swallowed (logged) — never break the calling loop.
         """
         try:
             import sheets_manager as sm
 
             ctx = self.check_ticker(ticker)
+
+            if ctx.get("from_cache"):
+                logger.debug("Skipping sheet write for %s (cached)", ticker)
+                return True
+
             filings = ctx["edgar_filings"]
             news = ctx["finnhub_news"]
 
