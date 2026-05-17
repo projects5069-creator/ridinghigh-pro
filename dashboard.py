@@ -3779,17 +3779,20 @@ def system_overview_page():
             {
                 "num": "7",
                 "name": "Visualization (תצוגה)",
-                "desc": "המסך שאתה רואה כרגע. Streamlit dashboard עם 8 דפים:",
+                "desc": "המסך שאתה רואה כרגע. Streamlit dashboard עם 11 דפים:",
                 "files": [
-                    "**dashboard.py** (4,111 שורות) — הקובץ העיקרי",
+                    "**dashboard.py** (~5,119 שורות) — הקובץ העיקרי",
                     "  • 🏠 Home — סיכום היום",
                     "  • 💼 Portfolio Tracker — trades פעילים",
                     "  • 🔬 Post Analysis — מניות עם Score≥60 + 5 ימי מעקב",
-                    "  • ⚡ Live Trades — trades בזמן אמת",
                     "  • 📈 Score Tracker — מסע Score של מניה ביום",
                     "  • 📅 Daily Summary — סיכום יומי",
                     "  • 📦 Timeline Archive — ארכיון timeline_live",
                     "  • 🖥️ System Overview (זה הדף הזה)",
+                    "  • 🤖 Live Agent — מעקב חי אחרי The Trader",
+                    "  • 📊 Trade History — היסטוריית עסקאות הסוכן",
+                    "  • 🧠 Score Brain — ניתוח ציונים והצעות שיפור",
+                    "  • 🛡️ Sentinel Events — אירועי Data Sentinel",
                 ],
             },
             {
@@ -3885,6 +3888,7 @@ def system_overview_page():
 4. **Read-once, write-once** — אין מקבילות לאותו sheet
 5. **Idempotent maintenance** — חזרה על rotation/OAuth/backup בטוחה
         """)
+        st.markdown("**שכבה 8 — הסוכנים:** מערכת הסוכנים יושבת מעל 7 השכבות האלה ומתועדת בנפרד ב-expander 🤖 ארכיטקטורת הסוכנים.")
 
     # ═══════════════════════════════════════════════════════════════════════
     # 3b. Trading Agents

@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-05-17 13:10:41 -05
+**Generated:** 2026-05-17 13:50:17 -05
 **Branch:** `main`
-**Latest commit:** `7f5d6ac` — docs(dashboard): refresh Roadmap expander + fix stale check count
+**Latest commit:** `884ecbd` — docs(dashboard): refresh Architecture expander — pages + agent layer
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `7f5d6ac (HEAD -> main) docs(dashboard): refresh Roadmap expander + fix stale check count`
-- `d7b1876 (origin/main, origin/HEAD) docs(dashboard): refresh Health Checks expander — 18→24`
+- `884ecbd (HEAD -> main) docs(dashboard): refresh Architecture expander — pages + agent layer`
+- `5522e36 (origin/main, origin/HEAD) docs(dashboard): refresh Roadmap expander + fix stale check count`
+- `d7b1876 docs(dashboard): refresh Health Checks expander — 18→24`
 - `bf3d98d docs(dashboard): refresh Workflows expander — 7→12`
 - `e343aaf docs(dashboard): refresh Sheets architecture expander — 9→18`
-- `828961a feat(dashboard): add Trading Agents expander to System Overview`
 
 ---
 
@@ -70,8 +70,8 @@ _Months in config: `2026-04`, `2026-05`, `2026-06`_
 
 ## 🩺 Health
 
-- ⚠️ 44 uncommitted file(s):
--    - 44 new/untracked
+- ⚠️ 45 uncommitted file(s):
+-    - 45 new/untracked
 
 ---
 
