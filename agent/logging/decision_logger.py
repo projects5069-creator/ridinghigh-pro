@@ -134,10 +134,11 @@ class DecisionLogger:
             decision_id (str) on success
             None on failure (stderr logged)
         """
-        # Generate ID if not set
+        # Generate ID if not set (ticker embedded for collision-proof IDs — Bug #3 fix)
         if not decision.decision_id:
+            _tk = getattr(decision, "ticker", "") or ""
             try:
-                decision.decision_id = self.id_generator.generate()
+                decision.decision_id = self.id_generator.generate(_tk)
             except Exception as e:
                 print(f"[DecisionLogger] ID generation failed: {e}", file=sys.stderr)
                 decision.decision_id = self.id_generator.fallback_timestamp_id()

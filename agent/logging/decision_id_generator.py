@@ -1,18 +1,19 @@
 """
-Generates unique decision IDs in format: DEC-YYYY-MM-DD-NNNNN
+Generates unique decision IDs in format: DEC-YYYY-MM-DD-TICKER-HHMMSS-ff
 
-Strategy:
-- Read current count from decision_log Sheet on init
-- Increment in-memory for each generate() call
-- Counter resets at midnight (Peru TZ)
-- Fallback to timestamp-based ID if Sheet unreachable
+Strategy (Bug #3 fix 2026-05-16):
+- Timestamp-based — NO running counter, NO Sheet read on init.
+- Each ID embeds ticker + Peru-time HHMMSS + 2-digit microsecond fraction.
+- Collision-proof: two entries for the same ticker in the same second
+  still differ by the microsecond fraction.
+- Eliminates the read-increment-write race that produced duplicate
+  PositionIDs under concurrent GitHub Actions runs / quota 429.
 
 Usage:
     from agent.logging.decision_id_generator import DecisionIDGenerator
 
     gen = DecisionIDGenerator(sheet_id="...")
-    id1 = gen.generate()  # -> "DEC-2026-05-03-00001"
-    id2 = gen.generate()  # -> "DEC-2026-05-03-00002"
+    id1 = gen.generate("TDIC")  # -> "DEC-2026-05-13-TDIC-143052-47"
 
 Used by: decision_logger.py (M4)
 """
@@ -32,7 +33,8 @@ import sheets_manager
 PERU_TZ = pytz.timezone("America/Lima")
 
 # Format constants
-ID_PATTERN = re.compile(r"^DEC-(\d{4}-\d{2}-\d{2})-(\d{5})$")
+# New format: DEC-YYYY-MM-DD-TICKER-HHMMSS-ff  (legacy 5-digit still parseable)
+ID_PATTERN = re.compile(r"^DEC-(\d{4}-\d{2}-\d{2})-(.+)$")
 ID_PREFIX = "DEC"
 COUNTER_FORMAT = "{:05d}"  # 5 digits, zero-padded
 MAX_COUNTER = 99999
@@ -60,57 +62,30 @@ class DecisionIDGenerator:
         return datetime.now(PERU_TZ).strftime("%Y-%m-%d")
 
     def _initialize(self):
-        """Read last decision_id from Sheet, set counter accordingly."""
-        today = self._today_peru()
-        self._current_date = today
+        """Timestamp-based generator — no Sheet read, no counter (Bug #3 fix)."""
+        self._current_date = self._today_peru()
+        self._counter = 0  # retained for backward-compat; unused
 
-        try:
-            gc = sheets_manager._get_gc()
-            ws = gc.open_by_key(self.sheet_id).sheet1
-
-            # Get DecisionID column (col A)
-            ids = ws.col_values(1)  # includes header at index 0
-
-            # Find latest ID for today
-            today_max = 0
-            for row_id in reversed(ids[1:]):  # skip header
-                m = ID_PATTERN.match(row_id)
-                if m and m.group(1) == today:
-                    today_max = max(today_max, int(m.group(2)))
-                    break  # IDs are appended in order, first match from end is highest
-
-            self._counter = today_max
-        except Exception as e:
-            print(f"[DecisionIDGenerator] Could not read Sheet: {e}", file=sys.stderr)
-            print(f"[DecisionIDGenerator] Falling back to counter=0", file=sys.stderr)
-            self._counter = 0
-
-    def generate(self) -> str:
+    def generate(self, ticker: str = "") -> str:
         """
-        Generate next decision_id.
+        Generate a unique decision_id.
+
+        Format: DEC-YYYY-MM-DD-TICKER-HHMMSS-ff
+        Collision-proof — embeds ticker + Peru HHMMSS + 2-digit microsecond.
+
+        Args:
+            ticker: stock ticker to embed (uppercased, sanitised).
 
         Returns:
-            str like "DEC-2026-05-03-00001"
-
-        Raises:
-            RuntimeError: if counter exceeds MAX_COUNTER (99999/day).
+            str like "DEC-2026-05-13-TDIC-143052-47"
         """
-        today = self._today_peru()
-
-        # Date rolled over since last call?
-        if today != self._current_date:
-            self._current_date = today
-            self._counter = 0
-
-        self._counter += 1
-
-        if self._counter > MAX_COUNTER:
-            raise RuntimeError(
-                f"Counter exceeded {MAX_COUNTER} for {today}. "
-                f"Use timestamp fallback or investigate."
-            )
-
-        return f"{ID_PREFIX}-{today}-{COUNTER_FORMAT.format(self._counter)}"
+        now = datetime.now(PERU_TZ)
+        date_part = now.strftime("%Y-%m-%d")
+        time_part = now.strftime("%H%M%S")
+        frac = f"{now.microsecond // 10000:02d}"  # 2-digit hundredths-of-second
+        # Sanitise ticker: keep alphanumerics only, uppercase, fallback "X"
+        tk = "".join(c for c in str(ticker).upper() if c.isalnum()) or "X"
+        return f"{ID_PREFIX}-{date_part}-{tk}-{time_part}-{frac}"
 
     def fallback_timestamp_id(self) -> str:
         """

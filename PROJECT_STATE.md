@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-05-11 18:14:07 -05
+**Generated:** 2026-05-16 19:00:01 -05
 **Branch:** `main`
-**Latest commit:** `79c9d5d` — feat(sentinel): Phase 3 — 3 advanced checks with API integration
+**Latest commit:** `a167fdf` — fix(agent): collision-proof PositionID — timestamp+ticker, Bug #3
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `79c9d5d (HEAD -> main) feat(sentinel): Phase 3 — 3 advanced checks with API integration`
-- `52cec3c (origin/main, origin/HEAD) feat(sentinel): Phase 2 — 4 real checks (completeness, scan, price, position)`
+- `a167fdf (HEAD -> main) fix(agent): collision-proof PositionID — timestamp+ticker, Bug #3`
+- `a977057 (origin/main, origin/HEAD) feat(sentinel): Phase 3 — 3 advanced checks with API integration`
+- `52cec3c feat(sentinel): Phase 2 — 4 real checks (completeness, scan, price, position)`
 - `dd878cc feat(sentinel): DataSentinel Phase 1 Foundation (shadow mode)`
 - `8379d9b fix: filter NaN from FirstScanTime/LastScanTime, add Q8 health check`
-- `810a799 Add files via upload`
 
 ---
 
@@ -32,11 +32,11 @@ _See `OPEN_ISSUES.md` for full list_
 
 | Workflow | Status | Conclusion | Started |
 |---|---|---|---|
-| Agent — Every Minute (DRY_RUN) | completed | ✅ success | 2026-05-11 22:38 UTC |
-| RidingHigh Auto Scanner | completed | ✅ success | 2026-05-11 22:38 UTC |
-| Health Audit | completed | ✅ success | 2026-05-11 21:51 UTC |
-| Agent — Daily Brief Email | completed | ✅ success | 2026-05-11 21:30 UTC |
-| Agent — End of Day | completed | ✅ success | 2026-05-11 21:00 UTC |
+| Agent — End of Day | completed | ✅ success | 2026-05-16 23:36 UTC |
+| Health Audit | completed | ✅ success | 2026-05-16 20:06 UTC |
+| Warm OAuth Token | completed | ✅ success | 2026-05-16 15:38 UTC |
+| Health Audit | completed | ✅ success | 2026-05-16 14:42 UTC |
+| Health Audit | completed | ✅ success | 2026-05-16 09:13 UTC |
 
 ---
 
@@ -47,19 +47,19 @@ _Months in config: `2026-04`, `2026-05`, `2026-06`_
 
 | Sheet | Total rows | Last date | Status |
 |---|---|---|---|
-| timeline_live | 135,618 | 2026-05-11 | ✅ |
-| daily_snapshots | 658 | 2026-05-11 | ✅ |
-| daily_summary | 701 | 2026-05-11 | ✅ |
-| post_analysis | 21 | 2026-05-08 | ✅ |
-| portfolio | 29 | 2026-05-11 | ✅ |
-| portfolio_live | 29 | 2026-05-11 | ✅ |
-| score_tracker | 1,110 | 2026-05-08 | ✅ |
-| live_trades | 1,110 | 2026-05-08 | ✅ |
+| timeline_live | 206,355 | 2026-05-15 | ✅ |
+| daily_snapshots | 957 | 2026-05-15 | ✅ |
+| daily_summary | 1,039 | 2026-05-15 | ✅ |
+| post_analysis | 42 | 2026-05-15 | ✅ |
+| portfolio | 48 | 2026-05-15 | ✅ |
+| portfolio_live | 31 | 2026-05-15 | ✅ |
+| score_tracker | 1,142 | 2026-05-14 | ✅ |
+| live_trades | 1,142 | 2026-05-14 | ✅ |
 | ticker_follow_up | 12,477 | 2026-05-08 | ✅ |
-| decision_log | 16,153 | — | ✅ |
-| paper_portfolio | 12 | — | ✅ |
+| decision_log | 16,212 | — | ✅ |
+| paper_portfolio | 71 | — | ✅ |
 | score_analytics | 0 | — | ⚠️ empty |
-| postmortems | 163 | — | ✅ |
+| postmortems | 1,466 | — | ✅ |
 | system_events | 0 | — | ⚠️ empty |
 | pending_suggestions | 0 | — | ⚠️ empty |
 | config_history | 0 | — | ⚠️ empty |
@@ -69,8 +69,8 @@ _Months in config: `2026-04`, `2026-05`, `2026-06`_
 
 ## 🩺 Health
 
-- ⚠️ 22 uncommitted file(s):
--    - 22 new/untracked
+- ⚠️ 24 uncommitted file(s):
+-    - 24 new/untracked
 
 ---
 
