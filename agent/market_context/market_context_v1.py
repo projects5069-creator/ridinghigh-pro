@@ -168,3 +168,35 @@ class MarketContextAgent:
             "timestamp": datetime.now(peru).isoformat(),
             "errors": errors,
         }
+
+    def write_context(self) -> bool:
+        """Fetch context and append one row to the market_context sheet.
+
+        Returns True on success, False on failure.
+        Failures are swallowed (logged) — never break the calling loop.
+        """
+        try:
+            import json
+            import sheets_manager as sm
+
+            ctx = self.get_context()
+            row = [
+                ctx["timestamp"],
+                ctx["spy_open"],
+                ctx["spy_close"],
+                ctx["spy_direction"],
+                ctx["iwm_open"],
+                ctx["iwm_close"],
+                ctx["iwm_direction"],
+                ctx["vix_close"],
+                ctx["vix_level"],
+                ctx["market_regime"],
+                json.dumps(ctx["errors"]) if ctx["errors"] else "",
+            ]
+            ws = sm.get_worksheet("market_context")
+            ws.append_row(row, value_input_option="USER_ENTERED")
+            logger.info("Wrote market context: regime=%s", ctx["market_regime"])
+            return True
+        except Exception as e:
+            logger.warning("Failed to write market context: %s", e)
+            return False
