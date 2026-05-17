@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-05-17 13:50:17 -05
+**Generated:** 2026-05-17 15:42:28 -05
 **Branch:** `main`
-**Latest commit:** `884ecbd` — docs(dashboard): refresh Architecture expander — pages + agent layer
+**Latest commit:** `9c3661c` — feat(news_detective): add News Detective Agent v1 — skeleton
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `884ecbd (HEAD -> main) docs(dashboard): refresh Architecture expander — pages + agent layer`
-- `5522e36 (origin/main, origin/HEAD) docs(dashboard): refresh Roadmap expander + fix stale check count`
+- `9c3661c (HEAD -> main) feat(news_detective): add News Detective Agent v1 — skeleton`
+- `7b84f29 (origin/main, origin/HEAD) docs(dashboard): refresh Architecture expander — pages + agent layer`
+- `5522e36 docs(dashboard): refresh Roadmap expander + fix stale check count`
 - `d7b1876 docs(dashboard): refresh Health Checks expander — 18→24`
 - `bf3d98d docs(dashboard): refresh Workflows expander — 7→12`
-- `e343aaf docs(dashboard): refresh Sheets architecture expander — 9→18`
 
 ---
 
@@ -32,11 +32,11 @@ _See `OPEN_ISSUES.md` for full list_
 
 | Workflow | Status | Conclusion | Started |
 |---|---|---|---|
+| Health Audit | completed | ✅ success | 2026-05-17 20:09 UTC |
 | Agent — Market Context (Hourly) | completed | ✅ success | 2026-05-17 16:28 UTC |
 | Health Audit | completed | ✅ success | 2026-05-17 14:45 UTC |
 | Health Audit | completed | ✅ success | 2026-05-17 09:23 UTC |
 | Agent — End of Day | completed | ✅ success | 2026-05-16 23:36 UTC |
-| Health Audit | completed | ✅ success | 2026-05-16 20:06 UTC |
 
 ---
 
@@ -70,8 +70,8 @@ _Months in config: `2026-04`, `2026-05`, `2026-06`_
 
 ## 🩺 Health
 
-- ⚠️ 45 uncommitted file(s):
--    - 45 new/untracked
+- ⚠️ 46 uncommitted file(s):
+-    - 46 new/untracked
 
 ---
 
