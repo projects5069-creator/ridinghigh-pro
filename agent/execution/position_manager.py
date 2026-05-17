@@ -115,7 +115,13 @@ class PositionManager:
         return stats
 
     def _get_open_positions(self) -> List[Dict[str, Any]]:
-        """Read open positions from paper_portfolio Sheet."""
+        """Read open positions from paper_portfolio Sheet.
+
+        Each returned dict carries a `_row_number` key — the absolute 1-based
+        Sheet row (header = row 1, first data row = 2). This lets the sheet
+        writer target the exact row instead of matching by PositionID, which
+        is unsafe when duplicate IDs exist (Bug #2 fix 2026-05-16).
+        """
         if self._sheet_reader:
             all_rows = self._sheet_reader()
         else:
@@ -127,7 +133,13 @@ class PositionManager:
                 logger.error("Failed to read paper_portfolio: %s", e)
                 return []
 
-        return [r for r in all_rows if r.get("Status") in (STATUS_OPEN, STATUS_DRY_RUN_OPEN)]
+        # Tag every record with its absolute Sheet row (data starts at row 2).
+        open_positions = []
+        for idx, r in enumerate(all_rows, start=2):
+            if r.get("Status") in (STATUS_OPEN, STATUS_DRY_RUN_OPEN):
+                r["_row_number"] = idx
+                open_positions.append(r)
+        return open_positions
 
     def _process_position(self, pos: Dict[str, Any]) -> str:
         """

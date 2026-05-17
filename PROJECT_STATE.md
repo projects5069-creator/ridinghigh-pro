@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-05-16 19:00:01 -05
+**Generated:** 2026-05-16 19:08:34 -05
 **Branch:** `main`
-**Latest commit:** `a167fdf` — fix(agent): collision-proof PositionID — timestamp+ticker, Bug #3
+**Latest commit:** `d6f48f1` — fix(agent): target sheet row by number, not PositionID — Bug #2
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `a167fdf (HEAD -> main) fix(agent): collision-proof PositionID — timestamp+ticker, Bug #3`
+- `d6f48f1 (HEAD -> main) fix(agent): target sheet row by number, not PositionID — Bug #2`
+- `6bc930c fix(agent): collision-proof PositionID — timestamp+ticker, Bug #3`
 - `a977057 (origin/main, origin/HEAD) feat(sentinel): Phase 3 — 3 advanced checks with API integration`
 - `52cec3c feat(sentinel): Phase 2 — 4 real checks (completeness, scan, price, position)`
 - `dd878cc feat(sentinel): DataSentinel Phase 1 Foundation (shadow mode)`
-- `8379d9b fix: filter NaN from FirstScanTime/LastScanTime, add Q8 health check`
 
 ---
 
@@ -69,8 +69,8 @@ _Months in config: `2026-04`, `2026-05`, `2026-06`_
 
 ## 🩺 Health
 
-- ⚠️ 24 uncommitted file(s):
--    - 24 new/untracked
+- ⚠️ 26 uncommitted file(s):
+-    - 26 new/untracked
 
 ---
 

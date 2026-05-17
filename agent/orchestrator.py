@@ -310,26 +310,39 @@ def run() -> Dict[str, Any]:
         )
 
         def _portfolio_sheet_writer(pos: dict, updates: dict):
-            """Write position updates to paper_portfolio. Header is cached."""
+            """Write position updates to paper_portfolio.
+
+            Targets the exact row via pos["_row_number"] (set by
+            _get_open_positions). Matching by PositionID is unsafe — duplicate
+            IDs route updates to the wrong row (Bug #2 fix 2026-05-16).
+            """
             if not _portfolio_ws or not _portfolio_hdr:
                 logger.error("paper_portfolio not available for update")
                 return
-            pos_id = pos.get("PositionID", "")
-            if not pos_id:
-                logger.warning("No PositionID in pos dict")
-                return
-            try:
-                # Locate the target row (single API read)
-                col_values = _portfolio_ws.col_values(_portfolio_pid_col + 1)
-                target_row = None
-                for row_idx, val in enumerate(col_values[1:], start=2):
-                    if val == pos_id:
-                        target_row = row_idx
-                        break
-                if target_row is None:
+            target_row = pos.get("_row_number")
+            if not target_row:
+                # Fallback: match by PositionID (legacy path; logs a warning)
+                pos_id = pos.get("PositionID", "")
+                if not pos_id:
+                    logger.warning("No _row_number and no PositionID in pos dict")
+                    return
+                logger.warning(
+                    "pos %s has no _row_number — falling back to PositionID match",
+                    pos_id,
+                )
+                try:
+                    col_values = _portfolio_ws.col_values(_portfolio_pid_col + 1)
+                    for row_idx, val in enumerate(col_values[1:], start=2):
+                        if val == pos_id:
+                            target_row = row_idx
+                            break
+                except Exception as e:
+                    logger.error("Fallback row lookup failed for %s: %s", pos_id, e)
+                    return
+                if not target_row:
                     logger.warning("PositionID %s not in sheet", pos_id)
                     return
-
+            try:
                 # Build batch update
                 cells = []
                 for col_name, value in updates.items():
