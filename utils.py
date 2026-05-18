@@ -445,6 +445,87 @@ def calculate_stats(scan_price, ohlc):
     }
 
 
+def classify_trade(scan_price, ohlc):
+    """
+    Classify a simulated short trade outcome, day-by-day (D1->D5).
+
+    Unlike calculate_stats (which only reports whether TP/SL was EVER touched
+    in the 5-day window), this walks the days in order and stops at the first
+    day that resolves the trade. This captures intraday ordering at day-level
+    resolution — critical because a window-level "both touched" is ambiguous,
+    while a same-day "both touched" is a genuine unresolvable whipsaw.
+
+    Short position: TP = price drops TP_THRESHOLD; SL = price rises SL_THRESHOLD.
+
+    Args:
+        scan_price: entry price.
+        ohlc: dict with D1_High/D1_Low ... D5_High/D5_Low.
+
+    Returns:
+        str — one of:
+          'WIN'      : a day's Low hit TP, that day's High did NOT hit SL.
+          'LOSS'     : a day's High hit SL, that day's Low did NOT hit TP.
+          'WHIPSAW'  : same single day hit BOTH TP and SL — unresolvable with
+                       daily bars. NOT a win, NOT a loss — flag for review
+                       (entry-timing / entry-point problem).
+          'NO_TOUCH' : 5 full days passed, neither TP nor SL ever hit — flag
+                       for review (why did we enter this stock at all?).
+          'PENDING'  : fewer than 5 days of OHLC available — trade not mature
+                       yet. Excluded from every statistic.
+    """
+    if scan_price is None or scan_price <= 0:
+        return 'PENDING'
+
+    # A trade may only be classified once all 5 days have settled.
+    # Fewer than 5 days of OHLC = trade is still live ("in the air") —
+    # no win/loss decision is permitted yet.
+    for i in range(1, 6):
+        if ohlc.get(f"D{i}_Low") is None or ohlc.get(f"D{i}_High") is None:
+            return 'PENDING'
+
+    tp_price = scan_price * (1 - TP_THRESHOLD_FRAC)
+    sl_price = scan_price * (1 + SL_THRESHOLD_FRAC)
+
+    # Walk D1->D5 in order; the first day that resolves the trade decides it.
+    for i in range(1, 6):
+        lo = ohlc[f"D{i}_Low"]
+        hi = ohlc[f"D{i}_High"]
+        tp_hit = lo <= tp_price
+        sl_hit = hi >= sl_price
+        if tp_hit and sl_hit:
+            return 'WHIPSAW'   # same day, both ends — unresolvable
+        if sl_hit:
+            return 'LOSS'      # SL resolved first
+        if tp_hit:
+            return 'WIN'       # TP resolved first
+
+    return 'NO_TOUCH'          # 5 full days, never resolved
+
+
+def classify_trade_row(row):
+    """DataFrame-row adapter for classify_trade().
+
+    Pulls ScanPrice and D1-D5 OHLC from a post_analysis row (pandas Series
+    or dict) and returns the WIN/LOSS/WHIPSAW/NO_TOUCH/PENDING classification.
+    Single source of truth — every caller goes through classify_trade().
+    """
+    import pandas as _pd
+    def _num(v):
+        if v is None:
+            return None
+        try:
+            f = float(str(v).replace('%', '').replace(',', '').replace('$', '').strip())
+        except (ValueError, TypeError):
+            return None
+        return None if (_pd.isna(f)) else f
+    scan_price = _num(row.get("ScanPrice"))
+    ohlc = {}
+    for i in range(1, 6):
+        for k in ("High", "Low"):
+            ohlc[f"D{i}_{k}"] = _num(row.get(f"D{i}_{k}"))
+    return classify_trade(scan_price, ohlc)
+
+
 # ═══════════════════════════════════════════════════════════════════════
 # Module self-test
 # ═══════════════════════════════════════════════════════════════════════

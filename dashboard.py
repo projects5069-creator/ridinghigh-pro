@@ -2358,35 +2358,41 @@ def post_analysis_page():
         st.info("📭 אין נתונים עדיין — הקולקטור יתחיל לאסוף לאחר 5 ימי מסחר מהסריקה הראשונה")
         return
 
-    complete_df = df[df["MaxDrop%"].notna() & (df["MaxDrop%"] != 0)] if "MaxDrop%" in df.columns else df
-    total = len(complete_df)
-    tp10  = int(complete_df["TP10_Hit"].sum()) if "TP10_Hit" in complete_df.columns else 0
-    tp15  = int(complete_df["TP15_Hit"].sum()) if "TP15_Hit" in complete_df.columns else 0
-    tp20  = int(complete_df["TP20_Hit"].sum()) if "TP20_Hit" in complete_df.columns else 0
-    avg_drop = complete_df["MaxDrop%"].mean() if "MaxDrop%" in complete_df.columns else 0
+    # ── Realistic outcome classification (day-by-day, see utils.classify_trade) ──
+    from utils import classify_trade_row
+    _outcomes = df.apply(classify_trade_row, axis=1)
+    n_win   = int((_outcomes == "WIN").sum())
+    n_loss  = int((_outcomes == "LOSS").sum())
+    n_whip  = int((_outcomes == "WHIPSAW").sum())
+    n_notch = int((_outcomes == "NO_TOUCH").sum())
+    n_pend  = int((_outcomes == "PENDING").sum())
+    n_decided = n_win + n_loss
+    win_rate = (n_win / n_decided * 100) if n_decided else 0
 
-    winners = complete_df[complete_df["TP10_Hit"] == 1] if "TP10_Hit" in complete_df.columns else pd.DataFrame()
-    losers  = complete_df[complete_df["TP10_Hit"] == 0] if "TP10_Hit" in complete_df.columns else pd.DataFrame()
-    avg_win  = winners["MaxDrop%"].mean() if not winners.empty else 0
-    avg_loss = losers["MaxDrop%"].mean() if not losers.empty else 0
-    expected_value = (tp10/total * abs(avg_win) - (1 - tp10/total) * abs(avg_loss)) if total else 0
-
-    c1, c2, c3, c4, c5 = st.columns(5)
-    c1.metric("סה״כ מניות", total)
-    c2.metric("TP 10% Hit", f"{tp10}/{total}", f"{tp10/total*100:.0f}%" if total else "")
-    c3.metric("TP 15% Hit", f"{tp15}/{total}", f"{tp15/total*100:.0f}%" if total else "")
-    c4.metric("TP 20% Hit", f"{tp20}/{total}", f"{tp20/total*100:.0f}%" if total else "")
-    c5.metric("Avg Max Drop", f"{avg_drop:.1f}%")
+    st.subheader("🎯 Win Rate אמיתי — עסקאות שהוכרעו")
+    st.caption("רק עסקאות שעברו 5 ימי מסחר מלאים ונגעו בקצה אחד בלבד. "
+               "סיווג יום-אחר-יום (utils.classify_trade) — מי נגע ראשון, TP או SL.")
+    c1, c2, c3 = st.columns(3)
+    c1.metric("Win Rate", f"{win_rate:.1f}%", f"{n_decided} עסקאות שהוכרעו")
+    c2.metric("✅ רווח (TP)", n_win)
+    c3.metric("❌ הפסד (SL)", n_loss)
 
     st.divider()
-    st.subheader("📊 ניתוח רווח/הפסד")
-    w1, w2, w3, w4 = st.columns(4)
-    w1.metric("✅ מנצחות", f"{len(winners)}", f"הגיעו ל-10%+")
-    w2.metric("📈 רווח ממוצע", f"{abs(avg_win):.1f}%", "על המנצחות")
-    w3.metric("❌ מפסידות", f"{len(losers)}", f"לא הגיעו ל-10%")
-    w4.metric("📉 הפסד ממוצע", f"{abs(avg_loss):.1f}%", "על המפסידות")
+    st.subheader("🔍 קטגוריות לחקירה — לא נספרות ב-Win Rate")
+    st.caption("עסקאות שלא הוכרעו באופן נקי. כל קטגוריה היא שאלת מחקר בפני עצמה.")
+    f1, f2, f3 = st.columns(3)
+    f1.metric("⚖️ ביניים", n_notch, "לא נגעה ב-TP ולא ב-SL ב-5 ימים")
+    f2.metric("🔀 נגעה בשתיהן", n_whip, "TP ו-SL באותו יום — בעיית תזמון/כניסה")
+    f3.metric("🟡 עדיין חיות", n_pend, "טרם עברו 5 ימים — מחוץ לחישוב")
 
-    st.info(f"💡 Expected Value: על כל עסקה אתה מצפה לרוויח **{expected_value:.1f}%** בממוצע — ({tp10/total*100:.0f}% × {abs(avg_win):.1f}% רווח) פחות ({(1-tp10/total)*100:.0f}% × {abs(avg_loss):.1f}% הפסד)" if total else "")
+    with st.expander("ℹ️ למה שתי הקטגוריות לחקירה?"):
+        st.markdown(
+            "**ביניים** — המניה כמעט לא זזה. שאלה: למה בכלל נכנסנו אליה? "
+            "אולי הסיגנל היה חלש.\n\n"
+            "**נגעה בשתיהן** — המניה גם ירדה 10% וגם עלתה 10% באותו יום. "
+            "לא ניתן להכריע מנתון יומי מי קדם. שאלה: בעיית תזמון כניסה או "
+            "נקודת כניסה שגויה? המניות האלו דורשות חקירה נפרדת."
+        )
 
     st.divider()
 
