@@ -277,7 +277,7 @@ class OrderManager:
             import sheets_manager
             ws = sheets_manager.get_worksheet("paper_portfolio")
             if ws:
-                ws.append_row(row, value_input_option="USER_ENTERED")
+                sheets_manager.safe_append_row(ws, row, dedup_col=0, dedup_val=row[0])
             else:
                 logger.error("paper_portfolio worksheet not available")
         except Exception as e:

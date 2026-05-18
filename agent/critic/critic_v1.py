@@ -404,7 +404,7 @@ class CriticAgent:
                     " | ".join(a.get("description", "") for a in agent_anomalies) if agent_anomalies else "",
                     generated_at,
                 ]
-                ws.append_row(row, value_input_option="USER_ENTERED")
+                sm.safe_append_row(ws, row)
 
             logger.info("Wrote scorecard for %s: %d anomalies", facts["date"], len(anomalies))
             return True

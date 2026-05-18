@@ -410,6 +410,54 @@ def get_sheet_values(tab_name: str, month: str = None):
     return rows
 
 
+def safe_update(ws, *args, **kwargs):
+    """Range-based write with 429 retry. Idempotent — same cells each attempt."""
+    return _with_retry(ws.update, *args, **kwargs)
+
+
+def safe_batch_update(ws, *args, **kwargs):
+    """batch_update with 429 retry. Idempotent — explicit ranges."""
+    return _with_retry(ws.batch_update, *args, **kwargs)
+
+
+def safe_append_row(ws, row, dedup_col=None, dedup_val=None, **kwargs):
+    """append_row with 429 retry + optional idempotency.
+
+    append_row is NOT idempotent: a 429 that arrives after Google added
+    the row but before the response would cause a duplicate on retry.
+
+    If dedup_col (0-based index) and dedup_val are given, then before each
+    retry we read that column and skip the write if dedup_val already
+    appears — making the retry safe. Without dedup args, retry is blind
+    (acceptable only for low-risk, rare writes).
+    """
+    kwargs.setdefault("value_input_option", "USER_ENTERED")
+    last_error = None
+    for attempt in range(_RETRY_MAX):
+        try:
+            return ws.append_row(row, **kwargs)
+        except Exception as e:
+            last_error = e
+            if not _is_quota_error(e):
+                raise
+            if attempt < _RETRY_MAX - 1:
+                wait = _RETRY_BACKOFF_BASE ** (attempt + 1)
+                print(f"[sheets_manager] append 429 — retry {attempt+1}/{_RETRY_MAX} "
+                      f"after {wait}s: {e}")
+                _time.sleep(wait)
+                if dedup_col is not None and dedup_val is not None:
+                    try:
+                        col = ws.col_values(dedup_col + 1)
+                        if str(dedup_val) in [str(v) for v in col]:
+                            print(f"[sheets_manager] dedup hit — row already written "
+                                  f"({dedup_val}); skipping retry")
+                            return None
+                    except Exception as de:
+                        print(f"[sheets_manager] dedup check failed (will retry blind): {de}")
+    print(f"[sheets_manager] append: all {_RETRY_MAX} retries exhausted: {last_error}")
+    raise last_error
+
+
 def get_worksheet(tab_name: str, month: str = None, gc=None):
     """
     Return the gspread Worksheet for tab_name in the given month.

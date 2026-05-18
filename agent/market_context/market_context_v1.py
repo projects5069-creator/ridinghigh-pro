@@ -194,7 +194,7 @@ class MarketContextAgent:
                 json.dumps(ctx["errors"]) if ctx["errors"] else "",
             ]
             ws = sm.get_worksheet("market_context")
-            ws.append_row(row, value_input_option="USER_ENTERED")
+            sm.safe_append_row(ws, row)
             logger.info("Wrote market context: regime=%s", ctx["market_regime"])
             return True
         except Exception as e:

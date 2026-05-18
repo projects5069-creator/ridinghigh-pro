@@ -368,8 +368,9 @@ def run() -> Dict[str, Any]:
                         a1 = _rowcol_to_a1(target_row, col_idx_1)
                         cells.append({"range": a1, "values": [[value]]})
                 if cells:
-                    _portfolio_ws.batch_update(
-                        cells, value_input_option="USER_ENTERED"
+                    import sheets_manager as _sm
+                    _sm.safe_batch_update(
+                        _portfolio_ws, cells, value_input_option="USER_ENTERED"
                     )
             except Exception as e:
                 logger.error(

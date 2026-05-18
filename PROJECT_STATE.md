@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-05-18 14:51:08 -05
+**Generated:** 2026-05-18 15:25:43 -05
 **Branch:** `main`
-**Latest commit:** `789afa4` — fix(sentinel): position_sync + provider_heartbeat were blind in production
+**Latest commit:** `e43d767` — feat(sheets): retry + idempotency for all agent writes
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `789afa4 (HEAD -> main) fix(sentinel): position_sync + provider_heartbeat were blind in production`
-- `2f384cc (origin/main, origin/HEAD) docs(pk): v2.16 — §20 realistic win-rate classification`
+- `e43d767 (HEAD -> main) feat(sheets): retry + idempotency for all agent writes`
+- `02e6ecd (origin/main, origin/HEAD) fix(sentinel): position_sync + provider_heartbeat were blind in production`
+- `2f384cc docs(pk): v2.16 — §20 realistic win-rate classification`
 - `cdb3389 fix(dashboard): realistic win-rate via classify_trade — replaces misleading TP10_Hit`
 - `775656e docs(pk): v2.15 — Sheets quota retry + read cache`
-- `f7dc985 fix(sheets): add 429 retry + read cache — kills silent quota failures`
 
 ---
 
@@ -32,11 +32,11 @@ _See `OPEN_ISSUES.md` for full list_
 
 | Workflow | Status | Conclusion | Started |
 |---|---|---|---|
-| Agent — Every Minute (DRY_RUN) | in_progress | ⏳ — | 2026-05-18 19:51 UTC |
-| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-05-18 19:51 UTC |
-| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-05-18 19:50 UTC |
-| Agent — Every Minute (DRY_RUN) | in_progress | ⏳ — | 2026-05-18 19:50 UTC |
-| RidingHigh Auto Scanner | completed | ✅ success | 2026-05-18 19:49 UTC |
+| Agent — Every Minute (DRY_RUN) | completed | ✅ success | 2026-05-18 20:25 UTC |
+| RidingHigh Auto Scanner | completed | ✅ success | 2026-05-18 20:25 UTC |
+| RidingHigh Auto Scanner | completed | ✅ success | 2026-05-18 20:24 UTC |
+| Agent — Every Minute (DRY_RUN) | completed | ✅ success | 2026-05-18 20:24 UTC |
+| Agent — Every Minute (DRY_RUN) | completed | ✅ success | 2026-05-18 20:23 UTC |
 
 ---
 
@@ -47,33 +47,33 @@ _Months in config: `2026-04`, `2026-05`, `2026-06`_
 
 | Sheet | Total rows | Last date | Status |
 |---|---|---|---|
-| timeline_live | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| daily_snapshots | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| daily_summary | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| post_analysis | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| timeline_live | 216,005 | 2026-05-18 | ✅ |
+| daily_snapshots | 1,012 | 2026-05-18 | ✅ |
+| daily_summary | 1,105 | 2026-05-18 | ✅ |
+| post_analysis | 42 | 2026-05-15 | ✅ |
 | portfolio | 48 | 2026-05-15 | ✅ |
-| portfolio_live | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| score_tracker | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| live_trades | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| ticker_follow_up | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| decision_log | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| paper_portfolio | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| score_analytics | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| postmortems | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| system_events | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| pending_suggestions | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| config_history | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| borrow_data | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| market_context | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| news_findings | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| agent_scorecard | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| portfolio_live | 32 | 2026-05-15 | ✅ |
+| score_tracker | 1,187 | 2026-05-18 | ✅ |
+| live_trades | 1,187 | 2026-05-18 | ✅ |
+| ticker_follow_up | 12,477 | 2026-05-08 | ✅ |
+| decision_log | 16,218 | — | ✅ |
+| paper_portfolio | 77 | — | ✅ |
+| score_analytics | 0 | — | ⚠️ empty |
+| postmortems | 57 | — | ✅ |
+| system_events | 1,403 | — | ✅ |
+| pending_suggestions | 0 | — | ⚠️ empty |
+| config_history | 0 | — | ⚠️ empty |
+| borrow_data | 0 | — | ⚠️ empty |
+| market_context | 5 | — | ✅ |
+| news_findings | 2,818 | — | ✅ |
+| agent_scorecard | 20 | 2026-05-17 | ✅ |
 
 ---
 
 ## 🩺 Health
 
-- ⚠️ 32 uncommitted file(s):
--    - 27 new/untracked
+- ⚠️ 41 uncommitted file(s):
+-    - 36 new/untracked
 -    - 5 deleted
 
 ---

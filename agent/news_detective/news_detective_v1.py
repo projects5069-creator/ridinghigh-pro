@@ -272,7 +272,7 @@ class NewsDetectiveAgent:
                 "; ".join(ctx["errors"]) if ctx["errors"] else "",
             ]
             ws = sm.get_worksheet("news_findings")
-            ws.append_row(row, value_input_option="USER_ENTERED")
+            sm.safe_append_row(ws, row)
             logger.info("Wrote news findings for %s: material=%s", ticker, ctx["has_material_news"])
             return True
         except Exception as e:

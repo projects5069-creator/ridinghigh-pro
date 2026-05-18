@@ -56,7 +56,7 @@ def _log_sentinel_event(decision: str, component: str, reason: str,
             action_taken,                      # ActionTaken
         ]
         ws = sm.get_worksheet("system_events")
-        ws.append_row(row, value_input_option="USER_ENTERED")
+        sm.safe_append_row(ws, row)
     except Exception as e:
         logger.warning("Failed to log sentinel event to system_events: %s", e)
 
