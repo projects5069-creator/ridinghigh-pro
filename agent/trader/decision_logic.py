@@ -34,6 +34,7 @@ from config import (
     AGENT_TP_PCT, AGENT_SL_PCT, AGENT_POSITION_SIZE_USD,
     AGENT_COLD_START_ENABLED, AGENT_COLD_START_MAX_CONCURRENT,
     AGENT_COLD_START_MAX_DAILY, AGENT_MAX_REENTRIES_PER_TICKER,
+    AGENT_ROCKET_GUARD_RUNUP, AGENT_ROCKET_GUARD_PTH,
 )
 from agent.trader.score_calculator import calculate_agent_score
 from agent.perception.data_quality import validate as validate_quality
@@ -311,5 +312,20 @@ def _check_filters(d: Decision, signal: Dict[str, Any], quality: Dict[str, Any])
     # Filter 10: Buying power
     if d.buying_power is not None and d.buying_power < AGENT_POSITION_SIZE_USD:
         return f"INSUFFICIENT_BUYING_POWER: ${d.buying_power:.2f} < ${AGENT_POSITION_SIZE_USD}"
+
+    # Filter 11: ROCKET_GUARD — block shorting a stock still climbing vertically.
+    # A stock with high RunUp AND price still near its intraday high is a
+    # rocket mid-ascent, not a faded pump. Shorting it fights the trend.
+    # Both conditions required (AND): high RunUp alone or near-high alone
+    # is not enough. PriceToHigh is read straight off the signal dict.
+    _pth = signal.get("price_to_high", 0.0)
+    try:
+        _pth = float(_pth)
+    except (TypeError, ValueError):
+        _pth = 0.0
+    if d.run_up >= AGENT_ROCKET_GUARD_RUNUP and _pth >= AGENT_ROCKET_GUARD_PTH:
+        return (f"ROCKET_GUARD: {d.ticker} still climbing — "
+                f"RunUp={d.run_up:.1f}% >= {AGENT_ROCKET_GUARD_RUNUP}% AND "
+                f"PriceToHigh={_pth:.1f}% >= {AGENT_ROCKET_GUARD_PTH}%")
 
     return None  # all filters passed

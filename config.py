@@ -297,6 +297,12 @@ AGENT_COLD_START_DAILY_LOSS_ALERT_USD = 200
 # setups) but must be bounded to limit churn / single-ticker exposure.
 AGENT_MAX_REENTRIES_PER_TICKER = 3
 
+# ROCKET_GUARD (Filter 11) — block shorting a stock still climbing vertically.
+# Calibrated on 196 post_analysis rows: RunUp>=50 AND PriceToHigh>=-10
+# blocks 16 historical losses, 0 winners. PIII 2026-05-15 sits exactly on it.
+AGENT_ROCKET_GUARD_RUNUP = 50    # %, RunUp at/above this = still climbing
+AGENT_ROCKET_GUARD_PTH   = -10   # %, PriceToHigh at/above this = still near peak
+
 # Modes
 AGENT_DRY_RUN = True               # Start in DRY_RUN; switch to False at M10
 AGENT_LIVE_PAPER = False           # Becomes True after M10 approval

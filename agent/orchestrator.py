@@ -73,6 +73,7 @@ def _signal_from_timeline_row(row: Dict[str, Any]) -> Dict[str, Any]:
         "rel_vol": _f("REL_VOL"),
         "change": _f("Change"),
         "typical_price_dist": _f("TypicalPriceDist"),
+        "price_to_high": _f("PriceToHigh"),
         "gap": _f("Gap"),
         "float_pct": _f("Float%"),
         "float_shares": _f("FloatShares"),
