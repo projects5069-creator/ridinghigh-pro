@@ -405,7 +405,10 @@ def run() -> Dict[str, Any]:
     sentinel_blocks = 0
 
     # System-level check (HALT entire run if fails)
-    today_enters_count = len([p for p in account_state.get("existing_positions", set())])
+    # FIX: today_enters must be today's ENTER count from decision_log,
+    # not the size of the mixed existing_positions set. cold_start_daily_used
+    # is incremented once per today's ENTER row in build_account_state.
+    today_enters_count = account_state.get("cold_start_daily_used", 0)
     sys_result = sentinel.check_system(
         account_state,
         today_enters=today_enters_count,

@@ -30,8 +30,10 @@ def check_position_sync(account_state: Dict[str, Any],
     Returns:
         SentinelResult — BLOCK means HALT entire run
     """
-    existing_positions = account_state.get("existing_positions", set())
-    open_count = len(existing_positions)
+    # FIX: open_count must be real OPEN rows from paper_portfolio,
+    # not len(existing_positions) — that set also holds today's ENTER
+    # tickers, which would mask a genuine sync failure.
+    open_count = account_state.get("open_position_count", 0)
 
     # If no ENTERs today, no way to detect mismatch
     if today_enters == 0:

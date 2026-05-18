@@ -29,7 +29,7 @@ def _perform_heartbeat(market_state: Dict[str, Any]) -> bool:
     try:
         data_provider = market_state.get("data_provider")
         if data_provider is None:
-            from providers.data_provider_factory import get_data_provider
+            from data_provider import get_data_provider
             data_provider = get_data_provider()
 
         bar = data_provider.get_latest_bar(_CANARY_TICKER)

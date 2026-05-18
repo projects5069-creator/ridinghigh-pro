@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-05-18 12:49:13 -05
+**Generated:** 2026-05-18 14:51:08 -05
 **Branch:** `main`
-**Latest commit:** `485a10d` — docs(pk): v2.16 — §20 realistic win-rate classification
+**Latest commit:** `789afa4` — fix(sentinel): position_sync + provider_heartbeat were blind in production
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `485a10d (HEAD -> main) docs(pk): v2.16 — §20 realistic win-rate classification`
-- `cdb3389 (origin/main, origin/HEAD) fix(dashboard): realistic win-rate via classify_trade — replaces misleading TP10_Hit`
+- `789afa4 (HEAD -> main) fix(sentinel): position_sync + provider_heartbeat were blind in production`
+- `2f384cc (origin/main, origin/HEAD) docs(pk): v2.16 — §20 realistic win-rate classification`
+- `cdb3389 fix(dashboard): realistic win-rate via classify_trade — replaces misleading TP10_Hit`
 - `775656e docs(pk): v2.15 — Sheets quota retry + read cache`
 - `f7dc985 fix(sheets): add 429 retry + read cache — kills silent quota failures`
-- `c0ff669 fix(pk): preserve v2.12 historical filter count as 10`
 
 ---
 
@@ -32,17 +32,17 @@ _See `OPEN_ISSUES.md` for full list_
 
 | Workflow | Status | Conclusion | Started |
 |---|---|---|---|
-| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-05-18 17:49 UTC |
-| Agent — Every Minute (DRY_RUN) | queued | ⏳ — | 2026-05-18 17:49 UTC |
-| Agent — Every Minute (DRY_RUN) | completed | ✅ success | 2026-05-18 17:48 UTC |
-| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-05-18 17:48 UTC |
-| Agent — Every Minute (DRY_RUN) | in_progress | ⏳ — | 2026-05-18 17:47 UTC |
+| Agent — Every Minute (DRY_RUN) | in_progress | ⏳ — | 2026-05-18 19:51 UTC |
+| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-05-18 19:51 UTC |
+| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-05-18 19:50 UTC |
+| Agent — Every Minute (DRY_RUN) | in_progress | ⏳ — | 2026-05-18 19:50 UTC |
+| RidingHigh Auto Scanner | completed | ✅ success | 2026-05-18 19:49 UTC |
 
 ---
 
-## 📊 Google Sheets — showing month `2026-06`
+## 📊 Google Sheets — showing month `2026-05`
 
-_Selection: most recent month with data (2026-06)_
+_Selection: current Peru month (2026-05) has data_
 _Months in config: `2026-04`, `2026-05`, `2026-06`_
 
 | Sheet | Total rows | Last date | Status |
@@ -51,18 +51,30 @@ _Months in config: `2026-04`, `2026-05`, `2026-06`_
 | daily_snapshots | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
 | daily_summary | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
 | post_analysis | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| portfolio | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| portfolio | 48 | 2026-05-15 | ✅ |
 | portfolio_live | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
 | score_tracker | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
 | live_trades | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
 | ticker_follow_up | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| decision_log | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| paper_portfolio | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| score_analytics | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| postmortems | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| system_events | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| pending_suggestions | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| config_history | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| borrow_data | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| market_context | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| news_findings | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| agent_scorecard | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
 
 ---
 
 ## 🩺 Health
 
-- ⚠️ 86 uncommitted file(s):
--    - 86 new/untracked
+- ⚠️ 32 uncommitted file(s):
+-    - 27 new/untracked
+-    - 5 deleted
 
 ---
 
