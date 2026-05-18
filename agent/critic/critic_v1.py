@@ -569,3 +569,91 @@ class CriticAgent:
             },
             "errors": errors,
         }
+
+    def weekly_summary(self, end_date_str: Optional[str] = None) -> Dict[str, Any]:
+        """Aggregate daily facts + positions across the trading week ending on end_date.
+
+        Computes Mon-Fri of the week containing end_date, calls daily_facts
+        and unified_positions for each day, and returns weekly totals +
+        daily breakdown + recurring anomaly tickers.
+
+        Args:
+            end_date_str: "YYYY-MM-DD" (Friday). Defaults to today in America/Lima.
+        """
+        import pytz as _pytz
+        from datetime import datetime as _dt, timedelta as _td
+
+        peru = _pytz.timezone("America/Lima")
+        if end_date_str is None:
+            end_date_str = _dt.now(peru).strftime("%Y-%m-%d")
+
+        end_date = _dt.strptime(end_date_str, "%Y-%m-%d").date()
+        # Find Monday of this week (weekday: Mon=0 ... Fri=4)
+        monday = end_date - _td(days=end_date.weekday())
+        week_days = [monday + _td(days=i) for i in range(5)]  # Mon-Fri
+
+        totals = {
+            "enters": 0, "skips": 0, "skips_available": False,
+            "tickers_checked": 0, "anomalies": 0, "anomalies_high": 0,
+            "conflicts": 0,
+        }
+        daily_breakdown = []
+        anomaly_tickers_by_day: Dict[str, List[str]] = {}  # ticker → list of dates
+
+        for day in week_days:
+            day_str = day.strftime("%Y-%m-%d")
+            day_enters = 0
+            day_anomalies = 0
+            day_conflicts = 0
+
+            # daily_facts
+            try:
+                facts = self.daily_facts(day_str)
+                trader = facts.get("trader", {})
+                day_enters = trader.get("enters", 0)
+                totals["enters"] += day_enters
+                if trader.get("skip_data_available"):
+                    totals["skips"] += trader.get("skips", 0) or 0
+                    totals["skips_available"] = True
+                totals["tickers_checked"] += facts.get("news_detective", {}).get("tickers_checked", 0)
+
+                for a in facts.get("anomalies", []):
+                    day_anomalies += 1
+                    totals["anomalies"] += 1
+                    if a.get("severity") == "HIGH":
+                        totals["anomalies_high"] += 1
+                    # Track recurring anomaly tickers
+                    desc = a.get("description", "")
+                    if "\u2014" in desc:  # em-dash
+                        parts = desc.split("\u2014")
+                        if len(parts) > 1:
+                            ticker_part = parts[1].strip().split(" ")[0]
+                            anomaly_tickers_by_day.setdefault(ticker_part, []).append(day_str)
+            except Exception as e:
+                logger.warning("weekly_summary: daily_facts(%s) failed: %s", day_str, e)
+
+            # unified_positions
+            try:
+                positions = self.unified_positions(day_str)
+                day_conflicts = positions.get("summary", {}).get("conflict_count", 0)
+                totals["conflicts"] += day_conflicts
+            except Exception as e:
+                logger.warning("weekly_summary: unified_positions(%s) failed: %s", day_str, e)
+
+            daily_breakdown.append({
+                "date": day_str,
+                "enters": day_enters,
+                "anomalies": day_anomalies,
+                "conflicts": day_conflicts,
+            })
+
+        # Recurring: tickers that appeared as anomaly on >1 day
+        recurring = {t: len(days) for t, days in anomaly_tickers_by_day.items() if len(days) > 1}
+
+        return {
+            "week_start": monday.strftime("%Y-%m-%d"),
+            "week_end": week_days[-1].strftime("%Y-%m-%d"),
+            "totals": totals,
+            "daily_breakdown": daily_breakdown,
+            "recurring_anomaly_tickers": recurring,
+        }

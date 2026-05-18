@@ -7,11 +7,13 @@ import pytz
 PERU_TZ = pytz.timezone("America/Lima")
 
 
-def render_critic_email(facts: Dict[str, Any], positions: Dict[str, Any]) -> tuple:
+def render_critic_email(facts: Dict[str, Any], positions: Dict[str, Any],
+                        weekly: Dict[str, Any] = None) -> tuple:
     """
     Args:
         facts: output of CriticAgent.daily_facts()
         positions: output of CriticAgent.unified_positions()
+        weekly: output of CriticAgent.weekly_summary() — included on Fridays only.
     Returns:
         (subject: str, html: str)
     """
@@ -140,9 +142,70 @@ def render_critic_email(facts: Dict[str, Any], positions: Dict[str, Any]) -> tup
       {activity_html}
       {anomalies_html}
       {conflicts_html}
+      {_render_weekly_block(weekly) if weekly else ""}
       <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 24px 0;">
       <p style="color: #999; font-size: 12px;">RidingHigh Pro · Critic Agent · דף מלא בדשבורד: 🏆 דירוג סוכנים</p>
     </body></html>
     """
 
     return subject, html
+
+
+def _render_weekly_block(weekly: Dict[str, Any]) -> str:
+    """Render the weekly summary HTML block (only included on Fridays)."""
+    totals = weekly.get("totals", {})
+    breakdown = weekly.get("daily_breakdown", [])
+    recurring = weekly.get("recurring_anomaly_tickers", {})
+
+    # Daily breakdown table rows
+    day_rows = ""
+    for d in breakdown:
+        day_rows += f"""
+        <tr>
+          <td style="padding: 4px 8px; border-bottom: 1px solid #e5e7eb;">{d['date']}</td>
+          <td style="padding: 4px 8px; border-bottom: 1px solid #e5e7eb; text-align: center;">{d['enters']}</td>
+          <td style="padding: 4px 8px; border-bottom: 1px solid #e5e7eb; text-align: center;">{d['anomalies']}</td>
+          <td style="padding: 4px 8px; border-bottom: 1px solid #e5e7eb; text-align: center;">{d['conflicts']}</td>
+        </tr>
+        """
+
+    # Totals row
+    skips_str = str(totals.get("skips", 0)) if totals.get("skips_available") else "—"
+    totals_row = f"""
+    <tr style="background: #f3f4f6; font-weight: bold;">
+      <td style="padding: 4px 8px;">סה"כ</td>
+      <td style="padding: 4px 8px; text-align: center;">{totals.get('enters', 0)}</td>
+      <td style="padding: 4px 8px; text-align: center;">{totals.get('anomalies', 0)}</td>
+      <td style="padding: 4px 8px; text-align: center;">{totals.get('conflicts', 0)}</td>
+    </tr>
+    """
+
+    # Recurring anomalies
+    recurring_html = ""
+    if recurring:
+        items = ", ".join(f"<strong>{t}</strong> ({n} ימים)" for t, n in recurring.items())
+        recurring_html = f"""
+        <div style="background: #fffbeb; border-left: 4px solid #f59e0b; padding: 12px; margin: 12px 0;">
+          <strong>🔁 מניות עם חריגה חוזרת השבוע:</strong> {items}
+        </div>
+        """
+
+    return f"""
+    <hr style="border: none; border-top: 2px solid #2563eb; margin: 32px 0 16px;">
+    <h3 style="color: #2563eb;">📅 סיכום שבועי ({weekly.get('week_start', '?')} — {weekly.get('week_end', '?')})</h3>
+    <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
+      <tr style="background: #f3f4f6;">
+        <th style="padding: 6px 8px; text-align: right;">יום</th>
+        <th style="padding: 6px 8px; text-align: center;">כניסות</th>
+        <th style="padding: 6px 8px; text-align: center;">חריגות</th>
+        <th style="padding: 6px 8px; text-align: center;">קונפליקטים</th>
+      </tr>
+      {day_rows}
+      {totals_row}
+    </table>
+    <p style="color: #666; font-size: 13px; margin-top: 8px;">
+      דילוגים: {skips_str} · מניות שנבדקו (News): {totals.get('tickers_checked', 0)} ·
+      חריגות HIGH: {totals.get('anomalies_high', 0)}
+    </p>
+    {recurring_html}
+    """

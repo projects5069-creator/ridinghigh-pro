@@ -73,15 +73,27 @@ def run() -> Dict[str, Any]:
         summary["errors"] += 1
         logger.error("unified_positions failed: %s", e, exc_info=True)
 
-    # 3. Send daily Critic email
+    # 3. Send daily Critic email (with weekly summary on Fridays)
+    weekly_data = None
+    summary["weekly_included"] = False
+    if now.weekday() == 4:  # Friday
+        try:
+            weekly_data = critic.weekly_summary(today)
+            summary["weekly_included"] = True
+            logger.info("Weekly summary computed: %s", weekly_data.get("totals", {}))
+        except Exception as e:
+            logger.error("weekly_summary failed (sending daily-only): %s", e, exc_info=True)
+
     try:
         facts = critic.daily_facts(today)
         from agent.notifications.templates.critic_brief import render_critic_email
         from agent.notifications.email_sender import send_email
-        subject, html = render_critic_email(facts, positions)
+        subject, html = render_critic_email(facts, positions, weekly=weekly_data)
         sent = send_email(subject, html)
         summary["email_sent"] = sent
-        logger.info("Critic email: %s", "sent" if sent else "not sent (SMTP not configured?)")
+        logger.info("Critic email: %s%s",
+                     "sent" if sent else "not sent (SMTP not configured?)",
+                     " (with weekly)" if weekly_data else "")
     except Exception as e:
         summary["errors"] += 1
         logger.error("Critic email failed: %s", e, exc_info=True)
