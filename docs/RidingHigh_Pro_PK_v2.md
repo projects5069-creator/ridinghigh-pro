@@ -20,6 +20,12 @@
 
 ### Document Changelog
 ```
+v2.15 (2026-05-17): Sheets quota resilience — #1 production risk.
+                    sheets_manager._with_retry(): exponential backoff
+                    (2/4/8s) on 429 quota errors only. get_sheet_values():
+                    60s read cache keyed by (tab,month). Critic weekly_summary
+                    cut from 35 to 4 Sheets API calls. gsheets_sync reads
+                    wrapped in retry. PnL-empty bug investigated = false alarm.
 v2.14 (2026-05-17): ROCKET_GUARD (Filter 11) — blocks shorting stocks
                     still climbing (RunUp>=50% AND PriceToHigh>=-10%).
                     Calibrated on 196 rows: 16 losses blocked, 0 wins lost.

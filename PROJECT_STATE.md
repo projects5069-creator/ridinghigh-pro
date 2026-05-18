@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-05-17 21:06:04 -05
+**Generated:** 2026-05-17 21:08:30 -05
 **Branch:** `main`
-**Latest commit:** `7e16025` — fix(sheets): add 429 retry + read cache — kills silent quota failures
+**Latest commit:** `15486b7` — docs(pk): v2.15 — Sheets quota retry + read cache
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `7e16025 (HEAD -> main) fix(sheets): add 429 retry + read cache — kills silent quota failures`
-- `c0ff669 (origin/main, origin/HEAD) fix(pk): preserve v2.12 historical filter count as 10`
+- `15486b7 (HEAD -> main) docs(pk): v2.15 — Sheets quota retry + read cache`
+- `f7dc985 (origin/main, origin/HEAD) fix(sheets): add 429 retry + read cache — kills silent quota failures`
+- `c0ff669 fix(pk): preserve v2.12 historical filter count as 10`
 - `8ea208d docs(pk): v2.14 — ROCKET_GUARD + agents #3-5 + filter list 9→11`
 - `ef14e26 feat(trader): add ROCKET_GUARD Filter 11 — block shorting stocks still climbing`
-- `ce01641 feat(critic): add weekly summary — completes the Critic agent`
 
 ---
 
@@ -72,8 +72,8 @@ _Months in config: `2026-04`, `2026-05`, `2026-06`_
 
 ## 🩺 Health
 
-- ⚠️ 66 uncommitted file(s):
--    - 66 new/untracked
+- ⚠️ 67 uncommitted file(s):
+-    - 67 new/untracked
 
 ---
 
