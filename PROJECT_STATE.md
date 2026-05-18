@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-05-18 15:25:43 -05
+**Generated:** 2026-05-18 17:34:47 -05
 **Branch:** `main`
-**Latest commit:** `e43d767` — feat(sheets): retry + idempotency for all agent writes
+**Latest commit:** `ea11c26` — feat(dashboard): market regime banner on Live Agent + Trade History
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `e43d767 (HEAD -> main) feat(sheets): retry + idempotency for all agent writes`
-- `02e6ecd (origin/main, origin/HEAD) fix(sentinel): position_sync + provider_heartbeat were blind in production`
+- `ea11c26 (HEAD -> main) feat(dashboard): market regime banner on Live Agent + Trade History`
+- `d56352c (origin/main, origin/HEAD) feat(sheets): retry + idempotency for all agent writes`
+- `02e6ecd fix(sentinel): position_sync + provider_heartbeat were blind in production`
 - `2f384cc docs(pk): v2.16 — §20 realistic win-rate classification`
 - `cdb3389 fix(dashboard): realistic win-rate via classify_trade — replaces misleading TP10_Hit`
-- `775656e docs(pk): v2.15 — Sheets quota retry + read cache`
 
 ---
 
@@ -32,11 +32,11 @@ _See `OPEN_ISSUES.md` for full list_
 
 | Workflow | Status | Conclusion | Started |
 |---|---|---|---|
-| Agent — Every Minute (DRY_RUN) | completed | ✅ success | 2026-05-18 20:25 UTC |
-| RidingHigh Auto Scanner | completed | ✅ success | 2026-05-18 20:25 UTC |
-| RidingHigh Auto Scanner | completed | ✅ success | 2026-05-18 20:24 UTC |
-| Agent — Every Minute (DRY_RUN) | completed | ✅ success | 2026-05-18 20:24 UTC |
-| Agent — Every Minute (DRY_RUN) | completed | ✅ success | 2026-05-18 20:23 UTC |
+| Agent — Daily Brief Email | completed | ✅ success | 2026-05-18 21:30 UTC |
+| Agent — End of Day | completed | ✅ success | 2026-05-18 21:00 UTC |
+| Agent — Every Minute (DRY_RUN) | completed | ✅ success | 2026-05-18 20:59 UTC |
+| RidingHigh Auto Scanner | completed | ✅ success | 2026-05-18 20:59 UTC |
+| Agent — Every Minute (DRY_RUN) | completed | ✅ success | 2026-05-18 20:58 UTC |
 
 ---
 
@@ -66,7 +66,7 @@ _Months in config: `2026-04`, `2026-05`, `2026-06`_
 | borrow_data | 0 | — | ⚠️ empty |
 | market_context | 5 | — | ✅ |
 | news_findings | 2,818 | — | ✅ |
-| agent_scorecard | 20 | 2026-05-17 | ✅ |
+| agent_scorecard | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
 
 ---
 

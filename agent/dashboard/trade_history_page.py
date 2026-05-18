@@ -23,6 +23,7 @@ import pandas as pd
 
 from agent.dashboard._data_loaders import (
     load_paper_portfolio,
+    render_regime_banner,
     PERU_TZ,
 )
 
@@ -576,6 +577,9 @@ def render_trade_history():
     """Main entry point for Trade History page."""
     st.title("📊 Trade History")
     st.caption("Audit trail — all positions opened by the agent")
+
+    # ── Market Regime Banner (display only) ──────────────────
+    render_regime_banner()
 
     # Load data
     portfolio_df = load_paper_portfolio()

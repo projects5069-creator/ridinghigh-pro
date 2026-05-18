@@ -76,6 +76,64 @@ def load_decision_log_today() -> pd.DataFrame:
 
 
 @st.cache_data(ttl=300)
+def _cached_market_context() -> pd.DataFrame:
+    """market_context sheet -> raw DataFrame. Refreshes every 5 min."""
+    ws = _get_worksheet("market_context")
+    if ws is None:
+        return pd.DataFrame()
+    try:
+        data = ws.get_all_values()
+        if len(data) <= 1:
+            return pd.DataFrame()
+        return pd.DataFrame(data[1:], columns=data[0])
+    except Exception as e:
+        logger.error("Failed to load market_context: %s", e)
+        return pd.DataFrame()
+
+
+def render_regime_banner():
+    """Display today's market regime as a colored banner.
+
+    Read-only — shows what Market Context recorded. Does NOT affect
+    any trading logic (Level A: display only, 2026-05-18).
+    """
+    try:
+        df = _cached_market_context()
+        if df.empty:
+            return
+        today = datetime.now(PERU_TZ).strftime("%Y-%m-%d")
+        df_today = df[df["Timestamp"].astype(str).str.startswith(today)]
+        if df_today.empty:
+            return
+        row = df_today.iloc[-1]
+        regime = str(row.get("Market_Regime", "?")).upper()
+        vix = row.get("VIX_Close", "?")
+        vix_lvl = str(row.get("VIX_Level", "?"))
+        spy_dir = str(row.get("SPY_Direction", "?"))
+        iwm_dir = str(row.get("IWM_Direction", "?"))
+        try:
+            vix_txt = f"{float(vix):.1f}"
+        except (ValueError, TypeError):
+            vix_txt = str(vix)
+        regime_he = {
+            "RISK_ON": "תיאבון לסיכון",
+            "RISK_OFF": "הימנעות מסיכון",
+            "NEUTRAL": "ניטרלי",
+        }.get(regime, regime)
+        msg = (f"\U0001f324\ufe0f **אקלים השוק: {regime_he}**  \u00b7  "
+               f"VIX {vix_txt} ({vix_lvl})  \u00b7  "
+               f"SPY {spy_dir}  \u00b7  IWM {iwm_dir}")
+        if regime == "RISK_OFF":
+            st.error(msg)
+        elif regime == "RISK_ON":
+            st.success(msg)
+        else:
+            st.info(msg)
+    except Exception:
+        pass  # display-only — never crashes the page
+
+
+@st.cache_data(ttl=300)
 def load_score_analytics_latest() -> Optional[Dict[str, Any]]:
     """Load latest score_analytics row (TTL 300s)."""
     ws = _get_worksheet("score_analytics")

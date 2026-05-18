@@ -25,6 +25,7 @@ from agent.dashboard._data_loaders import (
     load_paper_portfolio,
     load_decision_log_today,
     log_emergency_stop,
+    render_regime_banner,
     PERU_TZ,
 )
 
@@ -47,6 +48,9 @@ def render_live_agent():
     if st.button("🔄 Refresh data", key="agent_refresh_top"):
         st.cache_data.clear()
         st.rerun()
+
+    # ── Market Regime Banner (display only) ──────────────────
+    render_regime_banner()
 
     # ── Section A: Status Banner ─────────────────────────────
     _render_status_banner()
