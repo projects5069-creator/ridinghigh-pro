@@ -50,8 +50,7 @@ class CriticAgent:
         import sheets_manager as sm
 
         # --- Load paper_portfolio ---
-        ws_port = sm.get_worksheet("paper_portfolio")
-        port_rows = ws_port.get_all_values()
+        port_rows = sm.get_sheet_values("paper_portfolio")
         if len(port_rows) <= 1:
             logger.warning("paper_portfolio is empty")
             return []
@@ -75,8 +74,7 @@ class CriticAgent:
         pi_dq = _pcol("DataQuality")
 
         # --- Load decision_log for cross-reference ---
-        ws_dec = sm.get_worksheet("decision_log")
-        dec_rows = ws_dec.get_all_values()
+        dec_rows = sm.get_sheet_values("decision_log")
         dec_header = dec_rows[0] if dec_rows else []
         dec_data = dec_rows[1:] if len(dec_rows) > 1 else []
 
@@ -218,8 +216,7 @@ class CriticAgent:
             "entered_tickers": [], "entered_tickers_unique": {},
         }
         try:
-            ws = sm.get_worksheet("decision_log")
-            rows = ws.get_all_values()
+            rows = sm.get_sheet_values("decision_log")
             if len(rows) > 1:
                 header = rows[0]
                 ts_idx = header.index("Timestamp") if "Timestamp" in header else None
@@ -258,8 +255,7 @@ class CriticAgent:
         # --- 2. DATA SENTINEL (system_events) ---
         sentinel_facts = {"blocks": 0, "warns": 0}
         try:
-            ws = sm.get_worksheet("system_events")
-            rows = ws.get_all_values()
+            rows = sm.get_sheet_values("system_events")
             if len(rows) > 1:
                 header = rows[0]
                 ts_idx = header.index("Timestamp") if "Timestamp" in header else 0
@@ -280,8 +276,7 @@ class CriticAgent:
         # --- 3. MARKET CONTEXT (market_context) ---
         mc_facts: Dict[str, Any] = {"regime": None, "changed_during_day": False}
         try:
-            ws = sm.get_worksheet("market_context")
-            rows = ws.get_all_values()
+            rows = sm.get_sheet_values("market_context")
             if len(rows) > 1:
                 header = rows[0]
                 ts_idx = header.index("Timestamp") if "Timestamp" in header else 0
@@ -305,8 +300,7 @@ class CriticAgent:
         # --- 4. NEWS DETECTIVE (news_findings) ---
         nd_facts = {"tickers_checked": 0, "material_news_count": 0}
         try:
-            ws = sm.get_worksheet("news_findings")
-            rows = ws.get_all_values()
+            rows = sm.get_sheet_values("news_findings")
             if len(rows) > 1:
                 header = rows[0]
                 ts_idx = header.index("Timestamp") if "Timestamp" in header else 0
@@ -464,8 +458,7 @@ class CriticAgent:
         for src in SOURCES:
             agent = src["agent"]
             try:
-                ws = sm.get_worksheet(src["sheet"])
-                rows = ws.get_all_values()
+                rows = sm.get_sheet_values(src["sheet"])
                 if len(rows) <= 1:
                     continue
 
@@ -500,8 +493,7 @@ class CriticAgent:
         # ── Market context (market-wide, not per-ticker) ────────────────
         regime = None
         try:
-            ws = sm.get_worksheet("market_context")
-            rows = ws.get_all_values()
+            rows = sm.get_sheet_values("market_context")
             if len(rows) > 1:
                 header = rows[0]
                 ts_idx = header.index("Timestamp") if "Timestamp" in header else 0

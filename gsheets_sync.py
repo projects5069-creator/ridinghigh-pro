@@ -62,7 +62,7 @@ def _get_post_analysis_ws(gc=None):
         return None
     # If sheet1 is empty but a named tab might exist, try "גיליון1" explicitly
     try:
-        data = ws.get_all_values()
+        data = sheets_manager._with_retry(ws.get_all_values)
         if len(data) <= 1:
             # sheet1 is empty — check if a "גיליון1" tab actually has data
             import gspread
@@ -74,7 +74,7 @@ def _get_post_analysis_ws(gc=None):
                 for candidate in ["post_analysis", "גיליון1"]:
                     try:
                         cws = sp.worksheet(candidate)
-                        cdata = cws.get_all_values()
+                        cdata = sheets_manager._with_retry(cws.get_all_values)
                         if len(cdata) > 1:
                             return cws
                     except gspread.exceptions.WorksheetNotFound:
@@ -132,7 +132,7 @@ def save_snapshot_to_sheets(df: pd.DataFrame) -> bool:
         df = df.copy()
         df.insert(0, "Date", today)
 
-        existing = ws.get_all_values()
+        existing = sheets_manager._with_retry(ws.get_all_values)
         if len(existing) <= 1:
             _df_to_sheet(ws, df)
         else:
@@ -168,7 +168,7 @@ def load_timeline_dates_from_sheets() -> list:
         if ws is None:
             return []
 
-        data = ws.get_all_values()
+        data = sheets_manager._with_retry(ws.get_all_values)
         if len(data) <= 1:
             return []
 
@@ -191,7 +191,7 @@ def load_timeline_from_sheets(date: str):
         if ws is None:
             return None
 
-        data = ws.get_all_values()
+        data = sheets_manager._with_retry(ws.get_all_values)
         if len(data) <= 1:
             return None
 
@@ -240,7 +240,7 @@ def load_portfolio_from_sheets():
         if ws is None:
             return None
 
-        data = ws.get_all_values()
+        data = sheets_manager._with_retry(ws.get_all_values)
         if len(data) <= 1:
             return None
 
@@ -280,7 +280,7 @@ def save_post_analysis_to_sheets(df: pd.DataFrame) -> bool:
             return False
 
         # ── Step 1: load existing ─────────────────────────────────────────
-        raw = ws.get_all_values()
+        raw = sheets_manager._with_retry(ws.get_all_values)
         if len(raw) > 1 and raw[0]:
             existing_df = pd.DataFrame(raw[1:], columns=raw[0])
         else:
@@ -304,7 +304,7 @@ def save_post_analysis_to_sheets(df: pd.DataFrame) -> bool:
         if existing_df.empty:
             try:
                 legacy_ws = gc.open_by_key(LEGACY_SPREADSHEET_ID).worksheet("post_analysis")
-                legacy_raw = legacy_ws.get_all_values()
+                legacy_raw = sheets_manager._with_retry(legacy_ws.get_all_values)
                 if len(legacy_raw) > 1:
                     existing_df = pd.DataFrame(legacy_raw[1:], columns=legacy_raw[0])
                     print(f"[GSheets] Seeded {len(existing_df)} rows from legacy spreadsheet")
@@ -358,7 +358,7 @@ def load_post_analysis_from_sheets() -> pd.DataFrame:
         if ws is None:
             return pd.DataFrame()
 
-        data = ws.get_all_values()
+        data = sheets_manager._with_retry(ws.get_all_values)
         if len(data) <= 1:
             return pd.DataFrame()
 

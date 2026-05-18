@@ -347,6 +347,69 @@ def get_sheet_id(tab_name: str, month: str = None) -> str:
     return month_cfg[tab_name]
 
 
+# ════════════════════════════════════════════════════════════════════
+# Quota resilience: retry helper + short-lived read cache (#N18 / 1א)
+# ════════════════════════════════════════════════════════════════════
+
+import time as _time
+
+_RETRY_MAX = 3
+_RETRY_BACKOFF_BASE = 2          # seconds: 2, 4, 8
+_SHEET_CACHE_TTL = 60            # seconds — short, for batch reads (weekly_summary)
+_sheet_values_cache = {}         # {(tab_name, month): (timestamp, rows)}
+
+
+def _is_quota_error(exc) -> bool:
+    """True if an exception looks like a Google Sheets 429 / quota error."""
+    msg = str(exc).lower()
+    return ("429" in msg or "quota" in msg
+            or "resource_exhausted" in msg or "rate limit" in msg)
+
+
+def _with_retry(fn, *args, **kwargs):
+    """Run fn(*args, **kwargs) with exponential backoff on quota (429) errors.
+
+    Matches the retry pattern in agent/execution/order_manager.py.
+    Non-quota errors are raised immediately (no point retrying those).
+    """
+    last_error = None
+    for attempt in range(_RETRY_MAX):
+        try:
+            return fn(*args, **kwargs)
+        except Exception as e:
+            last_error = e
+            if not _is_quota_error(e):
+                raise  # not a quota error — fail fast
+            if attempt < _RETRY_MAX - 1:
+                wait = _RETRY_BACKOFF_BASE ** (attempt + 1)
+                print(f"[sheets_manager] quota 429 — retry {attempt+1}/{_RETRY_MAX} "
+                      f"after {wait}s: {e}")
+                _time.sleep(wait)
+    print(f"[sheets_manager] all {_RETRY_MAX} retries exhausted: {last_error}")
+    raise last_error
+
+
+def get_sheet_values(tab_name: str, month: str = None):
+    """Return all rows of a worksheet, with 60s cache + 429 retry.
+
+    Use this instead of get_worksheet(x).get_all_values() anywhere the
+    same sheet may be read repeatedly in a short window (e.g. the Critic's
+    weekly_summary, which reads 7 sheets x 5 days). The cache collapses
+    those repeats into one API call per sheet per 60s window.
+    """
+    key = (tab_name, month)
+    now = _time.time()
+    cached = _sheet_values_cache.get(key)
+    if cached is not None and (now - cached[0]) < _SHEET_CACHE_TTL:
+        return cached[1]
+    ws = _with_retry(get_worksheet, tab_name, month)
+    if ws is None:
+        return []
+    rows = _with_retry(ws.get_all_values)
+    _sheet_values_cache[key] = (now, rows)
+    return rows
+
+
 def get_worksheet(tab_name: str, month: str = None, gc=None):
     """
     Return the gspread Worksheet for tab_name in the given month.
