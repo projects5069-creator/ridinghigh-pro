@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-05-18 17:34:47 -05
+**Generated:** 2026-05-18 17:36:47 -05
 **Branch:** `main`
-**Latest commit:** `ea11c26` — feat(dashboard): market regime banner on Live Agent + Trade History
+**Latest commit:** `9733819` — chore: remove one-off migration scripts (already executed)
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `ea11c26 (HEAD -> main) feat(dashboard): market regime banner on Live Agent + Trade History`
+- `9733819 (HEAD -> main) chore: remove one-off migration scripts (already executed)`
+- `6de2a1a feat(dashboard): market regime banner on Live Agent + Trade History`
 - `d56352c (origin/main, origin/HEAD) feat(sheets): retry + idempotency for all agent writes`
 - `02e6ecd fix(sentinel): position_sync + provider_heartbeat were blind in production`
 - `2f384cc docs(pk): v2.16 — §20 realistic win-rate classification`
-- `cdb3389 fix(dashboard): realistic win-rate via classify_trade — replaces misleading TP10_Hit`
 
 ---
 
@@ -32,11 +32,11 @@ _See `OPEN_ISSUES.md` for full list_
 
 | Workflow | Status | Conclusion | Started |
 |---|---|---|---|
+| Agent — Every Minute (DRY_RUN) | completed | ✅ success | 2026-05-18 22:35 UTC |
 | Agent — Daily Brief Email | completed | ✅ success | 2026-05-18 21:30 UTC |
 | Agent — End of Day | completed | ✅ success | 2026-05-18 21:00 UTC |
 | Agent — Every Minute (DRY_RUN) | completed | ✅ success | 2026-05-18 20:59 UTC |
 | RidingHigh Auto Scanner | completed | ✅ success | 2026-05-18 20:59 UTC |
-| Agent — Every Minute (DRY_RUN) | completed | ✅ success | 2026-05-18 20:58 UTC |
 
 ---
 
@@ -72,9 +72,8 @@ _Months in config: `2026-04`, `2026-05`, `2026-06`_
 
 ## 🩺 Health
 
-- ⚠️ 41 uncommitted file(s):
+- ⚠️ 36 uncommitted file(s):
 -    - 36 new/untracked
--    - 5 deleted
 
 ---
 
