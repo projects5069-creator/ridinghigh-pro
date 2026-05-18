@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-05-17 20:32:33 -05
+**Generated:** 2026-05-17 20:37:58 -05
 **Branch:** `main`
-**Latest commit:** `be3a80f` — feat(trader): add ROCKET_GUARD Filter 11 — block shorting stocks still climbing
+**Latest commit:** `a65cfb9` — docs(pk): v2.14 — ROCKET_GUARD + agents #3-5 + filter list 9→11
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `be3a80f (HEAD -> main) feat(trader): add ROCKET_GUARD Filter 11 — block shorting stocks still climbing`
-- `ce01641 (origin/main, origin/HEAD) feat(critic): add weekly summary — completes the Critic agent`
+- `a65cfb9 (HEAD -> main) docs(pk): v2.14 — ROCKET_GUARD + agents #3-5 + filter list 9→11`
+- `ef14e26 (origin/main, origin/HEAD) feat(trader): add ROCKET_GUARD Filter 11 — block shorting stocks still climbing`
+- `ce01641 feat(critic): add weekly summary — completes the Critic agent`
 - `8440ec6 feat(critic): add daily critic email`
 - `f6b65fe feat(critic): add daily critic orchestrator + workflow`
-- `285b0af feat(critic): add "Agent Scorecard" dashboard page`
 
 ---
 
@@ -72,8 +72,8 @@ _Months in config: `2026-04`, `2026-05`, `2026-06`_
 
 ## 🩺 Health
 
-- ⚠️ 62 uncommitted file(s):
--    - 62 new/untracked
+- ⚠️ 63 uncommitted file(s):
+-    - 63 new/untracked
 
 ---
 

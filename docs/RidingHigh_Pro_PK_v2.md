@@ -20,6 +20,11 @@
 
 ### Document Changelog
 ```
+v2.14 (2026-05-17): ROCKET_GUARD (Filter 11) — blocks shorting stocks
+                    still climbing (RunUp>=50% AND PriceToHigh>=-10%).
+                    Calibrated on 196 rows: 16 losses blocked, 0 wins lost.
+                    Agents #3-5 built (Market Context, News Detective, Critic).
+                    System Overview fully refreshed. 11 filters total.
 v2.13 (2026-05-16): Added §A15 — Data Sentinel (agent #2, gatekeeper).
 v2.12 (2026-05-16): Bug-fix sweep — 5 critical trading-agent bugs.
                     Bug #1: _close_position uses trigger price (no stale re-fetch).
@@ -29,7 +34,7 @@ v2.12 (2026-05-16): Bug-fix sweep — 5 critical trading-agent bugs.
                     Bug #5: AGENT_MAX_REENTRIES_PER_TICKER=3 caps same-ticker churn.
                     DataQuality column added (CLEAN / PRE_FIX).
                     paper_portfolio schema now 25 columns.
-                    10 filters in decision_logic (added REENTRY_LIMIT).
+                    11 filters in decision_logic (added REENTRY_LIMIT).
 v2.11 (2026-05-04): Milestone 8 — Email System.
                     Added agent/notifications/email_sender.py — SMTP wrapper
                     for Gmail with App Password support. Reads creds from
@@ -143,7 +148,7 @@ v2.5 (2026-05-03): Milestone 4 — Decision Logger.
 v2.4 (2026-05-03): Milestone 3 — The Trader Core Logic.
                     Added 5 agent files: score_calculator, data_quality,
                     tradability (mock), decision_logic (41-field Decision
-                    dataclass + 10 filters), trader (stateless orchestrator).
+                    dataclass + 11 filters), trader (stateless orchestrator).
                     Critical test test_scanner_agent_match: 0 mismatches.
                     Score tolerance set to 0.04 (rounding-only, documented).
 
@@ -2340,9 +2345,9 @@ Decision with full reasoning.
 | `agent/trader/decision_logic.py` | 41-field Decision + 10 entry filters | 305 |
 | `agent/trader/trader.py` | Stateless orchestrator | 94 |
 
-### Decision flow (10 filters in order)
+### Decision flow (11 filters in order)
 
-1. SCORE_TOO_LOW: score < AGENT_MIN_SCORE (60)
+1. SCORE_TOO_LOW: score < AGENT_MIN_SCORE (50)
 2. MXV_TOO_HIGH: mxv > AGENT_MXV_MAX (-100)
 3. RUNUP_TOO_LOW: run_up < AGENT_RUNUP_MIN (30%)
 4. VOLUME_TOO_LOW: volume < AGENT_VOLUME_MIN (100K)
@@ -2350,9 +2355,11 @@ Decision with full reasoning.
 6. QUALITY_TOO_LOW: quality_score < 0.5 (>=3 flags)
 7. EXISTING_POSITION: already short this ticker
 8. COLD_START_LIMIT: concurrent (5) or daily (10) cap reached
-9. INSUFFICIENT_BUYING_POWER: < $1000
+9. REENTRY_LIMIT: same ticker already entered 3x today (Bug #5 fix)
+10. INSUFFICIENT_BUYING_POWER: < $1000
+11. ROCKET_GUARD: RunUp>=50% AND PriceToHigh>=-10% — stock still climbing vertically, shorting fights the trend. Calibrated on 196 rows: blocks 16 losses, 0 winners.
 
-If all 9 pass → ENTER. Otherwise → SKIP with specific skip_reason.
+If all 11 pass → ENTER. Otherwise → SKIP with specific skip_reason.
 
 ### Critical: stateless design
 
