@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-05-17 20:37:58 -05
+**Generated:** 2026-05-17 20:40:59 -05
 **Branch:** `main`
-**Latest commit:** `a65cfb9` — docs(pk): v2.14 — ROCKET_GUARD + agents #3-5 + filter list 9→11
+**Latest commit:** `94a767e` — fix(pk): preserve v2.12 historical filter count as 10
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `a65cfb9 (HEAD -> main) docs(pk): v2.14 — ROCKET_GUARD + agents #3-5 + filter list 9→11`
-- `ef14e26 (origin/main, origin/HEAD) feat(trader): add ROCKET_GUARD Filter 11 — block shorting stocks still climbing`
+- `94a767e (HEAD -> main) fix(pk): preserve v2.12 historical filter count as 10`
+- `8ea208d (origin/main, origin/HEAD) docs(pk): v2.14 — ROCKET_GUARD + agents #3-5 + filter list 9→11`
+- `ef14e26 feat(trader): add ROCKET_GUARD Filter 11 — block shorting stocks still climbing`
 - `ce01641 feat(critic): add weekly summary — completes the Critic agent`
 - `8440ec6 feat(critic): add daily critic email`
-- `f6b65fe feat(critic): add daily critic orchestrator + workflow`
 
 ---
 

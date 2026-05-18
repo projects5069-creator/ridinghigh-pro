@@ -34,7 +34,7 @@ v2.12 (2026-05-16): Bug-fix sweep — 5 critical trading-agent bugs.
                     Bug #5: AGENT_MAX_REENTRIES_PER_TICKER=3 caps same-ticker churn.
                     DataQuality column added (CLEAN / PRE_FIX).
                     paper_portfolio schema now 25 columns.
-                    11 filters in decision_logic (added REENTRY_LIMIT).
+                    10 filters in decision_logic (added REENTRY_LIMIT).
 v2.11 (2026-05-04): Milestone 8 — Email System.
                     Added agent/notifications/email_sender.py — SMTP wrapper
                     for Gmail with App Password support. Reads creds from
