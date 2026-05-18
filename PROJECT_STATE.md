@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-05-18 12:02:12 -05
+**Generated:** 2026-05-18 12:49:13 -05
 **Branch:** `main`
-**Latest commit:** `51edad9` — fix(dashboard): realistic win-rate via classify_trade — replaces misleading TP10_Hit
+**Latest commit:** `485a10d` — docs(pk): v2.16 — §20 realistic win-rate classification
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `51edad9 (HEAD -> main) fix(dashboard): realistic win-rate via classify_trade — replaces misleading TP10_Hit`
-- `775656e (origin/main, origin/HEAD) docs(pk): v2.15 — Sheets quota retry + read cache`
+- `485a10d (HEAD -> main) docs(pk): v2.16 — §20 realistic win-rate classification`
+- `cdb3389 (origin/main, origin/HEAD) fix(dashboard): realistic win-rate via classify_trade — replaces misleading TP10_Hit`
+- `775656e docs(pk): v2.15 — Sheets quota retry + read cache`
 - `f7dc985 fix(sheets): add 429 retry + read cache — kills silent quota failures`
 - `c0ff669 fix(pk): preserve v2.12 historical filter count as 10`
-- `8ea208d docs(pk): v2.14 — ROCKET_GUARD + agents #3-5 + filter list 9→11`
 
 ---
 
@@ -32,17 +32,17 @@ _See `OPEN_ISSUES.md` for full list_
 
 | Workflow | Status | Conclusion | Started |
 |---|---|---|---|
-| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-05-18 17:02 UTC |
-| Agent — Every Minute (DRY_RUN) | queued | ⏳ — | 2026-05-18 17:02 UTC |
-| Agent — Every Minute (DRY_RUN) | in_progress | ⏳ — | 2026-05-18 17:01 UTC |
-| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-05-18 17:01 UTC |
-| Agent — Every Minute (DRY_RUN) | in_progress | ⏳ — | 2026-05-18 17:00 UTC |
+| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-05-18 17:49 UTC |
+| Agent — Every Minute (DRY_RUN) | queued | ⏳ — | 2026-05-18 17:49 UTC |
+| Agent — Every Minute (DRY_RUN) | completed | ✅ success | 2026-05-18 17:48 UTC |
+| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-05-18 17:48 UTC |
+| Agent — Every Minute (DRY_RUN) | in_progress | ⏳ — | 2026-05-18 17:47 UTC |
 
 ---
 
 ## 📊 Google Sheets — showing month `2026-06`
 
-_Selection: fallback — no month has data, using latest key (2026-06)_
+_Selection: most recent month with data (2026-06)_
 _Months in config: `2026-04`, `2026-05`, `2026-06`_
 
 | Sheet | Total rows | Last date | Status |
@@ -61,8 +61,8 @@ _Months in config: `2026-04`, `2026-05`, `2026-06`_
 
 ## 🩺 Health
 
-- ⚠️ 85 uncommitted file(s):
--    - 85 new/untracked
+- ⚠️ 86 uncommitted file(s):
+-    - 86 new/untracked
 
 ---
 
