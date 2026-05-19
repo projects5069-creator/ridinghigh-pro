@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-05-18 17:36:47 -05
+**Generated:** 2026-05-18 20:04:04 -05
 **Branch:** `main`
-**Latest commit:** `9733819` — chore: remove one-off migration scripts (already executed)
+**Latest commit:** `1cc25b3` — fix(critic): offset cron from :00 to :07 — GH Actions hour-boundary drift
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `9733819 (HEAD -> main) chore: remove one-off migration scripts (already executed)`
+- `1cc25b3 (HEAD -> main) fix(critic): offset cron from :00 to :07 — GH Actions hour-boundary drift`
+- `2d65899 (origin/main, origin/HEAD) chore: remove one-off migration scripts (already executed)`
 - `6de2a1a feat(dashboard): market regime banner on Live Agent + Trade History`
-- `d56352c (origin/main, origin/HEAD) feat(sheets): retry + idempotency for all agent writes`
+- `d56352c feat(sheets): retry + idempotency for all agent writes`
 - `02e6ecd fix(sentinel): position_sync + provider_heartbeat were blind in production`
-- `2f384cc docs(pk): v2.16 — §20 realistic win-rate classification`
 
 ---
 
@@ -32,11 +32,11 @@ _See `OPEN_ISSUES.md` for full list_
 
 | Workflow | Status | Conclusion | Started |
 |---|---|---|---|
+| Daily Backup — post_analysis | completed | ✅ success | 2026-05-18 23:48 UTC |
+| Daily Backup — post_analysis | completed | ✅ success | 2026-05-18 23:48 UTC |
+| Agent — Market Context (Hourly) | completed | ✅ success | 2026-05-18 23:47 UTC |
+| RidingHigh Auto Scanner | completed | ✅ success | 2026-05-18 22:38 UTC |
 | Agent — Every Minute (DRY_RUN) | completed | ✅ success | 2026-05-18 22:35 UTC |
-| Agent — Daily Brief Email | completed | ✅ success | 2026-05-18 21:30 UTC |
-| Agent — End of Day | completed | ✅ success | 2026-05-18 21:00 UTC |
-| Agent — Every Minute (DRY_RUN) | completed | ✅ success | 2026-05-18 20:59 UTC |
-| RidingHigh Auto Scanner | completed | ✅ success | 2026-05-18 20:59 UTC |
 
 ---
 
@@ -64,16 +64,16 @@ _Months in config: `2026-04`, `2026-05`, `2026-06`_
 | pending_suggestions | 0 | — | ⚠️ empty |
 | config_history | 0 | — | ⚠️ empty |
 | borrow_data | 0 | — | ⚠️ empty |
-| market_context | 5 | — | ✅ |
+| market_context | 6 | — | ✅ |
 | news_findings | 2,818 | — | ✅ |
-| agent_scorecard | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| agent_scorecard | 20 | 2026-05-17 | ✅ |
 
 ---
 
 ## 🩺 Health
 
-- ⚠️ 36 uncommitted file(s):
--    - 36 new/untracked
+- ⚠️ 37 uncommitted file(s):
+-    - 37 new/untracked
 
 ---
 

@@ -3,7 +3,7 @@ name: Agent — Critic (daily)
 on:
   schedule:
     # 00:00 UTC Tue-Sat = 19:00 Peru Mon-Fri (after market + EOD processing)
-    - cron: '0 0 * * 2-6'
+    - cron: '7 0 * * 2-6'   # :07 offset — avoids GH Actions :00 hour-boundary drift
   workflow_dispatch:
 
 jobs:
