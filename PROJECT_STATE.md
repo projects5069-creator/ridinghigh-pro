@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-05-19 14:50:26 -05
+**Generated:** 2026-05-19 14:57:04 -05
 **Branch:** `main`
-**Latest commit:** `294a42c` — fix(trader): Filter 9 re-entry limit leaked — count from decision_log
+**Latest commit:** `6a44829` — docs(claude): add RULE #5b — never run git commit twice
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `294a42c (HEAD -> main) fix(trader): Filter 9 re-entry limit leaked — count from decision_log`
-- `2b28906 (origin/main, origin/HEAD) fix(oauth): renew token + correct Warmer docs (detector, not preventer)`
+- `6a44829 (HEAD -> main) docs(claude): add RULE #5b — never run git commit twice`
+- `d3b6e08 (origin/main, origin/HEAD) fix(trader): Filter 9 re-entry limit leaked — count from decision_log`
+- `2b28906 fix(oauth): renew token + correct Warmer docs (detector, not preventer)`
 - `6add916 fix(news-detective): pass FINNHUB_API_KEY to agent_minute env`
 - `d1498f2 perf(scanner): replace timeline_live get_all_values with row_count`
-- `b1353ba fix(sentinel): widen scan_freshness thresholds 3->5 / 5->10`
 
 ---
 
@@ -32,11 +32,11 @@ _See `OPEN_ISSUES.md` for full list_
 
 | Workflow | Status | Conclusion | Started |
 |---|---|---|---|
-| Agent — Every Minute (DRY_RUN) | in_progress | ⏳ — | 2026-05-19 19:50 UTC |
-| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-05-19 19:50 UTC |
-| RidingHigh Auto Scanner | completed | ✅ success | 2026-05-19 19:49 UTC |
-| Agent — Every Minute (DRY_RUN) | completed | ✅ success | 2026-05-19 19:49 UTC |
-| RidingHigh Auto Scanner | completed | ✅ success | 2026-05-19 19:48 UTC |
+| Agent — Every Minute (DRY_RUN) | queued | ⏳ — | 2026-05-19 19:57 UTC |
+| RidingHigh Auto Scanner | queued | ⏳ — | 2026-05-19 19:57 UTC |
+| Agent — Every Minute (DRY_RUN) | in_progress | ⏳ — | 2026-05-19 19:56 UTC |
+| RidingHigh Auto Scanner | completed | ✅ success | 2026-05-19 19:56 UTC |
+| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-05-19 19:55 UTC |
 
 ---
 
@@ -47,19 +47,19 @@ _Months in config: `2026-04`, `2026-05`, `2026-06`_
 
 | Sheet | Total rows | Last date | Status |
 |---|---|---|---|
-| timeline_live | 224,530 | 2026-05-19 | ✅ |
-| daily_snapshots | 1,012 | 2026-05-18 | ✅ |
-| daily_summary | 1,105 | 2026-05-18 | ✅ |
-| post_analysis | 43 | 2026-05-18 | ✅ |
-| portfolio | 48 | 2026-05-15 | ✅ |
-| portfolio_live | 32 | 2026-05-15 | ✅ |
-| score_tracker | 1,220 | 2026-05-19 | ✅ |
-| live_trades | 1,220 | 2026-05-19 | ✅ |
-| ticker_follow_up | 12,477 | 2026-05-08 | ✅ |
-| decision_log | 16,222 | — | ✅ |
-| paper_portfolio | 81 | — | ✅ |
-| score_analytics | 0 | — | ⚠️ empty |
-| postmortems | 63 | — | ✅ |
+| timeline_live | 224,756 | 2026-05-19 | ✅ |
+| daily_snapshots | 1,063 | 2026-05-19 | ✅ |
+| daily_summary | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| post_analysis | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| portfolio | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| portfolio_live | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| score_tracker | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| live_trades | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| ticker_follow_up | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| decision_log | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| paper_portfolio | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| score_analytics | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| postmortems | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
 | system_events | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
 | pending_suggestions | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
 | config_history | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
@@ -72,8 +72,8 @@ _Months in config: `2026-04`, `2026-05`, `2026-06`_
 
 ## 🩺 Health
 
-- ⚠️ 50 uncommitted file(s):
--    - 50 new/untracked
+- ⚠️ 51 uncommitted file(s):
+-    - 51 new/untracked
 
 ---
 

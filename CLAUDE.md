@@ -78,6 +78,18 @@ Silence is better than made-up facts.
 - The user will say "commit" or "push" explicitly
 - Never assume silence = approval
 
+### RULE #5b: NEVER run `git commit` twice for the same change
+
+If a block you just ran already contained a `git commit`, the commit is
+DONE — do NOT run `git commit` again. A short or truncated tail of the
+output (e.g. only seeing "commit created") does NOT mean the commit
+failed. Re-running creates a duplicate / confusing history.
+
+If you genuinely need to verify whether a commit landed:
+1. Run `git log -1 --oneline` FIRST.
+2. Only if the expected commit is NOT at HEAD, run `git commit` again.
+Never re-commit on a guess.
+
 ---
 
 ## RULE #6: Never Run Live Workflows Without Approval
