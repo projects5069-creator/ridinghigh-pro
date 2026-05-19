@@ -1,13 +1,15 @@
 #!/usr/bin/env python3
 """
-Warm OAuth Token — keep refresh token alive.
+Warm OAuth Token — OAuth health DETECTOR (not a preventer).
 
-Google revokes refresh tokens for apps in 'testing' status after 7 days
-of inactivity. This script does a refresh every 3 days to reset the clock.
+The OAuth app is PUBLISHED ('In production'), so refresh tokens do NOT
+expire from inactivity. This script does a refresh every 3 days and, if it
+fails, emails an alert. It does NOT persist a rotated token — GitHub
+Actions cannot write its own secrets without a PAT, which we deliberately
+avoid. So this is a DETECTOR: it catches a broken/rotated token early and
+tells you to renew manually (get_oauth_token.py + update the secret).
 
-If refresh fails → email alert with renewal instructions.
-
-Runs from GitHub Actions cron every 3 days. Also runnable locally for testing.
+Runs from GitHub Actions cron every 3 days. Also runnable locally.
 """
 import json
 import os
@@ -59,9 +61,10 @@ ACTION REQUIRED — manual renewal needed:
 5. Test by running prepare_next_month workflow manually.
 
 Why this happens:
-Google revokes refresh tokens for OAuth apps in 'Testing' status after 7
-days of inactivity. The Token Warmer normally prevents this by refreshing
-every 3 days, but something broke this cycle.
+The OAuth app is published ('In production'), so tokens do not expire from
+inactivity. The likely cause is Google refresh-token rotation: a refresh
+occasionally issues a new refresh token and revokes the old one. This
+warmer detects the break but cannot auto-heal it — renew manually below.
 
 Token Warmer code: warm_oauth_token.py
 Workflow: .github/workflows/warm_oauth_token.yml

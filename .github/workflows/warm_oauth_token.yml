@@ -1,10 +1,13 @@
 name: Warm OAuth Token
 
 # Keeps the OAuth refresh token alive by triggering a refresh every 3 days.
-# Without this, Google would revoke the token after 7 days of inactivity
-# (apps in 'Testing' OAuth consent status).
+# The OAuth app is PUBLISHED ('In production' consent status), so refresh
+# tokens do NOT expire from inactivity. This warmer is still kept as a
+# safety net: it exercises the token regularly (guards against rare token
+# rotation / revocation) and surfaces any auth break early via email.
 #
-# If refresh fails → email alert with manual renewal instructions.
+# If refresh fails → email alert with manual renewal instructions
+# (run get_oauth_token.py locally, then update the GOOGLE_OAUTH_TOKEN_JSON secret).
 
 on:
   schedule:
