@@ -328,8 +328,8 @@ SENTINEL_CHECK_POSITION_SYNC = True         # paper_portfolio integrity
 
 # Thresholds
 SENTINEL_PRICE_DELTA_MAX_PCT = 2.0          # 2% gap = stale
-SENTINEL_SCAN_MAX_AGE_MINUTES = 3           # warn at 3 min
-SENTINEL_SCAN_MAX_AGE_BLOCK_MINUTES = 5     # block at 5 min
+SENTINEL_SCAN_MAX_AGE_MINUTES = 5           # warn at 5 min (was 3 — too tight vs ~1.6min scan cadence, gaps up to 3min are normal)
+SENTINEL_SCAN_MAX_AGE_BLOCK_MINUTES = 10    # block at 10 min (was 5 — only block when pipeline truly stuck)
 SENTINEL_QUOTA_DEFENSIVE_THRESHOLD = 50     # writes/min → defensive
 SENTINEL_QUOTA_HALT_THRESHOLD = 60          # writes/min → halt
 SENTINEL_PRICE_MIN_USD = 0.01

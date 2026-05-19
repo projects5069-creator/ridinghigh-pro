@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-05-19 10:42:43 -05
+**Generated:** 2026-05-19 11:36:56 -05
 **Branch:** `main`
-**Latest commit:** `3b9a341` — fix(sentinel): price_freshness BLOCK->WARN; add self-test + shadow audit harness
+**Latest commit:** `f3dc41b` — fix(sentinel): widen scan_freshness thresholds 3->5 / 5->10
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `3b9a341 (HEAD -> main) fix(sentinel): price_freshness BLOCK->WARN; add self-test + shadow audit harness`
-- `2d6f26c (origin/main, origin/HEAD) fix(critic): offset cron from :00 to :07 — GH Actions hour-boundary drift`
+- `f3dc41b (HEAD -> main) fix(sentinel): widen scan_freshness thresholds 3->5 / 5->10`
+- `30a8bc4 (origin/main, origin/HEAD) fix(sentinel): price_freshness BLOCK->WARN; add self-test + shadow audit harness`
+- `2d6f26c fix(critic): offset cron from :00 to :07 — GH Actions hour-boundary drift`
 - `2d65899 chore: remove one-off migration scripts (already executed)`
 - `6de2a1a feat(dashboard): market regime banner on Live Agent + Trade History`
-- `d56352c feat(sheets): retry + idempotency for all agent writes`
 
 ---
 
@@ -32,11 +32,11 @@ _See `OPEN_ISSUES.md` for full list_
 
 | Workflow | Status | Conclusion | Started |
 |---|---|---|---|
-| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-05-19 15:42 UTC |
-| Agent — Every Minute (DRY_RUN) | completed | ✅ success | 2026-05-19 15:42 UTC |
-| Agent — Every Minute (DRY_RUN) | completed | ✅ success | 2026-05-19 15:41 UTC |
-| RidingHigh Auto Scanner | completed | ✅ success | 2026-05-19 15:41 UTC |
-| Agent — Every Minute (DRY_RUN) | completed | ✅ success | 2026-05-19 15:40 UTC |
+| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-05-19 16:36 UTC |
+| Agent — Every Minute (DRY_RUN) | in_progress | ⏳ — | 2026-05-19 16:36 UTC |
+| RidingHigh Auto Scanner | completed | ✅ success | 2026-05-19 16:35 UTC |
+| Agent — Every Minute (DRY_RUN) | completed | ✅ success | 2026-05-19 16:35 UTC |
+| RidingHigh Auto Scanner | completed | ✅ success | 2026-05-19 16:34 UTC |
 
 ---
 
@@ -47,23 +47,23 @@ _Months in config: `2026-04`, `2026-05`, `2026-06`_
 
 | Sheet | Total rows | Last date | Status |
 |---|---|---|---|
-| timeline_live | 217,503 | 2026-05-19 | ✅ |
+| timeline_live | 218,551 | 2026-05-19 | ✅ |
 | daily_snapshots | 1,012 | 2026-05-18 | ✅ |
 | daily_summary | 1,105 | 2026-05-18 | ✅ |
 | post_analysis | 43 | 2026-05-18 | ✅ |
-| portfolio | 48 | 2026-05-15 | ✅ |
-| portfolio_live | 32 | 2026-05-15 | ✅ |
-| score_tracker | 1,209 | 2026-05-19 | ✅ |
-| live_trades | 1,209 | 2026-05-19 | ✅ |
-| ticker_follow_up | 12,477 | 2026-05-08 | ✅ |
-| decision_log | 16,221 | — | ✅ |
-| paper_portfolio | 80 | — | ✅ |
-| score_analytics | 0 | — | ⚠️ empty |
-| postmortems | 61 | — | ✅ |
-| system_events | 1,784 | — | ✅ |
-| pending_suggestions | 0 | — | ⚠️ empty |
-| config_history | 0 | — | ⚠️ empty |
-| borrow_data | 0 | — | ⚠️ empty |
+| portfolio | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| portfolio_live | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| score_tracker | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| live_trades | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| ticker_follow_up | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| decision_log | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| paper_portfolio | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| score_analytics | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| postmortems | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| system_events | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| pending_suggestions | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| config_history | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| borrow_data | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
 | market_context | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
 | news_findings | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
 | agent_scorecard | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
@@ -72,8 +72,8 @@ _Months in config: `2026-04`, `2026-05`, `2026-06`_
 
 ## 🩺 Health
 
-- ⚠️ 39 uncommitted file(s):
--    - 39 new/untracked
+- ⚠️ 41 uncommitted file(s):
+-    - 41 new/untracked
 
 ---
 
