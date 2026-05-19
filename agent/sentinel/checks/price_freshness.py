@@ -98,7 +98,7 @@ def check_price_freshness(signal: Dict[str, Any],
 
     if delta_pct > SENTINEL_PRICE_DELTA_MAX_PCT:
         return SentinelResult(
-            decision="BLOCK", reason="STALE_FINVIZ_PRICE",
+            decision="WARN", reason="STALE_FINVIZ_PRICE",
             details={
                 "ticker": ticker,
                 "finviz_price": finviz_price,

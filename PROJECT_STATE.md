@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-05-18 20:04:04 -05
+**Generated:** 2026-05-19 10:42:43 -05
 **Branch:** `main`
-**Latest commit:** `1cc25b3` — fix(critic): offset cron from :00 to :07 — GH Actions hour-boundary drift
+**Latest commit:** `3b9a341` — fix(sentinel): price_freshness BLOCK->WARN; add self-test + shadow audit harness
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `1cc25b3 (HEAD -> main) fix(critic): offset cron from :00 to :07 — GH Actions hour-boundary drift`
-- `2d65899 (origin/main, origin/HEAD) chore: remove one-off migration scripts (already executed)`
+- `3b9a341 (HEAD -> main) fix(sentinel): price_freshness BLOCK->WARN; add self-test + shadow audit harness`
+- `2d6f26c (origin/main, origin/HEAD) fix(critic): offset cron from :00 to :07 — GH Actions hour-boundary drift`
+- `2d65899 chore: remove one-off migration scripts (already executed)`
 - `6de2a1a feat(dashboard): market regime banner on Live Agent + Trade History`
 - `d56352c feat(sheets): retry + idempotency for all agent writes`
-- `02e6ecd fix(sentinel): position_sync + provider_heartbeat were blind in production`
 
 ---
 
@@ -32,11 +32,11 @@ _See `OPEN_ISSUES.md` for full list_
 
 | Workflow | Status | Conclusion | Started |
 |---|---|---|---|
-| Daily Backup — post_analysis | completed | ✅ success | 2026-05-18 23:48 UTC |
-| Daily Backup — post_analysis | completed | ✅ success | 2026-05-18 23:48 UTC |
-| Agent — Market Context (Hourly) | completed | ✅ success | 2026-05-18 23:47 UTC |
-| RidingHigh Auto Scanner | completed | ✅ success | 2026-05-18 22:38 UTC |
-| Agent — Every Minute (DRY_RUN) | completed | ✅ success | 2026-05-18 22:35 UTC |
+| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-05-19 15:42 UTC |
+| Agent — Every Minute (DRY_RUN) | completed | ✅ success | 2026-05-19 15:42 UTC |
+| Agent — Every Minute (DRY_RUN) | completed | ✅ success | 2026-05-19 15:41 UTC |
+| RidingHigh Auto Scanner | completed | ✅ success | 2026-05-19 15:41 UTC |
+| Agent — Every Minute (DRY_RUN) | completed | ✅ success | 2026-05-19 15:40 UTC |
 
 ---
 
@@ -47,33 +47,33 @@ _Months in config: `2026-04`, `2026-05`, `2026-06`_
 
 | Sheet | Total rows | Last date | Status |
 |---|---|---|---|
-| timeline_live | 216,005 | 2026-05-18 | ✅ |
+| timeline_live | 217,503 | 2026-05-19 | ✅ |
 | daily_snapshots | 1,012 | 2026-05-18 | ✅ |
 | daily_summary | 1,105 | 2026-05-18 | ✅ |
-| post_analysis | 42 | 2026-05-15 | ✅ |
+| post_analysis | 43 | 2026-05-18 | ✅ |
 | portfolio | 48 | 2026-05-15 | ✅ |
 | portfolio_live | 32 | 2026-05-15 | ✅ |
-| score_tracker | 1,187 | 2026-05-18 | ✅ |
-| live_trades | 1,187 | 2026-05-18 | ✅ |
+| score_tracker | 1,209 | 2026-05-19 | ✅ |
+| live_trades | 1,209 | 2026-05-19 | ✅ |
 | ticker_follow_up | 12,477 | 2026-05-08 | ✅ |
-| decision_log | 16,218 | — | ✅ |
-| paper_portfolio | 77 | — | ✅ |
+| decision_log | 16,221 | — | ✅ |
+| paper_portfolio | 80 | — | ✅ |
 | score_analytics | 0 | — | ⚠️ empty |
-| postmortems | 57 | — | ✅ |
-| system_events | 1,403 | — | ✅ |
+| postmortems | 61 | — | ✅ |
+| system_events | 1,784 | — | ✅ |
 | pending_suggestions | 0 | — | ⚠️ empty |
 | config_history | 0 | — | ⚠️ empty |
 | borrow_data | 0 | — | ⚠️ empty |
-| market_context | 6 | — | ✅ |
-| news_findings | 2,818 | — | ✅ |
-| agent_scorecard | 20 | 2026-05-17 | ✅ |
+| market_context | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| news_findings | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| agent_scorecard | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
 
 ---
 
 ## 🩺 Health
 
-- ⚠️ 37 uncommitted file(s):
--    - 37 new/untracked
+- ⚠️ 39 uncommitted file(s):
+-    - 39 new/untracked
 
 ---
 
