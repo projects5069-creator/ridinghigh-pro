@@ -402,8 +402,9 @@ def run_scan():
         new_rows.insert(0, 'Date', today)
         new_rows = new_rows[slim_cols]  # enforce exact column order
 
-        existing_tl = ws_timeline.get_all_values()
-        if len(existing_tl) <= 1:
+        # Quota fix (2026-05-19): row_count is worksheet metadata (0 API
+        # cost) — no need to pull all ~220k rows just to test emptiness.
+        if ws_timeline.row_count <= 1:
             df_to_sheet(ws_timeline, new_rows)
         else:
             ws_timeline.append_rows(new_rows.astype(str).values.tolist())

@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-05-19 11:36:56 -05
+**Generated:** 2026-05-19 12:38:29 -05
 **Branch:** `main`
-**Latest commit:** `f3dc41b` — fix(sentinel): widen scan_freshness thresholds 3->5 / 5->10
+**Latest commit:** `ddd5279` — perf(scanner): replace timeline_live get_all_values with row_count
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `f3dc41b (HEAD -> main) fix(sentinel): widen scan_freshness thresholds 3->5 / 5->10`
-- `30a8bc4 (origin/main, origin/HEAD) fix(sentinel): price_freshness BLOCK->WARN; add self-test + shadow audit harness`
+- `ddd5279 (HEAD -> main) perf(scanner): replace timeline_live get_all_values with row_count`
+- `b1353ba (origin/main, origin/HEAD) fix(sentinel): widen scan_freshness thresholds 3->5 / 5->10`
+- `30a8bc4 fix(sentinel): price_freshness BLOCK->WARN; add self-test + shadow audit harness`
 - `2d6f26c fix(critic): offset cron from :00 to :07 — GH Actions hour-boundary drift`
 - `2d65899 chore: remove one-off migration scripts (already executed)`
-- `6de2a1a feat(dashboard): market regime banner on Live Agent + Trade History`
 
 ---
 
@@ -32,11 +32,11 @@ _See `OPEN_ISSUES.md` for full list_
 
 | Workflow | Status | Conclusion | Started |
 |---|---|---|---|
-| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-05-19 16:36 UTC |
-| Agent — Every Minute (DRY_RUN) | in_progress | ⏳ — | 2026-05-19 16:36 UTC |
-| RidingHigh Auto Scanner | completed | ✅ success | 2026-05-19 16:35 UTC |
-| Agent — Every Minute (DRY_RUN) | completed | ✅ success | 2026-05-19 16:35 UTC |
-| RidingHigh Auto Scanner | completed | ✅ success | 2026-05-19 16:34 UTC |
+| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-05-19 17:38 UTC |
+| Agent — Every Minute (DRY_RUN) | in_progress | ⏳ — | 2026-05-19 17:38 UTC |
+| Agent — Every Minute (DRY_RUN) | completed | ✅ success | 2026-05-19 17:37 UTC |
+| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-05-19 17:37 UTC |
+| RidingHigh Auto Scanner | completed | ✅ success | 2026-05-19 17:36 UTC |
 
 ---
 
@@ -47,33 +47,33 @@ _Months in config: `2026-04`, `2026-05`, `2026-06`_
 
 | Sheet | Total rows | Last date | Status |
 |---|---|---|---|
-| timeline_live | 218,551 | 2026-05-19 | ✅ |
+| timeline_live | 219,879 | 2026-05-19 | ✅ |
 | daily_snapshots | 1,012 | 2026-05-18 | ✅ |
 | daily_summary | 1,105 | 2026-05-18 | ✅ |
 | post_analysis | 43 | 2026-05-18 | ✅ |
-| portfolio | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| portfolio_live | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| score_tracker | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| live_trades | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| ticker_follow_up | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| decision_log | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| paper_portfolio | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| score_analytics | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| postmortems | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| system_events | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| pending_suggestions | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| config_history | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| borrow_data | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| market_context | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| news_findings | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| agent_scorecard | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| portfolio | 48 | 2026-05-15 | ✅ |
+| portfolio_live | 32 | 2026-05-15 | ✅ |
+| score_tracker | 1,220 | 2026-05-19 | ✅ |
+| live_trades | 1,220 | 2026-05-19 | ✅ |
+| ticker_follow_up | 12,477 | 2026-05-08 | ✅ |
+| decision_log | 16,222 | — | ✅ |
+| paper_portfolio | 81 | — | ✅ |
+| score_analytics | 0 | — | ⚠️ empty |
+| postmortems | 63 | — | ✅ |
+| system_events | 2,215 | — | ✅ |
+| pending_suggestions | 0 | — | ⚠️ empty |
+| config_history | 0 | — | ⚠️ empty |
+| borrow_data | 0 | — | ⚠️ empty |
+| market_context | 6 | — | ✅ |
+| news_findings | 4,236 | — | ✅ |
+| agent_scorecard | 24 | 2026-05-18 | ✅ |
 
 ---
 
 ## 🩺 Health
 
-- ⚠️ 41 uncommitted file(s):
--    - 41 new/untracked
+- ⚠️ 43 uncommitted file(s):
+-    - 43 new/untracked
 
 ---
 
