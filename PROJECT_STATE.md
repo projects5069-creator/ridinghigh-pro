@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-05-19 14:28:29 -05
+**Generated:** 2026-05-19 14:50:26 -05
 **Branch:** `main`
-**Latest commit:** `ca38b58` — fix(oauth): renew token + correct Warmer docs (detector, not preventer)
+**Latest commit:** `294a42c` — fix(trader): Filter 9 re-entry limit leaked — count from decision_log
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `ca38b58 (HEAD -> main) fix(oauth): renew token + correct Warmer docs (detector, not preventer)`
-- `6add916 (origin/main, origin/HEAD) fix(news-detective): pass FINNHUB_API_KEY to agent_minute env`
+- `294a42c (HEAD -> main) fix(trader): Filter 9 re-entry limit leaked — count from decision_log`
+- `2b28906 (origin/main, origin/HEAD) fix(oauth): renew token + correct Warmer docs (detector, not preventer)`
+- `6add916 fix(news-detective): pass FINNHUB_API_KEY to agent_minute env`
 - `d1498f2 perf(scanner): replace timeline_live get_all_values with row_count`
 - `b1353ba fix(sentinel): widen scan_freshness thresholds 3->5 / 5->10`
-- `30a8bc4 fix(sentinel): price_freshness BLOCK->WARN; add self-test + shadow audit harness`
 
 ---
 
@@ -32,37 +32,48 @@ _See `OPEN_ISSUES.md` for full list_
 
 | Workflow | Status | Conclusion | Started |
 |---|---|---|---|
-| Agent — Every Minute (DRY_RUN) | in_progress | ⏳ — | 2026-05-19 19:28 UTC |
-| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-05-19 19:28 UTC |
-| Agent — Every Minute (DRY_RUN) | in_progress | ⏳ — | 2026-05-19 19:27 UTC |
-| RidingHigh Auto Scanner | completed | ✅ success | 2026-05-19 19:27 UTC |
-| Agent — Every Minute (DRY_RUN) | completed | ✅ success | 2026-05-19 19:26 UTC |
+| Agent — Every Minute (DRY_RUN) | in_progress | ⏳ — | 2026-05-19 19:50 UTC |
+| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-05-19 19:50 UTC |
+| RidingHigh Auto Scanner | completed | ✅ success | 2026-05-19 19:49 UTC |
+| Agent — Every Minute (DRY_RUN) | completed | ✅ success | 2026-05-19 19:49 UTC |
+| RidingHigh Auto Scanner | completed | ✅ success | 2026-05-19 19:48 UTC |
 
 ---
 
-## 📊 Google Sheets — showing month `2026-06`
+## 📊 Google Sheets — showing month `2026-05`
 
-_Selection: most recent month with data (2026-06)_
+_Selection: current Peru month (2026-05) has data_
 _Months in config: `2026-04`, `2026-05`, `2026-06`_
 
 | Sheet | Total rows | Last date | Status |
 |---|---|---|---|
-| timeline_live | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| daily_snapshots | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| daily_summary | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| post_analysis | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| portfolio | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| portfolio_live | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| score_tracker | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| live_trades | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| ticker_follow_up | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| timeline_live | 224,530 | 2026-05-19 | ✅ |
+| daily_snapshots | 1,012 | 2026-05-18 | ✅ |
+| daily_summary | 1,105 | 2026-05-18 | ✅ |
+| post_analysis | 43 | 2026-05-18 | ✅ |
+| portfolio | 48 | 2026-05-15 | ✅ |
+| portfolio_live | 32 | 2026-05-15 | ✅ |
+| score_tracker | 1,220 | 2026-05-19 | ✅ |
+| live_trades | 1,220 | 2026-05-19 | ✅ |
+| ticker_follow_up | 12,477 | 2026-05-08 | ✅ |
+| decision_log | 16,222 | — | ✅ |
+| paper_portfolio | 81 | — | ✅ |
+| score_analytics | 0 | — | ⚠️ empty |
+| postmortems | 63 | — | ✅ |
+| system_events | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| pending_suggestions | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| config_history | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| borrow_data | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| market_context | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| news_findings | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| agent_scorecard | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
 
 ---
 
 ## 🩺 Health
 
-- ⚠️ 48 uncommitted file(s):
--    - 48 new/untracked
+- ⚠️ 50 uncommitted file(s):
+-    - 50 new/untracked
 
 ---
 

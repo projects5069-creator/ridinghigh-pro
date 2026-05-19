@@ -164,12 +164,11 @@ def build_account_state(broker=None) -> Dict[str, Any]:
                         state["existing_positions"].add(ticker)
                     # Count every OPEN row — duplicate tickers count separately.
                     state["open_position_count"] += 1
-                # Count today's entries per ticker (for re-entry limit).
-                entry_date = str(row.get("EntryDate", "")).strip()[:10]
-                if ticker and entry_date == today:
-                    state["entries_today_by_ticker"][ticker] = (
-                        state["entries_today_by_ticker"].get(ticker, 0) + 1
-                    )
+                # Bug #5 root-cause fix (2026-05-19): per-ticker entry count
+                # is NOT counted here. paper_portfolio writes can be lost to a
+                # 429, which under-counts and lets Filter 9 (re-entry limit)
+                # leak. It is counted from decision_log below — the reliable
+                # Single Source of Truth (ENTER is always logged there).
 
         # cold_start cap now reflects real concurrent positions, not unique tickers.
         state["cold_start_concurrent_used"] = state["open_position_count"]
@@ -198,6 +197,13 @@ def build_account_state(broker=None) -> Dict[str, Any]:
                 ts = str(row.get("Timestamp", ""))
                 if ts.startswith(today) and str(row.get("Action", "")).upper() == "ENTER":
                     state["cold_start_daily_used"] += 1
+                    # Bug #5 root-cause fix: count per-ticker entries from
+                    # decision_log (reliable SSoT), not paper_portfolio.
+                    _tk = str(row.get("Ticker", "")).strip().upper()
+                    if _tk:
+                        state["entries_today_by_ticker"][_tk] = (
+                            state["entries_today_by_ticker"].get(_tk, 0) + 1
+                        )
                     ticker = str(row.get("Ticker", "")).strip().upper()
                     if ticker and ticker not in exited_today:
                         state["existing_positions"].add(ticker)
@@ -474,6 +480,11 @@ def run() -> Dict[str, Any]:
                     account_state["existing_positions"].add(ticker)
                     account_state["cold_start_concurrent_used"] += 1
                     account_state["cold_start_daily_used"] += 1
+                    # Bug #5 fix: keep per-ticker count current within the
+                    # batch so Filter 9 sees re-entries from the same run.
+                    account_state["entries_today_by_ticker"][ticker] = (
+                        account_state["entries_today_by_ticker"].get(ticker, 0) + 1
+                    )
                     logger.info("ENTER %s: score=%.2f, order=%s",
                                 ticker, decision.score, enriched.order_id or "n/a")
                 else:
