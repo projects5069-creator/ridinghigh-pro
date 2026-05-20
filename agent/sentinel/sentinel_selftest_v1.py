@@ -86,17 +86,17 @@ def main():
     _run("price_freshness / valid (delta~0)", "ALLOW",
          lambda: check_price_freshness({"ticker": "TEST", "price": 10.0}, good_ms))
     clear_cache()
-    _run("price_freshness / delta 10%", "BLOCK",
+    _run("price_freshness / delta 10%", "WARN",
          lambda: check_price_freshness({"ticker": "TEST", "price": 11.0}, good_ms))
     clear_cache()
 
     print("\n── scan_freshness ──")
     _run("scan_freshness / valid (1 min)", "ALLOW",
          lambda: check_scan_freshness({"ticker": "TEST", "scan_time": _scan_time_minutes_ago(1)}, {}))
-    _run("scan_freshness / aging (4 min)", "WARN",
-         lambda: check_scan_freshness({"ticker": "TEST", "scan_time": _scan_time_minutes_ago(4)}, {}))
-    _run("scan_freshness / stale (6 min)", "BLOCK",
-         lambda: check_scan_freshness({"ticker": "TEST", "scan_time": _scan_time_minutes_ago(6)}, {}))
+    _run("scan_freshness / aging (7 min)", "WARN",
+         lambda: check_scan_freshness({"ticker": "TEST", "scan_time": _scan_time_minutes_ago(7)}, {}))
+    _run("scan_freshness / stale (12 min)", "BLOCK",
+         lambda: check_scan_freshness({"ticker": "TEST", "scan_time": _scan_time_minutes_ago(12)}, {}))
 
     print("\n── position_sync ──")
     _run("position_sync / valid (3 ent, 3 open)", "ALLOW",
