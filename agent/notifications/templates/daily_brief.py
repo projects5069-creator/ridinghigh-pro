@@ -7,6 +7,95 @@ import pytz
 PERU_TZ = pytz.timezone("America/Lima")
 
 
+def _exit_emoji(reason: str) -> str:
+    """Map exit reason to emoji."""
+    r = (reason or "").upper()
+    if "TP" in r:
+        return "🟢"
+    if "SL" in r:
+        return "🔴"
+    if "EOD" in r:
+        return "⚪"
+    return "•"
+
+
+def _build_closed_trades_section(trades: List[Dict[str, Any]]) -> str:
+    """Render Closed Trades table."""
+    if not trades:
+        return ""
+    rows = ""
+    for t in trades:
+        pnl = t.get("realized_pnl", 0.0)
+        pnl_color = "#10b981" if pnl >= 0 else "#dc2626"
+        pnl_sign = "+" if pnl >= 0 else ""
+        pnl_pct = t.get("realized_pnl_pct", 0.0)
+        emoji = _exit_emoji(t.get("exit_reason", ""))
+        days = t.get("days_held", 0)
+        days_label = f"same day" if days == 0 else (f"{days}d" if days < 7 else f"{days}d")
+        rows += f"""
+        <tr>
+          <td style="padding: 6px 8px; border-bottom: 1px solid #e5e7eb;"><b>{t.get("ticker", "?")}</b></td>
+          <td style="padding: 6px 8px; border-bottom: 1px solid #e5e7eb; color: #666;">{t.get("entry_date", "?")} → {days_label}</td>
+          <td style="padding: 6px 8px; border-bottom: 1px solid #e5e7eb;">{t.get("exit_time", "?")}</td>
+          <td style="padding: 6px 8px; border-bottom: 1px solid #e5e7eb;">{emoji} {t.get("exit_reason", "?")}</td>
+          <td style="padding: 6px 8px; border-bottom: 1px solid #e5e7eb; text-align: right; color: {pnl_color}; font-weight: bold;">{pnl_sign}${pnl:.2f}</td>
+          <td style="padding: 6px 8px; border-bottom: 1px solid #e5e7eb; text-align: right; color: {pnl_color};">{pnl_sign}{pnl_pct:.2f}%</td>
+        </tr>"""
+    return f"""
+      <h3>✅ Closed Trades ({len(trades)})</h3>
+      <table style="border-collapse: collapse; width: 100%; font-size: 13px;">
+        <thead>
+          <tr style="background: #f3f4f6;">
+            <th style="padding: 8px; text-align: left;">Ticker</th>
+            <th style="padding: 8px; text-align: left;">Entry → Held</th>
+            <th style="padding: 8px; text-align: left;">Exit Time</th>
+            <th style="padding: 8px; text-align: left;">Reason</th>
+            <th style="padding: 8px; text-align: right;">P&L $</th>
+            <th style="padding: 8px; text-align: right;">P&L %</th>
+          </tr>
+        </thead>
+        <tbody>{rows}</tbody>
+      </table>"""
+
+
+def _build_open_positions_section(positions: List[Dict[str, Any]]) -> str:
+    """Render Open Positions table."""
+    if not positions:
+        return ""
+    rows = ""
+    for p_pos in positions:
+        unreal = p_pos.get("unrealized_pnl", 0.0)
+        unreal_color = "#10b981" if unreal >= 0 else "#dc2626"
+        unreal_sign = "+" if unreal >= 0 else ""
+        unreal_pct = p_pos.get("unrealized_pnl_pct", 0.0)
+        days = p_pos.get("days_open", 0)
+        days_label = f"today" if days == 0 else (f"{days} day" if days == 1 else f"{days} days")
+        rows += f"""
+        <tr>
+          <td style="padding: 6px 8px; border-bottom: 1px solid #e5e7eb;"><b>{p_pos.get("ticker", "?")}</b></td>
+          <td style="padding: 6px 8px; border-bottom: 1px solid #e5e7eb; color: #666;">{p_pos.get("entry_date", "?")} ({days_label})</td>
+          <td style="padding: 6px 8px; border-bottom: 1px solid #e5e7eb; text-align: right;">${p_pos.get("entry_price", 0):.2f}</td>
+          <td style="padding: 6px 8px; border-bottom: 1px solid #e5e7eb; text-align: right;">${p_pos.get("current_price", 0):.2f}</td>
+          <td style="padding: 6px 8px; border-bottom: 1px solid #e5e7eb; text-align: right; color: {unreal_color}; font-weight: bold;">{unreal_sign}${unreal:.2f}</td>
+          <td style="padding: 6px 8px; border-bottom: 1px solid #e5e7eb; text-align: right; color: {unreal_color};">{unreal_sign}{unreal_pct:.2f}%</td>
+        </tr>"""
+    return f"""
+      <h3>⏳ Open Positions ({len(positions)})</h3>
+      <table style="border-collapse: collapse; width: 100%; font-size: 13px;">
+        <thead>
+          <tr style="background: #f3f4f6;">
+            <th style="padding: 8px; text-align: left;">Ticker</th>
+            <th style="padding: 8px; text-align: left;">Entry (Held)</th>
+            <th style="padding: 8px; text-align: right;">Entry $</th>
+            <th style="padding: 8px; text-align: right;">Current $</th>
+            <th style="padding: 8px; text-align: right;">Unrealized $</th>
+            <th style="padding: 8px; text-align: right;">Unrealized %</th>
+          </tr>
+        </thead>
+        <tbody>{rows}</tbody>
+      </table>"""
+
+
 def render_daily_email(stats: Dict[str, Any]) -> tuple:
     """
     Args:
@@ -65,6 +154,9 @@ def render_daily_email(stats: Dict[str, Any]) -> tuple:
         </div>
         """
 
+    closed_section = _build_closed_trades_section(stats.get("closed_trades", []))
+    open_section = _build_open_positions_section(stats.get("open_positions", []))
+
     html = f"""
     <html><body style="font-family: -apple-system, sans-serif; max-width: 600px;">
       <h2 style="color: #2563eb;">📊 Daily Brief</h2>
@@ -96,6 +188,10 @@ def render_daily_email(stats: Dict[str, Any]) -> tuple:
       </div>
 
       {errors_section}
+
+      {closed_section}
+
+      {open_section}
 
       <h3>🎯 Today's Top Decisions</h3>
       <table style="border-collapse: collapse; width: 100%; font-size: 14px;">

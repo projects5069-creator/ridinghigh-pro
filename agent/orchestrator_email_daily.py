@@ -22,6 +22,17 @@ logging.basicConfig(
 logger = logging.getLogger("agent.email_daily")
 
 
+def _days_between(date_str: str, today_str: str) -> int:
+    """Return calendar days between EntryDate and today."""
+    try:
+        from datetime import date
+        y1, m1, d1 = [int(x) for x in str(date_str).strip().split("-")]
+        y2, m2, d2 = [int(x) for x in str(today_str).strip().split("-")]
+        return (date(y2, m2, d2) - date(y1, m1, d1)).days
+    except Exception:
+        return 0
+
+
 def gather_daily_stats() -> Dict[str, Any]:
     """Aggregate today's activity from Sheets."""
     today = datetime.now(PERU_TZ).strftime("%Y-%m-%d")
@@ -39,6 +50,8 @@ def gather_daily_stats() -> Dict[str, Any]:
         "open_at_eod": 0,
         "errors_today": 0,
         "top_decisions": [],
+        "closed_trades": [],   # NEW: per-trade detail for closes today
+        "open_positions": [],  # NEW: per-trade detail for still-open positions
     }
 
     try:
@@ -70,27 +83,77 @@ def gather_daily_stats() -> Dict[str, Any]:
             records = ws.get_all_records()
             for r in records:
                 status = str(r.get("Status", "")).upper()
-                exit_date = str(r.get("ExitDate", ""))
+                exit_date = str(r.get("ExitDate", "")).strip()
+                exit_reason = str(r.get("ExitReason", "")).upper()
 
                 if status in ("OPEN", "DRY_RUN_OPEN"):
                     stats["open_at_eod"] += 1
+                    # NEW: collect per-position detail
+                    entry_date = str(r.get("EntryDate", "")).strip()
+                    try:
+                        unreal = float(r.get("UnrealizedPnL", 0) or 0)
+                    except (TypeError, ValueError):
+                        unreal = 0.0
+                    try:
+                        unreal_pct = float(r.get("UnrealizedPnLPct", 0) or 0)
+                    except (TypeError, ValueError):
+                        unreal_pct = 0.0
+                    try:
+                        entry_price = float(r.get("EntryPrice", 0) or 0)
+                    except (TypeError, ValueError):
+                        entry_price = 0.0
+                    try:
+                        current_price = float(r.get("CurrentPrice", 0) or 0)
+                    except (TypeError, ValueError):
+                        current_price = 0.0
+                    stats["open_positions"].append({
+                        "ticker": r.get("Ticker", "?"),
+                        "entry_date": entry_date,
+                        "days_open": _days_between(entry_date, today),
+                        "entry_price": entry_price,
+                        "current_price": current_price,
+                        "unrealized_pnl": unreal,
+                        "unrealized_pnl_pct": unreal_pct,
+                    })
                 elif exit_date == today:
                     stats["positions_closed"] += 1
-                    if "TP" in status:
+                    # FIX: classify by ExitReason, not Status (Status=DRY_RUN_CLOSED for all)
+                    if "TP" in exit_reason:
                         stats["tp_hits"] += 1
-                    elif "SL" in status:
+                    elif "SL" in exit_reason:
                         stats["sl_hits"] += 1
-                    elif "EOD" in status:
+                    elif "EOD" in exit_reason:
                         stats["eod_closes"] += 1
 
                     try:
                         pnl = float(r.get("RealizedPnL", 0) or 0)
                         stats["realized_pnl"] += pnl
                     except (TypeError, ValueError):
-                        pass
+                        pnl = 0.0
 
-                if str(r.get("EntryDate", "")) == today:
+                    # NEW: collect per-trade detail
+                    try:
+                        pnl_pct = float(r.get("RealizedPnLPct", 0) or 0)
+                    except (TypeError, ValueError):
+                        pnl_pct = 0.0
+                    entry_date = str(r.get("EntryDate", "")).strip()
+                    stats["closed_trades"].append({
+                        "ticker": r.get("Ticker", "?"),
+                        "entry_date": entry_date,
+                        "exit_time": str(r.get("ExitTime", "")).strip(),
+                        "exit_reason": exit_reason or "?",
+                        "realized_pnl": pnl,
+                        "realized_pnl_pct": pnl_pct,
+                        "days_held": _days_between(entry_date, today),
+                    })
+
+                if str(r.get("EntryDate", "")).strip() == today:
                     stats["positions_opened"] += 1
+
+        # Sort closed_trades by exit_time (descending — newest first)
+        stats["closed_trades"].sort(key=lambda x: x.get("exit_time", ""), reverse=True)
+        # Sort open_positions by entry_date (descending — newest first)
+        stats["open_positions"].sort(key=lambda x: x.get("entry_date", ""), reverse=True)
 
         # Errors (system_events)
         ws = sheets_manager.get_worksheet("system_events")
