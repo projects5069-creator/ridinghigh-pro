@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-05-20 15:19:06 -05
+**Generated:** 2026-05-20 15:23:44 -05
 **Branch:** `main`
-**Latest commit:** `ecd59bc` — fix(sentinel): position_sync — WARN on fetch failure, BLOCK only on real drift
+**Latest commit:** `fe81a42` — fix(429+bug): check_emergency_stop — cache + 24h window
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `ecd59bc (HEAD -> main) fix(sentinel): position_sync — WARN on fetch failure, BLOCK only on real drift`
-- `6625584 (origin/main, origin/HEAD) fix(429): retry + dedup for auto_scanner timeline_live writes`
+- `fe81a42 (HEAD -> main) fix(429+bug): check_emergency_stop — cache + 24h window`
+- `8f30eee (origin/main, origin/HEAD) fix(sentinel): position_sync — WARN on fetch failure, BLOCK only on real drift`
+- `6625584 fix(429): retry + dedup for auto_scanner timeline_live writes`
 - `81d41c0 feat(daily-brief): per-trade detail + Win Rate fix`
 - `5f3918a feat(sentinel): switch SENTINEL_MODE shadow -> active`
-- `31fa2e0 fix(dashboard): Trade History — show today's trades via shared cache`
 
 ---
 
@@ -32,11 +32,11 @@ _See `OPEN_ISSUES.md` for full list_
 
 | Workflow | Status | Conclusion | Started |
 |---|---|---|---|
-| Agent — Every Minute (DRY_RUN) | queued | ⏳ — | 2026-05-20 20:19 UTC |
-| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-05-20 20:19 UTC |
-| Agent — Every Minute (DRY_RUN) | completed | ✅ success | 2026-05-20 20:18 UTC |
-| RidingHigh Auto Scanner | completed | ✅ success | 2026-05-20 20:18 UTC |
-| Agent — Every Minute (DRY_RUN) | completed | ✅ success | 2026-05-20 20:17 UTC |
+| RidingHigh Auto Scanner | completed | ✅ success | 2026-05-20 20:23 UTC |
+| Agent — Every Minute (DRY_RUN) | in_progress | ⏳ — | 2026-05-20 20:23 UTC |
+| Agent — Every Minute (DRY_RUN) | completed | ✅ success | 2026-05-20 20:22 UTC |
+| RidingHigh Auto Scanner | completed | ✅ success | 2026-05-20 20:22 UTC |
+| Agent — Every Minute (DRY_RUN) | completed | ✅ success | 2026-05-20 20:21 UTC |
 
 ---
 
@@ -65,15 +65,15 @@ _Months in config: `2026-04`, `2026-05`, `2026-06`_
 | config_history | 0 | — | ⚠️ empty |
 | borrow_data | 0 | — | ⚠️ empty |
 | market_context | 11 | — | ✅ |
-| news_findings | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| agent_scorecard | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| news_findings | 7,658 | — | ✅ |
+| agent_scorecard | 28 | 2026-05-19 | ✅ |
 
 ---
 
 ## 🩺 Health
 
-- ⚠️ 80 uncommitted file(s):
--    - 80 new/untracked
+- ⚠️ 81 uncommitted file(s):
+-    - 81 new/untracked
 
 ---
 

@@ -111,17 +111,39 @@ def is_eod_window(now: Optional[datetime] = None) -> bool:
 # ════════════════════════════════════════════════════════════════════
 
 def check_emergency_stop() -> bool:
-    """Check system_events for unresolved EMERGENCY_STOP_REQUESTED. Returns True if active."""
+    """Check system_events for unresolved EMERGENCY_STOP_REQUESTED. Returns True if active.
+
+    2026-05-20: Two improvements over previous version:
+    1. Uses sheets_manager.get_sheet_records (60s TTL cache) instead of raw
+       ws.get_all_records() — runs every minute, system_events grew to
+       3,500+ rows since Sentinel went active, was hammering Read quota.
+    2. Searches by 24-hour timestamp window instead of last 50 rows. With
+       Sentinel writing ~700 events/day, an EMERGENCY written at 09:00
+       could fall outside the last 50 rows by 11:00 — silently making the
+       check useless. 24h cutoff guarantees we see same-day emergencies.
+    """
     try:
         import sheets_manager
-        ws = sheets_manager.get_worksheet("system_events")
-        if ws is None:
+        try:
+            records = sheets_manager.get_sheet_records("system_events")
+        except Exception as e:
+            # Don't break the agent on a transient fetch failure — log and
+            # assume no emergency. Next minute the cache will be warm.
+            logger.warning("check_emergency_stop: fetch failed (%s) — assuming no stop", e)
             return False
-        records = ws.get_all_records()
         if not records:
             return False
-        # Check last 50 events for active emergency stop
-        for row in reversed(records[-50:]):
+
+        # 24-hour cutoff — anything older has been there long enough to
+        # have been resolved or cleared deliberately.
+        from datetime import timedelta
+        cutoff_iso = (datetime.now(PERU_TZ) - timedelta(hours=24)).isoformat()
+
+        # records is chronological — iterate from newest backwards, break early
+        for row in reversed(records):
+            ts = str(row.get("Timestamp", ""))
+            if ts and ts < cutoff_iso:
+                break  # past the 24h window
             if row.get("EventType") == "EMERGENCY_STOP_REQUESTED":
                 action = str(row.get("ActionTaken", "")).upper()
                 if "RESOLVED" not in action and "CLEARED" not in action:
