@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-05-20 13:57:08 -05
+**Generated:** 2026-05-20 15:19:06 -05
 **Branch:** `main`
-**Latest commit:** `63e4d91` — fix(429): retry + dedup for auto_scanner timeline_live writes
+**Latest commit:** `ecd59bc` — fix(sentinel): position_sync — WARN on fetch failure, BLOCK only on real drift
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `63e4d91 (HEAD -> main) fix(429): retry + dedup for auto_scanner timeline_live writes`
-- `81d41c0 (origin/main, origin/HEAD) feat(daily-brief): per-trade detail + Win Rate fix`
+- `ecd59bc (HEAD -> main) fix(sentinel): position_sync — WARN on fetch failure, BLOCK only on real drift`
+- `6625584 (origin/main, origin/HEAD) fix(429): retry + dedup for auto_scanner timeline_live writes`
+- `81d41c0 feat(daily-brief): per-trade detail + Win Rate fix`
 - `5f3918a feat(sentinel): switch SENTINEL_MODE shadow -> active`
 - `31fa2e0 fix(dashboard): Trade History — show today's trades via shared cache`
-- `f67d12f chore(ci): bump checkout v4->v5 and setup-python v5->v6 (Node 24 migration)`
 
 ---
 
@@ -32,11 +32,11 @@ _See `OPEN_ISSUES.md` for full list_
 
 | Workflow | Status | Conclusion | Started |
 |---|---|---|---|
-| Agent — Every Minute (DRY_RUN) | in_progress | ⏳ — | 2026-05-20 18:57 UTC |
-| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-05-20 18:57 UTC |
-| Agent — Every Minute (DRY_RUN) | completed | ✅ success | 2026-05-20 18:56 UTC |
-| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-05-20 18:56 UTC |
-| Agent — Every Minute (DRY_RUN) | in_progress | ⏳ — | 2026-05-20 18:55 UTC |
+| Agent — Every Minute (DRY_RUN) | queued | ⏳ — | 2026-05-20 20:19 UTC |
+| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-05-20 20:19 UTC |
+| Agent — Every Minute (DRY_RUN) | completed | ✅ success | 2026-05-20 20:18 UTC |
+| RidingHigh Auto Scanner | completed | ✅ success | 2026-05-20 20:18 UTC |
+| Agent — Every Minute (DRY_RUN) | completed | ✅ success | 2026-05-20 20:17 UTC |
 
 ---
 
@@ -47,24 +47,24 @@ _Months in config: `2026-04`, `2026-05`, `2026-06`_
 
 | Sheet | Total rows | Last date | Status |
 |---|---|---|---|
-| timeline_live | 233,788 | 2026-05-20 | ✅ |
-| daily_snapshots | 1,066 | 2026-05-19 | ✅ |
-| daily_summary | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| post_analysis | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| portfolio | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| portfolio_live | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| score_tracker | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| live_trades | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| ticker_follow_up | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| decision_log | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| paper_portfolio | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| score_analytics | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| postmortems | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| system_events | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| pending_suggestions | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| config_history | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| borrow_data | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| market_context | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| timeline_live | 237,320 | 2026-05-20 | ✅ |
+| daily_snapshots | 1,135 | 2026-05-20 | ✅ |
+| daily_summary | 1,238 | 2026-05-20 | ✅ |
+| post_analysis | 44 | 2026-05-19 | ✅ |
+| portfolio | 54 | 2026-05-20 | ✅ |
+| portfolio_live | 38 | 2026-05-20 | ✅ |
+| score_tracker | 1,220 | 2026-05-19 | ✅ |
+| live_trades | 1,220 | 2026-05-19 | ✅ |
+| ticker_follow_up | 12,477 | 2026-05-08 | ✅ |
+| decision_log | 16,231 | — | ✅ |
+| paper_portfolio | 89 | — | ✅ |
+| score_analytics | 0 | — | ⚠️ empty |
+| postmortems | 69 | — | ✅ |
+| system_events | 3,599 | — | ✅ |
+| pending_suggestions | 0 | — | ⚠️ empty |
+| config_history | 0 | — | ⚠️ empty |
+| borrow_data | 0 | — | ⚠️ empty |
+| market_context | 11 | — | ✅ |
 | news_findings | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
 | agent_scorecard | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
 
@@ -72,8 +72,8 @@ _Months in config: `2026-04`, `2026-05`, `2026-06`_
 
 ## 🩺 Health
 
-- ⚠️ 78 uncommitted file(s):
--    - 78 new/untracked
+- ⚠️ 80 uncommitted file(s):
+-    - 80 new/untracked
 
 ---
 

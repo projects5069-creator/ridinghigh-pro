@@ -147,6 +147,10 @@ def build_account_state(broker=None) -> Dict[str, Any]:
         "open_position_count": 0,
         # Bug #5 fix: per-ticker entry count for today (re-entry limit).
         "entries_today_by_ticker": {},
+        # 2026-05-20 fix: flag for when paper_portfolio read failed (e.g. 429).
+        # position_sync uses this to return WARN instead of BLOCK — a fetch
+        # failure is a quota/network issue, not a real position drift.
+        "paper_portfolio_fetch_failed": False,
     }
 
     try:
@@ -155,7 +159,15 @@ def build_account_state(broker=None) -> Dict[str, Any]:
         ws_pf = sheets_manager.get_worksheet("paper_portfolio")
         today = datetime.now(PERU_TZ).strftime("%Y-%m-%d")
         if ws_pf:
-            records = sheets_manager.get_sheet_records("paper_portfolio")
+            try:
+                records = sheets_manager.get_sheet_records("paper_portfolio")
+            except Exception as fetch_err:
+                # 2026-05-20: catch fetch failure (e.g. 429) so position_sync
+                # can distinguish quota issues from real position drift.
+                logger.warning("build_account_state: paper_portfolio fetch failed (%s) — "
+                               "setting paper_portfolio_fetch_failed=True", fetch_err)
+                state["paper_portfolio_fetch_failed"] = True
+                records = []
             for row in records:
                 status = str(row.get("Status", "")).upper()
                 ticker = str(row.get("Ticker", "")).strip().upper()
@@ -209,6 +221,7 @@ def build_account_state(broker=None) -> Dict[str, Any]:
                         state["existing_positions"].add(ticker)
     except Exception as e:
         logger.warning("Could not build full account_state: %s", e)
+        state["paper_portfolio_fetch_failed"] = True
 
     # Buying power from broker (if available)
     if broker is not None:

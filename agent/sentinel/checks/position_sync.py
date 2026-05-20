@@ -35,6 +35,22 @@ def check_position_sync(account_state: Dict[str, Any],
     # tickers, which would mask a genuine sync failure.
     open_count = account_state.get("open_position_count", 0)
 
+    # 2026-05-20 FIX: if paper_portfolio fetch failed (e.g. 429), we cannot
+    # judge sync state. Return WARN instead of BLOCK — a fetch failure is a
+    # quota/network issue, not real position drift. BLOCK in active mode
+    # would HALT the entire run, which is wrong when the real problem is
+    # just a transient API hiccup. The next minute the cache will be warm.
+    if account_state.get("paper_portfolio_fetch_failed", False):
+        return SentinelResult(
+            decision="WARN",
+            reason="POSITION_SYNC_DEFERRED",
+            details={
+                "today_enters": today_enters,
+                "open_positions": open_count,
+                "hint": "paper_portfolio fetch failed — likely 429, retry next minute",
+            },
+        )
+
     # If no ENTERs today, no way to detect mismatch
     if today_enters == 0:
         return SentinelResult(
@@ -44,6 +60,7 @@ def check_position_sync(account_state: Dict[str, Any],
         )
 
     # Suspicious: ENTERs happened but no open positions visible
+    # (and fetch did NOT fail — so this is a real drift, not a quota issue)
     if today_enters > 0 and open_count == 0:
         return SentinelResult(
             decision="BLOCK",
@@ -51,7 +68,7 @@ def check_position_sync(account_state: Dict[str, Any],
             details={
                 "today_enters": today_enters,
                 "open_positions": open_count,
-                "hint": "paper_portfolio may have failed to load (likely 429)",
+                "hint": "paper_portfolio loaded OK but shows 0 OPEN despite ENTERs today — real drift",
             },
         )
 
