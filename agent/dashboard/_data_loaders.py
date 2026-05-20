@@ -41,14 +41,17 @@ def _get_worksheet(name: str):
         return None
 
 
-@st.cache_data(ttl=60)
+@st.cache_data(ttl=30)
 def load_paper_portfolio() -> pd.DataFrame:
-    """Load paper_portfolio Sheet (TTL 60s — live data)."""
-    ws = _get_worksheet("paper_portfolio")
-    if ws is None:
-        return pd.DataFrame()
+    """Load paper_portfolio Sheet.
+
+    Uses sheets_manager.get_sheet_records() — quota-resilient (60s cache + 429 retry)
+    and shares cache across dashboard reads. TTL kept short (30s) so users
+    see fresh ENTER/EXIT events without waiting through a stale Streamlit
+    cache (Trade History bug fixed 2026-05-20).
+    """
     try:
-        records = ws.get_all_records()
+        records = sheets_manager.get_sheet_records("paper_portfolio")
         return pd.DataFrame(records) if records else pd.DataFrame()
     except Exception as e:
         logger.error("Failed to load paper_portfolio: %s", e)
