@@ -407,7 +407,17 @@ def run_scan():
         if ws_timeline.row_count <= 1:
             df_to_sheet(ws_timeline, new_rows)
         else:
-            ws_timeline.append_rows(new_rows.astype(str).values.tolist())
+            # safe_append_rows with retry + dedup by ScanTime (col 1).
+            # ScanTime is identical for all rows in this scan, so if any row with
+            # this ScanTime already exists, the whole batch was written.
+            rows_to_write = new_rows.astype(str).values.tolist()
+            scan_time_str = str(scan_time)
+            sheets_manager.safe_append_rows(
+                ws_timeline,
+                rows_to_write,
+                dedup_col=1,  # ScanTime column
+                dedup_vals={scan_time_str},
+            )
 
         # ── Daily snapshot at 14:59 ───────────────────────────────────────────
         if is_snapshot_time():

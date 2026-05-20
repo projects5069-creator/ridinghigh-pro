@@ -473,6 +473,53 @@ def safe_append_row(ws, row, dedup_col=None, dedup_val=None, **kwargs):
     raise last_error
 
 
+def safe_append_rows(ws, rows, dedup_col=None, dedup_vals=None, **kwargs):
+    """append_rows with 429 retry + optional idempotency.
+
+    Like safe_append_row but for multiple rows in one API call. Used for
+    bulk writes (e.g. auto_scanner writes ~20-30 rows to timeline_live
+    every minute).
+
+    append_rows is NOT idempotent: a 429 after Google added the rows but
+    before responding would cause duplicates on retry.
+
+    If dedup_col (0-based) and dedup_vals (set of values that uniquely
+    identify these rows) are given, before each retry we read that column
+    and skip the write if ALL dedup_vals are already present — making the
+    retry safe.
+
+    Without dedup args, retry is blind: acceptable for low-rate writes
+    but risky for high-rate ones (use dedup_vals for HOT paths).
+    """
+    kwargs.setdefault("value_input_option", "USER_ENTERED")
+    last_error = None
+    for attempt in range(_RETRY_MAX):
+        try:
+            return ws.append_rows(rows, **kwargs)
+        except Exception as e:
+            last_error = e
+            if not _is_quota_error(e):
+                raise
+            if attempt < _RETRY_MAX - 1:
+                wait = _RETRY_BACKOFF_BASE ** (attempt + 1)
+                print(f"[sheets_manager] append_rows 429 — retry {attempt+1}/{_RETRY_MAX} "
+                      f"after {wait}s: {e}")
+                _time.sleep(wait)
+                if dedup_col is not None and dedup_vals:
+                    try:
+                        col = ws.col_values(dedup_col + 1)
+                        col_set = {str(v) for v in col}
+                        dedup_set = {str(v) for v in dedup_vals}
+                        if dedup_set.issubset(col_set):
+                            print(f"[sheets_manager] dedup hit — all {len(dedup_set)} rows "
+                                  f"already written; skipping retry")
+                            return None
+                    except Exception as dedup_err:
+                        print(f"[sheets_manager] dedup check failed: {dedup_err} — "
+                              f"proceeding with blind retry")
+    raise last_error
+
+
 def get_worksheet(tab_name: str, month: str = None, gc=None):
     """
     Return the gspread Worksheet for tab_name in the given month.
