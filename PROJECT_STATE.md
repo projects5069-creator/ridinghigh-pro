@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-05-19 21:38:04 -05
+**Generated:** 2026-05-19 21:51:21 -05
 **Branch:** `main`
-**Latest commit:** `803ee9e` — docs(pk): v2.25 — Critic cron midnight-UTC fix
+**Latest commit:** `1bf84e8` — docs(pk): v2.26 — log 3 new tasks from EOD review
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `803ee9e (HEAD -> main) docs(pk): v2.25 — Critic cron midnight-UTC fix`
-- `c0c7123 (origin/main, origin/HEAD) fix(critic): move cron from 00:07 UTC to 22:00 UTC (17:00 Peru)`
+- `1bf84e8 (HEAD -> main) docs(pk): v2.26 — log 3 new tasks from EOD review`
+- `46ad855 (origin/main, origin/HEAD) docs(pk): v2.25 — Critic cron midnight-UTC fix`
+- `c0c7123 fix(critic): move cron from 00:07 UTC to 22:00 UTC (17:00 Peru)`
 - `d105a36 docs(claude): add RULE #5b — never run git commit twice`
 - `d3b6e08 fix(trader): Filter 9 re-entry limit leaked — count from decision_log`
-- `2b28906 fix(oauth): renew token + correct Warmer docs (detector, not preventer)`
 
 ---
 
@@ -72,8 +72,8 @@ _Months in config: `2026-04`, `2026-05`, `2026-06`_
 
 ## 🩺 Health
 
-- ⚠️ 53 uncommitted file(s):
--    - 53 new/untracked
+- ⚠️ 54 uncommitted file(s):
+-    - 54 new/untracked
 
 ---
 
