@@ -173,6 +173,7 @@ class DecisionLogger:
             ws = gc.open_by_key(self.sheet_id).sheet1
             import sheets_manager as _sm
             _sm.safe_append_row(ws, row, dedup_col=0, dedup_val=decision.decision_id)
+            _sm.invalidate_cache("decision_log")  # fresh read next time
             return decision.decision_id
         except Exception as e:
             print(f"[DecisionLogger] Sheet write failed for ENTER {decision.decision_id}: {e}", file=sys.stderr)

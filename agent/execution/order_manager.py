@@ -278,6 +278,7 @@ class OrderManager:
             ws = sheets_manager.get_worksheet("paper_portfolio")
             if ws:
                 sheets_manager.safe_append_row(ws, row, dedup_col=0, dedup_val=row[0])
+                sheets_manager.invalidate_cache("paper_portfolio")  # fresh read next time
             else:
                 logger.error("paper_portfolio worksheet not available")
         except Exception as e:

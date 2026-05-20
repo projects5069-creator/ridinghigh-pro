@@ -155,7 +155,7 @@ def build_account_state(broker=None) -> Dict[str, Any]:
         ws_pf = sheets_manager.get_worksheet("paper_portfolio")
         today = datetime.now(PERU_TZ).strftime("%Y-%m-%d")
         if ws_pf:
-            records = ws_pf.get_all_records()
+            records = sheets_manager.get_sheet_records("paper_portfolio")
             for row in records:
                 status = str(row.get("Status", "")).upper()
                 ticker = str(row.get("Ticker", "")).strip().upper()
@@ -178,13 +178,13 @@ def build_account_state(broker=None) -> Dict[str, Any]:
         # when paper_portfolio sheet write hasn't propagated yet (race condition fix)
         ws_dl = sheets_manager.get_worksheet("decision_log")
         if ws_dl:
-            records = ws_dl.get_all_records()
+            records = sheets_manager.get_sheet_records("decision_log")
             today = datetime.now(PERU_TZ).strftime("%Y-%m-%d")
             # Build set of tickers that exited today (so we can re-enter them)
             exited_today = set()
             ws_pf2 = sheets_manager.get_worksheet("paper_portfolio")
             if ws_pf2:
-                pf_records = ws_pf2.get_all_records()
+                pf_records = sheets_manager.get_sheet_records("paper_portfolio")
                 for pf_row in pf_records:
                     exit_date = str(pf_row.get("ExitDate", "")).strip()
                     status = str(pf_row.get("Status", "")).upper()
@@ -235,7 +235,7 @@ def read_latest_signals() -> List[Dict[str, Any]]:
             logger.warning("timeline_live worksheet unavailable")
             return []
 
-        records = ws.get_all_records()
+        records = sheets_manager.get_sheet_records("timeline_live")
         if not records:
             logger.info("timeline_live is empty")
             return []

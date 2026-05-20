@@ -410,6 +410,21 @@ def get_sheet_values(tab_name: str, month: str = None):
     return rows
 
 
+def get_sheet_records(tab_name, month=None):
+    """Records version of get_sheet_values — cached + retry."""
+    rows = get_sheet_values(tab_name, month)
+    if not rows or len(rows) < 2:
+        return []
+    headers = rows[0]
+    return [dict(zip(headers, row)) for row in rows[1:]]
+
+
+def invalidate_cache(tab_name, month=None):
+    """Drop cached values for a tab. Call after writes."""
+    key = (tab_name, month)
+    _sheet_values_cache.pop(key, None)
+
+
 def safe_update(ws, *args, **kwargs):
     """Range-based write with 429 retry. Idempotent — same cells each attempt."""
     return _with_retry(ws.update, *args, **kwargs)
