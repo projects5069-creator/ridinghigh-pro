@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-05-19 21:28:35 -05
+**Generated:** 2026-05-19 21:38:04 -05
 **Branch:** `main`
-**Latest commit:** `6697625` — fix(critic): move cron from 00:07 UTC to 22:00 UTC (17:00 Peru)
+**Latest commit:** `803ee9e` — docs(pk): v2.25 — Critic cron midnight-UTC fix
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `6697625 (HEAD -> main) fix(critic): move cron from 00:07 UTC to 22:00 UTC (17:00 Peru)`
-- `d105a36 (origin/main, origin/HEAD) docs(claude): add RULE #5b — never run git commit twice`
+- `803ee9e (HEAD -> main) docs(pk): v2.25 — Critic cron midnight-UTC fix`
+- `c0c7123 (origin/main, origin/HEAD) fix(critic): move cron from 00:07 UTC to 22:00 UTC (17:00 Peru)`
+- `d105a36 docs(claude): add RULE #5b — never run git commit twice`
 - `d3b6e08 fix(trader): Filter 9 re-entry limit leaked — count from decision_log`
 - `2b28906 fix(oauth): renew token + correct Warmer docs (detector, not preventer)`
-- `6add916 fix(news-detective): pass FINNHUB_API_KEY to agent_minute env`
 
 ---
 
@@ -32,11 +32,11 @@ _See `OPEN_ISSUES.md` for full list_
 
 | Workflow | Status | Conclusion | Started |
 |---|---|---|---|
+| Agent — Critic (daily) | completed | ✅ success | 2026-05-20 02:30 UTC |
 | Daily Backup — post_analysis | completed | ✅ success | 2026-05-19 23:46 UTC |
 | Daily Backup — post_analysis | completed | ✅ success | 2026-05-19 22:46 UTC |
 | Agent — Daily Brief Email | completed | ✅ success | 2026-05-19 22:44 UTC |
 | Post Analysis Collector | completed | ✅ success | 2026-05-19 22:21 UTC |
-| Agent — Every Minute (DRY_RUN) | completed | ✅ success | 2026-05-19 22:14 UTC |
 
 ---
 
@@ -66,14 +66,14 @@ _Months in config: `2026-04`, `2026-05`, `2026-06`_
 | borrow_data | 0 | — | ⚠️ empty |
 | market_context | 8 | — | ✅ |
 | news_findings | 5,373 | — | ✅ |
-| agent_scorecard | 24 | 2026-05-18 | ✅ |
+| agent_scorecard | 28 | 2026-05-19 | ✅ |
 
 ---
 
 ## 🩺 Health
 
-- ⚠️ 52 uncommitted file(s):
--    - 52 new/untracked
+- ⚠️ 53 uncommitted file(s):
+-    - 53 new/untracked
 
 ---
 
