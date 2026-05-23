@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-05-23 14:39:57 -05
+**Generated:** 2026-05-23 15:31:49 -05
 **Branch:** `main`
-**Latest commit:** `4ae2955` — feat(backlog): seed 35 tasks + next-session pointer
+**Latest commit:** `e0e9440` — feat(meta): META.1 work allocation policy v2
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `4ae2955 (HEAD -> main) feat(backlog): seed 35 tasks + next-session pointer`
-- `0d233dc (origin/main, origin/HEAD) chore(workflow): P2.5 hygiene — gitignore *.bak_* + clean "גיבוי זמני" archive`
+- `e0e9440 (HEAD -> main) feat(meta): META.1 work allocation policy v2`
+- `be6df95 (origin/main, origin/HEAD) feat(backlog): seed 35 tasks + next-session pointer`
+- `0d233dc chore(workflow): P2.5 hygiene — gitignore *.bak_* + clean "גיבוי זמני" archive`
 - `32c3477 tools: add .rh-run.sh clipboard wrapper for Claude Code output`
 - `1edf278 docs(claude): mandatory skills usage + project skills map`
-- `4021432 fix(health_audit): cache + retry for Sheets reads`
 
 ---
 

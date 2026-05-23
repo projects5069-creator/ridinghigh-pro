@@ -1,9 +1,10 @@
 ---
 id: TASK-35
 title: META.1 — Rebalance work allocation
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-05-23 19:36'
+updated_date: '2026-05-23 20:17'
 labels: []
 dependencies: []
 priority: high
