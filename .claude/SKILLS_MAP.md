@@ -43,6 +43,7 @@
 | **P2.2** Sentinel Analytics | `explore-data` | `statistical-analysis` + `validate-data` + `data-visualization` |
 | **P2.3** Filter 12 ticker_reputation | `brainstorming` | `writing-plans` + `test-driven-development` |
 | **P2.4** Cross-month aggregation | `writing-plans` | `systematic-debugging` |
+| **P2.5** workflow hygiene (gitignore + archive cleanup) | `systematic-debugging` | `verification-before-completion` |
 
 ### P3 — Medium
 | Task | Primary | Secondary |
@@ -89,4 +90,4 @@
 - Skill removed → update tables
 - Changes committed together with CLAUDE.md
 
-**Last updated:** 2026-05-23 — initial creation with 14 tasks + 3 Waiting.
+**Last updated:** 2026-05-23 — P2.5 done (gitignore *.bak_*, deleted archive 50 files/2.4MB).

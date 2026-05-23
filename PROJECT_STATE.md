@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-05-23 11:53:23 -05
+**Generated:** 2026-05-23 12:28:03 -05
 **Branch:** `main`
-**Latest commit:** `9b094ba` — tools: add .rh-run.sh clipboard wrapper for Claude Code output
+**Latest commit:** `4c7daa1` — chore(workflow): P2.5 hygiene — gitignore *.bak_* + clean "גיבוי זמני" archive
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `9b094ba (HEAD -> main) tools: add .rh-run.sh clipboard wrapper for Claude Code output`
+- `4c7daa1 (HEAD -> main) chore(workflow): P2.5 hygiene — gitignore *.bak_* + clean "גיבוי זמני" archive`
+- `32c3477 (origin/main, origin/HEAD) tools: add .rh-run.sh clipboard wrapper for Claude Code output`
 - `1edf278 docs(claude): mandatory skills usage + project skills map`
-- `4021432 (origin/main, origin/HEAD) fix(health_audit): cache + retry for Sheets reads`
+- `4021432 fix(health_audit): cache + retry for Sheets reads`
 - `27b65d7 fix(sheets): force TEXT format on time-of-day columns`
-- `5cc658b fix(scan-freshness): parse_hhmm utility for numeric time comparison`
 
 ---
 
@@ -63,17 +63,17 @@ _Months in config: `2026-04`, `2026-05`, `2026-06`_
 | system_events | 8,632 | — | ✅ |
 | pending_suggestions | 0 | — | ⚠️ empty |
 | config_history | 0 | — | ⚠️ empty |
-| borrow_data | 0 | — | ⚠️ empty |
+| borrow_data | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
 | market_context | 18 | — | ✅ |
 | news_findings | 8,559 | — | ✅ |
-| agent_scorecard | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| agent_scorecard | 40 | 2026-05-22 | ✅ |
 
 ---
 
 ## 🩺 Health
 
-- ⚠️ 91 uncommitted file(s):
--    - 91 new/untracked
+- ⚠️ 25 uncommitted file(s):
+-    - 25 new/untracked
 
 ---
 

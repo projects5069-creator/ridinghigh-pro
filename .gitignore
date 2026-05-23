@@ -63,3 +63,7 @@ provider_validation_report.json
 
 # Local archives (do not commit)
 .archive_*/
+
+# Backup files created by RULE #4
+*.bak_*
+*.bak
