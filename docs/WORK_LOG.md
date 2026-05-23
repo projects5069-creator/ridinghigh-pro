@@ -62,3 +62,4 @@ Priority (first match wins):
 - D_pct = 18% < 20% → Rule §3.1 still fires → Development still needed for the week
 - After DEV.1 implementation: D_pct would rise above 20%
 | 2026-05-23 16:50-17:00 | P0.2 Daily Brief errors fix | Maintenance | 0.25 | 1-line filter added to exclude SENTINEL_* from error count |
+| 2026-05-23 17:00-17:25 | P1.2 cron drift investigation | Maintenance | 0.4 | Documented + closed; bumped P3.4 to HIGH (real fix lives there) |

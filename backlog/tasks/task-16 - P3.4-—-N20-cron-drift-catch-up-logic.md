@@ -4,9 +4,10 @@ title: 'P3.4 — #N20 cron-drift catch-up logic'
 status: To Do
 assignee: []
 created_date: '2026-05-23 19:33'
+updated_date: '2026-05-23 22:23'
 labels: []
 dependencies: []
-priority: medium
+priority: high
 ordinal: 16000
 ---
 
