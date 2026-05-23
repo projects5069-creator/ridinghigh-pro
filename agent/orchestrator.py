@@ -168,7 +168,13 @@ def build_account_state(broker=None) -> Dict[str, Any]:
         # Bug #2/#4 fix: count actual OPEN rows, not unique tickers.
         "open_position_count": 0,
         # Bug #5 fix: per-ticker entry count for today (re-entry limit).
+        # 2026-05-23 Fix D: kept as union of two sources — decision_log
+        # (primary SSoT) AND paper_portfolio (backup). Google Sheets
+        # eventual-consistency can hide recent writes from decision_log
+        # for minutes, causing Filter 9 to leak (PIII×14, HCWB×5). Union
+        # via max() ensures whichever sheet has the latest count wins.
         "entries_today_by_ticker": {},
+        "entries_today_by_ticker_pf": {},   # 2026-05-23 Fix D: paper_portfolio source
         # 2026-05-20 fix: flag for when paper_portfolio read failed (e.g. 429).
         # position_sync uses this to return WARN instead of BLOCK — a fetch
         # failure is a quota/network issue, not a real position drift.
@@ -198,11 +204,18 @@ def build_account_state(broker=None) -> Dict[str, Any]:
                         state["existing_positions"].add(ticker)
                     # Count every OPEN row — duplicate tickers count separately.
                     state["open_position_count"] += 1
-                # Bug #5 root-cause fix (2026-05-19): per-ticker entry count
-                # is NOT counted here. paper_portfolio writes can be lost to a
-                # 429, which under-counts and lets Filter 9 (re-entry limit)
-                # leak. It is counted from decision_log below — the reliable
-                # Single Source of Truth (ENTER is always logged there).
+                # 2026-05-23 Fix D: ALSO count today ENTRIES per ticker from
+                # paper_portfolio (any status — OPEN or already closed today).
+                # This is a SECONDARY source that runs in union with decision_log.
+                # Rationale: Google Sheets eventual-consistency can hide recent
+                # writes from one sheet for minutes. Counting BOTH sources and
+                # taking the max ensures Filter 9 sees the highest available
+                # count regardless of which sheet is currently lagging.
+                entry_date = str(row.get("EntryDate", "")).strip()
+                if entry_date == today and ticker:
+                    state["entries_today_by_ticker_pf"][ticker] = (
+                        state["entries_today_by_ticker_pf"].get(ticker, 0) + 1
+                    )
 
         # cold_start cap now reflects real concurrent positions, not unique tickers.
         state["cold_start_concurrent_used"] = state["open_position_count"]
@@ -241,6 +254,17 @@ def build_account_state(broker=None) -> Dict[str, Any]:
                     ticker = str(row.get("Ticker", "")).strip().upper()
                     if ticker and ticker not in exited_today:
                         state["existing_positions"].add(ticker)
+
+        # 2026-05-23 Fix D: union the two counters — for each ticker that
+        # appears in either source, take the max. This protects Filter 9
+        # from Google Sheets eventual-consistency lag (one sheet may be
+        # ahead of the other by minutes during quota pressure).
+        all_tickers = set(state["entries_today_by_ticker"].keys()) | \
+                      set(state["entries_today_by_ticker_pf"].keys())
+        for tk in all_tickers:
+            dl_count = state["entries_today_by_ticker"].get(tk, 0)
+            pf_count = state["entries_today_by_ticker_pf"].get(tk, 0)
+            state["entries_today_by_ticker"][tk] = max(dl_count, pf_count)
     except Exception as e:
         logger.warning("Could not build full account_state: %s", e)
         state["paper_portfolio_fetch_failed"] = True

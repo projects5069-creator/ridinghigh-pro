@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-05-23 17:32:33 -05
+**Generated:** 2026-05-23 17:59:05 -05
 **Branch:** `main`
-**Latest commit:** `8d07fba` — docs(p1.5): PIII postmortem + N5 follow-up
+**Latest commit:** `dd89433` — fix(filter9): Fix D — union decision_log + paper_portfolio counters
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `8d07fba (HEAD -> main) docs(p1.5): PIII postmortem + N5 follow-up`
-- `14aa22b (origin/main, origin/HEAD) docs(p1.2): cron drift investigation + bump P3.4 to HIGH`
+- `dd89433 (HEAD -> main) fix(filter9): Fix D — union decision_log + paper_portfolio counters`
+- `2f6117d (origin/main, origin/HEAD) docs(p1.5): PIII postmortem + N5 follow-up`
+- `14aa22b docs(p1.2): cron drift investigation + bump P3.4 to HIGH`
 - `08b8e7d fix(daily-brief): P0.2 exclude SENTINEL_* from error count`
 - `93e0ef4 chore(cleanup): N1 untracked review + DEV.1 plan`
-- `d7ab3b3 feat(meta): META.1 work allocation policy v2`
 
 ---
 
@@ -65,8 +65,8 @@ _Months in config: `2026-04`, `2026-05`, `2026-06`_
 | config_history | 0 | — | ⚠️ empty |
 | borrow_data | 0 | — | ⚠️ empty |
 | market_context | 18 | — | ✅ |
-| news_findings | 8,559 | — | ✅ |
-| agent_scorecard | 40 | 2026-05-22 | ✅ |
+| news_findings | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| agent_scorecard | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
 
 ---
 

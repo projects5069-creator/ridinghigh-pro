@@ -64,3 +64,5 @@ Priority (first match wins):
 | 2026-05-23 16:50-17:00 | P0.2 Daily Brief errors fix | Maintenance | 0.25 | 1-line filter added to exclude SENTINEL_* from error count |
 | 2026-05-23 17:00-17:25 | P1.2 cron drift investigation | Maintenance | 0.4 | Documented + closed; bumped P3.4 to HIGH (real fix lives there) |
 | 2026-05-23 17:25-17:45 | P1.5 PIII investigation + closure | Analysis | 0.4 | 14 entries in one day, Filter 9 leaked. Created N5 to verify post-19/5 fix |
+| 2026-05-23 17:30-18:00 | P1.1 + N5 root-cause investigation | Maintenance | 0.5 | HCWB×5 deep dive — found root cause: Sheets eventual consistency |
+| 2026-05-23 18:00-18:00 | Fix D — union of dl + pf counters | Maintenance | 0.5 | orchestrator.py build_account_state + counterfactual validation |

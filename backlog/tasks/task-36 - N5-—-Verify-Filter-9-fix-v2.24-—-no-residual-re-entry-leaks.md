@@ -1,9 +1,10 @@
 ---
 id: TASK-36
 title: N5 — Verify Filter 9 fix (v2.24) — no residual re-entry leaks
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-05-23 22:32'
+updated_date: '2026-05-23 22:58'
 labels: []
 dependencies: []
 priority: high
