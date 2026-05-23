@@ -63,3 +63,4 @@ Priority (first match wins):
 - After DEV.1 implementation: D_pct would rise above 20%
 | 2026-05-23 16:50-17:00 | P0.2 Daily Brief errors fix | Maintenance | 0.25 | 1-line filter added to exclude SENTINEL_* from error count |
 | 2026-05-23 17:00-17:25 | P1.2 cron drift investigation | Maintenance | 0.4 | Documented + closed; bumped P3.4 to HIGH (real fix lives there) |
+| 2026-05-23 17:25-17:45 | P1.5 PIII investigation + closure | Analysis | 0.4 | 14 entries in one day, Filter 9 leaked. Created N5 to verify post-19/5 fix |

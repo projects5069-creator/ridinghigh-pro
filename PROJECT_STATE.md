@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-05-23 17:23:36 -05
+**Generated:** 2026-05-23 17:32:33 -05
 **Branch:** `main`
-**Latest commit:** `0bf723e` — docs(p1.2): cron drift investigation + bump P3.4 to HIGH
+**Latest commit:** `8d07fba` — docs(p1.5): PIII postmortem + N5 follow-up
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `0bf723e (HEAD -> main) docs(p1.2): cron drift investigation + bump P3.4 to HIGH`
-- `08b8e7d (origin/main, origin/HEAD) fix(daily-brief): P0.2 exclude SENTINEL_* from error count`
+- `8d07fba (HEAD -> main) docs(p1.5): PIII postmortem + N5 follow-up`
+- `14aa22b (origin/main, origin/HEAD) docs(p1.2): cron drift investigation + bump P3.4 to HIGH`
+- `08b8e7d fix(daily-brief): P0.2 exclude SENTINEL_* from error count`
 - `93e0ef4 chore(cleanup): N1 untracked review + DEV.1 plan`
 - `d7ab3b3 feat(meta): META.1 work allocation policy v2`
-- `be6df95 feat(backlog): seed 35 tasks + next-session pointer`
 
 ---
 

@@ -1,9 +1,10 @@
 ---
 id: TASK-7
 title: P1.5 — PIII anomaly investigation
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-05-23 19:32'
+updated_date: '2026-05-23 22:32'
 labels: []
 dependencies: []
 priority: high
