@@ -1,9 +1,10 @@
 ---
 id: TASK-3
 title: P0.2 — Daily Brief errors mislabel
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-05-23 19:32'
+updated_date: '2026-05-23 21:58'
 labels: []
 dependencies: []
 priority: high

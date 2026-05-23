@@ -163,6 +163,7 @@ def gather_daily_stats() -> Dict[str, Any]:
                 1 for r in records
                 if str(r.get("Timestamp", "")).startswith(today)
                 and str(r.get("Severity", "")).upper() in ("ERROR", "CRITICAL")
+                and not str(r.get("EventType", "")).upper().startswith("SENTINEL_")
             )
     except Exception as e:
         logger.error("Failed to gather daily stats: %s", e, exc_info=True)

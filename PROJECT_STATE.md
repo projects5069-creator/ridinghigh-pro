@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-05-23 16:47:45 -05
+**Generated:** 2026-05-23 16:58:59 -05
 **Branch:** `main`
-**Latest commit:** `2b90042` — chore(cleanup): N1 untracked review + DEV.1 plan
+**Latest commit:** `8961a54` — fix(daily-brief): P0.2 exclude SENTINEL_* from error count
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `2b90042 (HEAD -> main) chore(cleanup): N1 untracked review + DEV.1 plan`
-- `d7ab3b3 (origin/main, origin/HEAD) feat(meta): META.1 work allocation policy v2`
+- `8961a54 (HEAD -> main) fix(daily-brief): P0.2 exclude SENTINEL_* from error count`
+- `93e0ef4 (origin/main, origin/HEAD) chore(cleanup): N1 untracked review + DEV.1 plan`
+- `d7ab3b3 feat(meta): META.1 work allocation policy v2`
 - `be6df95 feat(backlog): seed 35 tasks + next-session pointer`
 - `0d233dc chore(workflow): P2.5 hygiene — gitignore *.bak_* + clean "גיבוי זמני" archive`
-- `32c3477 tools: add .rh-run.sh clipboard wrapper for Claude Code output`
 
 ---
 
@@ -53,8 +53,8 @@ _Months in config: `2026-04`, `2026-05`, `2026-06`_
 | post_analysis | 55 | 2026-05-22 | ✅ |
 | portfolio | 65 | 2026-05-22 | ✅ |
 | portfolio_live | 48 | 2026-05-22 | ✅ |
-| score_tracker | 1,419 | 2026-05-22 | ✅ |
-| live_trades | 1,419 | 2026-05-22 | ✅ |
+| score_tracker | ? | ? | ❌ APIError: [500]: Internal error encounte |
+| live_trades | ? | ? | ❌ APIError: [500]: Internal error encounte |
 | ticker_follow_up | 12,477 | 2026-05-08 | ✅ |
 | decision_log | 16,231 | — | ✅ |
 | paper_portfolio | 89 | — | ✅ |
