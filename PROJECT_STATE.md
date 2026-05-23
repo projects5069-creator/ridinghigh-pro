@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-05-23 17:59:05 -05
+**Generated:** 2026-05-23 18:17:58 -05
 **Branch:** `main`
-**Latest commit:** `dd89433` — fix(filter9): Fix D — union decision_log + paper_portfolio counters
+**Latest commit:** `366b112` — chore: 4 task closures + hygiene cleanup
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `dd89433 (HEAD -> main) fix(filter9): Fix D — union decision_log + paper_portfolio counters`
-- `2f6117d (origin/main, origin/HEAD) docs(p1.5): PIII postmortem + N5 follow-up`
+- `366b112 (HEAD -> main) chore: 4 task closures + hygiene cleanup`
+- `fb84ed8 (origin/main, origin/HEAD) fix(filter9): Fix D — union decision_log + paper_portfolio counters`
+- `2f6117d docs(p1.5): PIII postmortem + N5 follow-up`
 - `14aa22b docs(p1.2): cron drift investigation + bump P3.4 to HIGH`
 - `08b8e7d fix(daily-brief): P0.2 exclude SENTINEL_* from error count`
-- `93e0ef4 chore(cleanup): N1 untracked review + DEV.1 plan`
 
 ---
 
@@ -63,8 +63,8 @@ _Months in config: `2026-04`, `2026-05`, `2026-06`_
 | system_events | 8,632 | — | ✅ |
 | pending_suggestions | 0 | — | ⚠️ empty |
 | config_history | 0 | — | ⚠️ empty |
-| borrow_data | 0 | — | ⚠️ empty |
-| market_context | 18 | — | ✅ |
+| borrow_data | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| market_context | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
 | news_findings | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
 | agent_scorecard | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
 

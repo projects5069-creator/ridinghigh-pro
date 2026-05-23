@@ -63,7 +63,7 @@ Silence is better than made-up facts.
 
 ## RULE #4: Before Any File Edit
 
-1. **Create backup**: `cp file.py file.py.BEFORE_<task_id>`
+1. **Create backup**: `cp file.py file.py.bak_$(date +%Y%m%d-%H%M%S)`
 2. **Read the exact lines** you're about to edit (view tool)
 3. **Make the change**
 4. **Run `python3 -m py_compile <file>`**
@@ -127,7 +127,7 @@ If output is too long, show first 50 + last 20 lines with a clear marker.
 
 ### Do NOT Touch Without Explicit Request
 - Score variants B-I (research experiments with distinct parameters)
-- Historical backup files `*.BEFORE_issue*`
+- Historical backup files `*.bak_*` (auto-ignored by gitignore)
 - OPEN_ISSUES.md (except when closing an issue)
 
 ---
