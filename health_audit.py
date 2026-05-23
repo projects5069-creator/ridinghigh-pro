@@ -360,9 +360,8 @@ def check_04_timeline_freshness(gc):
                            CRITICAL, "timeline_live not configured")
 
     try:
-        ws = gc.open_by_key(sheets["timeline_live"]).sheet1
-        # Get last row's date — first column
-        all_vals = ws.col_values(1)
+        # Get last row's date — first column (cached + retried)
+        all_vals = _ha_col_values(gc, sheets["timeline_live"], 1)
         if len(all_vals) < 2:
             return CheckResult("D1", "Timeline freshness", "Data freshness",
                                WARNING, "timeline_live is empty")
@@ -408,8 +407,7 @@ def check_05_post_analysis_completeness(gc):
                            CRITICAL, "post_analysis not configured")
 
     try:
-        ws = gc.open_by_key(sheets["post_analysis"]).sheet1
-        col1 = ws.col_values(2)[1:]  # ScanDate is column 2
+        col1 = _ha_col_values(gc, sheets["post_analysis"], 2)[1:]  # ScanDate is column 2
         if not col1:
             return CheckResult("D2", "Post-analysis completeness", "Data freshness",
                                WARNING, "post_analysis is empty")
@@ -448,8 +446,7 @@ def check_05_post_analysis_completeness(gc):
                     prev_month = months[idx - 1]
                     prev_sheets = config[prev_month]
                     if "post_analysis" in prev_sheets:
-                        prev_ws = gc.open_by_key(prev_sheets["post_analysis"]).sheet1
-                        prev_col = prev_ws.col_values(2)[1:]
+                        prev_col = _ha_col_values(gc, prev_sheets["post_analysis"], 2)[1:]
                         for v in prev_col:
                             try:
                                 d = v[:10]
@@ -616,8 +613,7 @@ def check_07_score_range(gc):
                            INFO, "post_analysis not available")
 
     try:
-        ws = gc.open_by_key(sheets["post_analysis"]).sheet1
-        all_data = ws.get_all_values()
+        all_data = _ha_get_all_values(gc, sheets["post_analysis"])
         if len(all_data) < 2:
             return CheckResult("Q1", "Score range", "Data quality",
                                INFO, "No data to check")
@@ -674,8 +670,7 @@ def check_08_required_columns(gc):
             missing_report.append(f"{name}: not configured")
             continue
         try:
-            ws = gc.open_by_key(sheets[name]).sheet1
-            header = ws.row_values(1)
+            header = _ha_row_values(gc, sheets[name], 1)
             missing = [c for c in req_cols if c not in header]
             if missing:
                 missing_report.append(f"{name}: missing {missing}")
@@ -703,8 +698,7 @@ def check_09_duplicate_post_analysis_rows(gc):
                            INFO, "post_analysis not available")
 
     try:
-        ws = gc.open_by_key(sheets["post_analysis"]).sheet1
-        all_data = ws.get_all_values()
+        all_data = _ha_get_all_values(gc, sheets["post_analysis"])
         if len(all_data) < 2:
             return CheckResult("Q3", "Duplicate post_analysis rows", "Data quality",
                                PASSED, "Empty — no duplicates")
@@ -751,8 +745,7 @@ def check_10_outliers(gc):
                            INFO, "post_analysis not available")
 
     try:
-        ws = gc.open_by_key(sheets["post_analysis"]).sheet1
-        all_data = ws.get_all_values()
+        all_data = _ha_get_all_values(gc, sheets["post_analysis"])
         if len(all_data) < 2:
             return CheckResult("Q4", "Outliers", "Data quality",
                                PASSED, "No data")
@@ -903,13 +896,57 @@ def check_14_uncommitted_count():
                            output[:300])
 
 
+# ── Sheets read cache + retry helpers (2026-05-22) ─────────────────────
+_HA_SHEET_CACHE = {}
+_HA_CACHE_TTL_SEC = 300
+
+
+def _ha_cached_read(gc, sheet_id, op, *args, ttl=_HA_CACHE_TTL_SEC, retries=3):
+    """Cached + retried Sheets read. op = 'get_all_values'|'col_values'|'row_values'."""
+    import time as _t
+    cache_key = (sheet_id, op, args)
+    now = _t.time()
+    cached = _HA_SHEET_CACHE.get(cache_key)
+    if cached and (now - cached[0]) < ttl:
+        return cached[1]
+    last_err = None
+    for attempt in range(retries):
+        try:
+            ws = gc.open_by_key(sheet_id).sheet1
+            if op == 'get_all_values': data = ws.get_all_values()
+            elif op == 'col_values': data = ws.col_values(*args)
+            elif op == 'row_values': data = ws.row_values(*args)
+            else: raise ValueError(f"Unknown op: {op}")
+            _HA_SHEET_CACHE[(sheet_id, op, args)] = (now, data)
+            return data
+        except Exception as e:
+            last_err = e
+            err_str = str(e).lower()
+            is_429 = '429' in err_str or 'quota' in err_str or 'rate' in err_str
+            if not is_429 or attempt == retries - 1: raise
+            wait = (2 ** attempt) * 5
+            _t.sleep(wait)
+    raise last_err
+
+
+def _ha_get_all_values(gc, sheet_id):
+    return _ha_cached_read(gc, sheet_id, 'get_all_values')
+
+
+def _ha_col_values(gc, sheet_id, col):
+    return _ha_cached_read(gc, sheet_id, 'col_values', col)
+
+
+def _ha_row_values(gc, sheet_id, row):
+    return _ha_cached_read(gc, sheet_id, 'row_values', row)
+
+
 def _load_recent_metrics(gc):
     """Helper: load last 200 rows of timeline_live for metric sanity checks."""
     month, sheets = get_active_month_sheets(gc)
     if not sheets or "timeline_live" not in sheets:
         return None, None, "timeline_live sheet not found in config"
-    ws = gc.open_by_key(sheets["timeline_live"]).sheet1
-    all_data = ws.get_all_values()
+    all_data = _ha_get_all_values(gc, sheets["timeline_live"])
     if len(all_data) < 50:
         return None, None, "Not enough data to evaluate (< 50 rows)"
     return all_data[0], all_data[-200:], None
@@ -1134,8 +1171,7 @@ def check_24_sentinel_health(gc):
         try:
             month, sheets = get_active_month_sheets(gc)
             if sheets and "system_events" in sheets:
-                ws = gc.open_by_key(sheets["system_events"]).sheet1
-                rows = ws.get_all_values()
+                rows = _ha_get_all_values(gc, sheets["system_events"])
                 sentinel_rows = [r for r in rows[1:]
                                  if r and len(r) > 1 and str(r[1]).startswith("SENTINEL_")]
                 event_info = f", {len(sentinel_rows)} sentinel events logged"
@@ -1164,8 +1200,7 @@ def check_23_nan_scantime(gc):
                            CRITICAL, "post_analysis not configured")
 
     try:
-        ws = gc.open_by_key(sheets["post_analysis"]).sheet1
-        data = ws.get_all_values()
+        data = _ha_get_all_values(gc, sheets["post_analysis"])
         if len(data) <= 1:
             return CheckResult("Q8", "NaN ScanTime in post_analysis", "Data quality",
                                INFO, "post_analysis is empty")
