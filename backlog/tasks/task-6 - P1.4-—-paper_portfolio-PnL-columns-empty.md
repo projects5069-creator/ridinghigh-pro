@@ -1,9 +1,10 @@
 ---
 id: TASK-6
 title: P1.4 — paper_portfolio PnL columns empty
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-05-23 19:32'
+updated_date: '2026-05-23 23:35'
 labels: []
 dependencies: []
 priority: high

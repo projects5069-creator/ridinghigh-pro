@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-05-23 18:25:03 -05
+**Generated:** 2026-05-23 18:35:18 -05
 **Branch:** `main`
-**Latest commit:** `2907d00` — fix(dashboard): P3.7 move parse_hhmm imports to top + cleanup
+**Latest commit:** `105b1a3` — docs(p1.4): verified not a bug — mark Done
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `2907d00 (HEAD -> main) fix(dashboard): P3.7 move parse_hhmm imports to top + cleanup`
-- `db6df80 (origin/main, origin/HEAD) chore: mark P3.7/P4.5/P4.7/N3 Done + work log`
+- `105b1a3 (HEAD -> main) docs(p1.4): verified not a bug — mark Done`
+- `c84638e (origin/main, origin/HEAD) fix(dashboard): P3.7 move parse_hhmm imports to top + cleanup`
+- `db6df80 chore: mark P3.7/P4.5/P4.7/N3 Done + work log`
 - `ccc23d9 chore: 4 task closures + hygiene cleanup`
 - `fb84ed8 fix(filter9): Fix D — union decision_log + paper_portfolio counters`
-- `2f6117d docs(p1.5): PIII postmortem + N5 follow-up`
 
 ---
 
