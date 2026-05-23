@@ -150,8 +150,42 @@ If output is too long, show first 50 + last 20 lines with a clear marker.
 
 ---
 
+## RULE #11: Skills Are Mandatory
+
+50 skills installed. Usage is mandatory, not a recommendation.
+
+### Before every task:
+1. Invoke `Skill` tool with `name="using-superpowers"` (meta-skill)
+2. Check `~/RidingHighPro/.claude/SKILLS_MAP.md`: which skill fits?
+3. Invoke: `Skill(name="<skill-name>")`
+4. Announce: "Using <skill> to <purpose>"
+5. Follow the skill instructions exactly
+
+### Iron Rule (from using-superpowers):
+> "If you think there is even a 1% chance a skill might apply, you ABSOLUTELY MUST invoke the skill. This is not negotiable."
+
+### Quick examples:
+- Bug investigation → `systematic-debugging`
+- Feature design → `brainstorming` → `writing-plans`
+- Statistical analysis → `statistical-analysis` / `explore-data`
+- Git cleanup → `git-cleanup`
+- Before completing task → `verification-before-completion`
+
+**Full mapping:** see `.claude/SKILLS_MAP.md`.
+
+### Red Flags (do NOT think these):
+- "Too simple for a skill" — skills are for simple tasks too
+- "I will just run the command" — skill first, then command
+- "I know what to do" — knowing ≠ invoking the skill
+- "No matching skill" — there is always at least `using-superpowers`
+
+---
+
 ## Summary: The Prime Directive
 
 **Show data. Don't explain data. Let the user drive interpretation.**
 
 When in doubt: output, wait, ask.
+
+---
+@.claude-startup.md

@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-05-22 21:23:41 -05
+**Generated:** 2026-05-23 11:52:22 -05
 **Branch:** `main`
-**Latest commit:** `627bdcc` — fix(health_audit): cache + retry for Sheets reads
+**Latest commit:** `50c4c16` — docs(claude): mandatory skills usage + project skills map
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `627bdcc (HEAD -> main) fix(health_audit): cache + retry for Sheets reads`
-- `27b65d7 (origin/main, origin/HEAD) fix(sheets): force TEXT format on time-of-day columns`
+- `50c4c16 (HEAD -> main) docs(claude): mandatory skills usage + project skills map`
+- `4021432 (origin/main, origin/HEAD) fix(health_audit): cache + retry for Sheets reads`
+- `27b65d7 fix(sheets): force TEXT format on time-of-day columns`
 - `5cc658b fix(scan-freshness): parse_hhmm utility for numeric time comparison`
 - `09385c6 fix(429+bug): check_emergency_stop — cache + 24h window`
-- `8f30eee fix(sentinel): position_sync — WARN on fetch failure, BLOCK only on real drift`
 
 ---
 
@@ -32,11 +32,11 @@ _See `OPEN_ISSUES.md` for full list_
 
 | Workflow | Status | Conclusion | Started |
 |---|---|---|---|
+| Health Audit | completed | ✅ success | 2026-05-23 11:57 UTC |
+| Health Audit | completed | ✅ success | 2026-05-23 06:14 UTC |
 | Agent — Critic (daily) | completed | ✅ success | 2026-05-22 22:48 UTC |
 | Daily Backup — post_analysis | completed | ✅ success | 2026-05-22 22:35 UTC |
 | Agent — Daily Brief Email | completed | ✅ success | 2026-05-22 22:34 UTC |
-| Post Analysis Collector | completed | ✅ success | 2026-05-22 22:14 UTC |
-| Agent — End of Day | completed | ✅ success | 2026-05-22 21:53 UTC |
 
 ---
 
@@ -65,15 +65,15 @@ _Months in config: `2026-04`, `2026-05`, `2026-06`_
 | config_history | 0 | — | ⚠️ empty |
 | borrow_data | 0 | — | ⚠️ empty |
 | market_context | 18 | — | ✅ |
-| news_findings | 8,559 | — | ✅ |
+| news_findings | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
 | agent_scorecard | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
 
 ---
 
 ## 🩺 Health
 
-- ⚠️ 91 uncommitted file(s):
--    - 91 new/untracked
+- ⚠️ 92 uncommitted file(s):
+-    - 92 new/untracked
 
 ---
 
