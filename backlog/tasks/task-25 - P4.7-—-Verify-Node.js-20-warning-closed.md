@@ -1,9 +1,10 @@
 ---
 id: TASK-25
 title: P4.7 — Verify Node.js 20 warning closed
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-05-23 19:35'
+updated_date: '2026-05-23 23:19'
 labels: []
 dependencies: []
 priority: low

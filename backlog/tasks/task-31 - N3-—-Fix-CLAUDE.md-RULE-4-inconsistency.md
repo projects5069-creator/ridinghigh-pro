@@ -1,9 +1,10 @@
 ---
 id: TASK-31
 title: 'N3 — Fix CLAUDE.md RULE #4 inconsistency'
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-05-23 19:35'
+updated_date: '2026-05-23 23:19'
 labels: []
 dependencies: []
 priority: low

@@ -1,9 +1,10 @@
 ---
 id: TASK-23
 title: P4.5 — Delete ~/.archive_2026-05-02 vault
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-05-23 19:35'
+updated_date: '2026-05-23 23:19'
 labels: []
 dependencies: []
 priority: low
