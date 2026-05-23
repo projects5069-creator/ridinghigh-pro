@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-05-23 11:52:22 -05
+**Generated:** 2026-05-23 11:53:23 -05
 **Branch:** `main`
-**Latest commit:** `50c4c16` — docs(claude): mandatory skills usage + project skills map
+**Latest commit:** `9b094ba` — tools: add .rh-run.sh clipboard wrapper for Claude Code output
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `50c4c16 (HEAD -> main) docs(claude): mandatory skills usage + project skills map`
+- `9b094ba (HEAD -> main) tools: add .rh-run.sh clipboard wrapper for Claude Code output`
+- `1edf278 docs(claude): mandatory skills usage + project skills map`
 - `4021432 (origin/main, origin/HEAD) fix(health_audit): cache + retry for Sheets reads`
 - `27b65d7 fix(sheets): force TEXT format on time-of-day columns`
 - `5cc658b fix(scan-freshness): parse_hhmm utility for numeric time comparison`
-- `09385c6 fix(429+bug): check_emergency_stop — cache + 24h window`
 
 ---
 
@@ -65,15 +65,15 @@ _Months in config: `2026-04`, `2026-05`, `2026-06`_
 | config_history | 0 | — | ⚠️ empty |
 | borrow_data | 0 | — | ⚠️ empty |
 | market_context | 18 | — | ✅ |
-| news_findings | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| news_findings | 8,559 | — | ✅ |
 | agent_scorecard | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
 
 ---
 
 ## 🩺 Health
 
-- ⚠️ 92 uncommitted file(s):
--    - 92 new/untracked
+- ⚠️ 91 uncommitted file(s):
+-    - 91 new/untracked
 
 ---
 
