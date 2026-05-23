@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-05-23 12:28:03 -05
+**Generated:** 2026-05-23 14:39:57 -05
 **Branch:** `main`
-**Latest commit:** `4c7daa1` — chore(workflow): P2.5 hygiene — gitignore *.bak_* + clean "גיבוי זמני" archive
+**Latest commit:** `4ae2955` — feat(backlog): seed 35 tasks + next-session pointer
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `4c7daa1 (HEAD -> main) chore(workflow): P2.5 hygiene — gitignore *.bak_* + clean "גיבוי זמני" archive`
-- `32c3477 (origin/main, origin/HEAD) tools: add .rh-run.sh clipboard wrapper for Claude Code output`
+- `4ae2955 (HEAD -> main) feat(backlog): seed 35 tasks + next-session pointer`
+- `0d233dc (origin/main, origin/HEAD) chore(workflow): P2.5 hygiene — gitignore *.bak_* + clean "גיבוי זמני" archive`
+- `32c3477 tools: add .rh-run.sh clipboard wrapper for Claude Code output`
 - `1edf278 docs(claude): mandatory skills usage + project skills map`
 - `4021432 fix(health_audit): cache + retry for Sheets reads`
-- `27b65d7 fix(sheets): force TEXT format on time-of-day columns`
 
 ---
 
@@ -32,11 +32,11 @@ _See `OPEN_ISSUES.md` for full list_
 
 | Workflow | Status | Conclusion | Started |
 |---|---|---|---|
+| Health Audit | completed | ✅ success | 2026-05-23 17:56 UTC |
 | Health Audit | completed | ✅ success | 2026-05-23 11:57 UTC |
 | Health Audit | completed | ✅ success | 2026-05-23 06:14 UTC |
 | Agent — Critic (daily) | completed | ✅ success | 2026-05-22 22:48 UTC |
 | Daily Backup — post_analysis | completed | ✅ success | 2026-05-22 22:35 UTC |
-| Agent — Daily Brief Email | completed | ✅ success | 2026-05-22 22:34 UTC |
 
 ---
 
@@ -64,16 +64,16 @@ _Months in config: `2026-04`, `2026-05`, `2026-06`_
 | pending_suggestions | 0 | — | ⚠️ empty |
 | config_history | 0 | — | ⚠️ empty |
 | borrow_data | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| market_context | 18 | — | ✅ |
-| news_findings | 8,559 | — | ✅ |
-| agent_scorecard | 40 | 2026-05-22 | ✅ |
+| market_context | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| news_findings | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| agent_scorecard | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
 
 ---
 
 ## 🩺 Health
 
-- ⚠️ 25 uncommitted file(s):
--    - 25 new/untracked
+- ⚠️ 24 uncommitted file(s):
+-    - 24 new/untracked
 
 ---
 
