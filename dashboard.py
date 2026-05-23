@@ -38,7 +38,7 @@ import plotly.express as px
 from finvizfinance.screener.overview import Overview
 from datetime import datetime, time as dt_time, timedelta
 import pytz
-import pytz
+from utils import parse_hhmm
 from data_logger import DataLogger
 from ta.momentum import RSIIndicator
 from data_provider import get_data_provider, get_fundamentals_provider
@@ -1213,7 +1213,6 @@ def _build_timeline_summary(arch_df):
 
     rows = []
     for (date, ticker), grp in arch_df.groupby(["Date", "Ticker"]):
-        from utils import parse_hhmm
         grp = grp.assign(_time_min=grp["ScanTime"].apply(parse_hhmm)) \
                  .sort_values("_time_min") \
                  .drop(columns=["_time_min"])
@@ -1808,7 +1807,6 @@ def timeline_archive_page():
     t_df = day_df[day_df["Ticker"] == ticker].copy()
     if not t_df.empty:
         if "ScanTime" in t_df.columns:
-            from utils import parse_hhmm
             t_df = t_df.assign(_time_min=t_df["ScanTime"].apply(parse_hhmm)) \
                        .sort_values("_time_min", ascending=False) \
                        .drop(columns=["_time_min"]) \
@@ -1836,7 +1834,6 @@ def timeline_archive_page():
             for col in _numeric_cols + ["FollowDay"]:
                 if col in fu_ticker.columns:
                     fu_ticker[col] = pd.to_numeric(fu_ticker[col], errors='coerce')
-            from utils import parse_hhmm
 
             fu_ticker = fu_ticker.assign(_time_min=fu_ticker["ScanTime"].apply(parse_hhmm))
 
@@ -3374,7 +3371,6 @@ def live_trades_page():
             m5.metric("💰 PnL",       f"${pnl:+.0f}")
 
             sub["_sort"] = sub["Status"].map(STATUS_ORDER).fillna(9)
-            from utils import parse_hhmm
             sub = sub.assign(_time_min=sub["EntryTime"].apply(parse_hhmm))
             sub = sub.sort_values(["_sort", "_time_min"], ascending=[True, False]).drop(columns=["_sort", "_time_min"])
             avail = [c for c in DISPLAY_COLS if c in sub.columns]

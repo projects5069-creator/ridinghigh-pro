@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-05-23 18:19:17 -05
+**Generated:** 2026-05-23 18:25:03 -05
 **Branch:** `main`
-**Latest commit:** `91f4610` — chore: mark P3.7/P4.5/P4.7/N3 Done + work log
+**Latest commit:** `2907d00` — fix(dashboard): P3.7 move parse_hhmm imports to top + cleanup
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `91f4610 (HEAD -> main) chore: mark P3.7/P4.5/P4.7/N3 Done + work log`
-- `ccc23d9 (origin/main, origin/HEAD) chore: 4 task closures + hygiene cleanup`
+- `2907d00 (HEAD -> main) fix(dashboard): P3.7 move parse_hhmm imports to top + cleanup`
+- `db6df80 (origin/main, origin/HEAD) chore: mark P3.7/P4.5/P4.7/N3 Done + work log`
+- `ccc23d9 chore: 4 task closures + hygiene cleanup`
 - `fb84ed8 fix(filter9): Fix D — union decision_log + paper_portfolio counters`
 - `2f6117d docs(p1.5): PIII postmortem + N5 follow-up`
-- `14aa22b docs(p1.2): cron drift investigation + bump P3.4 to HIGH`
 
 ---
 
@@ -61,12 +61,12 @@ _Months in config: `2026-04`, `2026-05`, `2026-06`_
 | score_analytics | 0 | — | ⚠️ empty |
 | postmortems | 71 | — | ✅ |
 | system_events | 8,632 | — | ✅ |
-| pending_suggestions | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| config_history | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| borrow_data | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| market_context | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| news_findings | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| agent_scorecard | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| pending_suggestions | 0 | — | ⚠️ empty |
+| config_history | 0 | — | ⚠️ empty |
+| borrow_data | 0 | — | ⚠️ empty |
+| market_context | 18 | — | ✅ |
+| news_findings | 8,559 | — | ✅ |
+| agent_scorecard | 40 | 2026-05-22 | ✅ |
 
 ---
 

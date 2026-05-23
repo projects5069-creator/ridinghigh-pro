@@ -66,3 +66,4 @@ Priority (first match wins):
 | 2026-05-23 17:25-17:45 | P1.5 PIII investigation + closure | Analysis | 0.4 | 14 entries in one day, Filter 9 leaked. Created N5 to verify post-19/5 fix |
 | 2026-05-23 17:30-18:00 | P1.1 + N5 root-cause investigation | Maintenance | 0.5 | HCWB×5 deep dive — found root cause: Sheets eventual consistency |
 | 2026-05-23 18:00-18:00 | Fix D — union of dl + pf counters | Maintenance | 0.5 | orchestrator.py build_account_state + counterfactual validation |
+| 2026-05-23 18:00-18:30 | P3.7 fix + cleanups | Maintenance | 0.6 | dashboard.py: removed duplicate pytz + moved 4 parse_hhmm to top. Deleted archive_2026-04-17 + 18 workflow .bak files |
