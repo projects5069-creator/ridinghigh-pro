@@ -1,9 +1,10 @@
 ---
 id: TASK-29
 title: N1 — Review 25 untracked files in project root
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-05-23 19:35'
+updated_date: '2026-05-23 21:47'
 labels: []
 dependencies: []
 priority: medium

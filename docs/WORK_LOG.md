@@ -46,3 +46,18 @@ Priority (first match wins):
 ## Week summaries
 
 (none yet — first weekly review: end of week 2026-05-24)
+| 2026-05-23 16:00-16:45 | DEV.1 plan + brainstorming | Development | 1.0 | docs/plans/dev1_devils_advocate.md created |
+| 2026-05-23 16:40-16:50 | N1 untracked cleanup | Maintenance | 0.5 | 25→3 untracked, archived TP10 + EDA research |
+
+### Updated running totals (excluding Meta)
+
+| Category | Hours | % |
+|---|---|---|
+| Maintenance | 4.5 | 82% |
+| Development | 1.0 | 18% |
+| Analysis | 0.0 | 0% |
+| Total budgeted | 5.5 | 100% |
+
+### Updated Rule §3 evaluation
+- D_pct = 18% < 20% → Rule §3.1 still fires → Development still needed for the week
+- After DEV.1 implementation: D_pct would rise above 20%

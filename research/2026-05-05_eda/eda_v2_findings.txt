@@ -1,0 +1,117 @@
+========================================================================
+DEEP EDA #2 — LONG vs SHORT — net moves analysis
+Run at: 2026-05-05 19:05
+========================================================================
+  2026-04: 154 rows
+  2026-05: 10 rows
+Total rows: 164
+
+Coverage:
+  MaxDrop%: 152 / 164 non-null
+  MaxRise%: 162 / 164 non-null
+  net_d5_pct: 93 / 164 non-null
+  net_d1_pct: 147 / 164 non-null
+
+========================================================================
+DEDUPLICATION — keep first scan per ticker
+========================================================================
+Before dedup: 164 rows
+After dedup:  101 rows (101 unique tickers)
+
+========================================================================
+Q1+Q2 — NET MOVE BY SCORE TIER (deduplicated, first scan per ticker)
+========================================================================
+
+N with both Score and D5_Close: 58
+
+  Score LOW     [0-40]: n=10
+    NET move @ D5_Close:  mean= -3.71%  median= +2.57%
+    NET move @ D1_Close:  mean= -6.37%  median= -8.12%
+    MaxDrop%:  mean=-22.87%  median=-19.54%
+    MaxRise%:  mean=+56.65%  median=+34.64%
+    D5 < ScanPrice (loss for long, win for short): 4/10 = 40%
+    D5 > ScanPrice (win for long, loss for short):  6/10 = 60%
+
+  Score MID-LO  [40-60]: n=16
+    NET move @ D5_Close:  mean=+14.53%  median= +6.95%
+    NET move @ D1_Close:  mean=+40.61%  median=+10.41%
+    MaxDrop%:  mean=-15.11%  median= -9.56%
+    MaxRise%:  mean=+794.08%  median=+30.63%
+    D5 < ScanPrice (loss for long, win for short): 6/16 = 38%
+    D5 > ScanPrice (win for long, loss for short):  10/16 = 62%
+
+  Score MID-HI  [60-80]: n=19
+    NET move @ D5_Close:  mean= +4.03%  median=-12.59%
+    NET move @ D1_Close:  mean= +5.63%  median= -4.67%
+    MaxDrop%:  mean=-24.69%  median=-23.08%
+    MaxRise%:  mean=+46.24%  median=+38.31%
+    D5 < ScanPrice (loss for long, win for short): 11/19 = 58%
+    D5 > ScanPrice (win for long, loss for short):  8/19 = 42%
+
+  Score HIGH    [80-101]: n=13
+    NET move @ D5_Close:  mean= +3.61%  median=-23.76%
+    NET move @ D1_Close:  mean= -9.58%  median=-11.11%
+    MaxDrop%:  mean=-31.70%  median=-31.17%
+    MaxRise%:  mean=+61.89%  median=+28.44%
+    D5 < ScanPrice (loss for long, win for short): 8/13 = 62%
+    D5 > ScanPrice (win for long, loss for short):  5/13 = 38%
+
+========================================================================
+Q3 — PURE SHORTS (MaxRise% < 7% — no SL hit ever)
+========================================================================
+
+Total: 91
+Pure shorts (MaxRise% < 7%): 11 (12%)
+  MaxDrop%:        mean=-35.46%, median=-37.10%
+  net_d5_pct:      mean=-33.59%, median=-32.68%
+
+  Profile of pure shorts (means):
+            Score: pure_shorts=    58.31  others=    63.01  diff=   -4.70
+    ⭐     Float%: pure_shorts=  1147.51  others=  2026.21  diff= -878.70
+    ⭐        Gap: pure_shorts=    10.25  others=    96.21  diff=  -85.96
+             ATRX: pure_shorts=     4.58  others=     4.47  diff=   +0.10
+    ⭐    REL_VOL: pure_shorts=    28.95  others=    55.57  diff=  -26.62
+    ⭐        RSI: pure_shorts=    40.93  others=    64.67  diff=  -23.74
+              MxV: pure_shorts= -2213.44  others= -2459.50  diff= +246.06
+            RunUp: pure_shorts=    42.68  others=    40.48  diff=   +2.20
+    ⭐  MarketCap: pure_shorts=24731938.50  others=141328702.68  diff=-116596764.18
+
+========================================================================
+Q4 — PURE LONGS (D5_Close > ScanPrice — net positive after pump)
+========================================================================
+
+Total: 58
+Net positive >5%  by D5: 26 (45%)
+Net positive >10% by D5: 19  (33%)
+
+  Profile of net-positive (>5%) (means):
+            Score: long=    59.13  others=    62.60  diff=   -3.47
+    ⭐     Float%: long=  3130.13  others=  2126.05  diff=+1004.08
+              Gap: long=    33.05  others=    43.20  diff=  -10.15
+             ATRX: long=     3.41  others=     4.23  diff=   -0.82
+          REL_VOL: long=    48.62  others=    52.41  diff=   -3.79
+              RSI: long=    63.07  others=    64.13  diff=   -1.06
+    ⭐        MxV: long= -3485.59  others= -1955.82  diff=-1529.77
+            RunUp: long=    26.36  others=    28.91  diff=   -2.55
+        MarketCap: long=132547777.00  others=150340630.50  diff=-17792853.50
+
+========================================================================
+Q5 — 2x2 MATRIX: dropped 10%+ × rose 7%+
+========================================================================
+
+                        MaxRise<7%   MaxRise>=7%
+    MaxDrop>=10%                11         60
+    MaxDrop<10%                  0         20
+
+Group analysis (net_d5 mean):
+  DROPPED ONLY (pure short ⭐)   : n= 11, net_d5_mean=-33.59%
+  DROPPED + ROSE (whipsaw)      : n= 60, net_d5_mean=-5.78%
+  ROSE ONLY (pure long ⭐)       : n= 20, net_d5_mean=+55.24%
+  neither (range-bound)         : n=0
+
+========================================================================
+PLOTS
+========================================================================
+  Saved: net_d5_distribution.png
+  Saved: net_d5_by_tier.png
+  Saved: drop_vs_rise_scatter.png

@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-05-23 15:31:49 -05
+**Generated:** 2026-05-23 16:47:45 -05
 **Branch:** `main`
-**Latest commit:** `e0e9440` — feat(meta): META.1 work allocation policy v2
+**Latest commit:** `2b90042` — chore(cleanup): N1 untracked review + DEV.1 plan
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `e0e9440 (HEAD -> main) feat(meta): META.1 work allocation policy v2`
-- `be6df95 (origin/main, origin/HEAD) feat(backlog): seed 35 tasks + next-session pointer`
+- `2b90042 (HEAD -> main) chore(cleanup): N1 untracked review + DEV.1 plan`
+- `d7ab3b3 (origin/main, origin/HEAD) feat(meta): META.1 work allocation policy v2`
+- `be6df95 feat(backlog): seed 35 tasks + next-session pointer`
 - `0d233dc chore(workflow): P2.5 hygiene — gitignore *.bak_* + clean "גיבוי זמני" archive`
 - `32c3477 tools: add .rh-run.sh clipboard wrapper for Claude Code output`
-- `1edf278 docs(claude): mandatory skills usage + project skills map`
 
 ---
 
@@ -32,11 +32,11 @@ _See `OPEN_ISSUES.md` for full list_
 
 | Workflow | Status | Conclusion | Started |
 |---|---|---|---|
+| Agent — End of Day | completed | ✅ success | 2026-05-23 21:40 UTC |
 | Health Audit | completed | ✅ success | 2026-05-23 17:56 UTC |
 | Health Audit | completed | ✅ success | 2026-05-23 11:57 UTC |
 | Health Audit | completed | ✅ success | 2026-05-23 06:14 UTC |
 | Agent — Critic (daily) | completed | ✅ success | 2026-05-22 22:48 UTC |
-| Daily Backup — post_analysis | completed | ✅ success | 2026-05-22 22:35 UTC |
 
 ---
 
@@ -63,17 +63,15 @@ _Months in config: `2026-04`, `2026-05`, `2026-06`_
 | system_events | 8,632 | — | ✅ |
 | pending_suggestions | 0 | — | ⚠️ empty |
 | config_history | 0 | — | ⚠️ empty |
-| borrow_data | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| market_context | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| news_findings | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| agent_scorecard | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| borrow_data | 0 | — | ⚠️ empty |
+| market_context | 18 | — | ✅ |
+| news_findings | 8,559 | — | ✅ |
+| agent_scorecard | 40 | 2026-05-22 | ✅ |
 
 ---
 
 ## 🩺 Health
-
-- ⚠️ 24 uncommitted file(s):
--    - 24 new/untracked
+✅ All checks passed.
 
 ---
 
