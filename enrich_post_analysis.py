@@ -141,7 +141,11 @@ def run(backfill: bool = False):
                 peak_time   = day_tl.loc[peak_idx, "ScanTime"]
                 peak_price  = round(day_tl.loc[peak_idx, "Price"], 2)
                 peak_score  = round(day_tl.loc[peak_idx, "Score"], 2)
-                first_price = round(day_tl.sort_values("ScanTime").iloc[0]["Price"], 2)
+                from utils import parse_hhmm
+                _sorted = day_tl.assign(_time_min=day_tl["ScanTime"].apply(parse_hhmm)) \
+                                .sort_values("_time_min") \
+                                .drop(columns=["_time_min"])
+                first_price = round(_sorted.iloc[0]["Price"], 2)
                 run_up_pct  = round((intra_high - first_price) / first_price * 100, 2) if first_price > 0 else 0
 
                 pa.at[idx, "IntraHigh"]      = intra_high

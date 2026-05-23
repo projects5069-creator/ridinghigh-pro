@@ -352,7 +352,10 @@ def _render_today_trades(df: pd.DataFrame):
     ]
 
     if "EntryTime" in display_df.columns:
-        display_df = display_df.sort_values("EntryTime", ascending=False)
+        from utils import parse_hhmm
+        display_df = display_df.assign(_time_min=display_df["EntryTime"].apply(parse_hhmm)) \
+                               .sort_values("_time_min", ascending=False) \
+                               .drop(columns=["_time_min"])
 
     st.dataframe(display_df[cols_to_show], use_container_width=True, hide_index=True)
 

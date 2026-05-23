@@ -282,7 +282,11 @@ def read_latest_signals() -> List[Dict[str, Any]]:
             return []
 
         # Find latest ScanTime
-        latest_scan_time = max(str(r.get("ScanTime", "")) for r in today_records)
+        from utils import parse_hhmm
+        latest_scan_time = max(
+            (str(r.get("ScanTime", "")) for r in today_records),
+            key=parse_hhmm,
+        )
         latest_records = [r for r in today_records if str(r.get("ScanTime", "")) == latest_scan_time]
 
         signals = [_signal_from_timeline_row(r) for r in latest_records]

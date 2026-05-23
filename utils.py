@@ -72,6 +72,41 @@ def get_peru_time():
     return datetime.now(PERU_TZ)
 
 
+def parse_hhmm(time_str) -> int:
+    """
+    Parse time-of-day string to minute-of-day (int).
+
+    Handles 3 formats produced by Google Sheets / Python writes:
+      - "8:45"     (unpadded HH:MM)
+      - "08:45"    (padded HH:MM)
+      - "08:45:00" (padded HH:MM:SS — paper_portfolio EntryTime/ExitTime)
+
+    Returns:
+      int 0-1439 on success
+      -1 on failure (so it sorts FIRST in ascending — caller can filter)
+
+    Why: lex compare on "9:58" vs "14:59" returns "9:58" as max (because
+    '9' > '1'). Use this function as key= in sort_values()/max()/min()
+    to compare numerically.
+    """
+    if time_str is None:
+        return -1
+    s = str(time_str).strip()
+    if not s or s.lower() in ("nan", "none", "null", ""):
+        return -1
+    parts = s.split(":")
+    if len(parts) < 2:
+        return -1
+    try:
+        h = int(parts[0])
+        m = int(parts[1])
+        if not (0 <= h <= 23) or not (0 <= m <= 59):
+            return -1
+        return h * 60 + m
+    except (ValueError, TypeError):
+        return -1
+
+
 def is_trading_day(date=None):
     """
     Returns True if the given date is a NASDAQ trading day.

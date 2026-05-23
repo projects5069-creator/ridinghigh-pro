@@ -1213,7 +1213,10 @@ def _build_timeline_summary(arch_df):
 
     rows = []
     for (date, ticker), grp in arch_df.groupby(["Date", "Ticker"]):
-        grp = grp.sort_values("ScanTime")
+        from utils import parse_hhmm
+        grp = grp.assign(_time_min=grp["ScanTime"].apply(parse_hhmm)) \
+                 .sort_values("_time_min") \
+                 .drop(columns=["_time_min"])
         scores = grp["Score"].values
         times  = grp["ScanTime"].values
 
@@ -1805,7 +1808,11 @@ def timeline_archive_page():
     t_df = day_df[day_df["Ticker"] == ticker].copy()
     if not t_df.empty:
         if "ScanTime" in t_df.columns:
-            t_df = t_df.sort_values("ScanTime", ascending=False).reset_index(drop=True)
+            from utils import parse_hhmm
+            t_df = t_df.assign(_time_min=t_df["ScanTime"].apply(parse_hhmm)) \
+                       .sort_values("_time_min", ascending=False) \
+                       .drop(columns=["_time_min"]) \
+                       .reset_index(drop=True)
         for col in _numeric_cols:
             if col in t_df.columns:
                 t_df[col] = pd.to_numeric(t_df[col], errors='coerce')
@@ -1829,8 +1836,14 @@ def timeline_archive_page():
             for col in _numeric_cols + ["FollowDay"]:
                 if col in fu_ticker.columns:
                     fu_ticker[col] = pd.to_numeric(fu_ticker[col], errors='coerce')
-            fu_ticker = fu_ticker.sort_values(["FollowDay", "Date", "ScanTime"],
+            from utils import parse_hhmm
+
+            fu_ticker = fu_ticker.assign(_time_min=fu_ticker["ScanTime"].apply(parse_hhmm))
+
+            fu_ticker = fu_ticker.sort_values(["FollowDay", "Date", "_time_min"],
                                               ascending=[True, True, False])
+
+            fu_ticker = fu_ticker.drop(columns=["_time_min"])
             c1, c2, c3 = st.columns(3)
             for day, col_ph in zip([1, 2, 3], [c1, c2, c3]):
                 day_rows = fu_ticker[fu_ticker["FollowDay"] == day]
@@ -3361,7 +3374,9 @@ def live_trades_page():
             m5.metric("💰 PnL",       f"${pnl:+.0f}")
 
             sub["_sort"] = sub["Status"].map(STATUS_ORDER).fillna(9)
-            sub = sub.sort_values(["_sort", "EntryTime"], ascending=[True, False]).drop(columns=["_sort"])
+            from utils import parse_hhmm
+            sub = sub.assign(_time_min=sub["EntryTime"].apply(parse_hhmm))
+            sub = sub.sort_values(["_sort", "_time_min"], ascending=[True, False]).drop(columns=["_sort", "_time_min"])
             avail = [c for c in DISPLAY_COLS if c in sub.columns]
             tbl = sub[avail].reset_index(drop=True)
             fmt = {c: "{:.2f}" for c in ["EntryPrice", "CurrentPrice", "TP10_Price", "SL_Price", "PnL_$"] if c in tbl.columns}

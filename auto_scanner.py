@@ -520,7 +520,10 @@ def _save_daily_summary(gc, today: str, ws_timeline):
 
         summary_rows = []
         for ticker, grp in today_tl.groupby("Ticker"):
-            grp = grp.sort_values("ScanTime")
+            from utils import parse_hhmm
+            grp = grp.assign(_time_min=grp["ScanTime"].apply(parse_hhmm)) \
+                     .sort_values("_time_min") \
+                     .drop(columns=["_time_min"])
             peak_idx = grp["Score"].idxmax()
             peak_row = grp.loc[peak_idx]
             summary_rows.append({

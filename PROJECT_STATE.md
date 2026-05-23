@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-05-20 15:23:44 -05
+**Generated:** 2026-05-22 19:34:30 -05
 **Branch:** `main`
-**Latest commit:** `fe81a42` — fix(429+bug): check_emergency_stop — cache + 24h window
+**Latest commit:** `038b278` — fix(scan-freshness): parse_hhmm utility for numeric time comparison
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `fe81a42 (HEAD -> main) fix(429+bug): check_emergency_stop — cache + 24h window`
-- `8f30eee (origin/main, origin/HEAD) fix(sentinel): position_sync — WARN on fetch failure, BLOCK only on real drift`
+- `038b278 (HEAD -> main) fix(scan-freshness): parse_hhmm utility for numeric time comparison`
+- `09385c6 (origin/main, origin/HEAD) fix(429+bug): check_emergency_stop — cache + 24h window`
+- `8f30eee fix(sentinel): position_sync — WARN on fetch failure, BLOCK only on real drift`
 - `6625584 fix(429): retry + dedup for auto_scanner timeline_live writes`
 - `81d41c0 feat(daily-brief): per-trade detail + Win Rate fix`
-- `5f3918a feat(sentinel): switch SENTINEL_MODE shadow -> active`
 
 ---
 
@@ -32,11 +32,11 @@ _See `OPEN_ISSUES.md` for full list_
 
 | Workflow | Status | Conclusion | Started |
 |---|---|---|---|
-| RidingHigh Auto Scanner | completed | ✅ success | 2026-05-20 20:23 UTC |
-| Agent — Every Minute (DRY_RUN) | in_progress | ⏳ — | 2026-05-20 20:23 UTC |
-| Agent — Every Minute (DRY_RUN) | completed | ✅ success | 2026-05-20 20:22 UTC |
-| RidingHigh Auto Scanner | completed | ✅ success | 2026-05-20 20:22 UTC |
-| Agent — Every Minute (DRY_RUN) | completed | ✅ success | 2026-05-20 20:21 UTC |
+| Agent — Critic (daily) | completed | ✅ success | 2026-05-22 22:48 UTC |
+| Daily Backup — post_analysis | completed | ✅ success | 2026-05-22 22:35 UTC |
+| Agent — Daily Brief Email | completed | ✅ success | 2026-05-22 22:34 UTC |
+| Post Analysis Collector | completed | ✅ success | 2026-05-22 22:14 UTC |
+| Agent — End of Day | completed | ✅ success | 2026-05-22 21:53 UTC |
 
 ---
 
@@ -47,33 +47,33 @@ _Months in config: `2026-04`, `2026-05`, `2026-06`_
 
 | Sheet | Total rows | Last date | Status |
 |---|---|---|---|
-| timeline_live | 237,320 | 2026-05-20 | ✅ |
-| daily_snapshots | 1,135 | 2026-05-20 | ✅ |
-| daily_summary | 1,238 | 2026-05-20 | ✅ |
-| post_analysis | 44 | 2026-05-19 | ✅ |
-| portfolio | 54 | 2026-05-20 | ✅ |
-| portfolio_live | 38 | 2026-05-20 | ✅ |
-| score_tracker | 1,220 | 2026-05-19 | ✅ |
-| live_trades | 1,220 | 2026-05-19 | ✅ |
+| timeline_live | 261,593 | 2026-05-22 | ✅ |
+| daily_snapshots | 1,293 | 2026-05-22 | ✅ |
+| daily_summary | 1,405 | 2026-05-22 | ✅ |
+| post_analysis | 55 | 2026-05-22 | ✅ |
+| portfolio | 65 | 2026-05-22 | ✅ |
+| portfolio_live | 48 | 2026-05-22 | ✅ |
+| score_tracker | 1,419 | 2026-05-22 | ✅ |
+| live_trades | 1,419 | 2026-05-22 | ✅ |
 | ticker_follow_up | 12,477 | 2026-05-08 | ✅ |
 | decision_log | 16,231 | — | ✅ |
 | paper_portfolio | 89 | — | ✅ |
 | score_analytics | 0 | — | ⚠️ empty |
-| postmortems | 69 | — | ✅ |
-| system_events | 3,599 | — | ✅ |
+| postmortems | 71 | — | ✅ |
+| system_events | 8,632 | — | ✅ |
 | pending_suggestions | 0 | — | ⚠️ empty |
 | config_history | 0 | — | ⚠️ empty |
-| borrow_data | 0 | — | ⚠️ empty |
-| market_context | 11 | — | ✅ |
-| news_findings | 7,658 | — | ✅ |
-| agent_scorecard | 28 | 2026-05-19 | ✅ |
+| borrow_data | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| market_context | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| news_findings | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| agent_scorecard | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
 
 ---
 
 ## 🩺 Health
 
-- ⚠️ 81 uncommitted file(s):
--    - 81 new/untracked
+- ⚠️ 87 uncommitted file(s):
+-    - 87 new/untracked
 
 ---
 
