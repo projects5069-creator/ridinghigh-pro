@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-05-22 19:34:30 -05
+**Generated:** 2026-05-22 20:58:24 -05
 **Branch:** `main`
-**Latest commit:** `038b278` — fix(scan-freshness): parse_hhmm utility for numeric time comparison
+**Latest commit:** `f9fff79` — fix(sheets): force TEXT format on time-of-day columns
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `038b278 (HEAD -> main) fix(scan-freshness): parse_hhmm utility for numeric time comparison`
-- `09385c6 (origin/main, origin/HEAD) fix(429+bug): check_emergency_stop — cache + 24h window`
+- `f9fff79 (HEAD -> main) fix(sheets): force TEXT format on time-of-day columns`
+- `5cc658b (origin/main, origin/HEAD) fix(scan-freshness): parse_hhmm utility for numeric time comparison`
+- `09385c6 fix(429+bug): check_emergency_stop — cache + 24h window`
 - `8f30eee fix(sentinel): position_sync — WARN on fetch failure, BLOCK only on real drift`
 - `6625584 fix(429): retry + dedup for auto_scanner timeline_live writes`
-- `81d41c0 feat(daily-brief): per-trade detail + Win Rate fix`
 
 ---
 
@@ -63,17 +63,17 @@ _Months in config: `2026-04`, `2026-05`, `2026-06`_
 | system_events | 8,632 | — | ✅ |
 | pending_suggestions | 0 | — | ⚠️ empty |
 | config_history | 0 | — | ⚠️ empty |
-| borrow_data | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| market_context | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| news_findings | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| borrow_data | 0 | — | ⚠️ empty |
+| market_context | 18 | — | ✅ |
+| news_findings | 8,559 | — | ✅ |
 | agent_scorecard | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
 
 ---
 
 ## 🩺 Health
 
-- ⚠️ 87 uncommitted file(s):
--    - 87 new/untracked
+- ⚠️ 90 uncommitted file(s):
+-    - 90 new/untracked
 
 ---
 

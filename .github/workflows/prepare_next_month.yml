@@ -36,6 +36,11 @@ jobs:
           GOOGLE_CREDENTIALS_JSON: ${{ secrets.GOOGLE_CREDENTIALS_JSON }}
         run: python3 -m agent.setup.create_agent_sheets --next-month
 
+      - name: Apply TEXT format to time columns
+        env:
+          GOOGLE_CREDENTIALS_JSON: ${{ secrets.GOOGLE_CREDENTIALS_JSON }}
+        run: python3 apply_text_format_v1.py --next-month
+
       - name: Commit and push config
         run: |
           git config user.name "github-actions[bot]"
