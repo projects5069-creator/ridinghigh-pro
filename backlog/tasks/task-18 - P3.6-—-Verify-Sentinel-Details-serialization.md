@@ -1,9 +1,10 @@
 ---
 id: TASK-18
 title: P3.6 — Verify Sentinel Details serialization
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-05-23 19:33'
+updated_date: '2026-05-24 00:03'
 labels: []
 dependencies: []
 priority: medium
