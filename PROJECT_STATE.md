@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-05-23 21:02:42 -05
+**Generated:** 2026-05-23 21:21:38 -05
 **Branch:** `main`
-**Latest commit:** `6f0fe85` — docs(p4.3): verified not-a-bug — live_trades sharing is by design
+**Latest commit:** `ad9753c` — fix(auto_scanner): P3.1 — wrap 6 unsafe sheets writes in retry
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `6f0fe85 (HEAD -> main) docs(p4.3): verified not-a-bug — live_trades sharing is by design`
-- `f431ed3 (origin/main, origin/HEAD) docs(pk): v2.31 — 5 changelog entries for 2026-05-23 session`
+- `ad9753c (HEAD -> main) fix(auto_scanner): P3.1 — wrap 6 unsafe sheets writes in retry`
+- `09a955b (origin/main, origin/HEAD) docs(p4.3): verified not-a-bug — live_trades sharing is by design`
+- `f431ed3 docs(pk): v2.31 — 5 changelog entries for 2026-05-23 session`
 - `e4d3c84 refactor(p4.6): AST-based check_02 + hidden bug fix`
 - `d174dd1 refactor(dashboard): P3.2 consolidate 4 duplicate styling fns`
-- `2b574f5 docs(p4.1): replace stale OPEN_ISSUES.md with stub`
 
 ---
 
@@ -64,8 +64,8 @@ _Months in config: `2026-04`, `2026-05`, `2026-06`_
 | pending_suggestions | 0 | — | ⚠️ empty |
 | config_history | 0 | — | ⚠️ empty |
 | borrow_data | 0 | — | ⚠️ empty |
-| market_context | 18 | — | ✅ |
-| news_findings | 8,559 | — | ✅ |
+| market_context | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| news_findings | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
 | agent_scorecard | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
 
 ---

@@ -66,8 +66,8 @@ get_gsheets_client = sheets_manager._get_gc  # alias for backward compat
 
 def df_to_sheet(ws, df):
     data = [df.columns.tolist()] + df.astype(str).values.tolist()
-    ws.clear()
-    ws.update(data)
+    sheets_manager._with_retry(ws.clear)
+    sheets_manager.safe_update(ws, data)
 
 # ── Market Cap cache ─────────────────────────────────────────────────────────
 _mc_cache = {}
@@ -931,7 +931,7 @@ def update_ticker_follow_up(gc, now_peru):
                 # First write — set header + data
                 df_to_sheet(ws_fu, rows_df)
             else:
-                ws_fu.append_rows(rows_df.astype(str).values.tolist(),
+                sheets_manager.safe_append_rows(ws_fu, rows_df.astype(str).values.tolist(),
                                   value_input_option="USER_ENTERED")
             print(f"📍 ticker_follow_up: wrote {len(new_rows)} rows (follow days 1-3)")
 
@@ -1229,11 +1229,11 @@ def sync_score_tracker(gc, now_peru):
         # Only read the header row (A1:R1) — avoids downloading thousands of rows
         header = ws_st.row_values(1)
         if header == COLS:
-            ws_st.append_rows(new_df.astype(str).values.tolist())
+            sheets_manager.safe_append_rows(ws_st, new_df.astype(str).values.tolist())
         else:
             # First run or old schema — rewrite with full header
-            ws_st.clear()
-            ws_st.update("A1", [COLS] + new_df.astype(str).values.tolist())
+            sheets_manager._with_retry(ws_st.clear)
+            sheets_manager.safe_update(ws_st, "A1", [COLS] + new_df.astype(str).values.tolist())
 
         print(f"[ScoreTracker] ✅ {len(new_rows)} rows at {scan_time}")
 

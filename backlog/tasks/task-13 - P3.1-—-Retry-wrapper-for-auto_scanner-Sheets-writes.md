@@ -1,9 +1,10 @@
 ---
 id: TASK-13
 title: P3.1 — Retry wrapper for auto_scanner Sheets writes
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-05-23 19:33'
+updated_date: '2026-05-24 02:21'
 labels: []
 dependencies: []
 priority: medium
