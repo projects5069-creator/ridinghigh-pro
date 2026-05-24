@@ -15,6 +15,7 @@ import sys
 import os
 import logging
 from datetime import datetime, timedelta
+from config import MIN_SCORE_DISPLAY
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
@@ -528,10 +529,10 @@ def _render_near_miss_skips(time_filter: str):
     # Score filter >= 60
     if "Score" in skips.columns:
         skips["Score"] = pd.to_numeric(skips["Score"], errors="coerce")
-        skips = skips[skips["Score"] >= 60]
+        skips = skips[skips["Score"] >= MIN_SCORE_DISPLAY]
 
     if skips.empty:
-        st.info("No near-miss SKIPs (Score >= 60) found.")
+        st.info(f"No near-miss SKIPs (Score >= {MIN_SCORE_DISPLAY}) found.")
         return
 
     # Time filter

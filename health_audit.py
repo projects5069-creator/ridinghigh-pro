@@ -284,39 +284,96 @@ def check_01_duplicate_functions():
 
 
 def check_02_hardcoded_thresholds():
-    """C2: Find hardcoded thresholds that should be in config.py."""
-    suspicious_patterns = [
-        (r"\b0\.07\b", "SL_THRESHOLD_FRAC (0.07)"),
-        (r"\b0\.10\b(?!\d)", "TP_THRESHOLD_FRAC (0.10)"),
-        (r">=\s*60\b", "MIN_SCORE_DISPLAY (60)"),
-        (r">=\s*70\b", "MIN_SCORE threshold (70)"),
-    ]
+    """C2: Find hardcoded thresholds that should be in config.py.
+
+    AST-based (P4.6, 2026-05-23): walks Compare nodes only, checking the
+    left-side variable name for score/threshold context. Skips docstrings,
+    comments, string literals automatically. Whitelist known false-positive
+    contexts (quantile, total_seconds, sleep, range, etc).
+    """
+    import ast as _ast
+
+    SUSPECTS = {
+        0.07: "SL_THRESHOLD_FRAC (0.07)",
+        0.10: "TP_THRESHOLD_FRAC (0.10)",
+        60:   "MIN_SCORE_DISPLAY (60)",
+        70:   "MIN_SCORE threshold (70)",
+    }
+
+    SCORE_HINTS = {
+        "score", "Score", "SCORE",
+        "mxv", "MxV", "MXV",
+        "runup", "RunUp", "RUNUP", "run_up",
+        "threshold", "THRESHOLD",
+        "min_score", "MIN_SCORE", "AGENT_MIN_SCORE",
+    }
+
+    NON_THRESHOLD_CALLS = {
+        "quantile", "percentile", "total_seconds",
+        "sleep", "range", "enumerate", "round",
+        "slice", "format", "isclose", "timedelta",
+    }
+
+    def _is_score_context(left_node):
+        if isinstance(left_node, _ast.Name):
+            return left_node.id in SCORE_HINTS or any(h in left_node.id for h in SCORE_HINTS)
+        if isinstance(left_node, _ast.Attribute):
+            return left_node.attr in SCORE_HINTS or any(h in left_node.attr for h in SCORE_HINTS)
+        if isinstance(left_node, _ast.Subscript):
+            sl = left_node.slice
+            if isinstance(sl, _ast.Constant) and isinstance(sl.value, str):
+                return sl.value in SCORE_HINTS or any(h in sl.value for h in SCORE_HINTS)
+        if isinstance(left_node, _ast.Call):
+            if isinstance(left_node.func, _ast.Name):
+                if left_node.func.id in NON_THRESHOLD_CALLS:
+                    return False
+                return "score" in left_node.func.id.lower()
+            if isinstance(left_node.func, _ast.Attribute):
+                if left_node.func.attr in NON_THRESHOLD_CALLS:
+                    return False
+                return "score" in left_node.func.attr.lower()
+        return False
 
     findings = []
-    for f in REPO_ROOT.glob("*.py"):
-        if "_BEFORE_" in f.name or f.name in {"config.py", "test_formulas.py",
-                                              "test_utils.py", "health_audit.py"}:
+    skip_files = {"config.py", "test_formulas.py", "test_utils.py", "health_audit.py"}
+
+    py_files = list(REPO_ROOT.glob("*.py")) + list(REPO_ROOT.glob("agent/**/*.py"))
+
+    for f in py_files:
+        name = f.name
+        if ".bak_" in name or ".BEFORE_" in name or "_BEFORE_" in name:
             continue
+        if name in skip_files:
+            continue
+
         try:
-            content = f.read_text(encoding="utf-8")
-            for pattern, label in suspicious_patterns:
-                matches = list(re.finditer(pattern, content))
-                if matches:
-                    line_nums = []
-                    for m in matches[:3]:
-                        line_no = content[:m.start()].count("\n") + 1
-                        line_nums.append(line_no)
-                    findings.append(f"{f.name}:{line_nums} → {label}")
-        except Exception:
+            src = f.read_text(encoding="utf-8")
+            tree = _ast.parse(src, filename=str(f))
+        except (SyntaxError, UnicodeDecodeError, OSError):
             continue
+
+        for node in _ast.walk(tree):
+            if not isinstance(node, _ast.Compare):
+                continue
+            for op, comp in zip(node.ops, node.comparators):
+                if not isinstance(op, (_ast.GtE, _ast.LtE, _ast.Gt, _ast.Lt, _ast.Eq)):
+                    continue
+                val = None
+                if isinstance(comp, _ast.Constant) and isinstance(comp.value, (int, float)):
+                    val = comp.value
+                if val is None or val not in SUSPECTS:
+                    continue
+                if not _is_score_context(node.left):
+                    continue
+                rel = f.relative_to(REPO_ROOT)
+                findings.append(f"{rel}:{node.lineno} -> {SUSPECTS[val]}")
 
     if not findings:
         return CheckResult("C2", "Hardcoded thresholds", "Code integrity",
-                           PASSED, "No hardcoded thresholds found")
-
+                           PASSED, "No hardcoded thresholds found (AST-based scan)")
     return CheckResult("C2", "Hardcoded thresholds", "Code integrity",
                        WARNING, f"{len(findings)} hardcoded threshold(s)",
-                       "; ".join(findings[:5]))
+                       "; ".join(findings[:10]))
 
 
 def check_03_imports_consistency():

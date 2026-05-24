@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-05-23 20:16:39 -05
+**Generated:** 2026-05-23 20:34:43 -05
 **Branch:** `main`
-**Latest commit:** `880bb3e` — refactor(dashboard): P3.2 consolidate 4 duplicate styling fns
+**Latest commit:** `b2a18c5` — refactor(p4.6): AST-based check_02 + hidden bug fix
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `880bb3e (HEAD -> main) refactor(dashboard): P3.2 consolidate 4 duplicate styling fns`
-- `2b574f5 (origin/main, origin/HEAD) docs(p4.1): replace stale OPEN_ISSUES.md with stub`
+- `b2a18c5 (HEAD -> main) refactor(p4.6): AST-based check_02 + hidden bug fix`
+- `d174dd1 (origin/main, origin/HEAD) refactor(dashboard): P3.2 consolidate 4 duplicate styling fns`
+- `2b574f5 docs(p4.1): replace stale OPEN_ISSUES.md with stub`
 - `e99b54e docs(p3.5): D1_Open outliers — all 5 verified as real events`
 - `dbf4b57 docs(n4): Daily Brief code location verified correct`
-- `58f3efd docs(p3.6): Sentinel serialization verified clean`
 
 ---
 

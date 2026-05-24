@@ -73,3 +73,4 @@ Priority (first match wins):
 | 2026-05-23 19:10-19:15 | P3.5 D1_Open outlier analysis | Analysis | 0.2 | 5 outliers — all real events (WOK split, TDIC pumps, PCLA gap up). No data bugs. |
 | 2026-05-23 19:20-19:30 | P4.1 OPEN_ISSUES rebuild | Maintenance | 0.2 | Archived 617-line stale file, replaced with 30-line stub pointing to Backlog |
 | 2026-05-23 19:30-20:15 | P3.2 refactor 4 nested defs | Maintenance | 0.75 | 4 nested color_score/highlight_score → 2 module-level. -19 lines. N19 historical. |
+| 2026-05-23 20:00-20:35 | P4.6 check_02 AST refactor + bug fix | Maintenance | 0.6 | regex->AST (7->0 FP). Found+fixed trade_history_page.py:531 hardcoded 60->MIN_SCORE_DISPLAY. |
