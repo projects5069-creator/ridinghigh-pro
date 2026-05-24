@@ -75,3 +75,4 @@ Priority (first match wins):
 | 2026-05-23 19:30-20:15 | P3.2 refactor 4 nested defs | Maintenance | 0.75 | 4 nested color_score/highlight_score → 2 module-level. -19 lines. N19 historical. |
 | 2026-05-23 20:00-20:35 | P4.6 check_02 AST refactor + bug fix | Maintenance | 0.6 | regex->AST (7->0 FP). Found+fixed trade_history_page.py:531 hardcoded 60->MIN_SCORE_DISPLAY. |
 | 2026-05-23 20:35-20:50 | P4.4 PK_v2 update v2.27-v2.31 | Maintenance | 0.25 | 5 changelog entries. Bumped 2.26->2.31. |
+| 2026-05-23 20:55-21:05 | P4.3 verify | Maintenance | 0.15 | live_trades sheet_id shared with score_tracker by design. 3->5 expander: no match found. |

@@ -1,9 +1,10 @@
 ---
 id: TASK-21
 title: P4.3 — Dashboard 3→5 expander + live_trades sheet_id drift
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-05-23 19:35'
+updated_date: '2026-05-24 02:02'
 labels: []
 dependencies: []
 priority: low
