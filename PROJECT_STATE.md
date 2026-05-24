@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-05-23 20:34:43 -05
+**Generated:** 2026-05-23 20:51:12 -05
 **Branch:** `main`
-**Latest commit:** `b2a18c5` — refactor(p4.6): AST-based check_02 + hidden bug fix
+**Latest commit:** `f976462` — docs(pk): v2.31 — 5 changelog entries for 2026-05-23 session
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `b2a18c5 (HEAD -> main) refactor(p4.6): AST-based check_02 + hidden bug fix`
-- `d174dd1 (origin/main, origin/HEAD) refactor(dashboard): P3.2 consolidate 4 duplicate styling fns`
+- `f976462 (HEAD -> main) docs(pk): v2.31 — 5 changelog entries for 2026-05-23 session`
+- `e4d3c84 (origin/main, origin/HEAD) refactor(p4.6): AST-based check_02 + hidden bug fix`
+- `d174dd1 refactor(dashboard): P3.2 consolidate 4 duplicate styling fns`
 - `2b574f5 docs(p4.1): replace stale OPEN_ISSUES.md with stub`
 - `e99b54e docs(p3.5): D1_Open outliers — all 5 verified as real events`
-- `dbf4b57 docs(n4): Daily Brief code location verified correct`
 
 ---
 
@@ -64,7 +64,7 @@ _Months in config: `2026-04`, `2026-05`, `2026-06`_
 | pending_suggestions | 0 | — | ⚠️ empty |
 | config_history | 0 | — | ⚠️ empty |
 | borrow_data | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| market_context | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| market_context | 18 | — | ✅ |
 | news_findings | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
 | agent_scorecard | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
 

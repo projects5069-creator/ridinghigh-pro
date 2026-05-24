@@ -1,9 +1,10 @@
 ---
 id: TASK-22
 title: P4.4 — Update PK_v2 with 20/5 + 22/5 changes
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-05-23 19:35'
+updated_date: '2026-05-24 01:51'
 labels: []
 dependencies: []
 priority: low
