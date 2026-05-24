@@ -1222,20 +1222,25 @@ def check_24_sentinel_health(gc):
         return CheckResult("S1", "Data Sentinel health", "Agents",
                            WARNING, f"Config read failed: {e}")
 
-    # 3. system_events sheet reachable + recent event count
+    # 3. sentinel_events + system_events sheets reachable + recent event count
     event_info = ""
     if gc is not None:
         try:
             month, sheets = get_active_month_sheets(gc)
-            if sheets and "system_events" in sheets:
-                rows = _ha_get_all_values(gc, sheets["system_events"])
+            # P2.1: read sentinel_events (primary) with system_events fallback
+            rows = []
+            if sheets and "sentinel_events" in sheets:
+                rows = _ha_get_all_values(gc, sheets["sentinel_events"]) or []
+            elif sheets and "system_events" in sheets:
+                rows = _ha_get_all_values(gc, sheets["system_events"]) or []
+            if rows:
                 sentinel_rows = [r for r in rows[1:]
                                  if r and len(r) > 1 and str(r[1]).startswith("SENTINEL_")]
                 event_info = f", {len(sentinel_rows)} sentinel events logged"
             else:
-                event_info = ", system_events not configured"
+                event_info = ", sentinel_events/system_events not configured"
         except Exception as e:
-            event_info = f", system_events read failed: {e}"
+            event_info = f", sentinel_events/system_events read failed: {e}"
 
     return CheckResult("S1", "Data Sentinel health", "Agents",
                        PASSED, f"All 9 files OK, mode={mode}, enabled={enabled}{event_info}")

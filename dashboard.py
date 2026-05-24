@@ -4205,7 +4205,7 @@ dashboard.py reads → displays in 8 pages
              "מה נכתב": "ניתוח ביצועי הניקוד"},
             {"Sheet": "postmortems", "כותב": "agent/analytics/postmortem_engine", "תדירות": "EOD",
              "מה נכתב": "ניתוח predicted מול actual לכל עסקה"},
-            {"Sheet": "system_events", "כותב": "agent/sentinel/", "תדירות": "לפי אירוע",
+            {"Sheet": "sentinel_events", "כותב": "agent/sentinel/", "תדירות": "לפי אירוע",
              "מה נכתב": "אירועי BLOCK/WARN של Data Sentinel"},
             {"Sheet": "market_context", "כותב": "agent/market_context/", "תדירות": "8x ביום מסחר",
              "מה נכתב": "SPY/IWM/VIX + תווית RISK regime (11 עמודות)"},
@@ -4533,7 +4533,7 @@ SL ALWAYS overrides TP אם שניהם נפגעו באותו bar (שמרני).
         st.markdown("### 🤖 Agents (בדיקה אחת)")
         checks_agents = [
             {"id": "S1", "name": "Data Sentinel health",
-             "what": "בודק שמודול Data Sentinel תקין — 9 קבצי הסוכן קיימים, SENTINEL_MODE חוקי, גישה ל-system_events וספירת אירועים",
+             "what": "בודק שמודול Data Sentinel תקין — 9 קבצי הסוכן קיימים, SENTINEL_MODE חוקי, גישה ל-sentinel_events וספירת אירועים",
              "fail": "CRITICAL אם חסרים קבצים · WARNING אם config לא תקין"},
         ]
         for c in checks_agents:

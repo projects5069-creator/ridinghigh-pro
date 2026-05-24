@@ -8,7 +8,7 @@ A. Status banner (mode, market open/closed)
 B. Today's KPIs (positions, PnL, decisions count)
 C. Open positions table
 D. Today's decisions table
-E. Emergency stop (logs to system_events; M10 adds halt logic)
+E. Emergency stop (logs to system_events — non-Sentinel tab; M10 adds halt logic)
 """
 
 import sys
@@ -363,7 +363,7 @@ def _render_today_trades(df: pd.DataFrame):
 def _render_emergency_stop():
     """Emergency stop with confirmation dialog."""
     st.subheader("🚨 Emergency Stop")
-    st.caption("Halts all agent activity. Logged to system_events. M10 adds real halt logic.")
+    st.caption("Halts all agent activity. Logged to system_events (non-Sentinel tab). M10 adds real halt logic.")
 
     if st.button("🚨 EMERGENCY STOP", type="primary", key="emergency_stop_btn"):
         st.session_state["es_confirm_dialog"] = True

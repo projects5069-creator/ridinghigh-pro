@@ -3,7 +3,7 @@ agent/dashboard/sentinel_events_page.py
 ─────────────────────────────────────────
 Sentinel Events — what Data Sentinel caught.
 
-Reads system_events sheet, filters to SENTINEL_* events, shows:
+Reads sentinel_events sheet, shows:
 1. KPI Summary (total BLOCKs, WARNs, clean days, last event)
 2. Events table (recent BLOCK/WARN)
 3. Breakdown by Component (which check fired)
@@ -27,9 +27,9 @@ logger = logging.getLogger("agent.dashboard.sentinel_events")
 
 @st.cache_data(ttl=120)
 def _load_sentinel_events() -> pd.DataFrame:
-    """Load system_events, filter to SENTINEL_* rows. TTL 120s."""
+    """Load sentinel_events (all rows are Sentinel events). TTL 120s."""
     try:
-        ws = _get_worksheet("system_events")
+        ws = _get_worksheet("sentinel_events")
         if ws is None:
             return pd.DataFrame()
         records = ws.get_all_records()

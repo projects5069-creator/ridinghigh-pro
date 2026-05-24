@@ -155,8 +155,8 @@ def gather_daily_stats() -> Dict[str, Any]:
         # Sort open_positions by entry_date (descending — newest first)
         stats["open_positions"].sort(key=lambda x: x.get("entry_date", ""), reverse=True)
 
-        # Errors (system_events)
-        ws = sheets_manager.get_worksheet("system_events")
+        # Errors (sentinel_events + system_events, P2.1)
+        ws = sheets_manager.get_worksheet("sentinel_events") or sheets_manager.get_worksheet("system_events")
         if ws:
             records = ws.get_all_records()
             stats["errors_today"] = sum(

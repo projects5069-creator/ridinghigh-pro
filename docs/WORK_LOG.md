@@ -77,3 +77,4 @@ Priority (first match wins):
 | 2026-05-23 20:35-20:50 | P4.4 PK_v2 update v2.27-v2.31 | Maintenance | 0.25 | 5 changelog entries. Bumped 2.26->2.31. |
 | 2026-05-23 20:55-21:05 | P4.3 verify | Maintenance | 0.15 | live_trades sheet_id shared with score_tracker by design. 3->5 expander: no match found. |
 | 2026-05-23 21:05-21:20 | P3.1 retry wrapper auto_scanner | Maintenance | 0.25 | 6 unsafe sheets writes wrapped in retry. |
+| 2026-05-23 21:30-22:05 | P2.1 system_events split | Maintenance | 0.6 | 11 files, 29 edits. Sentinel->sentinel_events. Emergency/Reconciler stay system_events. 8632 rows preserved. |

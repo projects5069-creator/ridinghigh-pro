@@ -37,6 +37,7 @@ AGENT_SHEET_NAMES = [
     "paper_portfolio",
     "score_analytics",
     "postmortems",
+    "sentinel_events",
     "system_events",
     "market_context",
     "news_findings",
@@ -119,6 +120,9 @@ AGENT_SHEET_HEADERS = {
         "GeneratedAt", "ScoreVersion",
     ],  # 17 columns
 
+    "sentinel_events": [
+        "Timestamp", "EventType", "Severity", "Component", "Message", "Details", "ActionTaken"
+    ],
     "system_events": [
         # All (7)
         "Timestamp", "EventType", "Severity", "Component", "Message",

@@ -219,7 +219,7 @@ def update_suggestion_status(suggestion_id: str, status: str, response: str) -> 
 
 def log_emergency_stop(reason: str, source: str = "dashboard") -> bool:
     """
-    Write EMERGENCY_STOP_REQUESTED event to system_events Sheet.
+    Write EMERGENCY_STOP_REQUESTED event to system_events Sheet (non-Sentinel tab).
 
     M9 only logs — M10 will add real halt logic.
     """
@@ -228,7 +228,7 @@ def log_emergency_stop(reason: str, source: str = "dashboard") -> bool:
         return False
     try:
         now = datetime.now(PERU_TZ)
-        # system_events schema (7 cols): Timestamp, EventType, Severity, Component, Message, Details, ActionTaken
+        # system_events schema (7 cols, identical to sentinel_events): Timestamp, EventType, Severity, Component, Message, Details, ActionTaken
         row = [
             now.isoformat(),
             "EMERGENCY_STOP_REQUESTED",

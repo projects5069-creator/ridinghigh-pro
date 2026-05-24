@@ -30,7 +30,7 @@ DecisionType = Literal["ALLOW", "WARN", "BLOCK"]
 def _log_sentinel_event(decision: str, component: str, reason: str,
                         details: dict, action_taken: str) -> None:
     """
-    Write a Sentinel BLOCK/WARN event to the system_events sheet.
+    Write a Sentinel BLOCK/WARN event to the sentinel_events sheet.
 
     Schema: [Timestamp, EventType, Severity, Component, Message, Details, ActionTaken]
     Only called for BLOCK/WARN (never ALLOW) to keep Sheets quota low.
@@ -55,10 +55,10 @@ def _log_sentinel_event(decision: str, component: str, reason: str,
             json.dumps(details, default=str)[:500],  # Details
             action_taken,                      # ActionTaken
         ]
-        ws = sm.get_worksheet("system_events")
+        ws = sm.get_worksheet("sentinel_events")
         sm.safe_append_row(ws, row)
     except Exception as e:
-        logger.warning("Failed to log sentinel event to system_events: %s", e)
+        logger.warning("Failed to log sentinel event to sentinel_events: %s", e)
 
 
 @dataclass
@@ -197,7 +197,7 @@ class DataSentinel:
                         signal.get("ticker", "?"), worst_reason)
             effective_decision = "ALLOW"
 
-        # Log BLOCK/WARN events to system_events (not ALLOW — quota)
+        # Log BLOCK/WARN events to sentinel_events (not ALLOW — quota)
         if worst_decision in ("BLOCK", "WARN"):
             action = "SHADOW_LOGGED" if self.mode == "shadow" else (
                 "BLOCKED" if worst_decision == "BLOCK" else "WARNED")
@@ -267,7 +267,7 @@ class DataSentinel:
             elif r.decision == "WARN" and worst.decision == "ALLOW":
                 worst = r
 
-        # Log system-level BLOCK/WARN to system_events
+        # Log system-level BLOCK/WARN to sentinel_events
         if worst.decision in ("BLOCK", "WARN"):
             action = "SHADOW_LOGGED" if self.mode == "shadow" else (
                 "HALTED" if worst.decision == "BLOCK" else "WARNED")

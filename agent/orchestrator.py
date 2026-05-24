@@ -111,11 +111,11 @@ def is_eod_window(now: Optional[datetime] = None) -> bool:
 # ════════════════════════════════════════════════════════════════════
 
 def check_emergency_stop() -> bool:
-    """Check system_events for unresolved EMERGENCY_STOP_REQUESTED. Returns True if active.
+    """Check system_events (non-Sentinel tab) for unresolved EMERGENCY_STOP_REQUESTED. Returns True if active.
 
     2026-05-20: Two improvements over previous version:
     1. Uses sheets_manager.get_sheet_records (60s TTL cache) instead of raw
-       ws.get_all_records() — runs every minute, system_events grew to
+       ws.get_all_records() — runs every minute. system_events (post-P2.1) holds only non-Sentinel events; grew to
        3,500+ rows since Sentinel went active, was hammering Read quota.
     2. Searches by 24-hour timestamp window instead of last 50 rows. With
        Sentinel writing ~700 events/day, an EMERGENCY written at 09:00

@@ -7,7 +7,7 @@ Strategy:
 - Alpaca is the source of truth for actual positions
 - Sheet is the log of what we believe is happening
 - When they conflict, Alpaca wins, Sheet gets corrected
-- Discrepancies logged to system_events for investigation
+- Discrepancies logged to system_events (non-Sentinel tab) for investigation
 
 Run schedule:
 - Once after market close (post-EOD)
@@ -63,7 +63,7 @@ class Reconciler:
             broker: AlpacaBroker instance
             sheet_reader: callable() → list of position dicts from paper_portfolio
             sheet_writer: callable(pos, updates) → None
-            alert_writer: callable(event_dict) → None (writes to system_events)
+            alert_writer: callable(event_dict) → None (writes to system_events — non-Sentinel tab)
         """
         self.broker = broker
         self._sheet_reader = sheet_reader

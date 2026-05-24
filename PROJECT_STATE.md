@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-05-23 21:21:38 -05
+**Generated:** 2026-05-23 22:03:28 -05
 **Branch:** `main`
-**Latest commit:** `ad9753c` — fix(auto_scanner): P3.1 — wrap 6 unsafe sheets writes in retry
+**Latest commit:** `b9637d8` — refactor(schema): P2.1 — split system_events into two tabs
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `ad9753c (HEAD -> main) fix(auto_scanner): P3.1 — wrap 6 unsafe sheets writes in retry`
-- `09a955b (origin/main, origin/HEAD) docs(p4.3): verified not-a-bug — live_trades sharing is by design`
+- `b9637d8 (HEAD -> main) refactor(schema): P2.1 — split system_events into two tabs`
+- `972e80f (origin/main, origin/HEAD) fix(auto_scanner): P3.1 — wrap 6 unsafe sheets writes in retry`
+- `09a955b docs(p4.3): verified not-a-bug — live_trades sharing is by design`
 - `f431ed3 docs(pk): v2.31 — 5 changelog entries for 2026-05-23 session`
 - `e4d3c84 refactor(p4.6): AST-based check_02 + hidden bug fix`
-- `d174dd1 refactor(dashboard): P3.2 consolidate 4 duplicate styling fns`
 
 ---
 
@@ -67,6 +67,7 @@ _Months in config: `2026-04`, `2026-05`, `2026-06`_
 | market_context | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
 | news_findings | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
 | agent_scorecard | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| sentinel_events | 8,632 | — | ✅ |
 
 ---
 

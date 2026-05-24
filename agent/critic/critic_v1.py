@@ -252,10 +252,10 @@ class CriticAgent:
             logger.warning("daily_facts: decision_log failed: %s", e)
             errors.append(f"decision_log: {e}")
 
-        # --- 2. DATA SENTINEL (system_events) ---
+        # --- 2. DATA SENTINEL (sentinel_events) ---
         sentinel_facts = {"blocks": 0, "warns": 0}
         try:
-            rows = sm.get_sheet_values("system_events")
+            rows = sm.get_sheet_values("sentinel_events")
             if len(rows) > 1:
                 header = rows[0]
                 ts_idx = header.index("Timestamp") if "Timestamp" in header else 0
@@ -270,8 +270,8 @@ class CriticAgent:
                             elif "WARN" in evt:
                                 sentinel_facts["warns"] += 1
         except Exception as e:
-            logger.warning("daily_facts: system_events failed: %s", e)
-            errors.append(f"system_events: {e}")
+            logger.warning("daily_facts: sentinel_events failed: %s", e)
+            errors.append(f"sentinel_events: {e}")
 
         # --- 3. MARKET CONTEXT (market_context) ---
         mc_facts: Dict[str, Any] = {"regime": None, "changed_during_day": False}

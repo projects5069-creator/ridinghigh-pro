@@ -1,9 +1,10 @@
 ---
 id: TASK-8
 title: P2.1 — Refactor system_events to sentinel_events
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-05-23 19:33'
+updated_date: '2026-05-24 03:03'
 labels: []
 dependencies: []
 priority: medium
