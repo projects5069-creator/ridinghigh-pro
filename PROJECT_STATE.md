@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-05-23 22:03:28 -05
+**Generated:** 2026-05-23 22:25:02 -05
 **Branch:** `main`
-**Latest commit:** `b9637d8` — refactor(schema): P2.1 — split system_events into two tabs
+**Latest commit:** `992b73c` — docs(p3.3): defer Market Context wiring with evidence-based notes
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `b9637d8 (HEAD -> main) refactor(schema): P2.1 — split system_events into two tabs`
-- `972e80f (origin/main, origin/HEAD) fix(auto_scanner): P3.1 — wrap 6 unsafe sheets writes in retry`
+- `992b73c (HEAD -> main) docs(p3.3): defer Market Context wiring with evidence-based notes`
+- `a8c79b6 (origin/main, origin/HEAD) refactor(schema): P2.1 — split system_events into two tabs`
+- `972e80f fix(auto_scanner): P3.1 — wrap 6 unsafe sheets writes in retry`
 - `09a955b docs(p4.3): verified not-a-bug — live_trades sharing is by design`
 - `f431ed3 docs(pk): v2.31 — 5 changelog entries for 2026-05-23 session`
-- `e4d3c84 refactor(p4.6): AST-based check_02 + hidden bug fix`
 
 ---
 
@@ -63,11 +63,11 @@ _Months in config: `2026-04`, `2026-05`, `2026-06`_
 | system_events | 8,632 | — | ✅ |
 | pending_suggestions | 0 | — | ⚠️ empty |
 | config_history | 0 | — | ⚠️ empty |
-| borrow_data | 0 | — | ⚠️ empty |
-| market_context | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| borrow_data | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| market_context | 18 | — | ✅ |
 | news_findings | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
 | agent_scorecard | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| sentinel_events | 8,632 | — | ✅ |
+| sentinel_events | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
 
 ---
 

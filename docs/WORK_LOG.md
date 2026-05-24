@@ -78,3 +78,4 @@ Priority (first match wins):
 | 2026-05-23 20:55-21:05 | P4.3 verify | Maintenance | 0.15 | live_trades sheet_id shared with score_tracker by design. 3->5 expander: no match found. |
 | 2026-05-23 21:05-21:20 | P3.1 retry wrapper auto_scanner | Maintenance | 0.25 | 6 unsafe sheets writes wrapped in retry. |
 | 2026-05-23 21:30-22:05 | P2.1 system_events split | Maintenance | 0.6 | 11 files, 29 edits. Sentinel->sentinel_events. Emergency/Reconciler stay system_events. 8632 rows preserved. |
+| 2026-05-23 22:09-22:25 | P3.3 Market Context investigation | Analysis | 0.27 | Phase 0 data analysis + literature review. Verdict: NO wiring possible — zero regime variance (100% NEUTRAL+LOW), 80% trades unmatched, median 19h stale. Deferred to backlog with notes for re-evaluation in 4 weeks. |
