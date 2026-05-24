@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-05-23 19:25:25 -05
+**Generated:** 2026-05-23 20:16:39 -05
 **Branch:** `main`
-**Latest commit:** `92bfc7c` — docs(p4.1): replace stale OPEN_ISSUES.md with stub
+**Latest commit:** `880bb3e` — refactor(dashboard): P3.2 consolidate 4 duplicate styling fns
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `92bfc7c (HEAD -> main) docs(p4.1): replace stale OPEN_ISSUES.md with stub`
-- `e99b54e (origin/main, origin/HEAD) docs(p3.5): D1_Open outliers — all 5 verified as real events`
+- `880bb3e (HEAD -> main) refactor(dashboard): P3.2 consolidate 4 duplicate styling fns`
+- `2b574f5 (origin/main, origin/HEAD) docs(p4.1): replace stale OPEN_ISSUES.md with stub`
+- `e99b54e docs(p3.5): D1_Open outliers — all 5 verified as real events`
 - `dbf4b57 docs(n4): Daily Brief code location verified correct`
 - `58f3efd docs(p3.6): Sentinel serialization verified clean`
-- `1d4c045 docs(p1.4): verified not a bug — mark Done`
 
 ---
 
@@ -63,10 +63,10 @@ _Months in config: `2026-04`, `2026-05`, `2026-06`_
 | system_events | 8,632 | — | ✅ |
 | pending_suggestions | 0 | — | ⚠️ empty |
 | config_history | 0 | — | ⚠️ empty |
-| borrow_data | 0 | — | ⚠️ empty |
-| market_context | 18 | — | ✅ |
-| news_findings | 8,559 | — | ✅ |
-| agent_scorecard | 40 | 2026-05-22 | ✅ |
+| borrow_data | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| market_context | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| news_findings | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| agent_scorecard | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
 
 ---
 

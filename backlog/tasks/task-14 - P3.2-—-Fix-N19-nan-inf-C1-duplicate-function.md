@@ -1,9 +1,10 @@
 ---
 id: TASK-14
 title: 'P3.2 — Fix #N19 nan/inf + C1 duplicate function'
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-05-23 19:33'
+updated_date: '2026-05-24 01:16'
 labels: []
 dependencies: []
 priority: medium

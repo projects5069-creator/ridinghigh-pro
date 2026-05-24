@@ -74,6 +74,39 @@ from config import (
     SL_THRESHOLD_FRAC,
     DATA_CUTOFF_DATE,
 )
+
+# -- styling helpers (P3.2: consolidated from 4 nested duplicates) --
+def color_score(val):
+    """Cell-level color by Score thresholds. Used by .style.map()."""
+    try:
+        score = float(val)
+        if score >= CRITICAL_SCORE:
+            return 'background-color: #800020; color: white; font-weight: bold'
+        elif score >= MIN_SCORE_DISPLAY:
+            return 'background-color: #cc0000; color: white'
+        elif score >= 50:
+            return 'background-color: #ff6600; color: white'
+        else:
+            return 'background-color: #ffcc00; color: black'
+    except:
+        return ''
+
+
+def highlight_score(row):
+    """Row-level color by row['Score'] thresholds. Used by .style.apply(axis=1)."""
+    try:
+        score = float(row['Score'])
+        if score >= CRITICAL_SCORE:
+            return ['background-color: #800020; color: white; font-weight: bold'] * len(row)
+        elif score >= MIN_SCORE_DISPLAY:
+            return ['background-color: #cc0000; color: white'] * len(row)
+        elif score >= 40:
+            return ['background-color: #ff6600; color: white'] * len(row)
+        else:
+            return ['background-color: #ffcc00; color: black'] * len(row)
+    except:
+        return [''] * len(row)
+
 from agent.dashboard import render_live_agent, render_trade_history, render_score_brain, render_sentinel_events
 
 st.set_page_config(
@@ -1510,17 +1543,6 @@ def main_page():
 
         df = pd.DataFrame(display_data)
 
-        def highlight_score(row):
-            score = float(row['Score'])
-            if score >= CRITICAL_SCORE:
-                return ['background-color: #800020; color: white; font-weight: bold'] * len(row)
-            elif score >= MIN_SCORE_DISPLAY:
-                return ['background-color: #cc0000; color: white'] * len(row)
-            elif score >= 40:
-                return ['background-color: #ff6600; color: white'] * len(row)
-            else:
-                return ['background-color: #ffcc00; color: black'] * len(row)
-
         def color_entry_score(val):
             try:
                 if val == "—":
@@ -1577,19 +1599,6 @@ def main_page():
                 time_left = max(0, 60 - time_since)
                 st.metric("Next", f"{int(time_left)}s")
         
-        def color_score(val):
-            try:
-                score = float(val)
-                if score >= CRITICAL_SCORE:
-                    return 'background-color: #800020; color: white; font-weight: bold'
-                elif score >= MIN_SCORE_DISPLAY:
-                    return 'background-color: #cc0000; color: white'
-                elif score >= 50:
-                    return 'background-color: #ff6600; color: white'
-                else:
-                    return 'background-color: #ffcc00; color: black'
-            except:
-                return ''
         
         styled_timeline = df_timeline.style.map(color_score).format("{:.2f}")
         
@@ -1640,20 +1649,6 @@ def daily_summary_page():
         return
     
     table_height = min(800, len(df) * 40 + 50)
-    
-    def highlight_score(row):
-        try:
-            score = float(row['Score'])
-            if score >= CRITICAL_SCORE:
-                return ['background-color: #800020; color: white; font-weight: bold'] * len(row)
-            elif score >= MIN_SCORE_DISPLAY:
-                return ['background-color: #cc0000; color: white'] * len(row)
-            elif score >= 40:
-                return ['background-color: #ff6600; color: white'] * len(row)
-            else:
-                return ['background-color: #ffcc00; color: black'] * len(row)
-        except:
-            return [''] * len(row)
     
     METRIC_COLS = [
         "Ticker",
@@ -1768,20 +1763,6 @@ def timeline_archive_page():
             st.metric("Stocks Tracked", len(pivot))
         with col2:
             st.metric("Time Points", len(pivot.columns))
-
-        def color_score(val):
-            try:
-                score = float(val)
-                if score >= CRITICAL_SCORE:
-                    return 'background-color: #800020; color: white; font-weight: bold'
-                elif score >= MIN_SCORE_DISPLAY:
-                    return 'background-color: #cc0000; color: white'
-                elif score >= 50:
-                    return 'background-color: #ff6600; color: white'
-                else:
-                    return 'background-color: #ffcc00; color: black'
-            except:
-                return ''
 
         styled = pivot.style.map(color_score).format("{:.2f}")
         st.dataframe(styled, use_container_width=True, height=600)
