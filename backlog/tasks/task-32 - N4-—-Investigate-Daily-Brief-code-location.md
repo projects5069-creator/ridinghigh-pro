@@ -1,9 +1,10 @@
 ---
 id: TASK-32
 title: N4 — Investigate Daily Brief code location
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-05-23 19:35'
+updated_date: '2026-05-24 00:08'
 labels: []
 dependencies: []
 priority: low
