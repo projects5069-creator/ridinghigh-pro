@@ -1,9 +1,10 @@
 ---
 id: TASK-17
 title: 'P3.5 — #N24 D1_Open outlier'
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-05-23 19:33'
+updated_date: '2026-05-24 00:15'
 labels: []
 dependencies: []
 priority: medium

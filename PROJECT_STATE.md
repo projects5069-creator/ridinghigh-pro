@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-05-23 19:08:37 -05
+**Generated:** 2026-05-23 19:15:37 -05
 **Branch:** `main`
-**Latest commit:** `b19a843` — docs(n4): Daily Brief code location verified correct
+**Latest commit:** `2469b38` — docs(p3.5): D1_Open outliers — all 5 verified as real events
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `b19a843 (HEAD -> main) docs(n4): Daily Brief code location verified correct`
-- `58f3efd (origin/main, origin/HEAD) docs(p3.6): Sentinel serialization verified clean`
+- `2469b38 (HEAD -> main) docs(p3.5): D1_Open outliers — all 5 verified as real events`
+- `dbf4b57 (origin/main, origin/HEAD) docs(n4): Daily Brief code location verified correct`
+- `58f3efd docs(p3.6): Sentinel serialization verified clean`
 - `1d4c045 docs(p1.4): verified not a bug — mark Done`
 - `c84638e fix(dashboard): P3.7 move parse_hhmm imports to top + cleanup`
-- `db6df80 chore: mark P3.7/P4.5/P4.7/N3 Done + work log`
 
 ---
 
@@ -51,7 +51,7 @@ _Months in config: `2026-04`, `2026-05`, `2026-06`_
 | daily_snapshots | 1,293 | 2026-05-22 | ✅ |
 | daily_summary | 1,405 | 2026-05-22 | ✅ |
 | post_analysis | 55 | 2026-05-22 | ✅ |
-| portfolio | 65 | 2026-05-22 | ✅ |
+| portfolio | ? | ? | ❌ APIError: [503]: The service is currentl |
 | portfolio_live | 48 | 2026-05-22 | ✅ |
 | score_tracker | 1,419 | 2026-05-22 | ✅ |
 | live_trades | 1,419 | 2026-05-22 | ✅ |
