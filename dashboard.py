@@ -5103,9 +5103,16 @@ def dashboard_home_page():
             if col in df.columns:
                 df[col] = pd.to_numeric(df[col], errors="coerce")
         total_stocks  = len(df)
-        has_outcome   = df[df["TP10_Hit"].notna()] if "TP10_Hit" in df.columns else pd.DataFrame()
-        win_rate_hist = f"{has_outcome['TP10_Hit'].mean()*100:.0f}%" if not has_outcome.empty else "—"
-        winners       = has_outcome[has_outcome["TP10_Hit"] == 1] if not has_outcome.empty else pd.DataFrame()
+        # Use classify_trade_row (PK v2.16) — same source-of-truth as Post Analysis page.
+        # Old metric (TP10_Hit.mean()) counted whipsaws as wins, inflating WR.
+        from utils import classify_trade_row
+        _outcomes_home = df.apply(classify_trade_row, axis=1)
+        _n_win        = int((_outcomes_home == "WIN").sum())
+        _n_loss       = int((_outcomes_home == "LOSS").sum())
+        _n_decided    = _n_win + _n_loss
+        win_rate_hist = f"{_n_win / _n_decided * 100:.0f}%" if _n_decided > 0 else "—"
+        winners       = df[_outcomes_home == "WIN"]
+        has_outcome   = df[_outcomes_home.isin(["WIN", "LOSS"])]  # for delta count
         avg_drop      = winners["MaxDrop%"].mean() if not winners.empty and "MaxDrop%" in winners.columns else None
         avg_drop_str  = f"{avg_drop:.1f}%" if avg_drop is not None and pd.notna(avg_drop) else "—"
         best_score    = df["Score"].max() if "Score" in df.columns else None
@@ -5113,7 +5120,7 @@ def dashboard_home_page():
         n_days        = df["ScanDate"].nunique() if "ScanDate" in df.columns else "?"
 
         m1, m2, m3, m4 = st.columns(4)
-        m1.metric("🎯 Win Rate",           win_rate_hist, delta=f"{len(has_outcome)} עם תוצאה")
+        m1.metric("🎯 Win Rate",           win_rate_hist, delta=f"{_n_decided}/{len(df)} הוכרעו")
         m2.metric("📋 מניות",              total_stocks,  delta=f"{n_days} ימים")
         m3.metric("📉 Avg Drop (winners)", avg_drop_str)
         m4.metric("🏆 Best Score",         best_score_str)

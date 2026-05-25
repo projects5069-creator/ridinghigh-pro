@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-05-24 21:48:27 -05
+**Generated:** 2026-05-25 10:20:00 -05
 **Branch:** `main`
-**Latest commit:** `4b84da9` — fix(dashboard): missing sheets_manager import broke Trade History + Live Agent
+**Latest commit:** `2e8c253` — fix(dashboard): Home page WR — use classify_trade_row (task-44 AUDIT.9)
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `4b84da9 (HEAD -> main) fix(dashboard): missing sheets_manager import broke Trade History + Live Agent`
-- `ab071d0 (origin/main, origin/HEAD) chore(deploy): force Streamlit Cloud rebuild — stale parse_hhmm`
+- `2e8c253 (HEAD -> main) fix(dashboard): Home page WR — use classify_trade_row (task-44 AUDIT.9)`
+- `ede93cd (origin/main, origin/HEAD) fix(dashboard): missing sheets_manager import broke Trade History + Live Agent`
+- `ab071d0 chore(deploy): force Streamlit Cloud rebuild — stale parse_hhmm`
 - `59b3ee5 feat(health_audit): AUDIT.3 — support agent freshness checks`
 - `141031c chore(backlog): hygiene + 6 AUDIT tasks added`
-- `9fbe336 fix(sheets): AUDIT.2 — wire quota_health.record_write to writes`
 
 ---
 
@@ -32,11 +32,11 @@ _See `OPEN_ISSUES.md` for full list_
 
 | Workflow | Status | Conclusion | Started |
 |---|---|---|---|
-| Health Audit | completed | ✅ success | 2026-05-24 17:54 UTC |
-| Health Audit | completed | ✅ success | 2026-05-24 11:58 UTC |
-| Health Audit | completed | ✅ success | 2026-05-24 06:39 UTC |
-| Agent — End of Day | completed | ✅ success | 2026-05-23 21:40 UTC |
-| Health Audit | completed | ✅ success | 2026-05-23 17:56 UTC |
+| RidingHigh Auto Scanner | completed | ✅ success | 2026-05-25 15:19 UTC |
+| Agent — Every Minute (DRY_RUN) | in_progress | ⏳ — | 2026-05-25 15:19 UTC |
+| RidingHigh Auto Scanner | completed | ✅ success | 2026-05-25 15:18 UTC |
+| Agent — Every Minute (DRY_RUN) | completed | ✅ success | 2026-05-25 15:18 UTC |
+| RidingHigh Auto Scanner | completed | ✅ success | 2026-05-25 15:17 UTC |
 
 ---
 
@@ -53,26 +53,28 @@ _Months in config: `2026-04`, `2026-05`, `2026-06`_
 | post_analysis | 55 | 2026-05-22 | ✅ |
 | portfolio | 65 | 2026-05-22 | ✅ |
 | portfolio_live | 48 | 2026-05-22 | ✅ |
-| score_tracker | 1,419 | 2026-05-22 | ✅ |
-| live_trades | 1,419 | 2026-05-22 | ✅ |
-| ticker_follow_up | 12,477 | 2026-05-08 | ✅ |
-| decision_log | 16,231 | — | ✅ |
-| paper_portfolio | 89 | — | ✅ |
-| score_analytics | 0 | — | ⚠️ empty |
-| postmortems | 71 | — | ✅ |
-| system_events | 8,632 | — | ✅ |
-| pending_suggestions | 0 | — | ⚠️ empty |
-| config_history | 0 | — | ⚠️ empty |
-| borrow_data | 0 | — | ⚠️ empty |
-| market_context | 18 | — | ✅ |
-| news_findings | 8,559 | — | ✅ |
-| agent_scorecard | 40 | 2026-05-22 | ✅ |
-| sentinel_events | 8,632 | — | ✅ |
+| score_tracker | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| live_trades | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| ticker_follow_up | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| decision_log | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| paper_portfolio | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| score_analytics | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| postmortems | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| system_events | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| pending_suggestions | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| config_history | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| borrow_data | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| market_context | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| news_findings | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| agent_scorecard | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| sentinel_events | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
 
 ---
 
 ## 🩺 Health
-✅ All checks passed.
+
+- ⚠️ 1 uncommitted file(s):
+-    - 1 new/untracked
 
 ---
 
