@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-05-24 20:02:42 -05
+**Generated:** 2026-05-24 20:27:43 -05
 **Branch:** `main`
-**Latest commit:** `39a009d` — docs(pk+log): v2.33 — P3.4 closure (Phase 1 done, Phase 2 deferred)
+**Latest commit:** `9edc032` — fix(dashboard): AUDIT.1 — remove calc_score_v2 duplicate scoring
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `39a009d (HEAD -> main) docs(pk+log): v2.33 — P3.4 closure (Phase 1 done, Phase 2 deferred)`
-- `7dae5e5 (origin/main, origin/HEAD) feat(orchestrator): P3.4 Phase 1 — cron-drift outage detection`
+- `9edc032 (HEAD -> main) fix(dashboard): AUDIT.1 — remove calc_score_v2 duplicate scoring`
+- `e36ec9b (origin/main, origin/HEAD) docs(pk+log): v2.33 — P3.4 closure (Phase 1 done, Phase 2 deferred)`
+- `7dae5e5 feat(orchestrator): P3.4 Phase 1 — cron-drift outage detection`
 - `fdd0965 docs(pk+log): v2.32 — SENT.1 closure + SENT.2 task`
 - `2ef7ceb fix(dashboard): SENT.1 — apply parse_hhmm to last 9th call site`
-- `6bbc4b9 docs(p3.3): defer Market Context wiring with evidence-based notes`
 
 ---
 
@@ -65,9 +65,9 @@ _Months in config: `2026-04`, `2026-05`, `2026-06`_
 | config_history | 0 | — | ⚠️ empty |
 | borrow_data | 0 | — | ⚠️ empty |
 | market_context | 18 | — | ✅ |
-| news_findings | 8,559 | — | ✅ |
+| news_findings | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
 | agent_scorecard | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| sentinel_events | 8,632 | — | ✅ |
+| sentinel_events | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
 
 ---
 
