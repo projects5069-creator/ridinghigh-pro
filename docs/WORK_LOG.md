@@ -79,3 +79,6 @@ Priority (first match wins):
 | 2026-05-23 21:05-21:20 | P3.1 retry wrapper auto_scanner | Maintenance | 0.25 | 6 unsafe sheets writes wrapped in retry. |
 | 2026-05-23 21:30-22:05 | P2.1 system_events split | Maintenance | 0.6 | 11 files, 29 edits. Sentinel->sentinel_events. Emergency/Reconciler stay system_events. 8632 rows preserved. |
 | 2026-05-23 22:09-22:25 | P3.3 Market Context investigation | Analysis | 0.27 | Phase 0 data analysis + literature review. Verdict: NO wiring possible — zero regime variance (100% NEUTRAL+LOW), 80% trades unmatched, median 19h stale. Deferred to backlog with notes for re-evaluation in 4 weeks. |
+| 2026-05-24 08:00-12:30 | SENT.1 deep investigation | Analysis | 4.5 | 4-hour deep dive: 7 steps (inventory, multi-dim breakdown, git forensics, FP analysis, scan_freshness logic). Root cause: lex-compare bug in orchestrator.read_latest_signals (fixed 22/5 commit 5cc658b). Found 9th call site missed. |
+| 2026-05-24 19:20-19:25 | dashboard.py:2757 lex-compare fix | Maintenance | 0.1 | Last remaining lex-compare bug — _fetch_health_data() fallback. parse_hhmm via _time_min column. Commit 2ef7ceb. |
+| 2026-05-24 19:25-19:40 | PK v2.32 + WORK_LOG update | Maintenance | 0.25 | SENT.1 closure documented. PK Sentinel section updated to active. Backlog SENT.2 task created. |
