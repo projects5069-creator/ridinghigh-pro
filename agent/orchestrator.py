@@ -322,6 +322,64 @@ def read_latest_signals() -> List[Dict[str, Any]]:
 
 
 # ════════════════════════════════════════════════════════════════════
+# Outage detection (P3.4 Phase 1)
+# ════════════════════════════════════════════════════════════════════
+
+
+def detect_outage(now: datetime) -> Optional[Dict[str, Any]]:
+    """
+    Detect cron-drift outages by checking gap since last successful scan.
+
+    Uses timeline_live as a proxy for "last successful run" — if scanner
+    wrote a row, the workflow ran successfully. Compares to current time.
+
+    Returns:
+      Dict with 'gap_min' (float) + 'last_scan_time' (str) if gap > 10 min.
+      None otherwise (no history, first scan of day, or invalid data).
+
+    Notes:
+      - Uses parse_hhmm for numeric time comparison (same pattern as
+        read_latest_signals to avoid lex-compare bugs — see SENT.1).
+      - Caller should be inside is_market_hours() — outside market hours,
+        gaps are expected, not outages.
+      - Graceful: any exception returns None (observability is best-effort).
+    """
+    try:
+        import sheets_manager
+        from utils import parse_hhmm
+
+        records = sheets_manager.get_sheet_records("timeline_live")
+        if not records:
+            return None
+
+        today_str = now.strftime("%Y-%m-%d")
+        today_records = [r for r in records if str(r.get("Date", "")) == today_str]
+        if not today_records:
+            return None
+
+        latest_scan_time_str = max(
+            (str(r.get("ScanTime", "")) for r in today_records),
+            key=parse_hhmm,
+        )
+        latest_min_of_day = parse_hhmm(latest_scan_time_str)
+        if latest_min_of_day < 0:
+            return None
+
+        now_min_of_day = now.hour * 60 + now.minute
+        gap_min = now_min_of_day - latest_min_of_day
+
+        if gap_min > 10:
+            return {
+                "gap_min": float(gap_min),
+                "last_scan_time": latest_scan_time_str,
+            }
+        return None
+    except Exception as e:
+        logger.error("detect_outage failed: %s", e)
+        return None
+
+
+# ════════════════════════════════════════════════════════════════════
 # Main run
 # ════════════════════════════════════════════════════════════════════
 
@@ -360,6 +418,51 @@ def run() -> Dict[str, Any]:
         summary["halted"] = True
         summary["halt_reason"] = "EMERGENCY_STOP"
         return summary
+
+    # Safety check 3: cron-drift outage detection (P3.4 Phase 1 — observability only)
+    try:
+        outage_info = detect_outage(now)
+        if outage_info:
+            gap_min = outage_info["gap_min"]
+            severity = "CRITICAL" if gap_min > 30 else "WARNING"
+
+            from agent.sentinel.data_sentinel import _log_sentinel_event
+            _log_sentinel_event(
+                decision="OUTAGE",
+                component="orchestrator",
+                reason="CRON_DRIFT_OUTAGE",
+                details={
+                    "gap_minutes": round(gap_min, 1),
+                    "last_scan_time": outage_info["last_scan_time"],
+                    "now": now.strftime("%H:%M:%S"),
+                    "severity": severity,
+                },
+                action_taken=f"OUTAGE_LOGGED gap={gap_min:.1f}min severity={severity}",
+            )
+            logger.warning(
+                "P3.4 Outage detected: %.1f min gap since last scan at %s (severity=%s)",
+                gap_min, outage_info["last_scan_time"], severity,
+            )
+
+            # Send email alert for severe outages only
+            if gap_min > 30:
+                try:
+                    from agent.notifications.email_sender import send_alert
+                    send_alert(
+                        f"Cron-drift outage: {gap_min:.0f} min gap",
+                        f"Last successful scan: {outage_info['last_scan_time']} Peru\n"
+                        f"Current time: {now.strftime('%H:%M:%S')} Peru\n"
+                        f"Gap: {gap_min:.1f} minutes\n"
+                        f"Severity: CRITICAL (>30 min threshold)\n\n"
+                        f"GH Actions may have skipped runs. Phase 1 = observability only.\n"
+                        f"Catch-up logic (Phase 2) not yet implemented."
+                    )
+                    logger.info("Outage alert email sent")
+                except Exception as e:
+                    logger.error("Failed to send outage alert email: %s", e)
+    except Exception as e:
+        # Outage detection must never halt the run
+        logger.error("Outage detection block failed: %s", e)
 
     # Initialize components
     try:

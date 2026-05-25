@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-05-24 19:32:34 -05
+**Generated:** 2026-05-24 19:52:48 -05
 **Branch:** `main`
-**Latest commit:** `14cbf04` — docs(pk+log): v2.32 — SENT.1 closure + SENT.2 task
+**Latest commit:** `cbc437b` — feat(orchestrator): P3.4 Phase 1 — cron-drift outage detection
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `14cbf04 (HEAD -> main) docs(pk+log): v2.32 — SENT.1 closure + SENT.2 task`
-- `2ef7ceb (origin/main, origin/HEAD) fix(dashboard): SENT.1 — apply parse_hhmm to last 9th call site`
+- `cbc437b (HEAD -> main) feat(orchestrator): P3.4 Phase 1 — cron-drift outage detection`
+- `fdd0965 (origin/main, origin/HEAD) docs(pk+log): v2.32 — SENT.1 closure + SENT.2 task`
+- `2ef7ceb fix(dashboard): SENT.1 — apply parse_hhmm to last 9th call site`
 - `6bbc4b9 docs(p3.3): defer Market Context wiring with evidence-based notes`
 - `a8c79b6 refactor(schema): P2.1 — split system_events into two tabs`
-- `972e80f fix(auto_scanner): P3.1 — wrap 6 unsafe sheets writes in retry`
 
 ---
 
@@ -66,8 +66,8 @@ _Months in config: `2026-04`, `2026-05`, `2026-06`_
 | borrow_data | 0 | — | ⚠️ empty |
 | market_context | 18 | — | ✅ |
 | news_findings | 8,559 | — | ✅ |
-| agent_scorecard | 40 | 2026-05-22 | ✅ |
-| sentinel_events | 8,632 | — | ✅ |
+| agent_scorecard | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| sentinel_events | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
 
 ---
 
