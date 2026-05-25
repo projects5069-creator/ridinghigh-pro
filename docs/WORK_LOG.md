@@ -85,3 +85,39 @@ Priority (first match wins):
 | 2026-05-24 19:38-19:50 | P3.4 discovery + plan | Analysis | 0.25 | Read research/2026-05-23_cron_drift_analysis.md + task-16. Defined hybrid plan (Phase 1 detect + Phase 2 catch-up). Discovered orchestrator.py structure (run() at L328, send_alert exists). |
 | 2026-05-24 19:50-19:55 | P3.4 Phase 1 implementation | Development | 1.5 | detect_outage() function + wiring into run(). Logs to sentinel_events on gap >10min, email alert on >30min. Graceful try/except, observability-only. Commit 7dae5e5. |
 | 2026-05-24 19:55-20:15 | P3.4 deep research + closure | Analysis | 0.5 | 16 days of timeline_live data: 95.28% on-time, only 8 severe outages (5 of which on 22/5 incident). 80% of data loss is drift Phase 2 wouldn't fix. Critical outages 1/16d. Phase 2 deferred — ROI insufficient vs complexity. task-16 closed. |
+
+## Session 2026-05-25 (Memorial Day, no trading)
+
+**Duration:** ~3h
+**Category:** Analysis (task-44 audit) + Maintenance (cleanup)
+**Commit:** bc47794
+
+### Completed
+- ✅ **task-44 (AUDIT.9) — Scanner vs Trader split analysis** [Analysis, ~2.5h]
+  - Misframing identified: not "Scanner vs Trader", actually 4 different WR sources across dashboard
+  - Bug found in Home page: TP10_Hit.mean counted whipsaws as wins (PK v2.16 anti-pattern, never propagated from Post Analysis)
+  - Fixed: dashboard.py:5106 now uses classify_trade_row -> 78% to 69% (matches Post Analysis 68.9%)
+  - Documented: 4 WR sources measure 4 different concepts (theoretical/simulated/canonical/actual) — kept distinct intentionally
+  - Research doc: research/2026-05-25_winrate_audit.md (169 lines)
+  - PK updated: v2.33 -> v2.34
+  - Local test verified on 105 v2 rows before push
+
+### Identified (not done)
+- task-46 (AUDIT.11) — Portfolio Tracker code dedup [low priority]
+- task-47 (AUDIT.12) — portfolio sheet deprecation audit [low priority]
+
+### Incidents
+- ~30min lost: orphan Drive folders created from API misuse (get_worksheet arg order). Cleaned up (sheets_config.json + manual Drive deletion of RidingHigh-Data folder + ~17 orphan sheets).
+- Lesson: always read API signature before guessing. Iron Rule §3 (investigation before fix) applies to API usage too, not just code edits.
+
+### Budget tally for this session
+- Analysis: ~2.5h (task-44 audit)
+- Maintenance: ~0.5h (PK update, cleanup, task creation)
+- Development: 0h
+- META: ~30min (handoff/planning — excluded from budget per META.1)
+
+### Next session priorities
+- task-28 (SENT.2) — Verify scan_freshness on 26/5 first market day [HIGH, time-sensitive]
+- task-37 (Wait.3) — Live Write Verification [P1.4 unblocked it]
+- task-33 / task-34 — Development (Devil's Advocate / Risk Sentinel) — fill 40% Development budget gap
+
