@@ -13,3 +13,5 @@ pandas-market-calendars
 
 # Alpaca data provider (Issue #9 Phase 2)
 alpaca-py>=0.25.0
+
+# Force rebuild 20260524-212925
