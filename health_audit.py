@@ -1189,6 +1189,95 @@ def check_15_gitignore_enforcement():
 # CHECKS — Category 7: Agent subsystems
 # ============================================================================
 
+def _last_expected_trading_day():
+    """Return the last trading day that should have been completed.
+
+    Used by support agent freshness checks. Walks back from today (Peru)
+    until it hits a trading day. If today IS a trading day, returns today.
+    """
+    today = now_peru().replace(tzinfo=None)
+    d = today
+    for _ in range(10):  # safety bound
+        if is_trading_day(d):
+            return d
+        d = d - timedelta(days=1)
+    return today  # fallback
+
+
+def _check_agent_freshness(gc, sheet_key, check_id, agent_name, time_col_idx):
+    """Generic support agent freshness check.
+
+    sheet_key: key in sheets_config (e.g. "agent_scorecard")
+    check_id: short ID for the check (e.g. "A1")
+    agent_name: display name (e.g. "Critic agent")
+    time_col_idx: 1-based column index for timestamp column
+
+    Returns CheckResult with WARNING if agent silent (not CRITICAL —
+    these are support agents, Trader still works without them).
+    """
+    if gc is None:
+        return CheckResult(check_id, agent_name + " freshness", "Agent health",
+                           INFO, "Skipped (no Sheets access)")
+
+    month, sheets = get_active_month_sheets(gc)
+    if not sheets or sheet_key not in sheets:
+        return CheckResult(check_id, agent_name + " freshness", "Agent health",
+                           WARNING, sheet_key + " not configured")
+
+    try:
+        all_vals = _ha_col_values(gc, sheets[sheet_key], time_col_idx)
+        if len(all_vals) < 2:
+            return CheckResult(check_id, agent_name + " freshness", "Agent health",
+                               WARNING, sheet_key + " is empty")
+
+        last_value = str(all_vals[-1])
+        last_date_str = last_value[:10]
+
+        try:
+            last_dt = datetime.strptime(last_date_str, "%Y-%m-%d")
+        except ValueError:
+            return CheckResult(check_id, agent_name + " freshness", "Agent health",
+                               WARNING, "Unparseable last entry: " + last_value[:30])
+
+        last_td = _last_expected_trading_day()
+        days_old = (last_td - last_dt).days
+
+        if days_old <= 0:
+            return CheckResult(check_id, agent_name + " freshness", "Agent health",
+                               PASSED, "Last entry: " + last_date_str)
+        elif days_old <= 1:
+            return CheckResult(check_id, agent_name + " freshness", "Agent health",
+                               PASSED, "Last entry: " + last_date_str + " (1 trading day ago)")
+        elif days_old <= 3:
+            return CheckResult(check_id, agent_name + " freshness", "Agent health",
+                               WARNING,
+                               agent_name + " silent " + str(days_old) + " trading days",
+                               "Last entry: " + last_date_str + ", expected since: " + last_td.strftime("%Y-%m-%d"))
+        else:
+            return CheckResult(check_id, agent_name + " freshness", "Agent health",
+                               WARNING,
+                               agent_name + " silent " + str(days_old) + "+ trading days (likely broken)",
+                               "Last entry: " + last_date_str + ", expected since: " + last_td.strftime("%Y-%m-%d"))
+    except Exception as e:
+        return CheckResult(check_id, agent_name + " freshness", "Agent health",
+                           WARNING, "Failed: " + str(e)[:60])
+
+
+def check_25_critic_agent(gc):
+    """A1: Critic agent ran in last trading day."""
+    return _check_agent_freshness(gc, "agent_scorecard", "A1", "Critic agent", time_col_idx=1)
+
+
+def check_26_market_context_agent(gc):
+    """A2: Market Context agent ran in last trading day."""
+    return _check_agent_freshness(gc, "market_context", "A2", "Market Context agent", time_col_idx=1)
+
+
+def check_27_news_detective_agent(gc):
+    """A3: News Detective agent ran in last trading day."""
+    return _check_agent_freshness(gc, "news_findings", "A3", "News Detective agent", time_col_idx=1)
+
+
 def check_24_sentinel_health(gc):
     """S1: Data Sentinel module health — files, config, recent events."""
     import os as _os
@@ -1626,6 +1715,9 @@ def main():
     results.append(check_21_gap_outliers(gc))
     results.append(check_23_nan_scantime(gc))
     results.append(check_24_sentinel_health(gc))
+    results.append(check_25_critic_agent(gc))
+    results.append(check_26_market_context_agent(gc))
+    results.append(check_27_news_detective_agent(gc))
 
     # Config
     results.append(check_11_sheets_config_current_month())
