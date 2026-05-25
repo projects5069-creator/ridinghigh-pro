@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-05-24 20:44:19 -05
+**Generated:** 2026-05-24 21:03:06 -05
 **Branch:** `main`
-**Latest commit:** `7856e90` — fix(sheets): AUDIT.2 — wire quota_health.record_write to writes
+**Latest commit:** `c51feae` — chore(backlog): hygiene + 6 AUDIT tasks added
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `7856e90 (HEAD -> main) fix(sheets): AUDIT.2 — wire quota_health.record_write to writes`
-- `5695070 (origin/main, origin/HEAD) fix(dashboard): AUDIT.1 — remove calc_score_v2 duplicate scoring`
+- `c51feae (HEAD -> main) chore(backlog): hygiene + 6 AUDIT tasks added`
+- `9fbe336 (origin/main, origin/HEAD) fix(sheets): AUDIT.2 — wire quota_health.record_write to writes`
+- `5695070 fix(dashboard): AUDIT.1 — remove calc_score_v2 duplicate scoring`
 - `e36ec9b docs(pk+log): v2.33 — P3.4 closure (Phase 1 done, Phase 2 deferred)`
 - `7dae5e5 feat(orchestrator): P3.4 Phase 1 — cron-drift outage detection`
-- `fdd0965 docs(pk+log): v2.32 — SENT.1 closure + SENT.2 task`
 
 ---
 
@@ -64,10 +64,10 @@ _Months in config: `2026-04`, `2026-05`, `2026-06`_
 | pending_suggestions | 0 | — | ⚠️ empty |
 | config_history | 0 | — | ⚠️ empty |
 | borrow_data | 0 | — | ⚠️ empty |
-| market_context | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| market_context | 18 | — | ✅ |
 | news_findings | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
 | agent_scorecard | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| sentinel_events | 8,632 | — | ✅ |
+| sentinel_events | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
 
 ---
 

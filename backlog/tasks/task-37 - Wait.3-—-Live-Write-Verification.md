@@ -1,5 +1,5 @@
 ---
-id: TASK-28
+id: TASK-37
 title: Wait.3 — Live Write Verification
 status: To Do
 assignee: []
@@ -7,7 +7,7 @@ created_date: '2026-05-23 19:35'
 labels: []
 dependencies: []
 priority: medium
-ordinal: 28000
+ordinal: 37000
 ---
 
 ## Description
