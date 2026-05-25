@@ -2754,7 +2754,13 @@ def _fetch_health_data():
             df_snap = _cached_daily_snapshots()
             if not df_snap.empty and "Date" in df_snap.columns:
                 last_date = df_snap["Date"].max()
-                scan_time = df_snap[df_snap["Date"] == last_date]["ScanTime"].max() if "ScanTime" in df_snap.columns else "14:59"
+                if "ScanTime" in df_snap.columns:
+                    day_rows = df_snap[df_snap["Date"] == last_date].copy()
+                    day_rows["_time_min"] = day_rows["ScanTime"].apply(parse_hhmm)
+                    valid_rows = day_rows[day_rows["_time_min"] >= 0]
+                    scan_time = valid_rows.loc[valid_rows["_time_min"].idxmax(), "ScanTime"] if not valid_rows.empty else "14:59"
+                else:
+                    scan_time = "14:59"
                 last_scan = f"{last_date} {scan_time}"
         except Exception:
             pass

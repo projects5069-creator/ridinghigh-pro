@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-05-23 22:25:02 -05
+**Generated:** 2026-05-24 19:23:23 -05
 **Branch:** `main`
-**Latest commit:** `992b73c` — docs(p3.3): defer Market Context wiring with evidence-based notes
+**Latest commit:** `9c40468` — fix(dashboard): SENT.1 — apply parse_hhmm to last 9th call site
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `992b73c (HEAD -> main) docs(p3.3): defer Market Context wiring with evidence-based notes`
-- `a8c79b6 (origin/main, origin/HEAD) refactor(schema): P2.1 — split system_events into two tabs`
+- `9c40468 (HEAD -> main) fix(dashboard): SENT.1 — apply parse_hhmm to last 9th call site`
+- `6bbc4b9 (origin/main, origin/HEAD) docs(p3.3): defer Market Context wiring with evidence-based notes`
+- `a8c79b6 refactor(schema): P2.1 — split system_events into two tabs`
 - `972e80f fix(auto_scanner): P3.1 — wrap 6 unsafe sheets writes in retry`
 - `09a955b docs(p4.3): verified not-a-bug — live_trades sharing is by design`
-- `f431ed3 docs(pk): v2.31 — 5 changelog entries for 2026-05-23 session`
 
 ---
 
@@ -32,11 +32,11 @@ _See `OPEN_ISSUES.md` for full list_
 
 | Workflow | Status | Conclusion | Started |
 |---|---|---|---|
+| Health Audit | completed | ✅ success | 2026-05-24 17:54 UTC |
+| Health Audit | completed | ✅ success | 2026-05-24 11:58 UTC |
+| Health Audit | completed | ✅ success | 2026-05-24 06:39 UTC |
 | Agent — End of Day | completed | ✅ success | 2026-05-23 21:40 UTC |
 | Health Audit | completed | ✅ success | 2026-05-23 17:56 UTC |
-| Health Audit | completed | ✅ success | 2026-05-23 11:57 UTC |
-| Health Audit | completed | ✅ success | 2026-05-23 06:14 UTC |
-| Agent — Critic (daily) | completed | ✅ success | 2026-05-22 22:48 UTC |
 
 ---
 
@@ -63,9 +63,9 @@ _Months in config: `2026-04`, `2026-05`, `2026-06`_
 | system_events | 8,632 | — | ✅ |
 | pending_suggestions | 0 | — | ⚠️ empty |
 | config_history | 0 | — | ⚠️ empty |
-| borrow_data | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| borrow_data | 0 | — | ⚠️ empty |
 | market_context | 18 | — | ✅ |
-| news_findings | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| news_findings | 8,559 | — | ✅ |
 | agent_scorecard | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
 | sentinel_events | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
 
