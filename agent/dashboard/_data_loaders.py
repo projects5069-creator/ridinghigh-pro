@@ -21,6 +21,8 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspa
 import streamlit as st
 import pandas as pd
 
+import sheets_manager
+
 logger = logging.getLogger("agent.dashboard.data_loaders")
 
 try:
