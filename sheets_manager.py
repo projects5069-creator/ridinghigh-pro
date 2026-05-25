@@ -425,14 +425,37 @@ def invalidate_cache(tab_name, month=None):
     _sheet_values_cache.pop(key, None)
 
 
+def _track_write_quota():
+    """Record a successful Sheets write for quota_health monitoring.
+
+    AUDIT.2 fix (2026-05-24): This helper was missing — quota_health.record_write()
+    existed but no one called it, so the counter stayed at 0 and check_quota_health
+    always reported ALLOW. This restores the connection.
+
+    Graceful — never raises. If quota_health unavailable, write succeeds anyway.
+    Counter is in-process (resets each orchestrator run), giving partial
+    observability of burst-writes within a single run. Cross-run quota tracking
+    would require persistent state (deferred).
+    """
+    try:
+        from agent.sentinel.checks.quota_health import record_write
+        record_write()
+    except Exception:
+        pass  # observability is best-effort — never block a successful write
+
+
 def safe_update(ws, *args, **kwargs):
     """Range-based write with 429 retry. Idempotent — same cells each attempt."""
-    return _with_retry(ws.update, *args, **kwargs)
+    result = _with_retry(ws.update, *args, **kwargs)
+    _track_write_quota()
+    return result
 
 
 def safe_batch_update(ws, *args, **kwargs):
     """batch_update with 429 retry. Idempotent — explicit ranges."""
-    return _with_retry(ws.batch_update, *args, **kwargs)
+    result = _with_retry(ws.batch_update, *args, **kwargs)
+    _track_write_quota()
+    return result
 
 
 def safe_append_row(ws, row, dedup_col=None, dedup_val=None, **kwargs):
@@ -450,7 +473,9 @@ def safe_append_row(ws, row, dedup_col=None, dedup_val=None, **kwargs):
     last_error = None
     for attempt in range(_RETRY_MAX):
         try:
-            return ws.append_row(row, **kwargs)
+            result = ws.append_row(row, **kwargs)
+            _track_write_quota()
+            return result
         except Exception as e:
             last_error = e
             if not _is_quota_error(e):
@@ -495,7 +520,9 @@ def safe_append_rows(ws, rows, dedup_col=None, dedup_vals=None, **kwargs):
     last_error = None
     for attempt in range(_RETRY_MAX):
         try:
-            return ws.append_rows(rows, **kwargs)
+            result = ws.append_rows(rows, **kwargs)
+            _track_write_quota()
+            return result
         except Exception as e:
             last_error = e
             if not _is_quota_error(e):
