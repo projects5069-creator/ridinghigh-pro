@@ -161,34 +161,44 @@ If output is too long, show first 50 + last 20 lines with a clear marker.
 
 ---
 
-## RULE #11: Skills Are Mandatory
+## RULE #11: Skills Are Mandatory (HARD ENFORCEMENT)
 
-50 skills installed. Usage is mandatory, not a recommendation.
+**THIS RULE OVERRIDES ALL OTHER GUIDANCE.**
 
-### Before every task:
-1. Invoke `Skill` tool with `name="using-superpowers"` (meta-skill)
-2. Check `~/RidingHighPro/.claude/SKILLS_MAP.md`: which skill fits?
-3. Invoke: `Skill(name="<skill-name>")`
-4. Announce: "Using <skill> to <purpose>"
-5. Follow the skill instructions exactly
+Before responding to ANY user prompt — including this one — you MUST:
 
-### Iron Rule (from using-superpowers):
-> "If you think there is even a 1% chance a skill might apply, you ABSOLUTELY MUST invoke the skill. This is not negotiable."
+1. **Call Skill tool first**, with the relevant skill name:
+   - `Skill(name="using-superpowers")` at session start (once per session)
+   - `Skill(name="systematic-debugging")` before any investigation
+   - `Skill(name="writing-plans")` before any code edit
+   - `Skill(name="brainstorming")` before new feature design
+   - `Skill(name="verification-before-completion")` before declaring "done"
+   - Other relevant skill names as appropriate
 
-### Quick examples:
-- Bug investigation → `systematic-debugging`
-- Feature design → `brainstorming` → `writing-plans`
-- Statistical analysis → `statistical-analysis` / `explore-data`
-- Git cleanup → `git-cleanup`
-- Before completing task → `verification-before-completion`
+2. **Append to skill audit log** (`~/RidingHighPro/.skill_audit.log`):
+echo "$(TZ='America/Lima' date '+%Y-%m-%d %H:%M:%S') | TASK_TYPE | skill_name | brief_description" >> ~/RidingHighPro/.skill_audit.log
 
-**Full mapping:** see `.claude/SKILLS_MAP.md`.
+3. **Print to stdout** at the start of your response:
+SKILL INVOKED: <skill_name> (audit logged)
 
-### Red Flags (do NOT think these):
-- "Too simple for a skill" — skills are for simple tasks too
-- "I will just run the command" — skill first, then command
-- "I know what to do" — knowing ≠ invoking the skill
-- "No matching skill" — there is always at least `using-superpowers`
+### Failure Mode
+
+If you respond WITHOUT calling the Skill tool first:
+- You have FAILED RULE #11
+- Report failure explicitly: "RULE #11 VIOLATED — proceeding anyway"
+- The user will see this and know to remind you
+
+### Why This Matters
+
+The user (Amihay) has explicitly stated: "תמיד תמיד תמיד תעבוד עם כל הסקילים. תמיד!"
+This is non-negotiable. Skills exist for quality control. Skipping them
+because "the task seems simple" is the exact failure mode that loses trust.
+
+### Audit Trail
+
+The `~/RidingHighPro/.skill_audit.log` file is the evidence. The user can
+review it at any time. Empty log = you skipped skills. Populated log = you
+followed the rule.
 
 ---
 

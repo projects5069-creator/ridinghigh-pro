@@ -67,3 +67,4 @@ provider_validation_report.json
 # Backup files created by RULE #4
 *.bak_*
 *.bak
+.skill_audit.log

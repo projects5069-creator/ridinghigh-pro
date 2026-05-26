@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-05-26 10:37:44 -05
+**Generated:** 2026-05-26 11:13:00 -05
 **Branch:** `main`
-**Latest commit:** `fabe82e` — docs(pk): v2.39 — unified closure (Stage 1.6 + L3 + TD.2)
+**Latest commit:** `fb0f74d` — docs(claude.md): RULE #11 hard enforcement + skill audit log
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `fabe82e (HEAD -> main) docs(pk): v2.39 — unified closure (Stage 1.6 + L3 + TD.2)`
-- `5b20cbf (origin/main, origin/HEAD) feat(logging): TD.2 — add price_vs_sma20 to FIELD_MAPPING (41->42)`
+- `fb0f74d (HEAD -> main) docs(claude.md): RULE #11 hard enforcement + skill audit log`
+- `433cf89 (origin/main, origin/HEAD) docs(pk): v2.39 — unified closure (Stage 1.6 + L3 + TD.2)`
+- `5b20cbf feat(logging): TD.2 — add price_vs_sma20 to FIELD_MAPPING (41->42)`
 - `14452a2 feat(agent): L3 TOXIC_PROFILE filter — RSI>88 AND Price/SMA20>250%`
 - `fd450c9 test(td.1): update Decision field count 41 -> 42 (reentries_used_today)`
-- `b48bbae docs(claude.md): RULE #10 — add ET/Peru market hours table (DST handling)`
 
 ---
 
@@ -32,11 +32,11 @@ _See `OPEN_ISSUES.md` for full list_
 
 | Workflow | Status | Conclusion | Started |
 |---|---|---|---|
-| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-05-26 15:37 UTC |
-| Agent — Every Minute (DRY_RUN) | in_progress | ⏳ — | 2026-05-26 15:37 UTC |
-| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-05-26 15:36 UTC |
-| Agent — Every Minute (DRY_RUN) | completed | ✅ success | 2026-05-26 15:36 UTC |
-| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-05-26 15:35 UTC |
+| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-05-26 16:12 UTC |
+| Agent — Every Minute (DRY_RUN) | in_progress | ⏳ — | 2026-05-26 16:12 UTC |
+| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-05-26 16:11 UTC |
+| Agent — Every Minute (DRY_RUN) | completed | ✅ success | 2026-05-26 16:11 UTC |
+| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-05-26 16:10 UTC |
 
 ---
 
@@ -47,16 +47,16 @@ _Months in config: `2026-04`, `2026-05`, `2026-06`_
 
 | Sheet | Total rows | Last date | Status |
 |---|---|---|---|
-| timeline_live | 264,911 | 2026-05-26 | ✅ |
+| timeline_live | 267,489 | 2026-05-26 | ✅ |
 | daily_snapshots | 1,293 | 2026-05-22 | ✅ |
 | daily_summary | 1,405 | 2026-05-22 | ✅ |
-| post_analysis | 55 | 2026-05-22 | ✅ |
+| post_analysis | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
 | portfolio | 65 | 2026-05-22 | ✅ |
 | portfolio_live | 17 | 2026-05-22 | ✅ |
-| score_tracker | 1,419 | 2026-05-22 | ✅ |
-| live_trades | 1,419 | 2026-05-22 | ✅ |
-| ticker_follow_up | 12,477 | 2026-05-08 | ✅ |
-| decision_log | 16,232 | — | ✅ |
+| score_tracker | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| live_trades | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| ticker_follow_up | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| decision_log | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
 | paper_portfolio | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
 | score_analytics | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
 | postmortems | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
