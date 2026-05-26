@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-05-25 20:11:17 -05
+**Generated:** 2026-05-25 21:18:48 -05
 **Branch:** `main`
-**Latest commit:** `dbf94af` — feat(config): disable AGENT_RUNUP_MIN — capture wider universe per Stage 0 audit
+**Latest commit:** `7e5e8d9` — feat(agent): add L6 PRICE_TOO_LOW filter (ScanPrice >= $3)
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `dbf94af (HEAD -> main) feat(config): disable AGENT_RUNUP_MIN — capture wider universe per Stage 0 audit`
-- `15ecbd7 (origin/main, origin/HEAD) docs(backlog): close task-44 follow-ups + work log`
+- `7e5e8d9 (HEAD -> main) feat(agent): add L6 PRICE_TOO_LOW filter (ScanPrice >= $3)`
+- `3b3f812 (origin/main, origin/HEAD) feat(config): disable AGENT_RUNUP_MIN — capture wider universe per Stage 0 audit`
+- `15ecbd7 docs(backlog): close task-44 follow-ups + work log`
 - `bc47794 fix(dashboard): Home page WR — use classify_trade_row (task-44 AUDIT.9)`
 - `ede93cd fix(dashboard): missing sheets_manager import broke Trade History + Live Agent`
-- `ab071d0 chore(deploy): force Streamlit Cloud rebuild — stale parse_hhmm`
 
 ---
 
@@ -63,19 +63,19 @@ _Months in config: `2026-04`, `2026-05`, `2026-06`_
 | system_events | 8,632 | — | ✅ |
 | pending_suggestions | 0 | — | ⚠️ empty |
 | config_history | 0 | — | ⚠️ empty |
-| borrow_data | 0 | — | ⚠️ empty |
+| borrow_data | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
 | market_context | 22 | — | ✅ |
 | news_findings | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
 | agent_scorecard | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| sentinel_events | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| sentinel_events | 8,632 | — | ✅ |
 
 ---
 
 ## 🩺 Health
 
-- ⚠️ 20 uncommitted file(s):
+- ⚠️ 23 uncommitted file(s):
 -    - 1 modified
--    - 19 new/untracked
+-    - 22 new/untracked
 
 ---
 

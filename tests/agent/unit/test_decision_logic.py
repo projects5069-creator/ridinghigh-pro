@@ -87,3 +87,65 @@ def test_decision_has_41_fields():
     from dataclasses import fields
     field_names = [f.name for f in fields(Decision)]
     assert len(field_names) == 41, f"Expected 41 fields, got {len(field_names)}: {field_names}"
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# L6 — PRICE_TOO_LOW filter tests (2026-05-25 layers paradigm)
+# ─────────────────────────────────────────────────────────────────────────────
+
+def _good_signal_at_price(price):
+    """Helper: a signal that passes all filters except price."""
+    return {
+        "ticker": "TEST", "price": price, "volume": 5_000_000,
+        "market_cap": 50_000_000, "open": (price * 0.9) if price else 0,
+        "high": (price * 1.05) if price else 0, "low": (price * 0.85) if price else 0,
+        "mxv": -500.0, "run_up": 35.0, "atrx": 2.5, "rsi": 75.0,
+        "rel_vol": 8.0, "change": 25.0, "typical_price_dist": 0.05,
+    }
+
+
+def test_l6_price_too_low_blocks_under_3():
+    """Sub-$3 stocks must be blocked with PRICE_TOO_LOW."""
+    from agent.trader.decision_logic import evaluate_signal as evaluate
+    decision = evaluate(_good_signal_at_price(2.50))
+    assert decision.action == "SKIP"
+    assert decision.skip_reason.startswith("PRICE_TOO_LOW"), \
+        f"Expected PRICE_TOO_LOW, got: {decision.skip_reason}"
+
+
+def test_l6_price_too_low_blocks_at_zero():
+    """price=0 (missing/bad data) must be blocked safely."""
+    from agent.trader.decision_logic import evaluate_signal as evaluate
+    decision = evaluate(_good_signal_at_price(0.0))
+    assert decision.action == "SKIP"
+    assert decision.skip_reason.startswith("PRICE_TOO_LOW"), \
+        f"Expected PRICE_TOO_LOW, got: {decision.skip_reason}"
+
+
+def test_l6_price_too_low_blocks_at_none():
+    """price=None must be blocked without raising."""
+    from agent.trader.decision_logic import evaluate_signal as evaluate
+    sig = _good_signal_at_price(5.0)
+    sig["price"] = None
+    decision = evaluate(sig)
+    assert decision.action == "SKIP"
+    assert decision.skip_reason.startswith("PRICE_TOO_LOW"), \
+        f"Expected PRICE_TOO_LOW, got: {decision.skip_reason}"
+
+
+def test_l6_price_at_exactly_3_passes_filter():
+    """Boundary: price == 3.0 must NOT trigger PRICE_TOO_LOW."""
+    from agent.trader.decision_logic import evaluate_signal as evaluate
+    decision = evaluate(_good_signal_at_price(3.0))
+    if decision.action == "SKIP":
+        assert not decision.skip_reason.startswith("PRICE_TOO_LOW"), \
+            f"price=3.0 should pass L6, got: {decision.skip_reason}"
+
+
+def test_l6_price_above_3_passes_filter():
+    """Normal pump stock at $7.26 (winners median) must pass L6."""
+    from agent.trader.decision_logic import evaluate_signal as evaluate
+    decision = evaluate(_good_signal_at_price(7.26))
+    if decision.action == "SKIP":
+        assert not decision.skip_reason.startswith("PRICE_TOO_LOW"), \
+            f"price=7.26 should pass L6, got: {decision.skip_reason}"

@@ -30,7 +30,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspa
 
 from config import (
     AGENT_MIN_SCORE, AGENT_MXV_MAX, AGENT_RUNUP_MIN,
-    AGENT_VOLUME_MIN, AGENT_MARKET_CAP_MIN, AGENT_MARKET_CAP_MAX,
+    AGENT_VOLUME_MIN, AGENT_MIN_SCANPRICE_USD, AGENT_MARKET_CAP_MIN, AGENT_MARKET_CAP_MAX,
     AGENT_TP_PCT, AGENT_SL_PCT, AGENT_POSITION_SIZE_USD,
     AGENT_COLD_START_ENABLED, AGENT_COLD_START_MAX_CONCURRENT,
     AGENT_COLD_START_MAX_DAILY, AGENT_MAX_REENTRIES_PER_TICKER,
@@ -282,6 +282,14 @@ def _check_filters(d: Decision, signal: Dict[str, Any], quality: Dict[str, Any])
     # Filter 4: Volume
     if d.volume < AGENT_VOLUME_MIN:
         return f"VOLUME_TOO_LOW: {d.volume} < {AGENT_VOLUME_MIN}"
+
+    # Filter 4b (L6 — Layers paradigm, 2026-05-25): ScanPrice minimum
+    # Sub-$3 stocks have wide spreads, halt risk, and questionable borrow availability.
+    # Backtest: blocking <$3 contributed +129pp improvement (winners median $7.26 vs toxic $3.61).
+    # Treats price=None/0 as PRICE_TOO_LOW (safer than DATA_ERROR for missing price).
+    if d.price is None or d.price < AGENT_MIN_SCANPRICE_USD:
+        _price_str = f"${d.price:.2f}" if d.price is not None else "None"
+        return f"PRICE_TOO_LOW: {_price_str} < ${AGENT_MIN_SCANPRICE_USD}"
 
     # Filter 5: Market cap range
     if d.market_cap < AGENT_MARKET_CAP_MIN:

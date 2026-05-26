@@ -268,6 +268,7 @@ AGENT_MIN_SCORE = 50               # Lowered from 60 — admits micro-cap pumps 
 AGENT_MXV_MAX = -100               # Must be very negative
 AGENT_RUNUP_MIN = 0               # %, intraday rise
 AGENT_VOLUME_MIN = 100_000         # Liquidity floor
+AGENT_MIN_SCANPRICE_USD = 3.0          # L6 (2026-05-25 layers): block sub-$3 stocks (penny-stock-adjacent, wide spread, halt risk)
 AGENT_MARKET_CAP_MIN = 5_000_000   # $5M minimum
 AGENT_MARKET_CAP_MAX = 2_000_000_000  # $2B maximum
 
