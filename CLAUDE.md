@@ -218,6 +218,61 @@ If you respond without reading a relevant SKILL.md when one applies:
 
 ---
 
+## RULE #12: All bash commands must wrap through .rh-run.sh
+
+Every Bash tool invocation in this project MUST be wrapped:
+
+```bash
+~/RidingHighPro/.rh-run.sh '<command>'
+```
+
+Why: The wrapper pipes output to clipboard via pbcopy, so the user can
+paste it back to chat without manual copy-paste. Without the wrapper,
+the user must select and copy output manually from the terminal — slow
+and error-prone for long outputs.
+
+**The user does NOT need to ask for this. It is the default.**
+
+### Exceptions (rare)
+
+- Commands that produce binary output (e.g., `cat image.png`).
+- Interactive commands (`python` REPL, `git rebase -i`, `vim`).
+- Quick one-liners under 5 lines that obviously do not need clipboard
+  (e.g., `pwd`, `date`, `whoami`).
+
+### Failure mode
+
+If you skip the wrapper for any reason, state explicitly at the top
+of your response:
+
+> "Skipped wrapper because: <specific reason>"
+
+Do not silently bypass the wrapper. The user is tracking whether
+the wrapper is being used — silent skips break the workflow.
+
+### Why this rule exists
+
+Investigation on 2026-05-26 found that the "automatic clipboard"
+behavior depended entirely on Claude Code choosing to wrap each
+command. There is no hook, no alias, no shell-level mechanism. The
+only enforcement is this rule.
+
+Pattern verified working:
+
+```bash
+cat > /tmp/SCRIPT.sh << 'BASHEOF'
+#!/bin/bash
+# ... your commands ...
+BASHEOF
+
+chmod +x /tmp/SCRIPT.sh && ~/RidingHighPro/.rh-run.sh '/tmp/SCRIPT.sh'
+```
+
+The wrapper handles tee + pbcopy. Do not add `| pbcopy` inline — it
+breaks the wrapper output capture.
+
+---
+
 ## Summary: The Prime Directive
 
 **Show data. Don't explain data. Let the user drive interpretation.**

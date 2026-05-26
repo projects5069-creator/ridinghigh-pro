@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-05-26 15:26:20 -05
+**Generated:** 2026-05-26 17:00:49 -05
 **Branch:** `main`
-**Latest commit:** `166f8b0` — docs(claude.md): RULE #11 v3 — replace broken Skill() API with cat|wc-l
+**Latest commit:** `a4879f3` — docs(claude.md): RULE #12 — mandatory .rh-run.sh wrapper for all bash
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `166f8b0 (HEAD -> main) docs(claude.md): RULE #11 v3 — replace broken Skill() API with cat|wc-l`
-- `c3cf73e (origin/main, origin/HEAD) debug(L3): expose SMA20 enrichment silent failure in GH Actions`
+- `a4879f3 (HEAD -> main) docs(claude.md): RULE #12 — mandatory .rh-run.sh wrapper for all bash`
+- `cda560b (origin/main, origin/HEAD) docs(claude.md): RULE #11 v3 — replace broken Skill() API with cat|wc-l`
+- `c3cf73e debug(L3): expose SMA20 enrichment silent failure in GH Actions`
 - `3b63e3b feat(critic): integrate forensic prose into daily email`
 - `cce6c12 feat(postmortem): forensic prose AutoLessons in Hebrew`
-- `43704d4 fix(agent): wire decision_reader to PostmortemEngine`
 
 ---
 
@@ -32,11 +32,11 @@ _See `OPEN_ISSUES.md` for full list_
 
 | Workflow | Status | Conclusion | Started |
 |---|---|---|---|
-| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-05-26 20:26 UTC |
-| Agent — Every Minute (DRY_RUN) | in_progress | ⏳ — | 2026-05-26 20:26 UTC |
-| RidingHigh Auto Scanner | completed | ✅ success | 2026-05-26 20:25 UTC |
-| Agent — Every Minute (DRY_RUN) | completed | ✅ success | 2026-05-26 20:25 UTC |
-| RidingHigh Auto Scanner | completed | ✅ success | 2026-05-26 20:24 UTC |
+| Daily Backup — post_analysis | completed | ✅ success | 2026-05-26 21:56 UTC |
+| Daily Backup — post_analysis | completed | ✅ success | 2026-05-26 21:56 UTC |
+| Agent — Daily Brief Email | completed | ✅ success | 2026-05-26 21:30 UTC |
+| Agent — End of Day | completed | ✅ success | 2026-05-26 21:00 UTC |
+| RidingHigh Auto Scanner | completed | ✅ success | 2026-05-26 20:59 UTC |
 
 ---
 
