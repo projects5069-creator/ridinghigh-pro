@@ -149,3 +149,51 @@ def test_l6_price_above_3_passes_filter():
     if decision.action == "SKIP":
         assert not decision.skip_reason.startswith("PRICE_TOO_LOW"), \
             f"price=7.26 should pass L6, got: {decision.skip_reason}"
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Filter 4c — BLACKLISTED_TICKER (Stage 2, 2026-05-26 Toxic Blacklist)
+# ─────────────────────────────────────────────────────────────────────────────
+
+def _good_signal_with_ticker(ticker, price=7.0):
+    return {
+        "ticker": ticker, "price": price, "volume": 5_000_000,
+        "market_cap": 50_000_000, "open": price * 0.9,
+        "high": price * 1.05, "low": price * 0.85,
+        "mxv": -500.0, "run_up": 35.0, "atrx": 2.5, "rsi": 75.0,
+        "rel_vol": 8.0, "change": 25.0, "typical_price_dist": 0.05,
+    }
+
+
+def test_l3_blacklist_blocks_aehl():
+    from agent.trader.decision_logic import evaluate_signal
+    decision = evaluate_signal(_good_signal_with_ticker("AEHL"))
+    assert decision.action == "SKIP"
+    assert decision.skip_reason.startswith("BLACKLISTED_TICKER"), \
+        f"Expected BLACKLISTED_TICKER, got: {decision.skip_reason}"
+
+
+def test_l3_blacklist_blocks_tdic():
+    from agent.trader.decision_logic import evaluate_signal
+    decision = evaluate_signal(_good_signal_with_ticker("TDIC"))
+    assert decision.action == "SKIP"
+    assert decision.skip_reason.startswith("BLACKLISTED_TICKER"), \
+        f"Expected BLACKLISTED_TICKER, got: {decision.skip_reason}"
+
+
+def test_l3_blacklist_passes_non_blacklisted():
+    """Non-blacklisted ticker (e.g., ATRA winner) must not trigger blacklist filter."""
+    from agent.trader.decision_logic import evaluate_signal
+    decision = evaluate_signal(_good_signal_with_ticker("ATRA"))
+    if decision.action == "SKIP":
+        assert not decision.skip_reason.startswith("BLACKLISTED_TICKER"), \
+            f"ATRA should pass blacklist, got: {decision.skip_reason}"
+
+
+def test_l3_blacklist_priority_after_price():
+    """If ticker is blacklisted AND price < $3, PRICE_TOO_LOW fires first (4b before 4c)."""
+    from agent.trader.decision_logic import evaluate_signal
+    decision = evaluate_signal(_good_signal_with_ticker("AEHL", price=2.0))
+    assert decision.action == "SKIP"
+    assert decision.skip_reason.startswith("PRICE_TOO_LOW"), \
+        f"Expected PRICE_TOO_LOW (Filter 4b runs before 4c), got: {decision.skip_reason}"

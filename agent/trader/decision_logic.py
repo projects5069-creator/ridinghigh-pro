@@ -30,7 +30,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspa
 
 from config import (
     AGENT_MIN_SCORE, AGENT_MXV_MAX, AGENT_RUNUP_MIN,
-    AGENT_VOLUME_MIN, AGENT_MIN_SCANPRICE_USD, AGENT_MARKET_CAP_MIN, AGENT_MARKET_CAP_MAX,
+    AGENT_VOLUME_MIN, AGENT_MIN_SCANPRICE_USD, CHRONIC_DROPPER_BLACKLIST, AGENT_MARKET_CAP_MIN, AGENT_MARKET_CAP_MAX,
     AGENT_TP_PCT, AGENT_SL_PCT, AGENT_POSITION_SIZE_USD,
     AGENT_COLD_START_ENABLED, AGENT_COLD_START_MAX_CONCURRENT,
     AGENT_COLD_START_MAX_DAILY, AGENT_MAX_REENTRIES_PER_TICKER,
@@ -290,6 +290,12 @@ def _check_filters(d: Decision, signal: Dict[str, Any], quality: Dict[str, Any])
     if d.price is None or d.price < AGENT_MIN_SCANPRICE_USD:
         _price_str = f"${d.price:.2f}" if d.price is not None else "None"
         return f"PRICE_TOO_LOW: {_price_str} < ${AGENT_MIN_SCANPRICE_USD}"
+
+    # Filter 4c (Stage 2 — Layers, 2026-05-26): chronic dropper blacklist
+    # Tickers identified via DropsLab cross-reference as 3+ drops in 30d.
+    # AEHL + TDIC together account for ~$120 of DRY_RUN losses in Apr+May.
+    if d.ticker in CHRONIC_DROPPER_BLACKLIST:
+        return f"BLACKLISTED_TICKER: {d.ticker} in chronic dropper list"
 
     # Filter 5: Market cap range
     if d.market_cap < AGENT_MARKET_CAP_MIN:
