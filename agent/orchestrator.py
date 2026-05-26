@@ -91,7 +91,7 @@ def _signal_from_timeline_row(row: Dict[str, Any]) -> Dict[str, Any]:
         else:
             signal["price_vs_sma20"] = None
     except Exception as e:
-        logger.warning("SMA20 enrichment failed for %s: %s", signal.get("ticker", "?"), e)
+        print(f"[SMA_ENRICH_FAIL] {signal.get('ticker', '?')}: {type(e).__name__}: {e}", flush=True)
         signal["price_vs_sma20"] = None
 
     return signal

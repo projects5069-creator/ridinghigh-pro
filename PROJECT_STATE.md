@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-05-26 11:49:56 -05
+**Generated:** 2026-05-26 15:03:53 -05
 **Branch:** `main`
-**Latest commit:** `b48a1f1` — feat(critic): integrate forensic prose into daily email
+**Latest commit:** `d741ddb` — debug(L3): expose SMA20 enrichment silent failure in GH Actions
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `b48a1f1 (HEAD -> main) feat(critic): integrate forensic prose into daily email`
-- `cce6c12 (origin/main, origin/HEAD) feat(postmortem): forensic prose AutoLessons in Hebrew`
+- `d741ddb (HEAD -> main) debug(L3): expose SMA20 enrichment silent failure in GH Actions`
+- `3b63e3b (origin/main, origin/HEAD) feat(critic): integrate forensic prose into daily email`
+- `cce6c12 feat(postmortem): forensic prose AutoLessons in Hebrew`
 - `43704d4 fix(agent): wire decision_reader to PostmortemEngine`
 - `2d34da5 docs(claude.md): RULE #11 hard enforcement + skill audit log`
-- `433cf89 docs(pk): v2.39 — unified closure (Stage 1.6 + L3 + TD.2)`
 
 ---
 
@@ -32,11 +32,11 @@ _See `OPEN_ISSUES.md` for full list_
 
 | Workflow | Status | Conclusion | Started |
 |---|---|---|---|
-| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-05-26 16:49 UTC |
-| Agent — Every Minute (DRY_RUN) | in_progress | ⏳ — | 2026-05-26 16:49 UTC |
-| Agent — Every Minute (DRY_RUN) | completed | ✅ success | 2026-05-26 16:48 UTC |
-| RidingHigh Auto Scanner | completed | ✅ success | 2026-05-26 16:48 UTC |
-| Agent — Every Minute (DRY_RUN) | completed | ✅ success | 2026-05-26 16:47 UTC |
+| Agent — Every Minute (DRY_RUN) | completed | ✅ success | 2026-05-26 20:03 UTC |
+| RidingHigh Auto Scanner | completed | ✅ success | 2026-05-26 20:03 UTC |
+| RidingHigh Auto Scanner | completed | ✅ success | 2026-05-26 20:02 UTC |
+| Agent — Every Minute (DRY_RUN) | completed | ✅ success | 2026-05-26 20:02 UTC |
+| RidingHigh Auto Scanner | completed | ✅ success | 2026-05-26 20:01 UTC |
 
 ---
 
@@ -47,12 +47,12 @@ _Months in config: `2026-04`, `2026-05`, `2026-06`_
 
 | Sheet | Total rows | Last date | Status |
 |---|---|---|---|
-| timeline_live | 270,116 | 2026-05-26 | ✅ |
-| daily_snapshots | 1,293 | 2026-05-22 | ✅ |
-| daily_summary | 1,405 | 2026-05-22 | ✅ |
+| timeline_live | 282,818 | 2026-05-26 | ✅ |
+| daily_snapshots | 1,395 | 2026-05-26 | ✅ |
+| daily_summary | 1,512 | 2026-05-26 | ✅ |
 | post_analysis | 55 | 2026-05-22 | ✅ |
-| portfolio | 65 | 2026-05-22 | ✅ |
-| portfolio_live | 17 | 2026-05-22 | ✅ |
+| portfolio | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| portfolio_live | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
 | score_tracker | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
 | live_trades | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
 | ticker_follow_up | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |

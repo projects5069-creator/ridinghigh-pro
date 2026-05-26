@@ -72,10 +72,12 @@ def get_price_vs_sma20(ticker: str, current_price: float, provider=None) -> Opti
             return None
 
     if bars is None or len(bars) < 15:
+        print(f"[sma20_cache] BARS_INSUFFICIENT: {ticker} bars={None if bars is None else len(bars)}", flush=True)
         return None
     
     closes = bars["close"].dropna().tolist()
     if len(closes) < 15:
+        print(f"[sma20_cache] CLOSES_INSUFFICIENT: {ticker} closes={len(closes)}", flush=True)
         return None
     
     sma20 = sum(closes[-20:]) / min(len(closes), 20)
