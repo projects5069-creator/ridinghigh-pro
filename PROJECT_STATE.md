@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-05-25 22:13:48 -05
+**Generated:** 2026-05-26 07:19:16 -05
 **Branch:** `main`
-**Latest commit:** `f728c0b` — docs(pk): v2.36 — L6 PRICE_TOO_LOW filter + audit cleanup
+**Latest commit:** `e4e15dd` — docs: add SESSION_HANDOFF + MASTER_TASK_LIST from 2026-05-25 session
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `f728c0b (HEAD -> main) docs(pk): v2.36 — L6 PRICE_TOO_LOW filter + audit cleanup`
-- `e4687e0 (origin/main, origin/HEAD) feat(agent): add L6 PRICE_TOO_LOW filter (ScanPrice >= $3)`
+- `e4e15dd (HEAD -> main) docs: add SESSION_HANDOFF + MASTER_TASK_LIST from 2026-05-25 session`
+- `1adf3b8 (origin/main, origin/HEAD) docs(pk): v2.36 — L6 PRICE_TOO_LOW filter + audit cleanup`
+- `e4687e0 feat(agent): add L6 PRICE_TOO_LOW filter (ScanPrice >= $3)`
 - `3b3f812 feat(config): disable AGENT_RUNUP_MIN — capture wider universe per Stage 0 audit`
 - `15ecbd7 docs(backlog): close task-44 follow-ups + work log`
-- `bc47794 fix(dashboard): Home page WR — use classify_trade_row (task-44 AUDIT.9)`
 
 ---
 
@@ -32,11 +32,11 @@ _See `OPEN_ISSUES.md` for full list_
 
 | Workflow | Status | Conclusion | Started |
 |---|---|---|---|
+| Health Audit | completed | ✅ success | 2026-05-26 06:49 UTC |
 | Agent — Critic (daily) | completed | ✅ success | 2026-05-25 22:50 UTC |
 | Daily Backup — post_analysis | completed | ✅ success | 2026-05-25 22:36 UTC |
 | Agent — Daily Brief Email | completed | ✅ success | 2026-05-25 22:35 UTC |
 | Post Analysis Collector | completed | ✅ success | 2026-05-25 22:15 UTC |
-| Agent — End of Day | completed | ✅ success | 2026-05-25 21:57 UTC |
 
 ---
 
@@ -63,10 +63,10 @@ _Months in config: `2026-04`, `2026-05`, `2026-06`_
 | system_events | 8,632 | — | ✅ |
 | pending_suggestions | 0 | — | ⚠️ empty |
 | config_history | 0 | — | ⚠️ empty |
-| borrow_data | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| market_context | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| news_findings | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| agent_scorecard | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| borrow_data | 0 | — | ⚠️ empty |
+| market_context | 22 | — | ✅ |
+| news_findings | 8,559 | — | ✅ |
+| agent_scorecard | 44 | 2026-05-25 | ✅ |
 | sentinel_events | 8,632 | — | ✅ |
 
 ---
