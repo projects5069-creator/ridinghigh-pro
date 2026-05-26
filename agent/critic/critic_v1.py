@@ -649,3 +649,36 @@ class CriticAgent:
             "daily_breakdown": daily_breakdown,
             "recurring_anomaly_tickers": recurring,
         }
+
+    def get_today_postmortems(self):
+        """
+        Read postmortems Sheet, return rows where ExitDate is today (Peru).
+        Each row includes AutoLessons (forensic prose) for display in email.
+        """
+        from datetime import datetime
+        import pytz
+        try:
+            from sheets_manager import get_worksheet
+        except Exception as e:
+            print(f"[critic] sheets_manager import failed: {e}")
+            return []
+        
+        try:
+            ws = get_worksheet("postmortems")
+            if ws is None:
+                return []
+            rows = ws.get_all_records()
+        except Exception as e:
+            print(f"[critic] failed to read postmortems: {e}")
+            return []
+        
+        peru_tz = pytz.timezone("America/Lima")
+        today_str = datetime.now(peru_tz).strftime("%Y-%m-%d")
+        
+        today_rows = []
+        for r in rows:
+            exit_date = str(r.get("ExitDate", ""))
+            if exit_date.startswith(today_str):
+                today_rows.append(r)
+        
+        return today_rows

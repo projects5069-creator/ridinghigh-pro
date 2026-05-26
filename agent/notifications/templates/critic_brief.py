@@ -1,14 +1,15 @@
 """HTML template for daily Critic brief email (19:00 Peru)."""
 
 from datetime import datetime
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 import pytz
 
 PERU_TZ = pytz.timezone("America/Lima")
 
 
 def render_critic_email(facts: Dict[str, Any], positions: Dict[str, Any],
-                        weekly: Dict[str, Any] = None) -> tuple:
+                        weekly: Dict[str, Any] = None,
+                        postmortems: List[Dict[str, Any]] = None) -> tuple:
     """
     Args:
         facts: output of CriticAgent.daily_facts()
@@ -40,6 +41,32 @@ def render_critic_email(facts: Dict[str, Any], positions: Dict[str, Any],
 
     subject = f"🏆 RidingHigh — סיכום סוכנים יומי {date_str}"
 
+    # ── Forensic prose section (postmortems) ──────────────────────────
+    forensic_section = ""
+    if postmortems:
+        pm_cards = []
+        for pm in (postmortems or []):
+            ticker = pm.get("Ticker", "?")
+            pnl = pm.get("PnLPct", "")
+            exit_reason = pm.get("ExitReason", "")
+            lessons = pm.get("AutoLessons", "")
+            if lessons:
+                lessons_html = str(lessons).replace("\\n", "<br>")
+                is_win = "TP_HIT" in str(exit_reason) or (isinstance(pnl, (int, float)) and pnl > 0)
+                border_color = "#10b981" if is_win else "#ef4444"
+                pm_cards.append(
+                    f'<div style="background:#f8f9fa;padding:12px;margin:8px 0;'
+                    f'border-right:4px solid {border_color};border-radius:4px;">'
+                    f'<strong>{ticker}</strong><br>{lessons_html}</div>'
+                )
+        if pm_cards:
+            forensic_section = (
+                '<div style="margin:16px 0;">'
+                '<h3 style="color:#374151;">📊 ניתוח עסקאות היום</h3>'
+                + "".join(pm_cards)
+                + '</div>'
+            )
+
     # ── No-activity shortcut ────────────────────────────────────────
     if not has_activity and not anomalies and not conflicts:
         html = f"""
@@ -61,6 +88,7 @@ def render_critic_email(facts: Dict[str, Any], positions: Dict[str, Any],
     unique_str = ", ".join(f"{t}×{n}" for t, n in unique_tickers.items()) if unique_tickers else "—"
 
     activity_html = f"""
+    {forensic_section}
     <div style="background: #f9fafb; padding: 16px; border-radius: 8px; margin: 16px 0;">
       <h3 style="margin-top: 0; color: #374151;">📋 פעילות סוכנים</h3>
       <table style="width: 100%; border-collapse: collapse; font-size: 14px;">

@@ -88,7 +88,14 @@ def run() -> Dict[str, Any]:
         facts = critic.daily_facts(today)
         from agent.notifications.templates.critic_brief import render_critic_email
         from agent.notifications.email_sender import send_email
-        subject, html = render_critic_email(facts, positions, weekly=weekly_data)
+        # Fetch today's postmortems for forensic prose in email
+
+        postmortems = critic.get_today_postmortems()
+
+        logger.info('Today postmortems for email: %d', len(postmortems))
+
+
+        subject, html = render_critic_email(facts, positions, weekly=weekly_data, postmortems=postmortems)
         sent = send_email(subject, html)
         summary["email_sent"] = sent
         logger.info("Critic email: %s%s",
