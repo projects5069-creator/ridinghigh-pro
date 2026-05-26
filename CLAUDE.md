@@ -161,44 +161,60 @@ If output is too long, show first 50 + last 20 lines with a clear marker.
 
 ---
 
-## RULE #11: Skills Are Mandatory (HARD ENFORCEMENT)
+## RULE #11: Skill Activation (v3 — verifiable)
 
-**THIS RULE OVERRIDES ALL OTHER GUIDANCE.**
+The global `~/.claude/CLAUDE.md` §2 defines the protocol: read relevant
+SKILL.md files proactively. This rule REINFORCES it with project-specific
+skills and a verifiable proof mechanism.
 
-Before responding to ANY user prompt — including this one — you MUST:
+### Project-specific skill mapping
 
-1. **Call Skill tool first**, with the relevant skill name:
-   - `Skill(name="using-superpowers")` at session start (once per session)
-   - `Skill(name="systematic-debugging")` before any investigation
-   - `Skill(name="writing-plans")` before any code edit
-   - `Skill(name="brainstorming")` before new feature design
-   - `Skill(name="verification-before-completion")` before declaring "done"
-   - Other relevant skill names as appropriate
+| Task type                                | Required skill path                                                       |
+|------------------------------------------|---------------------------------------------------------------------------|
+| Debug / investigation / root cause       | `~/.claude/skills/superpowers/skills/systematic-debugging/SKILL.md`       |
+| Multi-step code edit / refactor          | `~/.claude/skills/superpowers/skills/writing-plans/SKILL.md`              |
+| New feature / open-ended question        | `~/.claude/skills/superpowers/skills/brainstorming/SKILL.md`              |
+| Before declaring "done" / before commit  | `~/.claude/skills/superpowers/skills/verification-before-completion/SKILL.md` |
+| Backtest / strategy validation / STRAT   | `~/.claude/skills/backtest-expert/SKILL.md`                               |
+| Trade postmortem / WHIPSAW / win-rate    | `~/.claude/skills/signal-postmortem/SKILL.md`                             |
+| Position sizing / risk-based shares      | `~/.claude/skills/position-sizer/SKILL.md`                                |
 
-2. **Append to skill audit log** (`~/RidingHighPro/.skill_audit.log`):
-echo "$(TZ='America/Lima' date '+%Y-%m-%d %H:%M:%S') | TASK_TYPE | skill_name | brief_description" >> ~/RidingHighPro/.skill_audit.log
+If unsure which sub-skill applies, list them first:
+`ls ~/.claude/skills/superpowers/skills/`
 
-3. **Print to stdout** at the start of your response:
-SKILL INVOKED: <skill_name> (audit logged)
+### How to activate a skill
 
-### Failure Mode
+Before starting a task where a skill applies, **read its SKILL.md** and
+report the line count as proof:
 
-If you respond WITHOUT calling the Skill tool first:
-- You have FAILED RULE #11
-- Report failure explicitly: "RULE #11 VIOLATED — proceeding anyway"
-- The user will see this and know to remind you
+```bash
+cat ~/.claude/skills/superpowers/skills/<skill-name>/SKILL.md | wc -l
+```
 
-### Why This Matters
+Include in your response:
+> Skill activated: <skill-name> (<N> lines read from <path>)
 
-The user (Amihay) has explicitly stated: "תמיד תמיד תמיד תעבוד עם כל הסקילים. תמיד!"
-This is non-negotiable. Skills exist for quality control. Skipping them
-because "the task seems simple" is the exact failure mode that loses trust.
+If you cannot produce a real line count, do NOT invent one. State
+explicitly which file you tried and why it failed.
 
-### Audit Trail
+### Why the v1 version failed
 
-The `~/RidingHighPro/.skill_audit.log` file is the evidence. The user can
-review it at any time. Empty log = you skipped skills. Populated log = you
-followed the rule.
+v1 instructed: `Skill(name="systematic-debugging")` and writes to
+`.skill_audit.log`. Neither mechanism exists or proves anything:
+- `Skill()` is not a callable tool in this environment.
+- A script writing to `.skill_audit.log` proves the script ran — not
+  that any skill was read.
+
+v3 uses `cat ... | wc -l` because:
+- The file must physically exist and be readable.
+- The line count cannot be fabricated without reading the file.
+- The path itself encodes which skill was activated.
+
+### Failure mode
+
+If you respond without reading a relevant SKILL.md when one applies:
+- State: "Skipped skill activation — RULE #11 v3 violation"
+- Do not silently proceed pretending you read it.
 
 ---
 

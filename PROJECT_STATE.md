@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-05-26 15:03:53 -05
+**Generated:** 2026-05-26 15:26:20 -05
 **Branch:** `main`
-**Latest commit:** `d741ddb` — debug(L3): expose SMA20 enrichment silent failure in GH Actions
+**Latest commit:** `166f8b0` — docs(claude.md): RULE #11 v3 — replace broken Skill() API with cat|wc-l
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `d741ddb (HEAD -> main) debug(L3): expose SMA20 enrichment silent failure in GH Actions`
-- `3b63e3b (origin/main, origin/HEAD) feat(critic): integrate forensic prose into daily email`
+- `166f8b0 (HEAD -> main) docs(claude.md): RULE #11 v3 — replace broken Skill() API with cat|wc-l`
+- `c3cf73e (origin/main, origin/HEAD) debug(L3): expose SMA20 enrichment silent failure in GH Actions`
+- `3b63e3b feat(critic): integrate forensic prose into daily email`
 - `cce6c12 feat(postmortem): forensic prose AutoLessons in Hebrew`
 - `43704d4 fix(agent): wire decision_reader to PostmortemEngine`
-- `2d34da5 docs(claude.md): RULE #11 hard enforcement + skill audit log`
 
 ---
 
@@ -32,11 +32,11 @@ _See `OPEN_ISSUES.md` for full list_
 
 | Workflow | Status | Conclusion | Started |
 |---|---|---|---|
-| Agent — Every Minute (DRY_RUN) | completed | ✅ success | 2026-05-26 20:03 UTC |
-| RidingHigh Auto Scanner | completed | ✅ success | 2026-05-26 20:03 UTC |
-| RidingHigh Auto Scanner | completed | ✅ success | 2026-05-26 20:02 UTC |
-| Agent — Every Minute (DRY_RUN) | completed | ✅ success | 2026-05-26 20:02 UTC |
-| RidingHigh Auto Scanner | completed | ✅ success | 2026-05-26 20:01 UTC |
+| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-05-26 20:26 UTC |
+| Agent — Every Minute (DRY_RUN) | in_progress | ⏳ — | 2026-05-26 20:26 UTC |
+| RidingHigh Auto Scanner | completed | ✅ success | 2026-05-26 20:25 UTC |
+| Agent — Every Minute (DRY_RUN) | completed | ✅ success | 2026-05-26 20:25 UTC |
+| RidingHigh Auto Scanner | completed | ✅ success | 2026-05-26 20:24 UTC |
 
 ---
 
@@ -47,27 +47,27 @@ _Months in config: `2026-04`, `2026-05`, `2026-06`_
 
 | Sheet | Total rows | Last date | Status |
 |---|---|---|---|
-| timeline_live | 282,818 | 2026-05-26 | ✅ |
+| timeline_live | 283,022 | 2026-05-26 | ✅ |
 | daily_snapshots | 1,395 | 2026-05-26 | ✅ |
 | daily_summary | 1,512 | 2026-05-26 | ✅ |
 | post_analysis | 55 | 2026-05-22 | ✅ |
-| portfolio | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| portfolio_live | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| score_tracker | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| live_trades | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| ticker_follow_up | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| decision_log | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| paper_portfolio | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| score_analytics | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| postmortems | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| system_events | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| pending_suggestions | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| config_history | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| borrow_data | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| market_context | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| news_findings | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| agent_scorecard | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| sentinel_events | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| portfolio | 70 | 2026-05-26 | ✅ |
+| portfolio_live | 22 | 2026-05-26 | ✅ |
+| score_tracker | 1,419 | 2026-05-22 | ✅ |
+| live_trades | 1,419 | 2026-05-22 | ✅ |
+| ticker_follow_up | 12,477 | 2026-05-08 | ✅ |
+| decision_log | 16,232 | — | ✅ |
+| paper_portfolio | 90 | — | ✅ |
+| score_analytics | 0 | — | ⚠️ empty |
+| postmortems | 72 | — | ✅ |
+| system_events | 9,183 | — | ✅ |
+| pending_suggestions | 0 | — | ⚠️ empty |
+| config_history | 0 | — | ⚠️ empty |
+| borrow_data | 0 | — | ⚠️ empty |
+| market_context | 25 | — | ✅ |
+| news_findings | 9,072 | — | ✅ |
+| agent_scorecard | 44 | 2026-05-25 | ✅ |
+| sentinel_events | 9,183 | — | ✅ |
 
 ---
 
