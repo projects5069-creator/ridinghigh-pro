@@ -499,7 +499,24 @@ def run() -> Dict[str, Any]:
         )
         data_provider = get_data_provider()
         order_manager = OrderManager(broker, data_provider=data_provider)
-        postmortem_engine = PostmortemEngine(data_provider=data_provider)
+        # decision_reader callback: look up decision_log by DecisionID
+        # Required by PostmortemEngine to populate MetricsAtEntry
+        def _read_decision(decision_id):
+            try:
+                from sheets_manager import get_worksheet
+                ws = get_worksheet("decision_log")
+                if ws is None:
+                    return {}
+                rows = ws.get_all_records()
+                for row in rows:
+                    if row.get("DecisionID") == decision_id:
+                        return row
+                return {}
+            except Exception as e:
+                logger.warning("_read_decision failed for %s: %s", decision_id, e)
+                return {}
+
+        postmortem_engine = PostmortemEngine(data_provider=data_provider, decision_reader=_read_decision)
         news_detective = NewsDetectiveAgent()
 
         # ── Sheet writer for position_manager ──────────────────────
