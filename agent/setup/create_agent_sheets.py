@@ -47,7 +47,7 @@ AGENT_SHEET_NAMES = [
     "agent_scorecard",
 ]
 
-# Headers for each sheet (column count: 41, 22, 25, 17, 7, 11, 11, 14, 10, 9, 7)
+# Headers for each sheet (column count: 42, 22, 25, 17, 7, 11, 11, 14, 10, 9, 7)
 AGENT_SHEET_HEADERS = {
     "decision_log": [
         # Identity (5)
@@ -58,7 +58,7 @@ AGENT_SHEET_HEADERS = {
         "Price", "Volume", "MarketCap", "Float", "Open", "High", "Low",
         # Metrics (9)
         "Score", "MxV", "RunUp", "ATRX", "RSI", "TypicalPriceDist", "REL_VOL",
-        "ScanChange", "FloatPct",
+        "PriceVsSMA20", "ScanChange", "FloatPct",
         # Decision timing (1)
         "DecisionTimeMs",
         # Quality (1)

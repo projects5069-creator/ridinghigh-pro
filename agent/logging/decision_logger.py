@@ -31,7 +31,7 @@ from agent.logging.decision_id_generator import DecisionIDGenerator
 
 # Explicit ordered mapping: Decision field -> Sheet column
 # IMPORTANT: This order MUST match the headers in create_agent_sheets.py decision_log
-# 41 entries, validated by test_field_mapping_has_41_entries
+# 42 entries, validated by test_field_mapping_has_42_entries
 FIELD_MAPPING = [
     # Identity (5)
     ("decision_id", "DecisionID"),
@@ -59,6 +59,7 @@ FIELD_MAPPING = [
     ("rsi", "RSI"),
     ("typical_price_dist", "TypicalPriceDist"),
     ("rel_vol", "REL_VOL"),
+    ("price_vs_sma20", "PriceVsSMA20"),
     ("scan_change", "ScanChange"),
     ("float_pct", "FloatPct"),
     # Decision timing (1)
@@ -117,7 +118,7 @@ class DecisionLogger:
         self.id_generator = DecisionIDGenerator(sheet_id)
 
     def _decision_to_row(self, decision: Decision) -> List[Any]:
-        """Convert Decision to ordered list of 41 values matching Sheet."""
+        """Convert Decision to ordered list of 42 values matching Sheet."""
         row = []
         for field_name, _sheet_col in FIELD_MAPPING:
             value = getattr(decision, field_name, None)
