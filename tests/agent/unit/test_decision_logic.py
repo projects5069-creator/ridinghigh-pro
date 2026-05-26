@@ -82,11 +82,11 @@ def test_cold_start_concurrent_limit(good_signal):
     assert "COLD_START_CONCURRENT" in d.skip_reason
 
 
-def test_decision_has_41_fields():
+def test_decision_has_42_fields():
     """Verify the dataclass schema matches the Sheet."""
     from dataclasses import fields
     field_names = [f.name for f in fields(Decision)]
-    assert len(field_names) == 41, f"Expected 41 fields, got {len(field_names)}: {field_names}"
+    assert len(field_names) == 42, f"Expected 42 fields, got {len(field_names)}: {field_names}"
 
 
 # ─────────────────────────────────────────────────────────────────────────────

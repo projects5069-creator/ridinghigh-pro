@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-05-26 07:57:08 -05
+**Generated:** 2026-05-26 07:58:18 -05
 **Branch:** `main`
-**Latest commit:** `c78e38d` — docs(claude.md): RULE #10 — add ET/Peru market hours table (DST handling)
+**Latest commit:** `f1c3125` — test(td.1): update Decision field count 41 -> 42 (reentries_used_today)
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `c78e38d (HEAD -> main) docs(claude.md): RULE #10 — add ET/Peru market hours table (DST handling)`
-- `788fa17 (origin/main, origin/HEAD) docs(pk): v2.38 — Stage 2 closure (Filter 4c BLACKLISTED_TICKER)`
+- `f1c3125 (HEAD -> main) test(td.1): update Decision field count 41 -> 42 (reentries_used_today)`
+- `b48bbae (origin/main, origin/HEAD) docs(claude.md): RULE #10 — add ET/Peru market hours table (DST handling)`
+- `788fa17 docs(pk): v2.38 — Stage 2 closure (Filter 4c BLACKLISTED_TICKER)`
 - `ec94d9c feat(agent): add Filter 4c BLACKLISTED_TICKER (Stage 2 — Toxic Blacklist)`
 - `fe5b109 docs(pk): v2.37 — Stage 0.4 closure (DropsLab fix + sheet ID correction)`
-- `15f9cf8 docs: add SESSION_HANDOFF + MASTER_TASK_LIST from 2026-05-25 session`
 
 ---
 
@@ -47,27 +47,27 @@ _Months in config: `2026-04`, `2026-05`, `2026-06`_
 
 | Sheet | Total rows | Last date | Status |
 |---|---|---|---|
-| timeline_live | 261,593 | 2026-05-22 | ✅ |
-| daily_snapshots | 1,293 | 2026-05-22 | ✅ |
-| daily_summary | 1,405 | 2026-05-22 | ✅ |
-| post_analysis | 55 | 2026-05-22 | ✅ |
-| portfolio | 65 | 2026-05-22 | ✅ |
-| portfolio_live | 48 | 2026-05-22 | ✅ |
-| score_tracker | 1,419 | 2026-05-22 | ✅ |
-| live_trades | 1,419 | 2026-05-22 | ✅ |
-| ticker_follow_up | 12,477 | 2026-05-08 | ✅ |
-| decision_log | 16,231 | — | ✅ |
-| paper_portfolio | 89 | — | ✅ |
-| score_analytics | 0 | — | ⚠️ empty |
-| postmortems | 71 | — | ✅ |
-| system_events | 8,632 | — | ✅ |
-| pending_suggestions | 0 | — | ⚠️ empty |
-| config_history | 0 | — | ⚠️ empty |
-| borrow_data | 0 | — | ⚠️ empty |
-| market_context | 22 | — | ✅ |
-| news_findings | 8,559 | — | ✅ |
-| agent_scorecard | 44 | 2026-05-25 | ✅ |
-| sentinel_events | 8,632 | — | ✅ |
+| timeline_live | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| daily_snapshots | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| daily_summary | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| post_analysis | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| portfolio | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| portfolio_live | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| score_tracker | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| live_trades | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| ticker_follow_up | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| decision_log | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| paper_portfolio | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| score_analytics | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| postmortems | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| system_events | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| pending_suggestions | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| config_history | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| borrow_data | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| market_context | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| news_findings | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| agent_scorecard | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| sentinel_events | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
 
 ---
 
