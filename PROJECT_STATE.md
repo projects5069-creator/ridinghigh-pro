@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-05-26 07:19:16 -05
+**Generated:** 2026-05-26 07:41:23 -05
 **Branch:** `main`
-**Latest commit:** `e4e15dd` — docs: add SESSION_HANDOFF + MASTER_TASK_LIST from 2026-05-25 session
+**Latest commit:** `b513f7b` — docs(pk): v2.37 — Stage 0.4 closure (DropsLab fix + sheet ID correction)
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `e4e15dd (HEAD -> main) docs: add SESSION_HANDOFF + MASTER_TASK_LIST from 2026-05-25 session`
-- `1adf3b8 (origin/main, origin/HEAD) docs(pk): v2.36 — L6 PRICE_TOO_LOW filter + audit cleanup`
+- `b513f7b (HEAD -> main) docs(pk): v2.37 — Stage 0.4 closure (DropsLab fix + sheet ID correction)`
+- `15f9cf8 (origin/main, origin/HEAD) docs: add SESSION_HANDOFF + MASTER_TASK_LIST from 2026-05-25 session`
+- `1adf3b8 docs(pk): v2.36 — L6 PRICE_TOO_LOW filter + audit cleanup`
 - `e4687e0 feat(agent): add L6 PRICE_TOO_LOW filter (ScanPrice >= $3)`
 - `3b3f812 feat(config): disable AGENT_RUNUP_MIN — capture wider universe per Stage 0 audit`
-- `15ecbd7 docs(backlog): close task-44 follow-ups + work log`
 
 ---
 
@@ -65,9 +65,9 @@ _Months in config: `2026-04`, `2026-05`, `2026-06`_
 | config_history | 0 | — | ⚠️ empty |
 | borrow_data | 0 | — | ⚠️ empty |
 | market_context | 22 | — | ✅ |
-| news_findings | 8,559 | — | ✅ |
-| agent_scorecard | 44 | 2026-05-25 | ✅ |
-| sentinel_events | 8,632 | — | ✅ |
+| news_findings | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| agent_scorecard | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| sentinel_events | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
 
 ---
 

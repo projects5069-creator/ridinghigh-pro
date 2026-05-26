@@ -2,7 +2,7 @@
 **Source session:** 2026-05-25 layers paradigm shift
 **Created:** 2026-05-26
 **Status:** Active roadmap - ~3 months
-**Total:** 15 stages, ~65 tasks, **8 completed (12%)**
+**Total:** 15 stages, ~65 tasks, **9 completed (14%)**
 
 > **Filter numbering:** Filters in decision_logic.py use sequential numbering with letter
 > suffixes for inserts (e.g., Filter 4b for L6). Preserves historical ROCKET_GUARD (11).
@@ -14,7 +14,7 @@
 - [x] **0.1** AGENT_RUNUP_MIN = 0 - הושלם
 - [x] **0.2** שיתוף DropsLab עם service account - הושלם
 - [x] **0.3** SESSION_HANDOFF נשמר ב-docs/ - הושלם
-- [ ] **0.4** בדיקת DropsLab - למה עצרה Apr 17? (30 דק')
+- [x] **0.4** בדיקת DropsLab - root cause: drops_collect timeout (organic growth) - הושלם 26/5
 
 ---
 
@@ -148,6 +148,7 @@
 - [ ] **13.3** dropslab_bridge.py
 - [ ] **13.4** dropslab_daily sheet
 - [ ] **13.5** auto-update blacklist
+- [ ] **13.6** drops_collect optimization (skip processed rows / --date flag) — root cause of May 19 timeout. Quick fix applied 26/5 (timeout 10->20)
 
 ---
 
