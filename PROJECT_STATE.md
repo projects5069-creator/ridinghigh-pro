@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-05-25 10:34:29 -05
+**Generated:** 2026-05-25 20:11:17 -05
 **Branch:** `main`
-**Latest commit:** `e50a55f` — docs(backlog): close task-44 follow-ups + work log
+**Latest commit:** `dbf94af` — feat(config): disable AGENT_RUNUP_MIN — capture wider universe per Stage 0 audit
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `e50a55f (HEAD -> main) docs(backlog): close task-44 follow-ups + work log`
-- `bc47794 (origin/main, origin/HEAD) fix(dashboard): Home page WR — use classify_trade_row (task-44 AUDIT.9)`
+- `dbf94af (HEAD -> main) feat(config): disable AGENT_RUNUP_MIN — capture wider universe per Stage 0 audit`
+- `15ecbd7 (origin/main, origin/HEAD) docs(backlog): close task-44 follow-ups + work log`
+- `bc47794 fix(dashboard): Home page WR — use classify_trade_row (task-44 AUDIT.9)`
 - `ede93cd fix(dashboard): missing sheets_manager import broke Trade History + Live Agent`
 - `ab071d0 chore(deploy): force Streamlit Cloud rebuild — stale parse_hhmm`
-- `59b3ee5 feat(health_audit): AUDIT.3 — support agent freshness checks`
 
 ---
 
@@ -32,11 +32,11 @@ _See `OPEN_ISSUES.md` for full list_
 
 | Workflow | Status | Conclusion | Started |
 |---|---|---|---|
-| RidingHigh Auto Scanner | completed | ✅ success | 2026-05-25 15:34 UTC |
-| Agent — Every Minute (DRY_RUN) | in_progress | ⏳ — | 2026-05-25 15:34 UTC |
-| Agent — Every Minute (DRY_RUN) | completed | ✅ success | 2026-05-25 15:33 UTC |
-| RidingHigh Auto Scanner | completed | ✅ success | 2026-05-25 15:33 UTC |
-| Agent — Every Minute (DRY_RUN) | completed | ✅ success | 2026-05-25 15:32 UTC |
+| Agent — Critic (daily) | completed | ✅ success | 2026-05-25 22:50 UTC |
+| Daily Backup — post_analysis | completed | ✅ success | 2026-05-25 22:36 UTC |
+| Agent — Daily Brief Email | completed | ✅ success | 2026-05-25 22:35 UTC |
+| Post Analysis Collector | completed | ✅ success | 2026-05-25 22:15 UTC |
+| Agent — End of Day | completed | ✅ success | 2026-05-25 21:57 UTC |
 
 ---
 
@@ -58,13 +58,13 @@ _Months in config: `2026-04`, `2026-05`, `2026-06`_
 | ticker_follow_up | 12,477 | 2026-05-08 | ✅ |
 | decision_log | 16,231 | — | ✅ |
 | paper_portfolio | 89 | — | ✅ |
-| score_analytics | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| score_analytics | 0 | — | ⚠️ empty |
 | postmortems | 71 | — | ✅ |
-| system_events | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| pending_suggestions | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| config_history | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| borrow_data | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| market_context | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| system_events | 8,632 | — | ✅ |
+| pending_suggestions | 0 | — | ⚠️ empty |
+| config_history | 0 | — | ⚠️ empty |
+| borrow_data | 0 | — | ⚠️ empty |
+| market_context | 22 | — | ✅ |
 | news_findings | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
 | agent_scorecard | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
 | sentinel_events | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
@@ -72,7 +72,10 @@ _Months in config: `2026-04`, `2026-05`, `2026-06`_
 ---
 
 ## 🩺 Health
-✅ All checks passed.
+
+- ⚠️ 20 uncommitted file(s):
+-    - 1 modified
+-    - 19 new/untracked
 
 ---
 
