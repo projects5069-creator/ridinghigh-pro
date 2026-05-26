@@ -127,7 +127,7 @@ class PostmortemEngine:
             "DurationHours": round(duration_hours, 2),
             "MaxFavorable": mfe if mfe is not None else "",
             "MaxAdverse": mae if mae is not None else "",
-            "AutoLessons": json.dumps(lessons),
+            "AutoLessons": self._build_forensic_prose(position, decision_context, mfe, mae, duration_hours),
             "GeneratedAt": datetime.now(PERU_TZ).isoformat(),
             "ScoreVersion": AGENT_SCORE_VERSION,
         }
@@ -344,3 +344,133 @@ class PostmortemEngine:
             return float(value)
         except (TypeError, ValueError):
             return default
+
+    # ─────────────────────────────────────────────────────────────────
+    # Forensic prose generator (added 2026-05-26)
+    # Replaces generic AutoLessons with Hebrew narrative analysis.
+    # Baseline references:
+    #   Winner median: RSI=83.62, Price/SMA20=194%, MxV=-2507
+    #   Toxic median:  RSI=92.61, Price/SMA20=305%, MxV=-887
+    # ─────────────────────────────────────────────────────────────────
+
+    WINNER_BASELINE = {"rsi": 83.62, "sma": 194, "mxv": -2507, "scan_change": 28}
+    TOXIC_BASELINE = {"rsi": 92.61, "sma": 305, "mxv": -887, "scan_change": 45}
+
+    def _build_forensic_prose(self, position, decision_ctx, mfe, mae, duration_hours):
+        """
+        Build forensic prose analysis in Hebrew for a closed trade.
+        תיעוד בעברית של עסקה סגורה — מה הכניס, מה היו הטריגרים, השוואה ל-baseline.
+        """
+        if not decision_ctx:
+            return "אין metrics לניתוח (decision_context ריק)"
+        
+        ticker = position.get("Ticker", "?")
+        pnl_pct = position.get("RealizedPnLPct") or position.get("PnLPct") or 0
+        exit_reason = position.get("ExitReason", "?")
+        
+        def f(v, default=0):
+            try: return float(v)
+            except (TypeError, ValueError): return default
+        
+        score = f(decision_ctx.get("Score", 0))
+        metrics = decision_ctx.get("metrics", {})
+        rsi = f(metrics.get("RSI", 0))
+        mxv = f(metrics.get("MxV", 0))
+        run_up = f(metrics.get("RunUp", 0))
+        rel_vol = f(metrics.get("REL_VOL", 0))
+        scan_change = f(metrics.get("ScanChange", 0))
+        sma_raw = decision_ctx.get("PriceVsSMA20")
+        sma_v = f(sma_raw, None) if sma_raw not in (None, "", "MISSING") else None
+        pnl = f(pnl_pct)
+        
+        winner = self.WINNER_BASELINE
+        toxic = self.TOXIC_BASELINE
+        
+        lines = []
+        
+        is_win = "TP_HIT" in str(exit_reason) or pnl > 0
+        is_loss = "SL_HIT" in str(exit_reason) or pnl < 0
+        if is_win:
+            lines.append(f"🟢 ניצחון — {exit_reason}, רווח {pnl:+.2f}% ({duration_hours:.1f}h)")
+        elif is_loss:
+            lines.append(f"🔴 הפסד — {exit_reason}, {pnl:+.2f}% ({duration_hours:.1f}h)")
+        else:
+            lines.append(f"⚪ סגירה — {exit_reason}, {pnl:+.2f}% ({duration_hours:.1f}h)")
+        lines.append("")
+        
+        lines.append("📊 מה הכניס לעסקה:")
+        if score < 60:
+            lines.append(f"• Score={score:.2f} — נמוך, בקושי מעל הסף (50). הציון לבדו לא תמך בכניסה")
+        elif score < 80:
+            lines.append(f"• Score={score:.2f} — בינוני")
+        else:
+            lines.append(f"• Score={score:.2f} — גבוה")
+        
+        triggers = []
+        if scan_change > 60:
+            triggers.append(f"ScanChange={scan_change:.1f}% (פאמפ חזק)")
+        elif scan_change > 30:
+            triggers.append(f"ScanChange={scan_change:.1f}% (פאמפ בינוני)")
+        if rel_vol > 10:
+            triggers.append(f"REL_VOL={rel_vol:.1f}x (וולום חריג)")
+        elif rel_vol > 5:
+            triggers.append(f"REL_VOL={rel_vol:.1f}x (וולום מוגבר)")
+        if mxv < -1000:
+            triggers.append(f"MxV={mxv:.0f} (illiquidity חזק)")
+        elif mxv < -300:
+            triggers.append(f"MxV={mxv:.0f} (illiquidity מתון)")
+        
+        if triggers:
+            lines.append(f"• הטריגרים: {' + '.join(triggers)}")
+        lines.append("")
+        
+        lines.append("🎯 ה-DNA — איזה ארכיטיפ:")
+        rsi_dist_to_winner = abs(rsi - winner["rsi"])
+        rsi_dist_to_toxic = abs(rsi - toxic["rsi"])
+        if rsi_dist_to_winner < rsi_dist_to_toxic:
+            lines.append(f"• RSI={rsi:.2f} → קרוב ל-winner median ({winner['rsi']}), רחוק מ-toxic ({toxic['rsi']}) ✅")
+        else:
+            lines.append(f"• RSI={rsi:.2f} → קרוב ל-toxic median ({toxic['rsi']}), רחוק מ-winner ({winner['rsi']}) ⚠️")
+        
+        if sma_v is None:
+            lines.append(f"• Price/SMA20: לא זמין → L3 בdefault PASS")
+        elif sma_v < 250:
+            lines.append(f"• Price/SMA20={sma_v:.0f}% — מתחת לסף toxic (250) ✅")
+        else:
+            lines.append(f"• Price/SMA20={sma_v:.0f}% — מעל סף toxic (250) ⚠️ (היה נחסם אם RSI>88)")
+        lines.append("")
+        
+        close_calls = []
+        if 50 <= score <= 55:
+            close_calls.append(f"Score={score:.2f} — 3 נק' פחות = SKIP")
+        if 85 <= rsi <= 88:
+            close_calls.append(f"RSI={rsi:.2f} — קרוב לסף L3 (88)")
+        if sma_v is not None and 230 <= sma_v <= 250:
+            close_calls.append(f"Price/SMA20={sma_v:.0f}% — קרוב לסף L3 (250%)")
+        if -150 <= mxv <= -100:
+            close_calls.append(f"MxV={mxv:.0f} — קרוב לסף MXV_TOO_HIGH (-100)")
+        
+        if close_calls:
+            lines.append("⚠️ Close calls:")
+            for cc in close_calls:
+                lines.append(f"• {cc}")
+            lines.append("")
+        
+        if mfe is not None and mae is not None:
+            lines.append(f"📈 תנועה: MFE={mfe:+.2f}% (מקסימום לטובתי) | MAE={mae:+.2f}% (מקסימום נגדי)")
+            lines.append("")
+        
+        lines.append("💡 תובנה:")
+        if is_win and duration_hours < 2:
+            lines.append(f"TP מהיר ({duration_hours:.1f}h) = pump-and-fade קלאסי. signature חזק.")
+        elif is_win and duration_hours > 24:
+            lines.append(f"TP איטי ({duration_hours:.1f}h) = mean reversion הדרגתי.")
+        elif is_loss and duration_hours < 2:
+            lines.append(f"SL מהיר ({duration_hours:.1f}h) = הפאמפ המשיך לעלות. בדוק אם ROCKET_GUARD היה צריך לחסום.")
+        elif is_loss:
+            lines.append(f"SL לאחר {duration_hours:.1f}h. בדוק אם RSI/SMA היו חריגים מ-baseline.")
+        else:
+            lines.append("עסקה ללא TP/SL — מקרה גבולי, ראוי לחקירה.")
+        
+        return "\n".join(lines)
+
