@@ -2,7 +2,7 @@
 **Source session:** 2026-05-25 layers paradigm shift
 **Created:** 2026-05-26
 **Status:** Active roadmap - ~3 months
-**Total:** 15 stages, ~65 tasks, **9 completed (14%)**
+**Total:** 15 stages, ~65 tasks, **13 completed (20%)**
 
 > **Filter numbering:** Filters in decision_logic.py use sequential numbering with letter
 > suffixes for inserts (e.g., Filter 4b for L6). Preserves historical ROCKET_GUARD (11).
@@ -33,10 +33,10 @@
 ## Stage 2 - Toxic Tickers Blacklist (NEXT)
 **AEHL + TDIC = chronic droppers (DropsLab cross-reference)**
 
-- [ ] **2.1** CHRONIC_DROPPER_BLACKLIST = ["AEHL","TDIC"] ל-config.py
-- [ ] **2.2** Filter 4c BLACKLISTED_TICKER (after Filter 4b)
-- [ ] **2.3** tests + commit
-- [ ] **2.4** תיעוד + PK update v2.37
+- [x] **2.1** CHRONIC_DROPPER_BLACKLIST = ["AEHL","TDIC"] ל-config.py
+- [x] **2.2** Filter 4c BLACKLISTED_TICKER (after Filter 4b)
+- [x] **2.3** tests + commit
+- [x] **2.4** תיעוד + PK update v2.38
 
 ---
 

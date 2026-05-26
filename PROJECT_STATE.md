@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-05-26 07:46:54 -05
+**Generated:** 2026-05-26 07:51:15 -05
 **Branch:** `main`
-**Latest commit:** `2c905bf` — feat(agent): add Filter 4c BLACKLISTED_TICKER (Stage 2 — Toxic Blacklist)
+**Latest commit:** `2e4ac30` — docs(pk): v2.38 — Stage 2 closure (Filter 4c BLACKLISTED_TICKER)
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `2c905bf (HEAD -> main) feat(agent): add Filter 4c BLACKLISTED_TICKER (Stage 2 — Toxic Blacklist)`
-- `fe5b109 (origin/main, origin/HEAD) docs(pk): v2.37 — Stage 0.4 closure (DropsLab fix + sheet ID correction)`
+- `2e4ac30 (HEAD -> main) docs(pk): v2.38 — Stage 2 closure (Filter 4c BLACKLISTED_TICKER)`
+- `ec94d9c (origin/main, origin/HEAD) feat(agent): add Filter 4c BLACKLISTED_TICKER (Stage 2 — Toxic Blacklist)`
+- `fe5b109 docs(pk): v2.37 — Stage 0.4 closure (DropsLab fix + sheet ID correction)`
 - `15f9cf8 docs: add SESSION_HANDOFF + MASTER_TASK_LIST from 2026-05-25 session`
 - `1adf3b8 docs(pk): v2.36 — L6 PRICE_TOO_LOW filter + audit cleanup`
-- `e4687e0 feat(agent): add L6 PRICE_TOO_LOW filter (ScanPrice >= $3)`
 
 ---
 
@@ -67,7 +67,7 @@ _Months in config: `2026-04`, `2026-05`, `2026-06`_
 | market_context | 22 | — | ✅ |
 | news_findings | 8,559 | — | ✅ |
 | agent_scorecard | 44 | 2026-05-25 | ✅ |
-| sentinel_events | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| sentinel_events | 8,632 | — | ✅ |
 
 ---
 
