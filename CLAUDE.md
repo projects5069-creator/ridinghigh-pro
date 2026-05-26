@@ -143,10 +143,21 @@ If output is too long, show first 50 + last 20 lines with a clear marker.
 
 ## RULE #10: Timezone Awareness
 
-- User is in **Peru (UTC-5, no DST)**
+- User is in **Peru (UTC-5, no DST year-round)**
 - GitHub Actions runs in **UTC**
 - 16:00 Peru = 21:00 UTC
 - Always specify which timezone when discussing times
+
+### US Market Hours vs Peru
+- US market opens **09:30 ET** (Eastern Time)
+- ET has DST; Peru does NOT:
+  - **Summer (Mar–Nov): ET = UTC-4 (EDT)** → 09:30 ET = **08:30 Peru**
+  - **Winter (Nov–Mar): ET = UTC-5 (EST)** → 09:30 ET = **09:30 Peru**
+- **Do NOT guess** — if market-open time matters, compute from current UTC offset:
+  ```bash
+  TZ='America/New_York' date +%Z    # EDT or EST
+  ```
+- Market close: 16:00 ET = 15:00 Peru (summer) / 16:00 Peru (winter)
 
 ---
 

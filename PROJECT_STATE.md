@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-05-26 07:51:15 -05
+**Generated:** 2026-05-26 07:57:08 -05
 **Branch:** `main`
-**Latest commit:** `2e4ac30` — docs(pk): v2.38 — Stage 2 closure (Filter 4c BLACKLISTED_TICKER)
+**Latest commit:** `c78e38d` — docs(claude.md): RULE #10 — add ET/Peru market hours table (DST handling)
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `2e4ac30 (HEAD -> main) docs(pk): v2.38 — Stage 2 closure (Filter 4c BLACKLISTED_TICKER)`
-- `ec94d9c (origin/main, origin/HEAD) feat(agent): add Filter 4c BLACKLISTED_TICKER (Stage 2 — Toxic Blacklist)`
+- `c78e38d (HEAD -> main) docs(claude.md): RULE #10 — add ET/Peru market hours table (DST handling)`
+- `788fa17 (origin/main, origin/HEAD) docs(pk): v2.38 — Stage 2 closure (Filter 4c BLACKLISTED_TICKER)`
+- `ec94d9c feat(agent): add Filter 4c BLACKLISTED_TICKER (Stage 2 — Toxic Blacklist)`
 - `fe5b109 docs(pk): v2.37 — Stage 0.4 closure (DropsLab fix + sheet ID correction)`
 - `15f9cf8 docs: add SESSION_HANDOFF + MASTER_TASK_LIST from 2026-05-25 session`
-- `1adf3b8 docs(pk): v2.36 — L6 PRICE_TOO_LOW filter + audit cleanup`
 
 ---
 
