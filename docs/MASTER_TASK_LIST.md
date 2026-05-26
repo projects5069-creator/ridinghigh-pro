@@ -2,7 +2,7 @@
 **Source session:** 2026-05-25 layers paradigm shift
 **Created:** 2026-05-26
 **Status:** Active roadmap - ~3 months
-**Total:** 15 stages, ~65 tasks, **13 completed (20%)**
+**Total:** 15 stages, ~65 tasks, **17 completed (26%)**
 
 > **Filter numbering:** Filters in decision_logic.py use sequential numbering with letter
 > suffixes for inserts (e.g., Filter 4b for L6). Preserves historical ROCKET_GUARD (11).
@@ -26,7 +26,7 @@
 - [x] **1.3** 5 tests, all pass
 - [x] **1.4** verification - tests, syntax, diff
 - [x] **1.5** commit + push
-- [ ] **1.6** monitor production (יום אחד) - **התחיל 26/5 08:30 Peru**
+- [x] **1.6** monitor production — הושלם 26/5. 67 runs, 902 decisions, L6 fired on AEMD @$2.58. 0 ENTERs (calm market).
 
 ---
 
@@ -88,7 +88,7 @@
 - [ ] **7.1** re-validate plateau backtest
 - [ ] **7.2** L4: Filter 9 REENTRY_LIMIT verify
 - [ ] **7.3** L5: Time<13:00 new filter
-- [ ] **7.4** L3: Toxic Profile (RSI<=88 + Price/SMA20<250)
+- [x] **7.4** L3: Toxic Profile (RSI>88 AND Price/SMA20>250%) — Filter 4d, commit 14452a2 (26/5)
 - [ ] **7.5** monitor 2 שבועות
 
 ---
@@ -174,8 +174,8 @@
 
 ## Tech Debt (זוהה בסשן L6)
 
-- [ ] **TD.1** test_decision_has_41_fields -> 42
-- [ ] **TD.2** reentries_used_today: FIELD_MAPPING? או internal-only?
+- [x] **TD.1** test_decision_has_41_fields -> 43 — commit fd450c9 + 14452a2 (26/5)
+- [x] **TD.2** price_vs_sma20 added to FIELD_MAPPING (41->42). reentries_used_today stays internal. commit 5b20cbf (26/5)
 - [ ] **TD.3** ניקוי ~95 .bak files
 - [ ] **TD.4** ניקוי 22 research/ dirs
 - [ ] **TD.5** TASK-41 filter order distribution
