@@ -57,7 +57,7 @@ def _signal_from_timeline_row(row: Dict[str, Any]) -> Dict[str, Any]:
         except (TypeError, ValueError):
             return default
 
-    return {
+    signal = {
         "ticker": str(row.get("Ticker", "")).strip().upper(),
         "price": _f("Price"),
         "volume": _i("Volume"),
@@ -80,6 +80,21 @@ def _signal_from_timeline_row(row: Dict[str, Any]) -> Dict[str, Any]:
         "scan_time": str(row.get("ScanTime", "")),
         "scan_date": str(row.get("Date", "")),
     }
+
+    # L3 enrichment: Price/SMA20 for Toxic Profile filter (4d)
+    try:
+        from agent.enrichment.sma20_cache import get_price_vs_sma20
+        _ticker = signal.get("ticker")
+        _price = signal.get("price")
+        if _ticker and _price:
+            signal["price_vs_sma20"] = get_price_vs_sma20(_ticker, _price)
+        else:
+            signal["price_vs_sma20"] = None
+    except Exception as e:
+        logger.warning("SMA20 enrichment failed for %s: %s", signal.get("ticker", "?"), e)
+        signal["price_vs_sma20"] = None
+
+    return signal
 
 
 # ════════════════════════════════════════════════════════════════════

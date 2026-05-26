@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-05-26 07:58:18 -05
+**Generated:** 2026-05-26 10:16:37 -05
 **Branch:** `main`
-**Latest commit:** `f1c3125` — test(td.1): update Decision field count 41 -> 42 (reentries_used_today)
+**Latest commit:** `7551417` — feat(agent): L3 TOXIC_PROFILE filter — RSI>88 AND Price/SMA20>250%
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `f1c3125 (HEAD -> main) test(td.1): update Decision field count 41 -> 42 (reentries_used_today)`
-- `b48bbae (origin/main, origin/HEAD) docs(claude.md): RULE #10 — add ET/Peru market hours table (DST handling)`
+- `7551417 (HEAD -> main) feat(agent): L3 TOXIC_PROFILE filter — RSI>88 AND Price/SMA20>250%`
+- `fd450c9 (origin/main, origin/HEAD) test(td.1): update Decision field count 41 -> 42 (reentries_used_today)`
+- `b48bbae docs(claude.md): RULE #10 — add ET/Peru market hours table (DST handling)`
 - `788fa17 docs(pk): v2.38 — Stage 2 closure (Filter 4c BLACKLISTED_TICKER)`
 - `ec94d9c feat(agent): add Filter 4c BLACKLISTED_TICKER (Stage 2 — Toxic Blacklist)`
-- `fe5b109 docs(pk): v2.37 — Stage 0.4 closure (DropsLab fix + sheet ID correction)`
 
 ---
 
@@ -32,42 +32,30 @@ _See `OPEN_ISSUES.md` for full list_
 
 | Workflow | Status | Conclusion | Started |
 |---|---|---|---|
-| Health Audit | completed | ✅ success | 2026-05-26 06:49 UTC |
-| Agent — Critic (daily) | completed | ✅ success | 2026-05-25 22:50 UTC |
-| Daily Backup — post_analysis | completed | ✅ success | 2026-05-25 22:36 UTC |
-| Agent — Daily Brief Email | completed | ✅ success | 2026-05-25 22:35 UTC |
-| Post Analysis Collector | completed | ✅ success | 2026-05-25 22:15 UTC |
+| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-05-26 15:16 UTC |
+| Agent — Every Minute (DRY_RUN) | in_progress | ⏳ — | 2026-05-26 15:16 UTC |
+| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-05-26 15:15 UTC |
+| Agent — Every Minute (DRY_RUN) | completed | ✅ success | 2026-05-26 15:15 UTC |
+| RidingHigh Auto Scanner | completed | ✅ success | 2026-05-26 15:14 UTC |
 
 ---
 
-## 📊 Google Sheets — showing month `2026-05`
+## 📊 Google Sheets — showing month `2026-06`
 
-_Selection: current Peru month (2026-05) has data_
+_Selection: most recent month with data (2026-06)_
 _Months in config: `2026-04`, `2026-05`, `2026-06`_
 
 | Sheet | Total rows | Last date | Status |
 |---|---|---|---|
-| timeline_live | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| daily_snapshots | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| daily_summary | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| post_analysis | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| portfolio | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| portfolio_live | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| score_tracker | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| live_trades | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| ticker_follow_up | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| decision_log | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| paper_portfolio | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| score_analytics | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| postmortems | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| system_events | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| pending_suggestions | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| config_history | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| borrow_data | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| market_context | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| news_findings | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| agent_scorecard | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| sentinel_events | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| timeline_live | 0 | — | ⚠️ empty |
+| daily_snapshots | 0 | — | ⚠️ empty |
+| daily_summary | 0 | — | ⚠️ empty |
+| post_analysis | 0 | — | ⚠️ empty |
+| portfolio | 0 | — | ⚠️ empty |
+| portfolio_live | 0 | — | ⚠️ empty |
+| score_tracker | 0 | — | ⚠️ empty |
+| live_trades | 0 | — | ⚠️ empty |
+| ticker_follow_up | 0 | — | ⚠️ empty |
 
 ---
 

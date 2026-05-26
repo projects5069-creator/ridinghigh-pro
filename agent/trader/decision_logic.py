@@ -78,6 +78,7 @@ class Decision:
     rsi: float = 0.0
     typical_price_dist: float = 0.0
     rel_vol: float = 0.0
+    price_vs_sma20: Optional[float] = None  # % distance from 20-day SMA. None if unavailable.
     scan_change: float = 0.0       # stored as "change" in metrics dict
     float_pct: Optional[float] = None
 
@@ -181,6 +182,7 @@ def evaluate_signal(
         rsi=signal.get("rsi", 0.0),
         typical_price_dist=signal.get("typical_price_dist", 0.0),
         rel_vol=signal.get("rel_vol", 0.0),
+        price_vs_sma20=signal.get("price_vs_sma20"),
         scan_change=signal.get("change", 0.0),
         float_pct=signal.get("float_pct"),
     )
@@ -296,6 +298,17 @@ def _check_filters(d: Decision, signal: Dict[str, Any], quality: Dict[str, Any])
     # AEHL + TDIC together account for ~$120 of DRY_RUN losses in Apr+May.
     if d.ticker in CHRONIC_DROPPER_BLACKLIST:
         return f"BLACKLISTED_TICKER: {d.ticker} in chronic dropper list"
+
+    # Filter 4d (L3 — Layers paradigm, 2026-05-26): Toxic Profile
+    # AND condition (both must be true to block):
+    #   - RSI > 88  (extreme overbought, toxic median was 92.61)
+    #   - Price/SMA20 > 250  (price 250%+ above 20-day mean, toxic median 305%)
+    # Winners typically have RSI 80-86 AND Price/SMA20 150-220 — both fail this AND.
+    # If price_vs_sma20 is None (data unavailable), filter is SKIPPED — defaults to
+    # "trust the other filters" rather than block-on-missing-data.
+    if d.rsi is not None and d.rsi > 88:
+        if d.price_vs_sma20 is not None and d.price_vs_sma20 > 250:
+            return f"TOXIC_PROFILE: RSI={d.rsi:.1f}>88 AND Price/SMA20={d.price_vs_sma20:.0f}%>250"
 
     # Filter 5: Market cap range
     if d.market_cap < AGENT_MARKET_CAP_MIN:

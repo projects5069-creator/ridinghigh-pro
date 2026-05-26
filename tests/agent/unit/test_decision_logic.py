@@ -82,11 +82,11 @@ def test_cold_start_concurrent_limit(good_signal):
     assert "COLD_START_CONCURRENT" in d.skip_reason
 
 
-def test_decision_has_42_fields():
+def test_decision_has_43_fields():
     """Verify the dataclass schema matches the Sheet."""
     from dataclasses import fields
     field_names = [f.name for f in fields(Decision)]
-    assert len(field_names) == 42, f"Expected 42 fields, got {len(field_names)}: {field_names}"
+    assert len(field_names) == 43, f"Expected 43 fields, got {len(field_names)}: {field_names}"
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -197,3 +197,63 @@ def test_l3_blacklist_priority_after_price():
     assert decision.action == "SKIP"
     assert decision.skip_reason.startswith("PRICE_TOO_LOW"), \
         f"Expected PRICE_TOO_LOW (Filter 4b runs before 4c), got: {decision.skip_reason}"
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Filter 4d — TOXIC_PROFILE (L3 Layers, 2026-05-26)
+# Blocks: RSI > 88 AND Price/SMA20 > 250 (BOTH conditions)
+# ─────────────────────────────────────────────────────────────────────────────
+
+def _signal_with_l3(rsi, price_vs_sma20, ticker="TEST", price=7.0):
+    return {
+        "ticker": ticker, "price": price, "volume": 5_000_000,
+        "market_cap": 50_000_000, "open": price * 0.9,
+        "high": price * 1.05, "low": price * 0.85,
+        "mxv": -500.0, "run_up": 35.0, "atrx": 2.5, "rsi": rsi,
+        "rel_vol": 8.0, "change": 25.0, "typical_price_dist": 0.05,
+        "price_vs_sma20": price_vs_sma20,
+    }
+
+
+def test_l3_toxic_profile_blocks_extreme():
+    """Toxic median: RSI=92.61, Price/SMA20=305 — MUST be blocked."""
+    from agent.trader.decision_logic import evaluate_signal
+    d = evaluate_signal(_signal_with_l3(rsi=92.61, price_vs_sma20=305))
+    assert d.action == "SKIP"
+    assert d.skip_reason.startswith("TOXIC_PROFILE"), f"got: {d.skip_reason}"
+
+
+def test_l3_winner_passes():
+    """Winner median: RSI=83.62, Price/SMA20=194 — MUST pass L3."""
+    from agent.trader.decision_logic import evaluate_signal
+    d = evaluate_signal(_signal_with_l3(rsi=83.62, price_vs_sma20=194))
+    if d.action == "SKIP":
+        assert not d.skip_reason.startswith("TOXIC_PROFILE"), \
+            f"Winner blocked by L3: {d.skip_reason}"
+
+
+def test_l3_rsi_high_but_sma_low_passes():
+    """Only RSI > 88 should NOT trigger — needs BOTH conditions."""
+    from agent.trader.decision_logic import evaluate_signal
+    d = evaluate_signal(_signal_with_l3(rsi=92.0, price_vs_sma20=180))
+    if d.action == "SKIP":
+        assert not d.skip_reason.startswith("TOXIC_PROFILE"), \
+            f"L3 fired on RSI alone (sma not extreme): {d.skip_reason}"
+
+
+def test_l3_sma_high_but_rsi_low_passes():
+    """Only Price/SMA20 > 250 should NOT trigger — needs BOTH conditions."""
+    from agent.trader.decision_logic import evaluate_signal
+    d = evaluate_signal(_signal_with_l3(rsi=85.0, price_vs_sma20=300))
+    if d.action == "SKIP":
+        assert not d.skip_reason.startswith("TOXIC_PROFILE"), \
+            f"L3 fired on SMA alone (rsi not extreme): {d.skip_reason}"
+
+
+def test_l3_missing_sma_data_does_not_block():
+    """If price_vs_sma20 is None (data unavailable), L3 must NOT block."""
+    from agent.trader.decision_logic import evaluate_signal
+    d = evaluate_signal(_signal_with_l3(rsi=92.0, price_vs_sma20=None))
+    if d.action == "SKIP":
+        assert not d.skip_reason.startswith("TOXIC_PROFILE"), \
+            f"L3 fired on missing data: {d.skip_reason}"
