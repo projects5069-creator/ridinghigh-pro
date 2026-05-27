@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-05-27 14:22:22 -05
+**Generated:** 2026-05-27 18:54:08 -05
 **Branch:** `main`
-**Latest commit:** `9166357` — revert(quota): roll back v2.40 read consolidation to pre-fix state
+**Latest commit:** `d26d115` — 🛡️ feat(agent#6): RiskSentinel v1 — daily-loss floor + buying-power buffer
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `9166357 (HEAD -> main) revert(quota): roll back v2.40 read consolidation to pre-fix state`
-- `3daf3e3 (origin/main, origin/HEAD) docs(pk): v2.40 — orchestrator reads consolidation`
+- `d26d115 (HEAD -> main) 🛡️ feat(agent#6): RiskSentinel v1 — daily-loss floor + buying-power buffer`
+- `2ab590f (origin/main, origin/HEAD) revert(quota): roll back v2.40 read consolidation to pre-fix state`
+- `3daf3e3 docs(pk): v2.40 — orchestrator reads consolidation`
 - `c7087e6 refactor(quota): consolidate paper_portfolio reads in build_account_state()`
 - `5eca906 docs(claude.md): RULE #12 — mandatory .rh-run.sh wrapper for all bash`
-- `cda560b docs(claude.md): RULE #11 v3 — replace broken Skill() API with cat|wc-l`
 
 ---
 
@@ -32,37 +32,49 @@ _See `OPEN_ISSUES.md` for full list_
 
 | Workflow | Status | Conclusion | Started |
 |---|---|---|---|
-| Agent — Every Minute (DRY_RUN) | in_progress | ⏳ — | 2026-05-27 19:22 UTC |
-| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-05-27 19:22 UTC |
-| Agent — Every Minute (DRY_RUN) | completed | ✅ success | 2026-05-27 19:21 UTC |
-| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-05-27 19:21 UTC |
-| RidingHigh Auto Scanner | completed | ✅ success | 2026-05-27 19:20 UTC |
+| Agent — Critic (daily) | completed | ✅ success | 2026-05-27 23:06 UTC |
+| Daily Backup — post_analysis | completed | ✅ success | 2026-05-27 22:58 UTC |
+| Agent — Daily Brief Email | completed | ✅ success | 2026-05-27 22:56 UTC |
+| Post Analysis Collector | completed | ✅ success | 2026-05-27 22:47 UTC |
+| Agent — End of Day | completed | ✅ success | 2026-05-27 22:23 UTC |
 
 ---
 
-## 📊 Google Sheets — showing month `2026-04`
+## 📊 Google Sheets — showing month `2026-05`
 
-_Selection: most recent month with data (2026-04)_
+_Selection: current Peru month (2026-05) has data_
 _Months in config: `2026-04`, `2026-05`, `2026-06`_
 
 | Sheet | Total rows | Last date | Status |
 |---|---|---|---|
-| timeline_live | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| daily_snapshots | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| daily_summary | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| post_analysis | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| portfolio | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| portfolio_live | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| score_tracker | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| live_trades | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| ticker_follow_up | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| timeline_live | 289,282 | 2026-05-27 | ✅ |
+| daily_snapshots | 1,461 | 2026-05-27 | ✅ |
+| daily_summary | 1,585 | 2026-05-27 | ✅ |
+| post_analysis | 64 | 2026-05-27 | ✅ |
+| portfolio | 74 | 2026-05-27 | ✅ |
+| portfolio_live | 26 | 2026-05-27 | ✅ |
+| score_tracker | 1,459 | 2026-05-27 | ✅ |
+| live_trades | 1,459 | 2026-05-27 | ✅ |
+| ticker_follow_up | 12,477 | 2026-05-08 | ✅ |
+| decision_log | 16,232 | — | ✅ |
+| paper_portfolio | 96 | — | ✅ |
+| score_analytics | 0 | — | ⚠️ empty |
+| postmortems | 78 | — | ✅ |
+| system_events | 11,325 | — | ✅ |
+| pending_suggestions | 0 | — | ⚠️ empty |
+| config_history | 0 | — | ⚠️ empty |
+| borrow_data | 0 | — | ⚠️ empty |
+| market_context | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| news_findings | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| agent_scorecard | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| sentinel_events | 11,325 | — | ✅ |
 
 ---
 
 ## 🩺 Health
 
-- ⚠️ 23 uncommitted file(s):
--    - 23 new/untracked
+- ⚠️ 24 uncommitted file(s):
+-    - 24 new/untracked
 
 ---
 
