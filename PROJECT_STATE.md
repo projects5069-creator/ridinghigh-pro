@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-05-27 13:55:14 -05
+**Generated:** 2026-05-27 13:55:21 -05
 **Branch:** `main`
-**Latest commit:** `560f947` — refactor(quota): consolidate paper_portfolio reads in build_account_state()
+**Latest commit:** `d24be8a` — docs(pk): v2.40 — orchestrator reads consolidation
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `560f947 (HEAD -> main) refactor(quota): consolidate paper_portfolio reads in build_account_state()`
+- `d24be8a (HEAD -> main) docs(pk): v2.40 — orchestrator reads consolidation`
+- `c7087e6 refactor(quota): consolidate paper_portfolio reads in build_account_state()`
 - `5eca906 (origin/main, origin/HEAD) docs(claude.md): RULE #12 — mandatory .rh-run.sh wrapper for all bash`
 - `cda560b docs(claude.md): RULE #11 v3 — replace broken Skill() API with cat|wc-l`
 - `c3cf73e debug(L3): expose SMA20 enrichment silent failure in GH Actions`
-- `3b63e3b feat(critic): integrate forensic prose into daily email`
 
 ---
 
@@ -40,14 +40,14 @@ _See `OPEN_ISSUES.md` for full list_
 
 ---
 
-## 📊 Google Sheets — showing month `2026-06`
+## 📊 Google Sheets — showing month `2026-04`
 
-_Selection: most recent month with data (2026-06)_
+_Selection: most recent month with data (2026-04)_
 _Months in config: `2026-04`, `2026-05`, `2026-06`_
 
 | Sheet | Total rows | Last date | Status |
 |---|---|---|---|
-| timeline_live | 0 | — | ⚠️ empty |
+| timeline_live | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
 | daily_snapshots | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
 | daily_summary | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
 | post_analysis | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
