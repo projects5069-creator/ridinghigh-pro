@@ -27,60 +27,6 @@ from typing import Dict, Any, List, Optional
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import pytz
-
-# ════════════════════════════════════════════════════════════════════
-# Quota fix (2026-05-27): cache paper_portfolio + decision_log reads
-# Helper: get paper_portfolio records (cached, TTL=60s)
-# ════════════════════════════════════════════════════════════════════
-
-from functools import lru_cache
-import time
-
-_CACHE_TTL = 60
-_CACHE_TIMES = {}
-
-def _cache_with_ttl(ttl: int):
-    """Decorator: cache function result for `ttl` seconds."""
-    def decorator(fn):
-        cache = {}
-        def wrapper(*args, **kwargs):
-            key = (fn.__name__, args, tuple(sorted(kwargs.items())))
-            now = time.time()
-            if key in cache:
-                result, cached_at = cache[key]
-                if now - cached_at < ttl:
-                    return result
-            result = fn(*args, **kwargs)
-            cache[key] = (result, now)
-            return result
-        return wrapper
-    return decorator
-
-@_cache_with_ttl(ttl=60)
-def _get_paper_portfolio_records():
-    """Get paper_portfolio records (cached for 60s to reduce API quota)."""
-    try:
-        import sheets_manager
-        ws = sheets_manager.get_worksheet("paper_portfolio")
-        if ws:
-            return sheets_manager.get_sheet_records("paper_portfolio")
-    except Exception as e:
-        logger.warning("_get_paper_portfolio_records() failed: %s", e)
-    return []
-
-@_cache_with_ttl(ttl=60)
-def _get_decision_log_records():
-    """Get decision_log records (cached for 60s to reduce API quota)."""
-    try:
-        import sheets_manager
-        ws = sheets_manager.get_worksheet("decision_log")
-        if ws:
-            return sheets_manager.get_sheet_records("decision_log")
-    except Exception as e:
-        logger.warning("_get_decision_log_records() failed: %s", e)
-    return []
-
-
 PERU_TZ = pytz.timezone("America/Lima")
 
 logging.basicConfig(
@@ -253,41 +199,38 @@ def build_account_state(broker=None) -> Dict[str, Any]:
     try:
         import sheets_manager
         # Open positions from paper_portfolio
-        # 2026-05-27: Consolidated reads #1 and #3 to single cached call
         ws_pf = sheets_manager.get_worksheet("paper_portfolio")
         today = datetime.now(PERU_TZ).strftime("%Y-%m-%d")
-        pf_records = []
         if ws_pf:
             try:
-                pf_records = _get_paper_portfolio_records()
+                records = sheets_manager.get_sheet_records("paper_portfolio")
             except Exception as fetch_err:
                 # 2026-05-20: catch fetch failure (e.g. 429) so position_sync
                 # can distinguish quota issues from real position drift.
                 logger.warning("build_account_state: paper_portfolio fetch failed (%s) — "
                                "setting paper_portfolio_fetch_failed=True", fetch_err)
                 state["paper_portfolio_fetch_failed"] = True
-        
-        # Process OPEN positions (read #1 logic)
-        for row in pf_records:
-            status = str(row.get("Status", "")).upper()
-            ticker = str(row.get("Ticker", "")).strip().upper()
-            if status in ("OPEN", "DRY_RUN_OPEN"):
-                if ticker:
-                    state["existing_positions"].add(ticker)
-                # Count every OPEN row — duplicate tickers count separately.
-                state["open_position_count"] += 1
-            # 2026-05-23 Fix D: ALSO count today ENTRIES per ticker from
-            # paper_portfolio (any status — OPEN or already closed today).
-            # This is a SECONDARY source that runs in union with decision_log.
-            # Rationale: Google Sheets eventual-consistency can hide recent
-            # writes from one sheet for minutes. Counting BOTH sources and
-            # taking the max ensures Filter 9 sees the highest available
-            # count regardless of which sheet is currently lagging.
-            entry_date = str(row.get("EntryDate", "")).strip()
-            if entry_date == today and ticker:
-                state["entries_today_by_ticker_pf"][ticker] = (
-                    state["entries_today_by_ticker_pf"].get(ticker, 0) + 1
-                )
+                records = []
+            for row in records:
+                status = str(row.get("Status", "")).upper()
+                ticker = str(row.get("Ticker", "")).strip().upper()
+                if status in ("OPEN", "DRY_RUN_OPEN"):
+                    if ticker:
+                        state["existing_positions"].add(ticker)
+                    # Count every OPEN row — duplicate tickers count separately.
+                    state["open_position_count"] += 1
+                # 2026-05-23 Fix D: ALSO count today ENTRIES per ticker from
+                # paper_portfolio (any status — OPEN or already closed today).
+                # This is a SECONDARY source that runs in union with decision_log.
+                # Rationale: Google Sheets eventual-consistency can hide recent
+                # writes from one sheet for minutes. Counting BOTH sources and
+                # taking the max ensures Filter 9 sees the highest available
+                # count regardless of which sheet is currently lagging.
+                entry_date = str(row.get("EntryDate", "")).strip()
+                if entry_date == today and ticker:
+                    state["entries_today_by_ticker_pf"][ticker] = (
+                        state["entries_today_by_ticker_pf"].get(ticker, 0) + 1
+                    )
 
         # cold_start cap now reflects real concurrent positions, not unique tickers.
         state["cold_start_concurrent_used"] = state["open_position_count"]
@@ -297,12 +240,13 @@ def build_account_state(broker=None) -> Dict[str, Any]:
         # when paper_portfolio sheet write hasn't propagated yet (race condition fix)
         ws_dl = sheets_manager.get_worksheet("decision_log")
         if ws_dl:
-            records = _get_decision_log_records()
+            records = sheets_manager.get_sheet_records("decision_log")
             today = datetime.now(PERU_TZ).strftime("%Y-%m-%d")
             # Build set of tickers that exited today (so we can re-enter them)
-            # 2026-05-27: Reuse pf_records from earlier read (quota fix)
             exited_today = set()
-            if pf_records:  # Use cached pf_records from earlier
+            ws_pf2 = sheets_manager.get_worksheet("paper_portfolio")
+            if ws_pf2:
+                pf_records = sheets_manager.get_sheet_records("paper_portfolio")
                 for pf_row in pf_records:
                     exit_date = str(pf_row.get("ExitDate", "")).strip()
                     status = str(pf_row.get("Status", "")).upper()

@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-05-27 13:55:21 -05
+**Generated:** 2026-05-27 14:22:22 -05
 **Branch:** `main`
-**Latest commit:** `d24be8a` — docs(pk): v2.40 — orchestrator reads consolidation
+**Latest commit:** `9166357` — revert(quota): roll back v2.40 read consolidation to pre-fix state
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `d24be8a (HEAD -> main) docs(pk): v2.40 — orchestrator reads consolidation`
+- `9166357 (HEAD -> main) revert(quota): roll back v2.40 read consolidation to pre-fix state`
+- `3daf3e3 (origin/main, origin/HEAD) docs(pk): v2.40 — orchestrator reads consolidation`
 - `c7087e6 refactor(quota): consolidate paper_portfolio reads in build_account_state()`
-- `5eca906 (origin/main, origin/HEAD) docs(claude.md): RULE #12 — mandatory .rh-run.sh wrapper for all bash`
+- `5eca906 docs(claude.md): RULE #12 — mandatory .rh-run.sh wrapper for all bash`
 - `cda560b docs(claude.md): RULE #11 v3 — replace broken Skill() API with cat|wc-l`
-- `c3cf73e debug(L3): expose SMA20 enrichment silent failure in GH Actions`
 
 ---
 
@@ -32,11 +32,11 @@ _See `OPEN_ISSUES.md` for full list_
 
 | Workflow | Status | Conclusion | Started |
 |---|---|---|---|
-| Agent — Every Minute (DRY_RUN) | in_progress | ⏳ — | 2026-05-27 18:55 UTC |
-| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-05-27 18:55 UTC |
-| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-05-27 18:54 UTC |
-| Agent — Every Minute (DRY_RUN) | in_progress | ⏳ — | 2026-05-27 18:54 UTC |
-| Agent — Every Minute (DRY_RUN) | in_progress | ⏳ — | 2026-05-27 18:53 UTC |
+| Agent — Every Minute (DRY_RUN) | in_progress | ⏳ — | 2026-05-27 19:22 UTC |
+| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-05-27 19:22 UTC |
+| Agent — Every Minute (DRY_RUN) | completed | ✅ success | 2026-05-27 19:21 UTC |
+| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-05-27 19:21 UTC |
+| RidingHigh Auto Scanner | completed | ✅ success | 2026-05-27 19:20 UTC |
 
 ---
 
