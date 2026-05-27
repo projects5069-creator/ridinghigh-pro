@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-05-26 17:00:49 -05
+**Generated:** 2026-05-27 13:55:14 -05
 **Branch:** `main`
-**Latest commit:** `a4879f3` — docs(claude.md): RULE #12 — mandatory .rh-run.sh wrapper for all bash
+**Latest commit:** `560f947` — refactor(quota): consolidate paper_portfolio reads in build_account_state()
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `a4879f3 (HEAD -> main) docs(claude.md): RULE #12 — mandatory .rh-run.sh wrapper for all bash`
-- `cda560b (origin/main, origin/HEAD) docs(claude.md): RULE #11 v3 — replace broken Skill() API with cat|wc-l`
+- `560f947 (HEAD -> main) refactor(quota): consolidate paper_portfolio reads in build_account_state()`
+- `5eca906 (origin/main, origin/HEAD) docs(claude.md): RULE #12 — mandatory .rh-run.sh wrapper for all bash`
+- `cda560b docs(claude.md): RULE #11 v3 — replace broken Skill() API with cat|wc-l`
 - `c3cf73e debug(L3): expose SMA20 enrichment silent failure in GH Actions`
 - `3b63e3b feat(critic): integrate forensic prose into daily email`
-- `cce6c12 feat(postmortem): forensic prose AutoLessons in Hebrew`
 
 ---
 
@@ -32,49 +32,37 @@ _See `OPEN_ISSUES.md` for full list_
 
 | Workflow | Status | Conclusion | Started |
 |---|---|---|---|
-| Daily Backup — post_analysis | completed | ✅ success | 2026-05-26 21:56 UTC |
-| Daily Backup — post_analysis | completed | ✅ success | 2026-05-26 21:56 UTC |
-| Agent — Daily Brief Email | completed | ✅ success | 2026-05-26 21:30 UTC |
-| Agent — End of Day | completed | ✅ success | 2026-05-26 21:00 UTC |
-| RidingHigh Auto Scanner | completed | ✅ success | 2026-05-26 20:59 UTC |
+| Agent — Every Minute (DRY_RUN) | in_progress | ⏳ — | 2026-05-27 18:55 UTC |
+| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-05-27 18:55 UTC |
+| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-05-27 18:54 UTC |
+| Agent — Every Minute (DRY_RUN) | in_progress | ⏳ — | 2026-05-27 18:54 UTC |
+| Agent — Every Minute (DRY_RUN) | in_progress | ⏳ — | 2026-05-27 18:53 UTC |
 
 ---
 
-## 📊 Google Sheets — showing month `2026-05`
+## 📊 Google Sheets — showing month `2026-06`
 
-_Selection: current Peru month (2026-05) has data_
+_Selection: most recent month with data (2026-06)_
 _Months in config: `2026-04`, `2026-05`, `2026-06`_
 
 | Sheet | Total rows | Last date | Status |
 |---|---|---|---|
-| timeline_live | 283,022 | 2026-05-26 | ✅ |
-| daily_snapshots | 1,395 | 2026-05-26 | ✅ |
-| daily_summary | 1,512 | 2026-05-26 | ✅ |
-| post_analysis | 55 | 2026-05-22 | ✅ |
-| portfolio | 70 | 2026-05-26 | ✅ |
-| portfolio_live | 22 | 2026-05-26 | ✅ |
-| score_tracker | 1,419 | 2026-05-22 | ✅ |
-| live_trades | 1,419 | 2026-05-22 | ✅ |
-| ticker_follow_up | 12,477 | 2026-05-08 | ✅ |
-| decision_log | 16,232 | — | ✅ |
-| paper_portfolio | 90 | — | ✅ |
-| score_analytics | 0 | — | ⚠️ empty |
-| postmortems | 72 | — | ✅ |
-| system_events | 9,183 | — | ✅ |
-| pending_suggestions | 0 | — | ⚠️ empty |
-| config_history | 0 | — | ⚠️ empty |
-| borrow_data | 0 | — | ⚠️ empty |
-| market_context | 25 | — | ✅ |
-| news_findings | 9,072 | — | ✅ |
-| agent_scorecard | 44 | 2026-05-25 | ✅ |
-| sentinel_events | 9,183 | — | ✅ |
+| timeline_live | 0 | — | ⚠️ empty |
+| daily_snapshots | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| daily_summary | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| post_analysis | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| portfolio | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| portfolio_live | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| score_tracker | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| live_trades | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| ticker_follow_up | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
 
 ---
 
 ## 🩺 Health
 
-- ⚠️ 22 uncommitted file(s):
--    - 22 new/untracked
+- ⚠️ 23 uncommitted file(s):
+-    - 23 new/untracked
 
 ---
 
