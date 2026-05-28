@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-05-27 19:01:44 -05
+**Generated:** 2026-05-27 19:22:44 -05
 **Branch:** `main`
-**Latest commit:** `7680c04` — docs: PK v2.40 — Agent #6 Risk Sentinel v1 (commit 28b1ce1)
+**Latest commit:** `34ab139` — revert: remove RiskSentinel v1 + PK v2.40 (per request)
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `7680c04 (HEAD -> main) docs: PK v2.40 — Agent #6 Risk Sentinel v1 (commit 28b1ce1)`
-- `28b1ce1 (origin/main, origin/HEAD) 🛡️ feat(agent#6): RiskSentinel v1 — daily-loss floor + buying-power buffer`
+- `34ab139 (HEAD -> main) revert: remove RiskSentinel v1 + PK v2.40 (per request)`
+- `ad04c1d (origin/main, origin/HEAD) docs: PK v2.40 — Agent #6 Risk Sentinel v1 (commit 28b1ce1)`
+- `28b1ce1 🛡️ feat(agent#6): RiskSentinel v1 — daily-loss floor + buying-power buffer`
 - `2ab590f revert(quota): roll back v2.40 read consolidation to pre-fix state`
 - `3daf3e3 docs(pk): v2.40 — orchestrator reads consolidation`
-- `c7087e6 refactor(quota): consolidate paper_portfolio reads in build_account_state()`
 
 ---
 
@@ -65,8 +65,8 @@ _Months in config: `2026-04`, `2026-05`, `2026-06`_
 | config_history | 0 | — | ⚠️ empty |
 | borrow_data | 0 | — | ⚠️ empty |
 | market_context | 28 | — | ✅ |
-| news_findings | 12,036 | — | ✅ |
-| agent_scorecard | 60 | 2026-05-27 | ✅ |
+| news_findings | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| agent_scorecard | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
 | sentinel_events | 11,325 | — | ✅ |
 
 ---
