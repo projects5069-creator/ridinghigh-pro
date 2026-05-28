@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-05-28 14:41:13 -05
+**Generated:** 2026-05-28 14:55:04 -05
 **Branch:** `main`
-**Latest commit:** `7a20d86` — feat(infra): UserPromptSubmit hook - kernel-level skill enforcement (v2.44)
+**Latest commit:** `b7edf8e` — docs(session-close): 2026-05-28 — 8h skills-infra session, permanent solve (v2.45)
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `7a20d86 (HEAD -> main) feat(infra): UserPromptSubmit hook - kernel-level skill enforcement (v2.44)`
+- `b7edf8e (HEAD -> main) docs(session-close): 2026-05-28 — 8h skills-infra session, permanent solve (v2.45)`
+- `24708f5 feat(infra): UserPromptSubmit hook - kernel-level skill enforcement (v2.44)`
 - `eb4ac15 (origin/main, origin/HEAD) feat(skills): integrity guard + RULE #11/MAP/PROTOCOL/PK sync (v2.43)`
 - `f30385b docs(session): PK mandatory + handoff 28-5 + TASK-48/49/50`
 - `8775523 feat(session): add Session Protocol + rhpro-session skill + RULE #13`
-- `2fe1165 docs: session handoff 2026-05-27 — c4c4750 closure + verified-only findings + open issues + tomorrow priorities`
 
 ---
 
@@ -32,38 +32,49 @@ _See `OPEN_ISSUES.md` for full list_
 
 | Workflow | Status | Conclusion | Started |
 |---|---|---|---|
-| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-05-28 19:41 UTC |
-| Agent — Every Minute (DRY_RUN) | in_progress | ⏳ — | 2026-05-28 19:41 UTC |
-| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-05-28 19:40 UTC |
-| Agent — Every Minute (DRY_RUN) | in_progress | ⏳ — | 2026-05-28 19:40 UTC |
-| RidingHigh Auto Scanner | completed | ✅ success | 2026-05-28 19:39 UTC |
+| RidingHigh Auto Scanner | queued | ⏳ — | 2026-05-28 19:55 UTC |
+| Agent — Every Minute (DRY_RUN) | queued | ⏳ — | 2026-05-28 19:55 UTC |
+| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-05-28 19:54 UTC |
+| Agent — Every Minute (DRY_RUN) | in_progress | ⏳ — | 2026-05-28 19:54 UTC |
+| RidingHigh Auto Scanner | completed | ✅ success | 2026-05-28 19:53 UTC |
 
 ---
 
-## 📊 Google Sheets — showing month `2026-06`
+## 📊 Google Sheets — showing month `2026-05`
 
-_Selection: most recent month with data (2026-06)_
+_Selection: current Peru month (2026-05) has data_
 _Months in config: `2026-04`, `2026-05`, `2026-06`_
 
 | Sheet | Total rows | Last date | Status |
 |---|---|---|---|
-| timeline_live | 0 | — | ⚠️ empty |
+| timeline_live | 293,895 | 2026-05-28 | ✅ |
 | daily_snapshots | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
 | daily_summary | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| post_analysis | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| portfolio | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| post_analysis | 64 | 2026-05-27 | ✅ |
+| portfolio | 74 | 2026-05-27 | ✅ |
 | portfolio_live | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
 | score_tracker | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
 | live_trades | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
 | ticker_follow_up | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| decision_log | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| paper_portfolio | 109 | — | ✅ |
+| score_analytics | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| postmortems | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| system_events | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| pending_suggestions | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| config_history | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| borrow_data | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| market_context | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| news_findings | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| agent_scorecard | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| sentinel_events | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
 
 ---
 
 ## 🩺 Health
 
-- ⚠️ 25 uncommitted file(s):
--    - 1 modified
--    - 24 new/untracked
+- ⚠️ 26 uncommitted file(s):
+-    - 26 new/untracked
 
 ---
 

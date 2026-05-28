@@ -9,7 +9,7 @@
 
 ---
 
-## Stage 0 - Quick Wins
+## Stage 0 - Quick Wins ✅ COMPLETE
 
 - [x] **0.1** AGENT_RUNUP_MIN = 0 - הושלם
 - [x] **0.2** שיתוף DropsLab עם service account - הושלם
@@ -30,7 +30,7 @@
 
 ---
 
-## Stage 2 - Toxic Tickers Blacklist (NEXT)
+## Stage 2 - Toxic Tickers Blacklist ✅ COMPLETE
 **AEHL + TDIC = chronic droppers (DropsLab cross-reference)**
 
 - [x] **2.1** CHRONIC_DROPPER_BLACKLIST = ["AEHL","TDIC"] ל-config.py
@@ -82,7 +82,7 @@
 
 ---
 
-## Stage 7 - L3 + L4 + L5 Active
+## Stage 7 - L3 Active ✅ / L4 + L5 NEXT
 **אחרי 30 ימי נתונים מ-L6**
 
 - [ ] **7.1** re-validate plateau backtest
