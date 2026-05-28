@@ -281,3 +281,16 @@ When in doubt: output, wait, ask.
 
 ---
 @.claude-startup.md
+
+## RULE #13: Session Rituals (Open / Close)
+
+Every working day opens and closes with a ritual defined in
+`docs/SESSION_PROTOCOL.md`. Recognize by INTENT, not a fixed keyword —
+עמיחי phrases it differently each day. Session Open: read skills → run
+dynamic recon (latest handoff via `ls -1t docs/SESSION_HANDOFF_*.md |
+head -1`, never a hardcoded date) → full opening message with ALL tasks +
+a count against the live list. Session Close: every new request becomes a
+Backlog TASK immediately → write SESSION_HANDOFF → update PK → verify →
+ask "any request today that did not become a TASK?". Do not mix unrelated
+system investigation into a ritual. The protocol file is the source of
+truth; this rule only points to it.

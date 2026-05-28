@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-05-27 22:00:34 -05
+**Generated:** 2026-05-28 10:16:59 -05
 **Branch:** `main`
-**Latest commit:** `6cd5a57` — docs: session handoff 2026-05-27 — c4c4750 closure + verified-only findings + open issues + tomorrow priorities
+**Latest commit:** `80a6667` — feat(session): add Session Protocol + rhpro-session skill + RULE #13
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `6cd5a57 (HEAD -> main) docs: session handoff 2026-05-27 — c4c4750 closure + verified-only findings + open issues + tomorrow priorities`
-- `c4c4750 (origin/main, origin/HEAD) fix(logging): decision_logger assert 41 to len(FIELD_MAPPING) — restores decision_log writes`
+- `80a6667 (HEAD -> main) feat(session): add Session Protocol + rhpro-session skill + RULE #13`
+- `2fe1165 (origin/main, origin/HEAD) docs: session handoff 2026-05-27 — c4c4750 closure + verified-only findings + open issues + tomorrow priorities`
+- `c4c4750 fix(logging): decision_logger assert 41 to len(FIELD_MAPPING) — restores decision_log writes`
 - `24165d4 revert: remove RiskSentinel v1 + PK v2.40 (per request)`
 - `ad04c1d docs: PK v2.40 — Agent #6 Risk Sentinel v1 (commit 28b1ce1)`
-- `28b1ce1 🛡️ feat(agent#6): RiskSentinel v1 — daily-loss floor + buying-power buffer`
 
 ---
 
@@ -32,11 +32,11 @@ _See `OPEN_ISSUES.md` for full list_
 
 | Workflow | Status | Conclusion | Started |
 |---|---|---|---|
-| Agent — Critic (daily) | completed | ✅ success | 2026-05-27 23:06 UTC |
-| Daily Backup — post_analysis | completed | ✅ success | 2026-05-27 22:58 UTC |
-| Agent — Daily Brief Email | completed | ✅ success | 2026-05-27 22:56 UTC |
-| Post Analysis Collector | completed | ✅ success | 2026-05-27 22:47 UTC |
-| Agent — End of Day | completed | ✅ success | 2026-05-27 22:23 UTC |
+| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-05-28 15:16 UTC |
+| Agent — Every Minute (DRY_RUN) | in_progress | ⏳ — | 2026-05-28 15:16 UTC |
+| Agent — Every Minute (DRY_RUN) | completed | ✅ success | 2026-05-28 15:15 UTC |
+| RidingHigh Auto Scanner | completed | ✅ success | 2026-05-28 15:15 UTC |
+| Agent — Every Minute (DRY_RUN) | in_progress | ⏳ — | 2026-05-28 15:14 UTC |
 
 ---
 
@@ -47,27 +47,27 @@ _Months in config: `2026-04`, `2026-05`, `2026-06`_
 
 | Sheet | Total rows | Last date | Status |
 |---|---|---|---|
-| timeline_live | 289,282 | 2026-05-27 | ✅ |
-| daily_snapshots | 1,461 | 2026-05-27 | ✅ |
-| daily_summary | 1,585 | 2026-05-27 | ✅ |
-| post_analysis | 64 | 2026-05-27 | ✅ |
-| portfolio | 74 | 2026-05-27 | ✅ |
-| portfolio_live | 26 | 2026-05-27 | ✅ |
-| score_tracker | 1,459 | 2026-05-27 | ✅ |
-| live_trades | 1,459 | 2026-05-27 | ✅ |
-| ticker_follow_up | 12,477 | 2026-05-08 | ✅ |
-| decision_log | 16,232 | — | ✅ |
-| paper_portfolio | 96 | — | ✅ |
-| score_analytics | 0 | — | ⚠️ empty |
-| postmortems | 78 | — | ✅ |
-| system_events | 11,325 | — | ✅ |
-| pending_suggestions | 0 | — | ⚠️ empty |
-| config_history | 0 | — | ⚠️ empty |
-| borrow_data | 0 | — | ⚠️ empty |
-| market_context | 28 | — | ✅ |
-| news_findings | 12,036 | — | ✅ |
-| agent_scorecard | 60 | 2026-05-27 | ✅ |
-| sentinel_events | 11,325 | — | ✅ |
+| timeline_live | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| daily_snapshots | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| daily_summary | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| post_analysis | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| portfolio | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| portfolio_live | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| score_tracker | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| live_trades | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| ticker_follow_up | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| decision_log | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| paper_portfolio | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| score_analytics | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| postmortems | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| system_events | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| pending_suggestions | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| config_history | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| borrow_data | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| market_context | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| news_findings | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| agent_scorecard | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| sentinel_events | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
 
 ---
 
