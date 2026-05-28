@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-05-28 13:34:31 -05
+**Generated:** 2026-05-28 14:41:13 -05
 **Branch:** `main`
-**Latest commit:** `9a0004f` — feat(skills): integrity guard + RULE #11/MAP/PROTOCOL/PK sync (v2.43)
+**Latest commit:** `7a20d86` — feat(infra): UserPromptSubmit hook - kernel-level skill enforcement (v2.44)
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `9a0004f (HEAD -> main) feat(skills): integrity guard + RULE #11/MAP/PROTOCOL/PK sync (v2.43)`
-- `f30385b (origin/main, origin/HEAD) docs(session): PK mandatory + handoff 28-5 + TASK-48/49/50`
+- `7a20d86 (HEAD -> main) feat(infra): UserPromptSubmit hook - kernel-level skill enforcement (v2.44)`
+- `eb4ac15 (origin/main, origin/HEAD) feat(skills): integrity guard + RULE #11/MAP/PROTOCOL/PK sync (v2.43)`
+- `f30385b docs(session): PK mandatory + handoff 28-5 + TASK-48/49/50`
 - `8775523 feat(session): add Session Protocol + rhpro-session skill + RULE #13`
 - `2fe1165 docs: session handoff 2026-05-27 — c4c4750 closure + verified-only findings + open issues + tomorrow priorities`
-- `c4c4750 fix(logging): decision_logger assert 41 to len(FIELD_MAPPING) — restores decision_log writes`
 
 ---
 
@@ -32,11 +32,11 @@ _See `OPEN_ISSUES.md` for full list_
 
 | Workflow | Status | Conclusion | Started |
 |---|---|---|---|
-| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-05-28 18:34 UTC |
-| Agent — Every Minute (DRY_RUN) | in_progress | ⏳ — | 2026-05-28 18:34 UTC |
-| Agent — Every Minute (DRY_RUN) | in_progress | ⏳ — | 2026-05-28 18:33 UTC |
-| RidingHigh Auto Scanner | completed | ✅ success | 2026-05-28 18:33 UTC |
-| RidingHigh Auto Scanner | completed | ✅ success | 2026-05-28 18:32 UTC |
+| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-05-28 19:41 UTC |
+| Agent — Every Minute (DRY_RUN) | in_progress | ⏳ — | 2026-05-28 19:41 UTC |
+| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-05-28 19:40 UTC |
+| Agent — Every Minute (DRY_RUN) | in_progress | ⏳ — | 2026-05-28 19:40 UTC |
+| RidingHigh Auto Scanner | completed | ✅ success | 2026-05-28 19:39 UTC |
 
 ---
 
@@ -47,7 +47,7 @@ _Months in config: `2026-04`, `2026-05`, `2026-06`_
 
 | Sheet | Total rows | Last date | Status |
 |---|---|---|---|
-| timeline_live | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| timeline_live | 0 | — | ⚠️ empty |
 | daily_snapshots | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
 | daily_summary | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
 | post_analysis | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
@@ -61,7 +61,8 @@ _Months in config: `2026-04`, `2026-05`, `2026-06`_
 
 ## 🩺 Health
 
-- ⚠️ 24 uncommitted file(s):
+- ⚠️ 25 uncommitted file(s):
+-    - 1 modified
 -    - 24 new/untracked
 
 ---
