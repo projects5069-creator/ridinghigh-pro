@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-05-27 18:54:08 -05
+**Generated:** 2026-05-27 19:01:44 -05
 **Branch:** `main`
-**Latest commit:** `d26d115` — 🛡️ feat(agent#6): RiskSentinel v1 — daily-loss floor + buying-power buffer
+**Latest commit:** `7680c04` — docs: PK v2.40 — Agent #6 Risk Sentinel v1 (commit 28b1ce1)
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `d26d115 (HEAD -> main) 🛡️ feat(agent#6): RiskSentinel v1 — daily-loss floor + buying-power buffer`
-- `2ab590f (origin/main, origin/HEAD) revert(quota): roll back v2.40 read consolidation to pre-fix state`
+- `7680c04 (HEAD -> main) docs: PK v2.40 — Agent #6 Risk Sentinel v1 (commit 28b1ce1)`
+- `28b1ce1 (origin/main, origin/HEAD) 🛡️ feat(agent#6): RiskSentinel v1 — daily-loss floor + buying-power buffer`
+- `2ab590f revert(quota): roll back v2.40 read consolidation to pre-fix state`
 - `3daf3e3 docs(pk): v2.40 — orchestrator reads consolidation`
 - `c7087e6 refactor(quota): consolidate paper_portfolio reads in build_account_state()`
-- `5eca906 docs(claude.md): RULE #12 — mandatory .rh-run.sh wrapper for all bash`
 
 ---
 
@@ -64,9 +64,9 @@ _Months in config: `2026-04`, `2026-05`, `2026-06`_
 | pending_suggestions | 0 | — | ⚠️ empty |
 | config_history | 0 | — | ⚠️ empty |
 | borrow_data | 0 | — | ⚠️ empty |
-| market_context | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| news_findings | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| agent_scorecard | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| market_context | 28 | — | ✅ |
+| news_findings | 12,036 | — | ✅ |
+| agent_scorecard | 60 | 2026-05-27 | ✅ |
 | sentinel_events | 11,325 | — | ✅ |
 
 ---
