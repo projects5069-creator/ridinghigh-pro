@@ -1,93 +1,67 @@
 # Skills Map — RidingHigh Pro
 
-> **Usage:** Claude Code invokes `Skill` tool before every task. This table maps tasks → skills.
-> **Iron Rule:** see `CLAUDE.md` RULE #11.
+> **Usage:** Claude Code invokes the relevant skill before every task.
+> **Iron Rule:** see `CLAUDE.md` RULE #11 v3.
+> **Integrity:** `scripts/check_skills_integrity.sh` runs at session open (RULE #13).
 
 ---
 
-## Quick Reference — which skill for each task type
+## Quick Reference — task → skill
 
-| Task type | Primary skill | Secondary skill |
+### Process (how to approach)
+| Task type | Skill | Source |
 |---|---|---|
-| Bug investigation / regression | `systematic-debugging` | `verification-before-completion` |
-| New feature | `brainstorming` | `writing-plans` + `test-driven-development` |
-| Statistical / data analysis | `statistical-analysis` | `explore-data` + `validate-data` |
-| Post-trade analysis | `signal-postmortem` | — |
-| Git cleanup / branches | `git-cleanup` | — |
-| Python tooling / refactor | `modern-python` | — |
-| Unclear task | `ask-questions-if-underspecified` | — |
-| Before completing task | `verification-before-completion` | — |
-| Dashboard / data viz | `data-visualization` / `create-viz` | `build-dashboard` |
+| Bug investigation / regression / root cause | `systematic-debugging` | superpowers plugin |
+| Open-ended question / new direction | `brainstorming` | superpowers plugin |
+| Multi-step plan / refactor | `writing-plans` | superpowers plugin |
+| Unclear / underspecified task | `ask-questions-if-underspecified` | trailofbits plugin |
+
+### Implementation (do the work)
+| Task type | Skill | Source |
+|---|---|---|
+| New feature with tests | `test-driven-development` | superpowers plugin |
+| Python tooling / lint / refactor | `modern-python` | trailofbits plugin |
+| Git branch / cleanup | `git-cleanup` | trailofbits plugin |
+| Long-running multi-task | `subagent-driven-development` | superpowers plugin |
+
+### Verification
+| Task type | Skill | Source |
+|---|---|---|
+| Before declaring "done" / before commit | `verification-before-completion` | superpowers plugin |
+| Skills/infra integrity at session open | `scripts/check_skills_integrity.sh` | local |
+
+### RH-dedicated (project skills)
+| Task type | Skill | Path |
+|---|---|---|
+| Session open/close ritual | `rhpro-session` | `~/.claude/skills/rhpro-session/` |
+| Any RH question (pointer to live PK) | `rhpro-live` | `~/.claude/skills/rhpro-live/` |
+| Backtest / strategy validation | `backtest-expert` | `~/.claude/skills/backtest-expert/` |
+| Data quality / pipeline validation | `data-quality-checker` | `~/.claude/skills/data-quality-checker/` |
+| Position sizing / risk-based shares | `position-sizer` | `~/.claude/skills/position-sizer/` |
+| Trade postmortem / WHIPSAW / win-rate | `signal-postmortem` | `~/.claude/skills/signal-postmortem/` |
+| Trader's prior context / memory recall | `trader-memory-core` | `~/.claude/skills/trader-memory-core/` |
+| Time / market hours verification | `time-check` | `~/.claude/skills/time-check/` |
+
+### Anthropic-skills bundle (`~/.claude/skills/anthropic-skills/skills/`)
+| Task type | Skill |
+|---|---|
+| Word doc creation/edit | `docx` |
+| PDF creation/extraction | `pdf` |
+| PowerPoint deck | `pptx` |
+| Excel / spreadsheet | `xlsx` |
+| Frontend / React / UI | `frontend-design` |
+| Creating a new skill | `skill-creator` |
+| API / MCP server | `claude-api`, `mcp-builder` |
+| Other: `algorithmic-art`, `brand-guidelines`, `canvas-design`, `doc-coauthoring`, `internal-comms`, `slack-gif-creator`, `theme-factory`, `web-artifacts-builder`, `webapp-testing` |
 
 ---
 
-## Active Tasks (2026-05-23)
-
-### P0 — Critical
-| Task | Primary | Secondary |
-|---|---|---|
-| **P0.2** errors mislabel | `systematic-debugging` | `verification-before-completion` |
-
-### P1 — Important
-| Task | Primary | Secondary |
-|---|---|---|
-| **P1.1** HCWB×5 regression | `systematic-debugging` | `signal-postmortem` |
-| **P1.2** GH Actions cron drift | `brainstorming` | `writing-plans` |
-| **P1.4** PnL empty bug | `systematic-debugging` | `signal-postmortem` + `test-driven-development` |
-| **P1.5** PIII anomaly | `systematic-debugging` | `explore-data` + `statistical-analysis` |
-
-### P2 — Strategic
-| Task | Primary | Secondary |
-|---|---|---|
-| **P2.1** system_events refactor | `writing-plans` | `brainstorming` + `using-git-worktrees` |
-| **P2.2** Sentinel Analytics | `explore-data` | `statistical-analysis` + `validate-data` + `data-visualization` |
-| **P2.3** Filter 12 ticker_reputation | `brainstorming` | `writing-plans` + `test-driven-development` |
-| **P2.4** Cross-month aggregation | `writing-plans` | `systematic-debugging` |
-| **P2.5** workflow hygiene (gitignore + archive cleanup) | `systematic-debugging` | `verification-before-completion` |
-
-### P3 — Medium
-| Task | Primary | Secondary |
-|---|---|---|
-| **P3.1** retry auto_scanner | `systematic-debugging` | `test-driven-development` |
-| **P3.2** nan/inf + duplicate | `systematic-debugging` | — |
-| **P3.3** Market Context wiring | `brainstorming` | `writing-plans` + `test-driven-development` |
-| **P3.5** D1_Open outlier | `explore-data` | `statistical-analysis` |
-| **P3.6** Sentinel serialization | `verification-before-completion` | — |
-| **P3.7** cosmetic dashboard | — | (no skill needed) |
-
-### P4 — Maintenance
-| Task | Primary | Secondary |
-|---|---|---|
-| **P4.1** OPEN_ISSUES rebuild | `doc-coauthoring` | `internal-comms` |
-| **P4.2** clean .bak files | `git-cleanup` | — |
-| **P4.3** dashboard expander drift | `systematic-debugging` | — |
-| **P4.4** PK_v2 update | `doc-coauthoring` | `internal-comms` |
-| **P4.5** delete archive vault | — | (one-off) |
-| **P4.6** hardcoded thresholds | `modern-python` | `brainstorming` |
-| **P4.7** Node.js verification | `verification-before-completion` | — |
-
-### Waiting for data
-| Task | Primary | Secondary |
-|---|---|---|
-| **Wait.1** WHIPSAW analysis | `explore-data` | `statistical-analysis` + `validate-data` |
-| **Wait.2** DropsLab integration | `brainstorming` | `writing-plans` |
-| **Wait.3** Live Write Verification | `verification-before-completion` | `test-driven-development` |
-
----
-
-## Skill Priority Order (from using-superpowers)
-
-1. **Process skills first** — how to approach: `brainstorming`, `systematic-debugging`
-2. **Implementation skills second** — do the work: `test-driven-development`, `writing-plans`
-3. **Verification last** — `verification-before-completion`
-
----
+## Activation priority (from `using-superpowers`)
+1. **Process first** — brainstorming / systematic-debugging
+2. **Implementation second** — TDD / writing-plans
+3. **Verification last** — verification-before-completion
 
 ## Maintenance
-
-- New task added → add row to appropriate table
-- New skill installed → add to Quick Reference
-- Skill removed → update tables
-- Changes committed together with CLAUDE.md
-
-**Last updated:** 2026-05-23 — P2.5 done (gitignore *.bak_*, deleted archive 50 files/2.4MB).
+- New skill installed → re-run integrity guard → add row here → commit with PK update.
+- Skill removed → remove row here → commit.
+- Integrity guard run at every session open per RULE #13.

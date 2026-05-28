@@ -40,8 +40,9 @@
 
 כשמזוהה כוונת פתיחת יום, בצע לפי הסדר:
 
-### שלב 1 — סקיל
-קרא ~/.claude/skills/rhpro-live/SKILL.md והצג שורת סקילים עם line count אמיתי.
+### שלב 1 — סקיל + אימות תקינות
+1. קרא ~/.claude/skills/rhpro-live/SKILL.md והצג שורת סקילים עם line count אמיתי.
+2. **הרץ `bash ~/RidingHighPro/scripts/check_skills_integrity.sh`** — חובה. אם FAIL, עצור ותקן לפני שממשיכים. (מונע את באג 26/5 שבו ה-superpowers שונו ל-.bak והסקילים נעלמו בשקט.)
 
 ### שלב 2 — פרומפט recon אחד ל-Claude Code
 פרומפט יחיד, עטוף ב-.rh-run.sh, פותח ב-wc -l של הסקיל המקומי, שקורא

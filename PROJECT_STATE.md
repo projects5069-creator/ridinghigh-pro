@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-05-28 10:40:50 -05
+**Generated:** 2026-05-28 13:34:31 -05
 **Branch:** `main`
-**Latest commit:** `09dd9f8` — docs(session): PK mandatory + handoff 28-5 + TASK-48/49/50
+**Latest commit:** `9a0004f` — feat(skills): integrity guard + RULE #11/MAP/PROTOCOL/PK sync (v2.43)
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `09dd9f8 (HEAD -> main) docs(session): PK mandatory + handoff 28-5 + TASK-48/49/50`
-- `8775523 (origin/main, origin/HEAD) feat(session): add Session Protocol + rhpro-session skill + RULE #13`
+- `9a0004f (HEAD -> main) feat(skills): integrity guard + RULE #11/MAP/PROTOCOL/PK sync (v2.43)`
+- `f30385b (origin/main, origin/HEAD) docs(session): PK mandatory + handoff 28-5 + TASK-48/49/50`
+- `8775523 feat(session): add Session Protocol + rhpro-session skill + RULE #13`
 - `2fe1165 docs: session handoff 2026-05-27 — c4c4750 closure + verified-only findings + open issues + tomorrow priorities`
 - `c4c4750 fix(logging): decision_logger assert 41 to len(FIELD_MAPPING) — restores decision_log writes`
-- `24165d4 revert: remove RiskSentinel v1 + PK v2.40 (per request)`
 
 ---
 
@@ -32,22 +32,22 @@ _See `OPEN_ISSUES.md` for full list_
 
 | Workflow | Status | Conclusion | Started |
 |---|---|---|---|
-| Agent — Every Minute (DRY_RUN) | in_progress | ⏳ — | 2026-05-28 15:40 UTC |
-| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-05-28 15:40 UTC |
-| Agent — Every Minute (DRY_RUN) | in_progress | ⏳ — | 2026-05-28 15:39 UTC |
-| RidingHigh Auto Scanner | completed | ✅ success | 2026-05-28 15:39 UTC |
-| RidingHigh Auto Scanner | completed | ✅ success | 2026-05-28 15:38 UTC |
+| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-05-28 18:34 UTC |
+| Agent — Every Minute (DRY_RUN) | in_progress | ⏳ — | 2026-05-28 18:34 UTC |
+| Agent — Every Minute (DRY_RUN) | in_progress | ⏳ — | 2026-05-28 18:33 UTC |
+| RidingHigh Auto Scanner | completed | ✅ success | 2026-05-28 18:33 UTC |
+| RidingHigh Auto Scanner | completed | ✅ success | 2026-05-28 18:32 UTC |
 
 ---
 
-## 📊 Google Sheets — showing month `2026-05`
+## 📊 Google Sheets — showing month `2026-06`
 
-_Selection: current Peru month (2026-05) has data_
+_Selection: most recent month with data (2026-06)_
 _Months in config: `2026-04`, `2026-05`, `2026-06`_
 
 | Sheet | Total rows | Last date | Status |
 |---|---|---|---|
-| timeline_live | 290,742 | 2026-05-28 | ✅ |
+| timeline_live | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
 | daily_snapshots | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
 | daily_summary | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
 | post_analysis | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
@@ -56,18 +56,6 @@ _Months in config: `2026-04`, `2026-05`, `2026-06`_
 | score_tracker | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
 | live_trades | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
 | ticker_follow_up | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| decision_log | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| paper_portfolio | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| score_analytics | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| postmortems | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| system_events | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| pending_suggestions | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| config_history | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| borrow_data | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| market_context | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| news_findings | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| agent_scorecard | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| sentinel_events | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
 
 ---
 

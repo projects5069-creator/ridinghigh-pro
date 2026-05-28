@@ -171,16 +171,18 @@ skills and a verifiable proof mechanism.
 
 | Task type                                | Required skill path                                                       |
 |------------------------------------------|---------------------------------------------------------------------------|
-| Debug / investigation / root cause       | `~/.claude/skills/superpowers/skills/systematic-debugging/SKILL.md`       |
-| Multi-step code edit / refactor          | `~/.claude/skills/superpowers/skills/writing-plans/SKILL.md`              |
-| New feature / open-ended question        | `~/.claude/skills/superpowers/skills/brainstorming/SKILL.md`              |
-| Before declaring "done" / before commit  | `~/.claude/skills/superpowers/skills/verification-before-completion/SKILL.md` |
+| Debug / investigation / root cause       | `~/.claude/plugins/cache/superpowers-marketplace/superpowers/*/skills/systematic-debugging/SKILL.md`       |
+| Multi-step code edit / refactor          | `~/.claude/plugins/cache/superpowers-marketplace/superpowers/*/skills/writing-plans/SKILL.md`              |
+| New feature / open-ended question        | `~/.claude/plugins/cache/superpowers-marketplace/superpowers/*/skills/brainstorming/SKILL.md`              |
+| Before declaring "done" / before commit  | `~/.claude/plugins/cache/superpowers-marketplace/superpowers/*/skills/verification-before-completion/SKILL.md` |
 | Backtest / strategy validation / STRAT   | `~/.claude/skills/backtest-expert/SKILL.md`                               |
 | Trade postmortem / WHIPSAW / win-rate    | `~/.claude/skills/signal-postmortem/SKILL.md`                             |
 | Position sizing / risk-based shares      | `~/.claude/skills/position-sizer/SKILL.md`                                |
+| Data quality / pipeline validation       | `~/.claude/skills/data-quality-checker/SKILL.md`                          |
+| Trader's prior context / memory recall   | `~/.claude/skills/trader-memory-core/SKILL.md`                            |
 
 If unsure which sub-skill applies, list them first:
-`ls ~/.claude/skills/superpowers/skills/`
+`ls ~/.claude/plugins/cache/superpowers-marketplace/superpowers/*/skills/`
 
 ### How to activate a skill
 
@@ -188,7 +190,7 @@ Before starting a task where a skill applies, **read its SKILL.md** and
 report the line count as proof:
 
 ```bash
-cat ~/.claude/skills/superpowers/skills/<skill-name>/SKILL.md | wc -l
+cat ~/.claude/plugins/cache/superpowers-marketplace/superpowers/*/skills/<skill-name>/SKILL.md | wc -l
 ```
 
 Include in your response:
