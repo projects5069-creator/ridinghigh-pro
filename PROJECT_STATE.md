@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-05-27 20:43:27 -05
+**Generated:** 2026-05-27 22:00:34 -05
 **Branch:** `main`
-**Latest commit:** `595e5c5` — fix(logging): decision_logger assert 41 to len(FIELD_MAPPING) — restores decision_log writes
+**Latest commit:** `6cd5a57` — docs: session handoff 2026-05-27 — c4c4750 closure + verified-only findings + open issues + tomorrow priorities
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `595e5c5 (HEAD -> main) fix(logging): decision_logger assert 41 to len(FIELD_MAPPING) — restores decision_log writes`
-- `24165d4 (origin/main, origin/HEAD) revert: remove RiskSentinel v1 + PK v2.40 (per request)`
+- `6cd5a57 (HEAD -> main) docs: session handoff 2026-05-27 — c4c4750 closure + verified-only findings + open issues + tomorrow priorities`
+- `c4c4750 (origin/main, origin/HEAD) fix(logging): decision_logger assert 41 to len(FIELD_MAPPING) — restores decision_log writes`
+- `24165d4 revert: remove RiskSentinel v1 + PK v2.40 (per request)`
 - `ad04c1d docs: PK v2.40 — Agent #6 Risk Sentinel v1 (commit 28b1ce1)`
 - `28b1ce1 🛡️ feat(agent#6): RiskSentinel v1 — daily-loss floor + buying-power buffer`
-- `2ab590f revert(quota): roll back v2.40 read consolidation to pre-fix state`
 
 ---
 
@@ -67,7 +67,7 @@ _Months in config: `2026-04`, `2026-05`, `2026-06`_
 | market_context | 28 | — | ✅ |
 | news_findings | 12,036 | — | ✅ |
 | agent_scorecard | 60 | 2026-05-27 | ✅ |
-| sentinel_events | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| sentinel_events | 11,325 | — | ✅ |
 
 ---
 
