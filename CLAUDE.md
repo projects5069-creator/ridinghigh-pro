@@ -290,7 +290,9 @@ Every working day opens and closes with a ritual defined in
 dynamic recon (latest handoff via `ls -1t docs/SESSION_HANDOFF_*.md |
 head -1`, never a hardcoded date) → full opening message with ALL tasks +
 a count against the live list. Session Close: every new request becomes a
-Backlog TASK immediately → write SESSION_HANDOFF → update PK → verify →
+Backlog TASK immediately → write SESSION_HANDOFF → ALWAYS update PK
+(read live version, bump, changelog — mandatory on every close / handoff /
+task-list update, no exceptions) → verify →
 ask "any request today that did not become a TASK?". Do not mix unrelated
 system investigation into a ritual. The protocol file is the source of
 truth; this rule only points to it.

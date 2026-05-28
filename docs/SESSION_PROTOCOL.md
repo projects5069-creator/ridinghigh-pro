@@ -79,9 +79,12 @@
 פרומפט ל-Claude Code שכותב docs/SESSION_HANDOFF_<תאריך-היום>.md בפורמט
 הקבוע (ראה §4). התאריך נקבע דינמית מ-TZ=America/Lima date.
 
-### שלב 3 — עדכון PK
-אם נגענו בקוד מהותי (נוסחאות / workflows / sheets / config / health
-checks — חוזה Anti-Drift) או בכל יום שהיו שינויים: bump + changelog.
+### שלב 3 — עדכון PK (חובה — ללא יוצא מן הכלל)
+עדכן PK בכל אחד מאלה: סגירת יום / כתיבת SESSION_HANDOFF / כל בקשה
+לעדכון משימות. תמיד קרא את הגרסה החיה (grep Document version) ואז bump
+לגרסה הבאה + שורת changelog על מה שנעשה. גם אם רק תיעוד/תשתית — מעדכנים.
+אם נגעת בקוד מהותי (נוסחאות / workflows / sheets / config / health
+checks) — זה חוזה Anti-Drift, חובה כפולה.
 
 ### שלב 4 — עדכון סטטוס משימות
 סמן ב-Backlog: הושלמו -> Done, בוטלו -> Cancelled/archive (לא להשאיר תקוע).
