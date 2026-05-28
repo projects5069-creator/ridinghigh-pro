@@ -1,7 +1,7 @@
 """
 Writes Decision objects as rows in decision_log Sheet.
 
-41 Decision fields mapped 1:1 to 41 Sheet columns (preserving order).
+42 Decision fields mapped 1:1 to 42 Sheet columns (preserving order).
 
 Strategy:
 - Each log() call writes immediately (not batched) — every decision matters
@@ -147,7 +147,7 @@ class DecisionLogger:
         # Build row
         try:
             row = self._decision_to_row(decision)
-            assert len(row) == 41, f"Row has {len(row)} values, expected 41"
+            assert len(row) == len(FIELD_MAPPING), f"Row has {len(row)} values, expected {len(FIELD_MAPPING)}"
         except Exception as e:
             print(f"[DecisionLogger] Row construction failed: {e}", file=sys.stderr)
             return None

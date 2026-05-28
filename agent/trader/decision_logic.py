@@ -43,11 +43,11 @@ from agent.perception.tradability import check_tradability
 PERU_TZ = pytz.timezone("America/Lima")
 
 
-# ── Decision dataclass — 41 fields matching decision_log Sheet ────────────────
+# ── Decision dataclass — 43 fields (42 mapped to decision_log Sheet) ────────────────
 
 @dataclass
 class Decision:
-    """Single decision record. Maps 1:1 to decision_log Sheet (41 cols)."""
+    """Single decision record. 42 of its 43 fields map to decision_log Sheet (42 cols)."""
 
     # Identity (5)
     decision_id: Optional[str] = None  # filled by M4 logger
