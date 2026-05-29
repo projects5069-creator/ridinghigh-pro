@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-05-29 09:15:26 -05
+**Generated:** 2026-05-29 09:21:05 -05
 **Branch:** `main`
-**Latest commit:** `edf575a` — docs(protocol): add §6 Clipboard Integrity — ✅ Done checksum + heredoc warning rule
+**Latest commit:** `95760fe` — chore(backlog): track task-51..56 + archive, audit doc, agent_outputs research
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `edf575a (HEAD -> main) docs(protocol): add §6 Clipboard Integrity — ✅ Done checksum + heredoc warning rule`
-- `e1902f8 (origin/main, origin/HEAD) docs(session-close): 2026-05-28 — TASK-53 done, TASK-55 deployed (PK v2.47)`
+- `95760fe (HEAD -> main) chore(backlog): track task-51..56 + archive, audit doc, agent_outputs research`
+- `c1644ab (origin/main, origin/HEAD) docs(protocol): add §6 Clipboard Integrity — ✅ Done checksum + heredoc warning rule`
+- `e1902f8 docs(session-close): 2026-05-28 — TASK-53 done, TASK-55 deployed (PK v2.47)`
 - `8e3c9ad fix(429): memoize get_active_month_sheets to cut Sheets read-quota burst`
 - `62b256f feat(infra): TASK-53 — PreToolUse hard skill-gate (fix tool_name->name)`
-- `a78ec54 docs(protocol): SESSION_PROTOCOL §2 stage 5 — task selection gate`
 
 ---
 
@@ -32,11 +32,11 @@ _See `OPEN_ISSUES.md` for full list_
 
 | Workflow | Status | Conclusion | Started |
 |---|---|---|---|
-| Agent — Every Minute (DRY_RUN) | in_progress | ⏳ — | 2026-05-29 14:15 UTC |
-| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-05-29 14:15 UTC |
-| RidingHigh Auto Scanner | completed | ✅ success | 2026-05-29 14:14 UTC |
-| Agent — Every Minute (DRY_RUN) | completed | ✅ success | 2026-05-29 14:14 UTC |
-| RidingHigh Auto Scanner | completed | ✅ success | 2026-05-29 14:13 UTC |
+| RidingHigh Auto Scanner | queued | ⏳ — | 2026-05-29 14:21 UTC |
+| Agent — Every Minute (DRY_RUN) | queued | ⏳ — | 2026-05-29 14:21 UTC |
+| Agent — Every Minute (DRY_RUN) | in_progress | ⏳ — | 2026-05-29 14:20 UTC |
+| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-05-29 14:20 UTC |
+| Agent — Every Minute (DRY_RUN) | in_progress | ⏳ — | 2026-05-29 14:19 UTC |
 
 ---
 
@@ -50,7 +50,7 @@ _Months in config: `2026-04`, `2026-05`, `2026-06`_
 | timeline_live | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
 | daily_snapshots | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
 | daily_summary | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| post_analysis | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| post_analysis | 0 | — | ⚠️ empty |
 | portfolio | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
 | portfolio_live | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
 | score_tracker | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
@@ -61,8 +61,8 @@ _Months in config: `2026-04`, `2026-05`, `2026-06`_
 
 ## 🩺 Health
 
-- ⚠️ 30 uncommitted file(s):
--    - 30 new/untracked
+- ⚠️ 22 uncommitted file(s):
+-    - 22 new/untracked
 
 ---
 
