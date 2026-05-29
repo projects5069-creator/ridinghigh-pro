@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-05-28 21:08:11 -05
+**Generated:** 2026-05-29 09:15:26 -05
 **Branch:** `main`
-**Latest commit:** `592e415` — docs(session-close): 2026-05-28 — TASK-53 done, TASK-55 deployed (PK v2.47)
+**Latest commit:** `edf575a` — docs(protocol): add §6 Clipboard Integrity — ✅ Done checksum + heredoc warning rule
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `592e415 (HEAD -> main) docs(session-close): 2026-05-28 — TASK-53 done, TASK-55 deployed (PK v2.47)`
-- `8e3c9ad (origin/main, origin/HEAD) fix(429): memoize get_active_month_sheets to cut Sheets read-quota burst`
+- `edf575a (HEAD -> main) docs(protocol): add §6 Clipboard Integrity — ✅ Done checksum + heredoc warning rule`
+- `e1902f8 (origin/main, origin/HEAD) docs(session-close): 2026-05-28 — TASK-53 done, TASK-55 deployed (PK v2.47)`
+- `8e3c9ad fix(429): memoize get_active_month_sheets to cut Sheets read-quota burst`
 - `62b256f feat(infra): TASK-53 — PreToolUse hard skill-gate (fix tool_name->name)`
 - `a78ec54 docs(protocol): SESSION_PROTOCOL §2 stage 5 — task selection gate`
-- `1ea869d docs(session-close): 2026-05-28 — 8h skills-infra session, permanent solve (v2.45)`
 
 ---
 
@@ -32,42 +32,30 @@ _See `OPEN_ISSUES.md` for full list_
 
 | Workflow | Status | Conclusion | Started |
 |---|---|---|---|
-| Agent — Critic (daily) | completed | ✅ success | 2026-05-28 23:08 UTC |
-| Agent — Daily Brief Email | completed | ✅ success | 2026-05-28 22:56 UTC |
-| Daily Backup — post_analysis | completed | ✅ success | 2026-05-28 22:54 UTC |
-| Post Analysis Collector | completed | ✅ success | 2026-05-28 22:44 UTC |
-| Agent — End of Day | completed | ✅ success | 2026-05-28 22:23 UTC |
+| Agent — Every Minute (DRY_RUN) | in_progress | ⏳ — | 2026-05-29 14:15 UTC |
+| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-05-29 14:15 UTC |
+| RidingHigh Auto Scanner | completed | ✅ success | 2026-05-29 14:14 UTC |
+| Agent — Every Minute (DRY_RUN) | completed | ✅ success | 2026-05-29 14:14 UTC |
+| RidingHigh Auto Scanner | completed | ✅ success | 2026-05-29 14:13 UTC |
 
 ---
 
-## 📊 Google Sheets — showing month `2026-05`
+## 📊 Google Sheets — showing month `2026-06`
 
-_Selection: current Peru month (2026-05) has data_
+_Selection: most recent month with data (2026-06)_
 _Months in config: `2026-04`, `2026-05`, `2026-06`_
 
 | Sheet | Total rows | Last date | Status |
 |---|---|---|---|
-| timeline_live | 294,226 | 2026-05-28 | ✅ |
-| daily_snapshots | 1,570 | 2026-05-28 | ✅ |
-| daily_summary | 1,703 | 2026-05-28 | ✅ |
-| post_analysis | 73 | 2026-05-28 | ✅ |
-| portfolio | 79 | 2026-05-28 | ✅ |
-| portfolio_live | 26 | 2026-05-27 | ✅ |
-| score_tracker | 1,482 | 2026-05-28 | ✅ |
-| live_trades | 1,482 | 2026-05-28 | ✅ |
-| ticker_follow_up | 12,477 | 2026-05-08 | ✅ |
-| decision_log | 16,243 | — | ✅ |
-| paper_portfolio | 109 | — | ✅ |
-| score_analytics | 0 | — | ⚠️ empty |
-| postmortems | 87 | — | ✅ |
-| system_events | 14,300 | — | ✅ |
-| pending_suggestions | 0 | — | ⚠️ empty |
-| config_history | 0 | — | ⚠️ empty |
-| borrow_data | 0 | — | ⚠️ empty |
-| market_context | 30 | — | ✅ |
-| news_findings | 14,402 | — | ✅ |
-| agent_scorecard | 64 | 2026-05-28 | ✅ |
-| sentinel_events | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| timeline_live | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| daily_snapshots | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| daily_summary | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| post_analysis | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| portfolio | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| portfolio_live | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| score_tracker | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| live_trades | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| ticker_follow_up | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
 
 ---
 
