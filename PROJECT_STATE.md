@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-05-29 15:24:52 -05
+**Generated:** 2026-05-29 15:34:28 -05
 **Branch:** `main`
-**Latest commit:** `8b3d316` — chore(backlog): close TASK-57 — 28/5 stall investigated (one-off outlier, unverifiable trigger, not recurring)
+**Latest commit:** `c5288f3` — docs(session-close): 2026-05-29 — 7 commits, 7 tasks closed, PK v2.48
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `8b3d316 (HEAD -> main) chore(backlog): close TASK-57 — 28/5 stall investigated (one-off outlier, unverifiable trigger, not recurring)`
-- `987b30a (origin/main, origin/HEAD) chore(backlog): close TASK-37 Live Write Verification (verified live on 6 ENTERs)`
+- `c5288f3 (HEAD -> main) docs(session-close): 2026-05-29 — 7 commits, 7 tasks closed, PK v2.48`
+- `2a2abd6 (origin/main, origin/HEAD) chore(backlog): close TASK-57 — 28/5 stall investigated (one-off outlier, unverifiable trigger, not recurring)`
+- `987b30a chore(backlog): close TASK-37 Live Write Verification (verified live on 6 ENTERs)`
 - `6fb5187 chore(backlog): close TASK-51 + TASK-52 (protocol rules now live)`
 - `b8119a2 docs(protocol): TASK-51 §1 proactive-proposal core + TASK-52 §5 Done-requires-verification gate`
-- `02069d5 fix(429): TASK-55 phase2 — _ha_cached_read retries 3->5, backoff cap 40s, TTL 300->600 (mid-day market-hours read resilience)`
 
 ---
 
@@ -32,11 +32,11 @@ _See `OPEN_ISSUES.md` for full list_
 
 | Workflow | Status | Conclusion | Started |
 |---|---|---|---|
-| RidingHigh Auto Scanner | completed | ✅ success | 2026-05-29 20:24 UTC |
-| Agent — Every Minute (DRY_RUN) | completed | ✅ success | 2026-05-29 20:24 UTC |
-| RidingHigh Auto Scanner | completed | ✅ success | 2026-05-29 20:23 UTC |
-| Agent — Every Minute (DRY_RUN) | completed | ✅ success | 2026-05-29 20:23 UTC |
-| Agent — Every Minute (DRY_RUN) | completed | ✅ success | 2026-05-29 20:22 UTC |
+| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-05-29 20:34 UTC |
+| Agent — Every Minute (DRY_RUN) | in_progress | ⏳ — | 2026-05-29 20:34 UTC |
+| Agent — Market Context (Hourly) | completed | ✅ success | 2026-05-29 20:33 UTC |
+| Agent — Every Minute (DRY_RUN) | completed | ✅ success | 2026-05-29 20:33 UTC |
+| RidingHigh Auto Scanner | completed | ✅ success | 2026-05-29 20:33 UTC |
 
 ---
 
@@ -64,7 +64,7 @@ _Months in config: `2026-04`, `2026-05`, `2026-06`_
 | pending_suggestions | 0 | — | ⚠️ empty |
 | config_history | 0 | — | ⚠️ empty |
 | borrow_data | 0 | — | ⚠️ empty |
-| market_context | 32 | — | ✅ |
+| market_context | 33 | — | ✅ |
 | news_findings | 17,156 | — | ✅ |
 | agent_scorecard | 64 | 2026-05-28 | ✅ |
 | sentinel_events | 16,319 | — | ✅ |
