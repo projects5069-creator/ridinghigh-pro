@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-05-29 14:47:13 -05
+**Generated:** 2026-05-29 15:24:52 -05
 **Branch:** `main`
-**Latest commit:** `56c8715` — chore(backlog): close TASK-37 Live Write Verification (verified live on 6 ENTERs)
+**Latest commit:** `8b3d316` — chore(backlog): close TASK-57 — 28/5 stall investigated (one-off outlier, unverifiable trigger, not recurring)
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `56c8715 (HEAD -> main) chore(backlog): close TASK-37 Live Write Verification (verified live on 6 ENTERs)`
-- `6fb5187 (origin/main, origin/HEAD) chore(backlog): close TASK-51 + TASK-52 (protocol rules now live)`
+- `8b3d316 (HEAD -> main) chore(backlog): close TASK-57 — 28/5 stall investigated (one-off outlier, unverifiable trigger, not recurring)`
+- `987b30a (origin/main, origin/HEAD) chore(backlog): close TASK-37 Live Write Verification (verified live on 6 ENTERs)`
+- `6fb5187 chore(backlog): close TASK-51 + TASK-52 (protocol rules now live)`
 - `b8119a2 docs(protocol): TASK-51 §1 proactive-proposal core + TASK-52 §5 Done-requires-verification gate`
 - `02069d5 fix(429): TASK-55 phase2 — _ha_cached_read retries 3->5, backoff cap 40s, TTL 300->600 (mid-day market-hours read resilience)`
-- `d5bce92 chore(backlog): track task-51..56 + archive, audit doc, agent_outputs research`
 
 ---
 
@@ -32,11 +32,11 @@ _See `OPEN_ISSUES.md` for full list_
 
 | Workflow | Status | Conclusion | Started |
 |---|---|---|---|
-| Agent — Every Minute (DRY_RUN) | in_progress | ⏳ — | 2026-05-29 19:47 UTC |
-| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-05-29 19:47 UTC |
-| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-05-29 19:46 UTC |
-| Agent — Every Minute (DRY_RUN) | completed | ✅ success | 2026-05-29 19:46 UTC |
-| Agent — Every Minute (DRY_RUN) | completed | ✅ success | 2026-05-29 19:45 UTC |
+| RidingHigh Auto Scanner | completed | ✅ success | 2026-05-29 20:24 UTC |
+| Agent — Every Minute (DRY_RUN) | completed | ✅ success | 2026-05-29 20:24 UTC |
+| RidingHigh Auto Scanner | completed | ✅ success | 2026-05-29 20:23 UTC |
+| Agent — Every Minute (DRY_RUN) | completed | ✅ success | 2026-05-29 20:23 UTC |
+| Agent — Every Minute (DRY_RUN) | completed | ✅ success | 2026-05-29 20:22 UTC |
 
 ---
 
@@ -47,27 +47,27 @@ _Months in config: `2026-04`, `2026-05`, `2026-06`_
 
 | Sheet | Total rows | Last date | Status |
 |---|---|---|---|
-| timeline_live | 300,584 | 2026-05-29 | ✅ |
-| daily_snapshots | 1,570 | 2026-05-28 | ✅ |
-| daily_summary | 1,703 | 2026-05-28 | ✅ |
+| timeline_live | 301,321 | 2026-05-29 | ✅ |
+| daily_snapshots | 1,638 | 2026-05-29 | ✅ |
+| daily_summary | 1,783 | 2026-05-29 | ✅ |
 | post_analysis | 73 | 2026-05-28 | ✅ |
-| portfolio | 79 | 2026-05-28 | ✅ |
-| portfolio_live | 31 | 2026-05-28 | ✅ |
+| portfolio | 83 | 2026-05-29 | ✅ |
+| portfolio_live | 35 | 2026-05-29 | ✅ |
 | score_tracker | 1,538 | 2026-05-29 | ✅ |
 | live_trades | 1,538 | 2026-05-29 | ✅ |
 | ticker_follow_up | 12,477 | 2026-05-08 | ✅ |
 | decision_log | 16,249 | — | ✅ |
 | paper_portfolio | 115 | — | ✅ |
-| score_analytics | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| score_analytics | 0 | — | ⚠️ empty |
 | postmortems | 95 | — | ✅ |
-| system_events | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| pending_suggestions | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| config_history | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| borrow_data | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| market_context | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| news_findings | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| agent_scorecard | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| sentinel_events | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| system_events | 16,319 | — | ✅ |
+| pending_suggestions | 0 | — | ⚠️ empty |
+| config_history | 0 | — | ⚠️ empty |
+| borrow_data | 0 | — | ⚠️ empty |
+| market_context | 32 | — | ✅ |
+| news_findings | 17,156 | — | ✅ |
+| agent_scorecard | 64 | 2026-05-28 | ✅ |
+| sentinel_events | 16,319 | — | ✅ |
 
 ---
 
