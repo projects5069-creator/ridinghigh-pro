@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-05-29 12:47:59 -05
+**Generated:** 2026-05-29 13:07:51 -05
 **Branch:** `main`
-**Latest commit:** `b38ad33` — fix(429): TASK-55 phase2 — _ha_cached_read retries 3->5, backoff cap 40s, TTL 300->600 (mid-day market-hours read resilience)
+**Latest commit:** `1ee658f` — docs(protocol): TASK-51 §1 proactive-proposal core + TASK-52 §5 Done-requires-verification gate
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `b38ad33 (HEAD -> main) fix(429): TASK-55 phase2 — _ha_cached_read retries 3->5, backoff cap 40s, TTL 300->600 (mid-day market-hours read resilience)`
-- `d5bce92 (origin/main, origin/HEAD) chore(backlog): track task-51..56 + archive, audit doc, agent_outputs research`
+- `1ee658f (HEAD -> main) docs(protocol): TASK-51 §1 proactive-proposal core + TASK-52 §5 Done-requires-verification gate`
+- `02069d5 (origin/main, origin/HEAD) fix(429): TASK-55 phase2 — _ha_cached_read retries 3->5, backoff cap 40s, TTL 300->600 (mid-day market-hours read resilience)`
+- `d5bce92 chore(backlog): track task-51..56 + archive, audit doc, agent_outputs research`
 - `c1644ab docs(protocol): add §6 Clipboard Integrity — ✅ Done checksum + heredoc warning rule`
 - `e1902f8 docs(session-close): 2026-05-28 — TASK-53 done, TASK-55 deployed (PK v2.47)`
-- `8e3c9ad fix(429): memoize get_active_month_sheets to cut Sheets read-quota burst`
 
 ---
 
@@ -32,11 +32,11 @@ _See `OPEN_ISSUES.md` for full list_
 
 | Workflow | Status | Conclusion | Started |
 |---|---|---|---|
-| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-05-29 17:47 UTC |
-| Agent — Every Minute (DRY_RUN) | in_progress | ⏳ — | 2026-05-29 17:47 UTC |
-| Agent — Every Minute (DRY_RUN) | completed | ✅ success | 2026-05-29 17:46 UTC |
-| RidingHigh Auto Scanner | completed | ✅ success | 2026-05-29 17:46 UTC |
-| RidingHigh Auto Scanner | completed | ✅ success | 2026-05-29 17:45 UTC |
+| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-05-29 18:07 UTC |
+| Agent — Every Minute (DRY_RUN) | in_progress | ⏳ — | 2026-05-29 18:07 UTC |
+| Agent — Every Minute (DRY_RUN) | in_progress | ⏳ — | 2026-05-29 18:06 UTC |
+| RidingHigh Auto Scanner | completed | ✅ success | 2026-05-29 18:06 UTC |
+| Agent — Every Minute (DRY_RUN) | in_progress | ⏳ — | 2026-05-29 18:05 UTC |
 
 ---
 
@@ -47,7 +47,7 @@ _Months in config: `2026-04`, `2026-05`, `2026-06`_
 
 | Sheet | Total rows | Last date | Status |
 |---|---|---|---|
-| timeline_live | 298,019 | 2026-05-29 | ✅ |
+| timeline_live | 298,480 | 2026-05-29 | ✅ |
 | daily_snapshots | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
 | daily_summary | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
 | post_analysis | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
@@ -73,9 +73,9 @@ _Months in config: `2026-04`, `2026-05`, `2026-06`_
 
 ## 🩺 Health
 
-- ⚠️ 26 uncommitted file(s):
--    - 1 modified
--    - 25 new/untracked
+- ⚠️ 28 uncommitted file(s):
+-    - 2 modified
+-    - 26 new/untracked
 
 ---
 
