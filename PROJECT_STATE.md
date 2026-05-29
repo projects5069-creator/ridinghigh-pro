@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-05-29 17:18:07 -05
+**Generated:** 2026-05-29 17:24:36 -05
 **Branch:** `main`
-**Latest commit:** `87be9e8` — docs(protocol): session-open ritual — 9-part template, model B, heredoc fix, changelog
+**Latest commit:** `1b35461` — docs(protocol): session-open ritual — 9-part template, model B, heredoc fix (TASK-59)
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `87be9e8 (HEAD -> main) docs(protocol): session-open ritual — 9-part template, model B, heredoc fix, changelog`
-- `4270704 (origin/main, origin/HEAD) docs(session-close): 2026-05-29 — 7 commits, 7 tasks closed, PK v2.48`
+- `1b35461 (HEAD -> main) docs(protocol): session-open ritual — 9-part template, model B, heredoc fix (TASK-59)`
+- `19e6c26 (origin/main, origin/HEAD) docs(protocol): session-open ritual — 9-part template, model B, heredoc fix, changelog`
+- `4270704 docs(session-close): 2026-05-29 — 7 commits, 7 tasks closed, PK v2.48`
 - `2a2abd6 chore(backlog): close TASK-57 — 28/5 stall investigated (one-off outlier, unverifiable trigger, not recurring)`
 - `987b30a chore(backlog): close TASK-37 Live Write Verification (verified live on 6 ENTERs)`
-- `6fb5187 chore(backlog): close TASK-51 + TASK-52 (protocol rules now live)`
 
 ---
 
@@ -32,11 +32,11 @@ _See `OPEN_ISSUES.md` for full list_
 
 | Workflow | Status | Conclusion | Started |
 |---|---|---|---|
+| Agent — End of Day | completed | ✅ success | 2026-05-29 22:22 UTC |
 | Daily Backup — post_analysis | completed | ✅ success | 2026-05-29 22:02 UTC |
 | Daily Backup — post_analysis | completed | ✅ success | 2026-05-29 22:02 UTC |
 | Agent — Daily Brief Email | completed | ✅ success | 2026-05-29 21:30 UTC |
 | RidingHigh Auto Scanner | completed | ✅ success | 2026-05-29 21:17 UTC |
-| Agent — Every Minute (DRY_RUN) | completed | ✅ success | 2026-05-29 21:15 UTC |
 
 ---
 
