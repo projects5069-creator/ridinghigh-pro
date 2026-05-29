@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-05-28 20:47:13 -05
+**Generated:** 2026-05-28 21:08:11 -05
 **Branch:** `main`
-**Latest commit:** `e2c8bb2` — fix(429): memoize get_active_month_sheets to cut Sheets read-quota burst
+**Latest commit:** `592e415` — docs(session-close): 2026-05-28 — TASK-53 done, TASK-55 deployed (PK v2.47)
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `e2c8bb2 (HEAD -> main) fix(429): memoize get_active_month_sheets to cut Sheets read-quota burst`
-- `62b256f (origin/main, origin/HEAD) feat(infra): TASK-53 — PreToolUse hard skill-gate (fix tool_name->name)`
+- `592e415 (HEAD -> main) docs(session-close): 2026-05-28 — TASK-53 done, TASK-55 deployed (PK v2.47)`
+- `8e3c9ad (origin/main, origin/HEAD) fix(429): memoize get_active_month_sheets to cut Sheets read-quota burst`
+- `62b256f feat(infra): TASK-53 — PreToolUse hard skill-gate (fix tool_name->name)`
 - `a78ec54 docs(protocol): SESSION_PROTOCOL §2 stage 5 — task selection gate`
 - `1ea869d docs(session-close): 2026-05-28 — 8h skills-infra session, permanent solve (v2.45)`
-- `24708f5 feat(infra): UserPromptSubmit hook - kernel-level skill enforcement (v2.44)`
 
 ---
 
@@ -66,7 +66,7 @@ _Months in config: `2026-04`, `2026-05`, `2026-06`_
 | borrow_data | 0 | — | ⚠️ empty |
 | market_context | 30 | — | ✅ |
 | news_findings | 14,402 | — | ✅ |
-| agent_scorecard | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| agent_scorecard | 64 | 2026-05-28 | ✅ |
 | sentinel_events | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
 
 ---

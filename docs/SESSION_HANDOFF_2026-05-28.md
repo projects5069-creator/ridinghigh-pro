@@ -87,3 +87,36 @@
 
 *נכתב 2026-05-28 ~14:50 Peru ע"י Claude (chat) + Claude Code.*
 *Anti-Drift: PK v2.45 + changelog. Skill enforcement: kernel-hook active.*
+
+---
+
+## 🌙 Session close addendum — 2026-05-28 evening (TASK-53 + TASK-55)
+
+### Closed end-to-end
+- **TASK-53 — PreToolUse skill-gate hook** (commit 62b256f, pushed). Kernel-level
+  hook blocks Bash/Edit/Write/NotebookEdit until a SKILL.md is Read or Skill-loaded.
+  Root-cause fix tool_name->name (Stage D caught live). Verified live 3/3:
+  block / Read-unblock / Skill-unblock. PK v2.46, CLAUDE.md RULE #11 v3.1.
+  Hook+RECOVERY mirrored to scripts/claude_hooks/. KNOWN HOLE -> TASK-54.
+
+### Deployed, AWAITING LIVE VERIFICATION (NOT Done)
+- **TASK-55 — Sheets 429 read-quota fix** (commit 8e3c9ad, pushed). IN PROGRESS.
+  ROOT (6-round recon): health_audit calls get_active_month_sheets 11x/run, each
+  does uncached gc.open_by_key (1-3 API calls) = up to 33 spurious reads vs Google
+  60/min cap. 3 failing checks (16/20/21) share _load_recent_metrics which calls it
+  before the cached read. Amplified by retries=3 backoff + 17:00 UTC 4-workflow
+  collision. FIX: memoize get_active_month_sheets (rename to _uncached + same-name
+  wrapper, 300s TTL, id(gc) key, mirrors _HA_SHEET_CACHE). 11->1 calls, zero blast
+  radius. VERIFY TOMORROW ~12:00 Peru (0 17 UTC run): log must show 0x APIError 429.
+  If clean -> Done. If still 429 -> Phase 2: retries=3->1, move cron 0 17->0 16 UTC.
+
+### Open for next session
+- Verify TASK-55 in production (next health_audit market-hours run).
+- decision_log assert bug (assert len==41 vs 42-col schema -> silent None since ~5/20).
+- Gate 0: 5 verified removals -> backlog ~27->~22.
+- BATCH A: ~30 untracked files (task-51..55.md, research/, .bak) -> commit/gitignore sort.
+- TASK-48: Critic email display broken. 3 contradictions (agent freeze, TASK-45, memory).
+
+### Repo at close
+- origin/main = 8e3c9ad + this close commit. 2 work commits pushed today:
+  62b256f (TASK-53), 8e3c9ad (TASK-55).
