@@ -980,10 +980,10 @@ def check_14_uncommitted_count():
 
 # ── Sheets read cache + retry helpers (2026-05-22) ─────────────────────
 _HA_SHEET_CACHE = {}
-_HA_CACHE_TTL_SEC = 300
+_HA_CACHE_TTL_SEC = 600
 
 
-def _ha_cached_read(gc, sheet_id, op, *args, ttl=_HA_CACHE_TTL_SEC, retries=3):
+def _ha_cached_read(gc, sheet_id, op, *args, ttl=_HA_CACHE_TTL_SEC, retries=5):
     """Cached + retried Sheets read. op = 'get_all_values'|'col_values'|'row_values'."""
     import time as _t
     cache_key = (sheet_id, op, args)
@@ -1006,7 +1006,7 @@ def _ha_cached_read(gc, sheet_id, op, *args, ttl=_HA_CACHE_TTL_SEC, retries=3):
             err_str = str(e).lower()
             is_429 = '429' in err_str or 'quota' in err_str or 'rate' in err_str
             if not is_429 or attempt == retries - 1: raise
-            wait = (2 ** attempt) * 5
+            wait = min((2 ** attempt) * 5, 40)
             _t.sleep(wait)
     raise last_err
 

@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-05-29 09:21:05 -05
+**Generated:** 2026-05-29 12:47:59 -05
 **Branch:** `main`
-**Latest commit:** `95760fe` — chore(backlog): track task-51..56 + archive, audit doc, agent_outputs research
+**Latest commit:** `b38ad33` — fix(429): TASK-55 phase2 — _ha_cached_read retries 3->5, backoff cap 40s, TTL 300->600 (mid-day market-hours read resilience)
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `95760fe (HEAD -> main) chore(backlog): track task-51..56 + archive, audit doc, agent_outputs research`
-- `c1644ab (origin/main, origin/HEAD) docs(protocol): add §6 Clipboard Integrity — ✅ Done checksum + heredoc warning rule`
+- `b38ad33 (HEAD -> main) fix(429): TASK-55 phase2 — _ha_cached_read retries 3->5, backoff cap 40s, TTL 300->600 (mid-day market-hours read resilience)`
+- `d5bce92 (origin/main, origin/HEAD) chore(backlog): track task-51..56 + archive, audit doc, agent_outputs research`
+- `c1644ab docs(protocol): add §6 Clipboard Integrity — ✅ Done checksum + heredoc warning rule`
 - `e1902f8 docs(session-close): 2026-05-28 — TASK-53 done, TASK-55 deployed (PK v2.47)`
 - `8e3c9ad fix(429): memoize get_active_month_sheets to cut Sheets read-quota burst`
-- `62b256f feat(infra): TASK-53 — PreToolUse hard skill-gate (fix tool_name->name)`
 
 ---
 
@@ -32,37 +32,50 @@ _See `OPEN_ISSUES.md` for full list_
 
 | Workflow | Status | Conclusion | Started |
 |---|---|---|---|
-| RidingHigh Auto Scanner | queued | ⏳ — | 2026-05-29 14:21 UTC |
-| Agent — Every Minute (DRY_RUN) | queued | ⏳ — | 2026-05-29 14:21 UTC |
-| Agent — Every Minute (DRY_RUN) | in_progress | ⏳ — | 2026-05-29 14:20 UTC |
-| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-05-29 14:20 UTC |
-| Agent — Every Minute (DRY_RUN) | in_progress | ⏳ — | 2026-05-29 14:19 UTC |
+| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-05-29 17:47 UTC |
+| Agent — Every Minute (DRY_RUN) | in_progress | ⏳ — | 2026-05-29 17:47 UTC |
+| Agent — Every Minute (DRY_RUN) | completed | ✅ success | 2026-05-29 17:46 UTC |
+| RidingHigh Auto Scanner | completed | ✅ success | 2026-05-29 17:46 UTC |
+| RidingHigh Auto Scanner | completed | ✅ success | 2026-05-29 17:45 UTC |
 
 ---
 
-## 📊 Google Sheets — showing month `2026-06`
+## 📊 Google Sheets — showing month `2026-05`
 
-_Selection: most recent month with data (2026-06)_
+_Selection: current Peru month (2026-05) has data_
 _Months in config: `2026-04`, `2026-05`, `2026-06`_
 
 | Sheet | Total rows | Last date | Status |
 |---|---|---|---|
-| timeline_live | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| timeline_live | 298,019 | 2026-05-29 | ✅ |
 | daily_snapshots | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
 | daily_summary | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| post_analysis | 0 | — | ⚠️ empty |
+| post_analysis | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
 | portfolio | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
 | portfolio_live | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| score_tracker | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| live_trades | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| score_tracker | 1,510 | 2026-05-29 | ✅ |
+| live_trades | 1,510 | 2026-05-29 | ✅ |
 | ticker_follow_up | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| decision_log | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| paper_portfolio | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| score_analytics | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| postmortems | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| system_events | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| pending_suggestions | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| config_history | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| borrow_data | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| market_context | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| news_findings | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| agent_scorecard | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| sentinel_events | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
 
 ---
 
 ## 🩺 Health
 
-- ⚠️ 22 uncommitted file(s):
--    - 22 new/untracked
+- ⚠️ 26 uncommitted file(s):
+-    - 1 modified
+-    - 25 new/untracked
 
 ---
 
