@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-05-28 15:22:06 -05
+**Generated:** 2026-05-28 19:36:47 -05
 **Branch:** `main`
-**Latest commit:** `2b9ff89` — docs(protocol): SESSION_PROTOCOL §2 stage 5 — task selection gate
+**Latest commit:** `d1bf75a` — feat(infra): TASK-53 — PreToolUse hard skill-gate (fix tool_name->name)
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `2b9ff89 (HEAD -> main) docs(protocol): SESSION_PROTOCOL §2 stage 5 — task selection gate`
-- `1ea869d (origin/main, origin/HEAD) docs(session-close): 2026-05-28 — 8h skills-infra session, permanent solve (v2.45)`
+- `d1bf75a (HEAD -> main) feat(infra): TASK-53 — PreToolUse hard skill-gate (fix tool_name->name)`
+- `a78ec54 (origin/main, origin/HEAD) docs(protocol): SESSION_PROTOCOL §2 stage 5 — task selection gate`
+- `1ea869d docs(session-close): 2026-05-28 — 8h skills-infra session, permanent solve (v2.45)`
 - `24708f5 feat(infra): UserPromptSubmit hook - kernel-level skill enforcement (v2.44)`
 - `eb4ac15 feat(skills): integrity guard + RULE #11/MAP/PROTOCOL/PK sync (v2.43)`
-- `f30385b docs(session): PK mandatory + handoff 28-5 + TASK-48/49/50`
 
 ---
 
@@ -32,11 +32,11 @@ _See `OPEN_ISSUES.md` for full list_
 
 | Workflow | Status | Conclusion | Started |
 |---|---|---|---|
-| RidingHigh Auto Scanner | queued | ⏳ — | 2026-05-28 20:22 UTC |
-| Agent — Every Minute (DRY_RUN) | queued | ⏳ — | 2026-05-28 20:22 UTC |
-| Agent — Every Minute (DRY_RUN) | completed | ✅ success | 2026-05-28 20:21 UTC |
-| RidingHigh Auto Scanner | completed | ✅ success | 2026-05-28 20:21 UTC |
-| RidingHigh Auto Scanner | completed | ✅ success | 2026-05-28 20:20 UTC |
+| Agent — Critic (daily) | completed | ✅ success | 2026-05-28 23:08 UTC |
+| Agent — Daily Brief Email | completed | ✅ success | 2026-05-28 22:56 UTC |
+| Daily Backup — post_analysis | completed | ✅ success | 2026-05-28 22:54 UTC |
+| Post Analysis Collector | completed | ✅ success | 2026-05-28 22:44 UTC |
+| Agent — End of Day | completed | ✅ success | 2026-05-28 22:23 UTC |
 
 ---
 
@@ -49,9 +49,9 @@ _Months in config: `2026-04`, `2026-05`, `2026-06`_
 |---|---|---|---|
 | timeline_live | 294,226 | 2026-05-28 | ✅ |
 | daily_snapshots | 1,570 | 2026-05-28 | ✅ |
-| daily_summary | 1,585 | 2026-05-27 | ✅ |
-| post_analysis | 64 | 2026-05-27 | ✅ |
-| portfolio | 74 | 2026-05-27 | ✅ |
+| daily_summary | 1,703 | 2026-05-28 | ✅ |
+| post_analysis | 73 | 2026-05-28 | ✅ |
+| portfolio | 79 | 2026-05-28 | ✅ |
 | portfolio_live | 26 | 2026-05-27 | ✅ |
 | score_tracker | 1,482 | 2026-05-28 | ✅ |
 | live_trades | 1,482 | 2026-05-28 | ✅ |
@@ -64,17 +64,17 @@ _Months in config: `2026-04`, `2026-05`, `2026-06`_
 | pending_suggestions | 0 | — | ⚠️ empty |
 | config_history | 0 | — | ⚠️ empty |
 | borrow_data | 0 | — | ⚠️ empty |
-| market_context | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| market_context | 30 | — | ✅ |
 | news_findings | 14,402 | — | ✅ |
-| agent_scorecard | 60 | 2026-05-27 | ✅ |
-| sentinel_events | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| agent_scorecard | 64 | 2026-05-28 | ✅ |
+| sentinel_events | 14,300 | — | ✅ |
 
 ---
 
 ## 🩺 Health
 
-- ⚠️ 27 uncommitted file(s):
--    - 27 new/untracked
+- ⚠️ 29 uncommitted file(s):
+-    - 29 new/untracked
 
 ---
 

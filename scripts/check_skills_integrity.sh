@@ -82,3 +82,15 @@ else
   echo "✅ SKILLS INTEGRITY: PASS (all checks)"
   exit 0
 fi
+
+# --- TASK-53: PreToolUse skill-gate checks ---
+if jq -e '.hooks.PreToolUse[]?.matcher' ~/.claude/settings.json >/dev/null 2>&1; then
+  echo "✅ PreToolUse hook registered"
+else
+  echo "❌ PreToolUse hook MISSING"
+fi
+if [ -x ~/.claude/hooks/pretooluse_skill_gate.sh ]; then
+  echo "✅ pretooluse_skill_gate.sh executable"
+else
+  echo "❌ pretooluse_skill_gate.sh missing/not exec"
+fi

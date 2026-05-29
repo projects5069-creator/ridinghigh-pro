@@ -220,6 +220,10 @@ If you respond without reading a relevant SKILL.md when one applies:
 
 ---
 
+
+### v3.1 (2026-05-28) — HARD GATE ACTIVE
+A PreToolUse hook now BLOCKS Bash/Edit/Write/NotebookEdit until a SKILL.md is Read (or a Skill tool loaded) in the session. This enforces RULE #11 at the kernel level — declaration alone is no longer enough. Recovery if locked out: ~/.claude/hooks/RECOVERY.md (disableAllHooks=true via native terminal). KNOWN HOLE: any SKILL.md satisfies it, not necessarily the relevant one (TASK-54).
+
 ## RULE #12: All bash commands must wrap through .rh-run.sh
 
 Every Bash tool invocation in this project MUST be wrapped:
