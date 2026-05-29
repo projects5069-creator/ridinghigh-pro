@@ -144,7 +144,32 @@ def get_gspread_client(local=False):
         return None, f"auth failed: {e}"
 
 
+# ── Memoization cache for get_active_month_sheets (2026-05-28: 429 quota fix) ──
+# 11 callsites/run × 1-3 gc.open_by_key API calls each = up to 33 spurious reads
+# against Google's 60/min/user cap. Result is constant within a run (depends on
+# now_peru().month + sheets_config.json), so 300s TTL is safe. Mirrors _HA_SHEET_CACHE.
+_ACTIVE_SHEETS_CACHE: dict = {}
+_ACTIVE_SHEETS_TTL_SEC = 300
+
+
 def get_active_month_sheets(gc):
+    """Memoized wrapper around _get_active_month_sheets_uncached.
+
+    See _ACTIVE_SHEETS_CACHE comment above for the why. Same signature/return
+    as before — drop-in replacement, zero blast radius.
+    """
+    import time as _t
+    key = id(gc) if gc is not None else "none"
+    now = _t.time()
+    cached = _ACTIVE_SHEETS_CACHE.get(key)
+    if cached and (now - cached[0]) < _ACTIVE_SHEETS_TTL_SEC:
+        return cached[1]
+    result = _get_active_month_sheets_uncached(gc)
+    _ACTIVE_SHEETS_CACHE[key] = (now, result)
+    return result
+
+
+def _get_active_month_sheets_uncached(gc):
     """
     Pick the active month from sheets_config.json — SMART.
 
