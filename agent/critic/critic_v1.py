@@ -16,6 +16,7 @@ No sheet writing, no orchestrator wiring — computation and return only.
 """
 
 import logging
+from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 logger = logging.getLogger("agent.critic")
@@ -36,12 +37,32 @@ def _safe_float(val, default=0.0) -> float:
         return default
 
 
+_SUMMARIES_DOTFILE = Path.home() / "RidingHighPro" / ".rh_summaries_sheet_id"
+
+
 def _get_monthly_worksheet():
-    """TASK-48 monthly host seam. STUB until 2b.
-    Will open tab 'monthly_summary' in the per-year RH-Summaries spreadsheet
-    (id from a dotfile, like RidingHigh-Health-Audit). Returns ws or None.
-    Returning None here is safe: write_monthly_summary logs a warning and returns False."""
-    return None  # STUB until 2b (host=RH-Summaries, id from dotfile)
+    """TASK-48 2b-ii: open the monthly_summary tab in the per-year-agnostic
+    RH-Summaries spreadsheet. Single tab 'monthly_summary' (MonthOf carries the
+    year). Returns ws, or None if not provisioned / on any error (caller degrades)."""
+    try:
+        if not _SUMMARIES_DOTFILE.exists():
+            return None
+        sid = _SUMMARIES_DOTFILE.read_text().strip()
+        if not sid:
+            return None
+        import sheets_manager as sm
+        gc = sm._get_gc()
+        if gc is None:
+            return None
+        ss = gc.open_by_key(sid)
+        try:
+            return ss.worksheet("monthly_summary")
+        except Exception:
+            # get-or-create: tab missing → create it
+            return ss.add_worksheet(title="monthly_summary", rows=200, cols=16)
+    except Exception as e:
+        logger.warning("_get_monthly_worksheet failed: %s", e)
+        return None
 
 
 class CriticAgent:

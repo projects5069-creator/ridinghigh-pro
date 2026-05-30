@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-05-30 15:42:29 -05
+**Generated:** 2026-05-30 16:42:50 -05
 **Branch:** `main`
-**Latest commit:** `fbde737` — fix(critic-email): include RealizedPnL in review_completed_trades dict (TASK-48 bug#1)
+**Latest commit:** `f5d7d6e` — feat(critic-email): monthly host — RH-Summaries provisioning + _get_monthly_worksheet seam (TASK-48 2b)
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `fbde737 (HEAD -> main) fix(critic-email): include RealizedPnL in review_completed_trades dict (TASK-48 bug#1)`
-- `7be721f (origin/main, origin/HEAD) feat(critic-email): monthly summary — code complete, workflow held until provisioning (TASK-48)`
+- `f5d7d6e (HEAD -> main) feat(critic-email): monthly host — RH-Summaries provisioning + _get_monthly_worksheet seam (TASK-48 2b)`
+- `2bd533a (origin/main, origin/HEAD) fix(critic-email): include RealizedPnL in review_completed_trades dict (TASK-48 bug#1)`
+- `7be721f feat(critic-email): monthly summary — code complete, workflow held until provisioning (TASK-48)`
 - `cc7a206 feat(critic-email): EMAIL.2 — standalone weekly summary email (TASK-48)`
 - `a8ec6ac feat(agent-sheets): EMAIL.3 — weekly_summary lean schema, 16 cols, schema-only (TASK-48)`
-- `a3c84ba feat(critic-email): EMAIL.1 — structured AutoLessons bullets + card header + anti-drop (TASK-48)`
 
 ---
 
@@ -53,7 +53,7 @@ _Months in config: `2026-04`, `2026-05`, `2026-06`_
 | post_analysis | 78 | 2026-05-29 | ✅ |
 | portfolio | 88 | 2026-05-29 | ✅ |
 | portfolio_live | 35 | 2026-05-29 | ✅ |
-| score_tracker | 1,538 | 2026-05-29 | ✅ |
+| score_tracker | ? | ? | ❌ APIError: [503]: The service is currentl |
 | live_trades | 1,538 | 2026-05-29 | ✅ |
 | ticker_follow_up | 12,477 | 2026-05-08 | ✅ |
 | decision_log | 16,249 | — | ✅ |

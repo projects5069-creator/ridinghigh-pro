@@ -68,3 +68,4 @@ provider_validation_report.json
 *.bak_*
 *.bak
 .skill_audit.log
+.rh_summaries_sheet_id
