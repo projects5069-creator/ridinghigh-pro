@@ -36,6 +36,14 @@ def _safe_float(val, default=0.0) -> float:
         return default
 
 
+def _get_monthly_worksheet():
+    """TASK-48 monthly host seam. STUB until 2b.
+    Will open tab 'monthly_summary' in the per-year RH-Summaries spreadsheet
+    (id from a dotfile, like RidingHigh-Health-Audit). Returns ws or None.
+    Returning None here is safe: write_monthly_summary logs a warning and returns False."""
+    return None  # STUB until 2b (host=RH-Summaries, id from dotfile)
+
+
 class CriticAgent:
     """Reviews completed trades and produces factual summaries."""
 
@@ -219,6 +227,62 @@ class CriticAgent:
             "Conflicts": act.get("conflicts", 0), "Conclusion": conclusion,
             "SampleSizeFlag": flag, "GeneratedAt": _dt.now(peru).isoformat(),
         }
+
+    def build_monthly_row(self, run_date_str, trades=None, activity=None):
+        """TASK-48 monthly: monthly_summary row (16 cols) for PREVIOUS month. Pure when injected."""
+        import pytz as _pytz
+        from datetime import datetime as _dt
+        from dateutil.relativedelta import relativedelta as _rd
+        peru = _pytz.timezone("America/Lima")
+        run_date = _dt.strptime(run_date_str, "%Y-%m-%d").date()
+        month_of = (run_date - _rd(months=1)).strftime("%Y-%m")
+        if trades is None:
+            trades = self.review_completed_trades()
+        def _in_month(t):
+            return str(t.get("ExitDate") or t.get("exit_date") or "")[:7] == month_of
+        mt = [t for t in (trades or []) if _in_month(t)]
+        wins = [t for t in mt if t.get("verdict") == "WIN"]
+        losses = [t for t in mt if t.get("verdict") == "LOSS"]
+        n = len(mt)
+        win_rate = round(len(wins) / n * 100, 1) if n else None
+        total_pnl = round(sum(_safe_float(t.get("RealizedPnL")) for t in mt), 2)
+        avg_win = round(sum(_safe_float(t.get("pnl_pct")) for t in wins) / len(wins), 2) if wins else None
+        avg_loss = round(sum(_safe_float(t.get("pnl_pct")) for t in losses) / len(losses), 2) if losses else None
+        act = activity or {}
+        flag = "INSUFFICIENT" if n < 10 else "OK"
+        conclusion = (f"{n} עסקאות · WinRate {win_rate if win_rate is not None else '—'}% · "
+                      f"נטו ${total_pnl}" + (" · מדגם קטן" if flag == "INSUFFICIENT" else ""))
+        return {
+            "MonthOf": month_of, "Trades": n, "Wins": len(wins), "Losses": len(losses),
+            "WinRate": win_rate, "TotalPnL": total_pnl, "AvgWin": avg_win, "AvgLoss": avg_loss,
+            "Enters": act.get("enters", 0), "Skips": act.get("skips", 0),
+            "TickersChecked": act.get("tickers_checked", 0), "Anomalies": act.get("anomalies", 0),
+            "Conflicts": act.get("conflicts", 0), "Conclusion": conclusion,
+            "SampleSizeFlag": flag, "GeneratedAt": _dt.now(peru).isoformat(),
+        }
+
+    def write_monthly_summary(self, row, dedup=True):
+        """TASK-48 monthly: append one monthly_summary row to the per-year RH-Summaries tab.
+        Column order from AGENT_SHEET_HEADERS (SSoT). Idempotent on MonthOf (col 0).
+        Returns True on success; False (with warning) if host not configured. Swallows errors."""
+        try:
+            import sheets_manager as sm
+            from agent.setup.create_agent_sheets import AGENT_SHEET_HEADERS
+            headers = AGENT_SHEET_HEADERS["monthly_summary"]
+            values = [("" if row.get(h) is None else row.get(h, "")) for h in headers]
+            ws = _get_monthly_worksheet()
+            if ws is None:
+                logger.warning("write_monthly_summary: monthly host unavailable (RH-Summaries not configured yet)")
+                return False
+            if dedup:
+                sm.safe_append_row(ws, values, dedup_col=0, dedup_val=row.get("MonthOf"))
+            else:
+                sm.safe_append_row(ws, values)
+            logger.info("Wrote monthly_summary row for %s", row.get("MonthOf"))
+            return True
+        except Exception as e:
+            logger.warning("write_monthly_summary failed: %s", e)
+            return False
 
     def write_weekly_summary(self, row, dedup=True):
         """TASK-48 EMAIL.2: append one weekly_summary row.

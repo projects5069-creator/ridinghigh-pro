@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-05-30 13:05:54 -05
+**Generated:** 2026-05-30 14:05:08 -05
 **Branch:** `main`
-**Latest commit:** `7f2d920` — feat(critic-email): EMAIL.2 — standalone weekly summary email (TASK-48)
+**Latest commit:** `f955819` — feat(critic-email): monthly summary — code complete, workflow held until provisioning (TASK-48)
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `7f2d920 (HEAD -> main) feat(critic-email): EMAIL.2 — standalone weekly summary email (TASK-48)`
-- `a8ec6ac (origin/main, origin/HEAD) feat(agent-sheets): EMAIL.3 — weekly_summary lean schema, 16 cols, schema-only (TASK-48)`
+- `f955819 (HEAD -> main) feat(critic-email): monthly summary — code complete, workflow held until provisioning (TASK-48)`
+- `cc7a206 (origin/main, origin/HEAD) feat(critic-email): EMAIL.2 — standalone weekly summary email (TASK-48)`
+- `a8ec6ac feat(agent-sheets): EMAIL.3 — weekly_summary lean schema, 16 cols, schema-only (TASK-48)`
 - `a3c84ba feat(critic-email): EMAIL.1 — structured AutoLessons bullets + card header + anti-drop (TASK-48)`
 - `6b8244f docs(protocol): session-open ritual — 9-part template, model B, heredoc fix (TASK-59)`
-- `19e6c26 docs(protocol): session-open ritual — 9-part template, model B, heredoc fix, changelog`
 
 ---
 
@@ -63,18 +63,18 @@ _Months in config: `2026-04`, `2026-05`, `2026-06`_
 | system_events | 16,319 | — | ✅ |
 | pending_suggestions | 0 | — | ⚠️ empty |
 | config_history | 0 | — | ⚠️ empty |
-| borrow_data | 0 | — | ⚠️ empty |
+| borrow_data | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
 | market_context | 33 | — | ✅ |
-| news_findings | 17,156 | — | ✅ |
-| agent_scorecard | 68 | 2026-05-29 | ✅ |
-| sentinel_events | 16,319 | — | ✅ |
+| news_findings | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| agent_scorecard | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| sentinel_events | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
 
 ---
 
 ## 🩺 Health
 
-- ⚠️ 25 uncommitted file(s):
--    - 25 new/untracked
+- ⚠️ 26 uncommitted file(s):
+-    - 26 new/untracked
 
 ---
 

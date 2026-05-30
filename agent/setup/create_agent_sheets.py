@@ -177,6 +177,17 @@ AGENT_SHEET_HEADERS = {
         "Anomaly_Detail", "Generated_At",
     ],  # 7 columns
 
+        "monthly_summary": [
+        # Period (1) — per-YEAR tab (monthly_summary_2026), one row per month
+        "MonthOf",
+        # Performance (7)
+        "Trades", "Wins", "Losses", "WinRate", "TotalPnL", "AvgWin", "AvgLoss",
+        # Activity (5)
+        "Enters", "Skips", "TickersChecked", "Anomalies", "Conflicts",
+        # Insight + meta (3)
+        "Conclusion", "SampleSizeFlag", "GeneratedAt",
+    ],  # 16 columns — NOT in AGENT_SHEET_NAMES (per-year, special-purpose host RH-Summaries)
+
     "weekly_summary": [
         # Period (1)
         "WeekOf",
