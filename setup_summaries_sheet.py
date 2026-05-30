@@ -25,7 +25,7 @@ DOTFILE = Path.home() / "RidingHighPro" / ".rh_summaries_sheet_id"
 
 
 def _gc_or_raise():
-    gc = _gc_or_raise()
+    gc = sm._get_gc()
     if gc is None:
         raise RuntimeError("gspread client unavailable (check service account creds)")
     return gc
@@ -63,7 +63,7 @@ def _ensure_tab(spreadsheet, headers):
     # ensure headers in row 1 (idempotent: only write if row 1 is empty/mismatched)
     first_row = ws.row_values(1)
     if first_row != headers:
-        ws.update("A1", [headers])
+        ws.update([headers], "A1")
         print(f"  wrote {len(headers)} headers to row 1")
     else:
         print("  headers already correct")

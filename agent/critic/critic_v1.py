@@ -59,7 +59,13 @@ def _get_monthly_worksheet():
             return ss.worksheet("monthly_summary")
         except Exception:
             # get-or-create: tab missing → create it
-            return ss.add_worksheet(title="monthly_summary", rows=200, cols=16)
+            _ws = ss.add_worksheet(title="monthly_summary", rows=200, cols=16)
+            try:
+                from agent.setup.create_agent_sheets import AGENT_SHEET_HEADERS
+                _ws.update([AGENT_SHEET_HEADERS["monthly_summary"]], "A1")
+            except Exception:
+                pass
+            return _ws
     except Exception as e:
         logger.warning("_get_monthly_worksheet failed: %s", e)
         return None
