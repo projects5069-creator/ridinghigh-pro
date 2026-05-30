@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-05-29 17:24:36 -05
+**Generated:** 2026-05-30 10:14:52 -05
 **Branch:** `main`
-**Latest commit:** `1b35461` — docs(protocol): session-open ritual — 9-part template, model B, heredoc fix (TASK-59)
+**Latest commit:** `b4674e8` — feat(critic-email): EMAIL.1 — structured AutoLessons bullets + card header + anti-drop (TASK-48)
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `1b35461 (HEAD -> main) docs(protocol): session-open ritual — 9-part template, model B, heredoc fix (TASK-59)`
-- `19e6c26 (origin/main, origin/HEAD) docs(protocol): session-open ritual — 9-part template, model B, heredoc fix, changelog`
+- `b4674e8 (HEAD -> main) feat(critic-email): EMAIL.1 — structured AutoLessons bullets + card header + anti-drop (TASK-48)`
+- `6b8244f (origin/main, origin/HEAD) docs(protocol): session-open ritual — 9-part template, model B, heredoc fix (TASK-59)`
+- `19e6c26 docs(protocol): session-open ritual — 9-part template, model B, heredoc fix, changelog`
 - `4270704 docs(session-close): 2026-05-29 — 7 commits, 7 tasks closed, PK v2.48`
 - `2a2abd6 chore(backlog): close TASK-57 — 28/5 stall investigated (one-off outlier, unverifiable trigger, not recurring)`
-- `987b30a chore(backlog): close TASK-37 Live Write Verification (verified live on 6 ENTERs)`
 
 ---
 
@@ -32,11 +32,11 @@ _See `OPEN_ISSUES.md` for full list_
 
 | Workflow | Status | Conclusion | Started |
 |---|---|---|---|
-| Agent — End of Day | completed | ✅ success | 2026-05-29 22:22 UTC |
-| Daily Backup — post_analysis | completed | ✅ success | 2026-05-29 22:02 UTC |
-| Daily Backup — post_analysis | completed | ✅ success | 2026-05-29 22:02 UTC |
-| Agent — Daily Brief Email | completed | ✅ success | 2026-05-29 21:30 UTC |
-| RidingHigh Auto Scanner | completed | ✅ success | 2026-05-29 21:17 UTC |
+| Health Audit | completed | ✅ success | 2026-05-30 12:02 UTC |
+| Health Audit | completed | ✅ success | 2026-05-30 06:25 UTC |
+| Agent — Critic (daily) | completed | ✅ success | 2026-05-29 23:01 UTC |
+| Daily Backup — post_analysis | completed | ✅ success | 2026-05-29 22:52 UTC |
+| Agent — Daily Brief Email | completed | ✅ success | 2026-05-29 22:51 UTC |
 
 ---
 
@@ -50,8 +50,8 @@ _Months in config: `2026-04`, `2026-05`, `2026-06`_
 | timeline_live | 301,321 | 2026-05-29 | ✅ |
 | daily_snapshots | 1,638 | 2026-05-29 | ✅ |
 | daily_summary | 1,783 | 2026-05-29 | ✅ |
-| post_analysis | 73 | 2026-05-28 | ✅ |
-| portfolio | 83 | 2026-05-29 | ✅ |
+| post_analysis | 78 | 2026-05-29 | ✅ |
+| portfolio | 88 | 2026-05-29 | ✅ |
 | portfolio_live | 35 | 2026-05-29 | ✅ |
 | score_tracker | 1,538 | 2026-05-29 | ✅ |
 | live_trades | 1,538 | 2026-05-29 | ✅ |
@@ -65,16 +65,16 @@ _Months in config: `2026-04`, `2026-05`, `2026-06`_
 | config_history | 0 | — | ⚠️ empty |
 | borrow_data | 0 | — | ⚠️ empty |
 | market_context | 33 | — | ✅ |
-| news_findings | 17,156 | — | ✅ |
-| agent_scorecard | 64 | 2026-05-28 | ✅ |
-| sentinel_events | 16,319 | — | ✅ |
+| news_findings | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| agent_scorecard | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| sentinel_events | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
 
 ---
 
 ## 🩺 Health
 
-- ⚠️ 22 uncommitted file(s):
--    - 22 new/untracked
+- ⚠️ 25 uncommitted file(s):
+-    - 25 new/untracked
 
 ---
 

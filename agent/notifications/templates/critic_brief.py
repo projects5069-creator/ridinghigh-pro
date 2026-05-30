@@ -3,9 +3,27 @@
 from datetime import datetime
 from typing import Any, Dict, List, Optional
 import pytz
+import html as _html
 
 PERU_TZ = pytz.timezone("America/Lima")
 
+
+def _lessons_to_bullets(raw):
+    """TASK-48 EMAIL.1: normalize AutoLessons (real \\n / literal \\\\n / \\r\\n)
+    into safe HTML. <=1 line -> <p>, else <ul><li>. HTML-escaped per line (emoji safe)."""
+    if raw is None:
+        return ""
+    text = str(raw)
+    if not text.strip():
+        return ""
+    text = text.replace("\r\n", "\n").replace("\\n", "\n")
+    lines = [ln.strip() for ln in text.split("\n") if ln.strip()]
+    if not lines:
+        return ""
+    if len(lines) == 1:
+        return "<p>" + _html.escape(lines[0]) + "</p>"
+    items = "".join("<li>" + _html.escape(ln) + "</li>" for ln in lines)
+    return "<ul>" + items + "</ul>"
 
 def render_critic_email(facts: Dict[str, Any], positions: Dict[str, Any],
                         weekly: Dict[str, Any] = None,
@@ -37,7 +55,7 @@ def render_critic_email(facts: Dict[str, Any], positions: Dict[str, Any],
     tickers_checked = nd.get("tickers_checked", 0)
     material_count = nd.get("material_news_count", 0)
 
-    has_activity = enters > 0 or blocks > 0 or warns > 0 or tickers_checked > 0
+    has_activity = enters > 0 or blocks > 0 or warns > 0 or tickers_checked > 0 or bool(postmortems)
 
     subject = f"🏆 RidingHigh — סיכום סוכנים יומי {date_str}"
 
@@ -51,13 +69,20 @@ def render_critic_email(facts: Dict[str, Any], positions: Dict[str, Any],
             exit_reason = pm.get("ExitReason", "")
             lessons = pm.get("AutoLessons", "")
             if lessons:
-                lessons_html = str(lessons).replace("\\n", "<br>")
+                lessons_html = _lessons_to_bullets(lessons)
                 is_win = "TP_HIT" in str(exit_reason) or (isinstance(pnl, (int, float)) and pnl > 0)
                 border_color = "#10b981" if is_win else "#ef4444"
+                try:
+                    pnl_str = f"{float(pnl):+.1f}%"
+                except (TypeError, ValueError):
+                    pnl_str = _html.escape(str(pnl)) if pnl else ""
                 pm_cards.append(
                     f'<div style="background:#f8f9fa;padding:12px;margin:8px 0;'
                     f'border-right:4px solid {border_color};border-radius:4px;">'
-                    f'<strong>{ticker}</strong><br>{lessons_html}</div>'
+                    f'<div style="margin-bottom:6px;">'
+                    f'<strong style="color:{border_color};">{_html.escape(str(ticker))}</strong>'
+                    f'<span style="color:#6b7280;font-size:13px;"> · {pnl_str} · {_html.escape(str(exit_reason))}</span>'
+                    f'</div>{lessons_html}</div>'
                 )
         if pm_cards:
             forensic_section = (
