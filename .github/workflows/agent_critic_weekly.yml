@@ -1,0 +1,40 @@
+# TASK-48 EMAIL.2 — STANDALONE weekly Critic email.
+# Separate from agent_critic.yml (daily). Runs Fri 18:00 Peru ('0 23 * * 5'),
+# one hour after the daily run, so all 5 trading days are processed first.
+name: Agent Critic Weekly
+
+on:
+  schedule:
+    # 22:00 UTC Mon-Fri = 18:00 Peru (Fri) Mon-Fri (1h after EOD at 16:00 Peru).
+    # Moved from 00:07 UTC because GH Actions schedule was silently dropped
+    # near midnight UTC (global peak) — the :07 offset was not enough.
+    - cron: '0 23 * * 5'
+  workflow_dispatch:
+
+jobs:
+  run-critic:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.11'
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: Run Critic orchestrator
+        env:
+          GOOGLE_CREDENTIALS_JSON: ${{ secrets.GOOGLE_CREDENTIALS_JSON }}
+          GOOGLE_OAUTH_TOKEN_JSON: ${{ secrets.GOOGLE_OAUTH_TOKEN_JSON }}
+          ALPACA_API_KEY_ID: ${{ secrets.ALPACA_API_KEY_ID }}
+          ALPACA_SECRET_KEY: ${{ secrets.ALPACA_SECRET_KEY }}
+          ALPACA_PAPER: 'true'
+          DATA_PROVIDER: alpaca
+          SMTP_HOST: ${{ secrets.SMTP_HOST }}
+          SMTP_PORT: ${{ secrets.SMTP_PORT }}
+          SMTP_USER: ${{ secrets.SMTP_USER }}
+          SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+          EMAIL_TO: ${{ secrets.EMAIL_TO }}
+        run: python -m agent.orchestrator_critic_weekly

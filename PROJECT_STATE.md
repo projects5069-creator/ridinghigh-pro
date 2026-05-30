@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-05-30 10:47:27 -05
+**Generated:** 2026-05-30 13:05:54 -05
 **Branch:** `main`
-**Latest commit:** `9298e5b` — feat(agent-sheets): EMAIL.3 — weekly_summary lean schema, 16 cols, schema-only (TASK-48)
+**Latest commit:** `7f2d920` — feat(critic-email): EMAIL.2 — standalone weekly summary email (TASK-48)
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `9298e5b (HEAD -> main) feat(agent-sheets): EMAIL.3 — weekly_summary lean schema, 16 cols, schema-only (TASK-48)`
-- `a3c84ba (origin/main, origin/HEAD) feat(critic-email): EMAIL.1 — structured AutoLessons bullets + card header + anti-drop (TASK-48)`
+- `7f2d920 (HEAD -> main) feat(critic-email): EMAIL.2 — standalone weekly summary email (TASK-48)`
+- `a8ec6ac (origin/main, origin/HEAD) feat(agent-sheets): EMAIL.3 — weekly_summary lean schema, 16 cols, schema-only (TASK-48)`
+- `a3c84ba feat(critic-email): EMAIL.1 — structured AutoLessons bullets + card header + anti-drop (TASK-48)`
 - `6b8244f docs(protocol): session-open ritual — 9-part template, model B, heredoc fix (TASK-59)`
 - `19e6c26 docs(protocol): session-open ritual — 9-part template, model B, heredoc fix, changelog`
-- `4270704 docs(session-close): 2026-05-29 — 7 commits, 7 tasks closed, PK v2.48`
 
 ---
 
@@ -32,11 +32,11 @@ _See `OPEN_ISSUES.md` for full list_
 
 | Workflow | Status | Conclusion | Started |
 |---|---|---|---|
+| Health Audit | completed | ✅ success | 2026-05-30 17:59 UTC |
 | Health Audit | completed | ✅ success | 2026-05-30 12:02 UTC |
 | Health Audit | completed | ✅ success | 2026-05-30 06:25 UTC |
 | Agent — Critic (daily) | completed | ✅ success | 2026-05-29 23:01 UTC |
 | Daily Backup — post_analysis | completed | ✅ success | 2026-05-29 22:52 UTC |
-| Agent — Daily Brief Email | completed | ✅ success | 2026-05-29 22:51 UTC |
 
 ---
 
@@ -57,7 +57,7 @@ _Months in config: `2026-04`, `2026-05`, `2026-06`_
 | live_trades | 1,538 | 2026-05-29 | ✅ |
 | ticker_follow_up | 12,477 | 2026-05-08 | ✅ |
 | decision_log | 16,249 | — | ✅ |
-| paper_portfolio | ? | ? | ❌ APIError: [500]: Internal error encounte |
+| paper_portfolio | 115 | — | ✅ |
 | score_analytics | 0 | — | ⚠️ empty |
 | postmortems | 95 | — | ✅ |
 | system_events | 16,319 | — | ✅ |

@@ -184,6 +184,65 @@ class CriticAgent:
             "clean": _stats(clean),
         }
 
+    def build_weekly_row(self, end_date_str, trades=None, activity=None):
+        """TASK-48 EMAIL.2: assemble one weekly_summary sheet row (16 cols).
+        Pure when trades+activity injected (no I/O)."""
+        import pytz as _pytz
+        from datetime import datetime as _dt, timedelta as _td
+        peru = _pytz.timezone("America/Lima")
+        end_date = _dt.strptime(end_date_str, "%Y-%m-%d").date()
+        monday = end_date - _td(days=end_date.weekday())
+        friday = monday + _td(days=4)
+        week_of = monday.strftime("%Y-%m-%d"); fri_s = friday.strftime("%Y-%m-%d")
+        if trades is None:
+            trades = self.review_completed_trades()
+        def _in_week(t):
+            ed = str(t.get("ExitDate") or t.get("exit_date") or "")[:10]
+            return week_of <= ed <= fri_s
+        wt = [t for t in (trades or []) if _in_week(t)]
+        wins = [t for t in wt if t.get("verdict") == "WIN"]
+        losses = [t for t in wt if t.get("verdict") == "LOSS"]
+        n = len(wt)
+        win_rate = round(len(wins) / n * 100, 1) if n else None
+        total_pnl = round(sum(_safe_float(t.get("RealizedPnL")) for t in wt), 2)
+        avg_win = round(sum(_safe_float(t.get("pnl_pct")) for t in wins) / len(wins), 2) if wins else None
+        avg_loss = round(sum(_safe_float(t.get("pnl_pct")) for t in losses) / len(losses), 2) if losses else None
+        act = activity or {}
+        flag = "INSUFFICIENT" if n < 10 else "OK"
+        conclusion = (f"{n} עסקאות · WinRate {win_rate if win_rate is not None else '—'}% · "
+                      f"נטו ${total_pnl}" + (" · מדגם קטן" if flag == "INSUFFICIENT" else ""))
+        return {
+            "WeekOf": week_of, "Trades": n, "Wins": len(wins), "Losses": len(losses),
+            "WinRate": win_rate, "TotalPnL": total_pnl, "AvgWin": avg_win, "AvgLoss": avg_loss,
+            "Enters": act.get("enters", 0), "Skips": act.get("skips", 0),
+            "TickersChecked": act.get("tickers_checked", 0), "Anomalies": act.get("anomalies", 0),
+            "Conflicts": act.get("conflicts", 0), "Conclusion": conclusion,
+            "SampleSizeFlag": flag, "GeneratedAt": _dt.now(peru).isoformat(),
+        }
+
+    def write_weekly_summary(self, row, dedup=True):
+        """TASK-48 EMAIL.2: append one weekly_summary row.
+        Column order derived from AGENT_SHEET_HEADERS (single source of truth).
+        Idempotent on WeekOf (col 0). Returns True; swallows errors."""
+        try:
+            import sheets_manager as sm
+            from agent.setup.create_agent_sheets import AGENT_SHEET_HEADERS
+            headers = AGENT_SHEET_HEADERS["weekly_summary"]
+            values = [("" if row.get(h) is None else row.get(h, "")) for h in headers]
+            ws = sm.get_worksheet("weekly_summary")
+            if ws is None:
+                logger.warning("write_weekly_summary: worksheet unavailable")
+                return False
+            if dedup:
+                sm.safe_append_row(ws, values, dedup_col=0, dedup_val=row.get("WeekOf"))
+            else:
+                sm.safe_append_row(ws, values)
+            logger.info("Wrote weekly_summary row for %s", row.get("WeekOf"))
+            return True
+        except Exception as e:
+            logger.warning("write_weekly_summary failed: %s", e)
+            return False
+
     def daily_facts(self, date_str: Optional[str] = None) -> Dict[str, Any]:
         """Collect dry facts about what each agent did on a given day.
 
