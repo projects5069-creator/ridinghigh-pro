@@ -141,6 +141,7 @@ class CriticAgent:
                 "exit_price": _safe_float(row[pi_exit_price] if pi_exit_price is not None and pi_exit_price < len(row) else ""),
                 "verdict": verdict,
                 "pnl_pct": pnl_pct,
+                "RealizedPnL": _safe_float(row[pi_pnl] if pi_pnl is not None and pi_pnl < len(row) else ""),
                 "exit_reason": row[pi_exit_reason] if pi_exit_reason is not None and pi_exit_reason < len(row) else "",
                 "data_quality": data_quality,
                 "score_at_entry": score,
