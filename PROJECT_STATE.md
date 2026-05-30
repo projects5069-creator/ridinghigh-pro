@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-05-30 17:15:04 -05
+**Generated:** 2026-05-30 17:29:46 -05
 **Branch:** `main`
-**Latest commit:** `9c1e9d7` — docs(critic-email): TASK-48 close — PK v2.49 + drift fix + session handoff
+**Latest commit:** `5f2a8cf` — chore(backlog): TASK-48 code-complete + 3 follow-up tasks (60/61/62)
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `9c1e9d7 (HEAD -> main) docs(critic-email): TASK-48 close — PK v2.49 + drift fix + session handoff`
-- `a64d470 (origin/main, origin/HEAD) feat(critic-email): activate monthly workflow — TASK-48 COMPLETE`
+- `5f2a8cf (HEAD -> main) chore(backlog): TASK-48 code-complete + 3 follow-up tasks (60/61/62)`
+- `5354dc4 (origin/main, origin/HEAD) docs(critic-email): TASK-48 close — PK v2.49 + drift fix + session handoff`
+- `a64d470 feat(critic-email): activate monthly workflow — TASK-48 COMPLETE`
 - `0caf8c6 fix(critic-email): recursion in _gc_or_raise + headers/deprecation polish (TASK-48 2b)`
 - `335a091 feat(critic-email): monthly host — RH-Summaries provisioning + _get_monthly_worksheet seam (TASK-48 2b)`
-- `2bd533a fix(critic-email): include RealizedPnL in review_completed_trades dict (TASK-48 bug#1)`
 
 ---
 
@@ -73,7 +73,8 @@ _Months in config: `2026-04`, `2026-05`, `2026-06`_
 
 ## 🩺 Health
 
-- ⚠️ 25 uncommitted file(s):
+- ⚠️ 26 uncommitted file(s):
+-    - 1 modified
 -    - 25 new/untracked
 
 ---
