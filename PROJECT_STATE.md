@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-05-30 17:06:02 -05
+**Generated:** 2026-05-30 17:15:04 -05
 **Branch:** `main`
-**Latest commit:** `422f9db` — feat(critic-email): activate monthly workflow — TASK-48 COMPLETE
+**Latest commit:** `9c1e9d7` — docs(critic-email): TASK-48 close — PK v2.49 + drift fix + session handoff
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `422f9db (HEAD -> main) feat(critic-email): activate monthly workflow — TASK-48 COMPLETE`
-- `0caf8c6 (origin/main, origin/HEAD) fix(critic-email): recursion in _gc_or_raise + headers/deprecation polish (TASK-48 2b)`
+- `9c1e9d7 (HEAD -> main) docs(critic-email): TASK-48 close — PK v2.49 + drift fix + session handoff`
+- `a64d470 (origin/main, origin/HEAD) feat(critic-email): activate monthly workflow — TASK-48 COMPLETE`
+- `0caf8c6 fix(critic-email): recursion in _gc_or_raise + headers/deprecation polish (TASK-48 2b)`
 - `335a091 feat(critic-email): monthly host — RH-Summaries provisioning + _get_monthly_worksheet seam (TASK-48 2b)`
 - `2bd533a fix(critic-email): include RealizedPnL in review_completed_trades dict (TASK-48 bug#1)`
-- `7be721f feat(critic-email): monthly summary — code complete, workflow held until provisioning (TASK-48)`
 
 ---
 

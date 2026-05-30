@@ -178,7 +178,7 @@ AGENT_SHEET_HEADERS = {
     ],  # 7 columns
 
         "monthly_summary": [
-        # Period (1) — per-YEAR tab (monthly_summary_2026), one row per month
+        # Period (1) — SINGLE tab monthly_summary (MonthOf=YYYY-MM carries the year), one row per month
         "MonthOf",
         # Performance (7)
         "Trades", "Wins", "Losses", "WinRate", "TotalPnL", "AvgWin", "AvgLoss",
