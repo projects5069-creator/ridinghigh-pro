@@ -2,7 +2,7 @@
 """
 create_agent_sheets.py
 ──────────────────────
-Creates the 11 Agent Google Sheets in the current (or specified) month's
+Creates the 13 Agent Google Sheets in the current (or specified) month's
 Drive folder. Follows the exact same pattern as prepare_next_month.py:
   - OAuth user-owned creation (SA has 0 GB quota)
   - Service Account shared as Editor
@@ -45,9 +45,10 @@ AGENT_SHEET_NAMES = [
     "config_history",
     "borrow_data",
     "agent_scorecard",
+    "weekly_summary",
 ]
 
-# Headers for each sheet (column count: 42, 22, 25, 17, 7, 11, 11, 14, 10, 9, 7)
+# Headers for each sheet (see AGENT_SHEET_HEADERS below for exact column counts)
 AGENT_SHEET_HEADERS = {
     "decision_log": [
         # Identity (5)
@@ -175,6 +176,17 @@ AGENT_SHEET_HEADERS = {
         "Date", "Agent", "Facts", "Anomaly_Count", "Anomaly_High",
         "Anomaly_Detail", "Generated_At",
     ],  # 7 columns
+
+    "weekly_summary": [
+        # Period (1)
+        "WeekOf",
+        # Performance — sourced from review_completed_trades + summarize (7)
+        "Trades", "Wins", "Losses", "WinRate", "TotalPnL", "AvgWin", "AvgLoss",
+        # Activity — sourced from existing weekly_summary() dict (5)
+        "Enters", "Skips", "TickersChecked", "Anomalies", "Conflicts",
+        # Insight + meta (3)
+        "Conclusion", "SampleSizeFlag", "GeneratedAt",
+    ],  # 16 columns
 }
 
 
