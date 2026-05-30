@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-05-30 17:02:04 -05
+**Generated:** 2026-05-30 17:06:02 -05
 **Branch:** `main`
-**Latest commit:** `8beccc0` — fix(critic-email): recursion in _gc_or_raise + headers/deprecation polish (TASK-48 2b)
+**Latest commit:** `422f9db` — feat(critic-email): activate monthly workflow — TASK-48 COMPLETE
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `8beccc0 (HEAD -> main) fix(critic-email): recursion in _gc_or_raise + headers/deprecation polish (TASK-48 2b)`
-- `335a091 (origin/main, origin/HEAD) feat(critic-email): monthly host — RH-Summaries provisioning + _get_monthly_worksheet seam (TASK-48 2b)`
+- `422f9db (HEAD -> main) feat(critic-email): activate monthly workflow — TASK-48 COMPLETE`
+- `0caf8c6 (origin/main, origin/HEAD) fix(critic-email): recursion in _gc_or_raise + headers/deprecation polish (TASK-48 2b)`
+- `335a091 feat(critic-email): monthly host — RH-Summaries provisioning + _get_monthly_worksheet seam (TASK-48 2b)`
 - `2bd533a fix(critic-email): include RealizedPnL in review_completed_trades dict (TASK-48 bug#1)`
 - `7be721f feat(critic-email): monthly summary — code complete, workflow held until provisioning (TASK-48)`
-- `cc7a206 feat(critic-email): EMAIL.2 — standalone weekly summary email (TASK-48)`
 
 ---
 
@@ -66,15 +66,15 @@ _Months in config: `2026-04`, `2026-05`, `2026-06`_
 | borrow_data | 0 | — | ⚠️ empty |
 | market_context | 33 | — | ✅ |
 | news_findings | 17,156 | — | ✅ |
-| agent_scorecard | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| sentinel_events | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| agent_scorecard | 68 | 2026-05-29 | ✅ |
+| sentinel_events | 16,319 | — | ✅ |
 
 ---
 
 ## 🩺 Health
 
-- ⚠️ 26 uncommitted file(s):
--    - 26 new/untracked
+- ⚠️ 25 uncommitted file(s):
+-    - 25 new/untracked
 
 ---
 
