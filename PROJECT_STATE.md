@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-05-31 08:24:22 -05
+**Generated:** 2026-05-31 12:00:18 -05
 **Branch:** `main`
-**Latest commit:** `589826a` — docs(protocol): forbid 'pasted PK outdated' note at session-open (TASK-81)
+**Latest commit:** `1458eee` — research(TASK-80): serial fallers investigation — no predictive edge found
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `589826a (HEAD -> main) docs(protocol): forbid 'pasted PK outdated' note at session-open (TASK-81)`
-- `c07c848 (origin/main, origin/HEAD) TASK-62: weekly retrospective + DropsLab investigation; session close (PK v2.50)`
+- `1458eee (HEAD -> main) research(TASK-80): serial fallers investigation — no predictive edge found`
+- `b5ddc94 (origin/main, origin/HEAD) docs(protocol): forbid 'pasted PK outdated' note at session-open (TASK-81)`
+- `c07c848 TASK-62: weekly retrospective + DropsLab investigation; session close (PK v2.50)`
 - `31138e1 chore(backlog): close session — TASK-48 In Progress (code-complete), TASK-62 net%-edge requirement, handoff insight`
 - `587f9f4 chore(backlog): TASK-48 code-complete + 3 follow-up tasks (60/61/62)`
-- `5354dc4 docs(critic-email): TASK-48 close — PK v2.49 + drift fix + session handoff`
 
 ---
 
@@ -32,11 +32,11 @@ _See `OPEN_ISSUES.md` for full list_
 
 | Workflow | Status | Conclusion | Started |
 |---|---|---|---|
+| Warm OAuth Token | completed | ❌ failure | 2026-05-31 13:50 UTC |
 | Health Audit | completed | ❌ failure | 2026-05-31 12:07 UTC |
 | Health Audit | completed | ❌ failure | 2026-05-31 07:00 UTC |
 | Agent — End of Day | completed | ✅ success | 2026-05-30 21:45 UTC |
 | Health Audit | completed | ✅ success | 2026-05-30 17:59 UTC |
-| Health Audit | completed | ✅ success | 2026-05-30 12:02 UTC |
 
 ---
 
@@ -56,7 +56,7 @@ _Months in config: `2026-04`, `2026-05`, `2026-06`_
 | score_tracker | 1,538 | 2026-05-29 | ✅ |
 | live_trades | 1,538 | 2026-05-29 | ✅ |
 | ticker_follow_up | 12,477 | 2026-05-08 | ✅ |
-| decision_log | ? | ? | ❌ APIError: [503]: The service is currentl |
+| decision_log | 16,249 | — | ✅ |
 | paper_portfolio | 115 | — | ✅ |
 | score_analytics | 0 | — | ⚠️ empty |
 | postmortems | 95 | — | ✅ |
@@ -65,15 +65,16 @@ _Months in config: `2026-04`, `2026-05`, `2026-06`_
 | config_history | 0 | — | ⚠️ empty |
 | borrow_data | 0 | — | ⚠️ empty |
 | market_context | 33 | — | ✅ |
-| news_findings | 17,156 | — | ✅ |
-| agent_scorecard | 68 | 2026-05-29 | ✅ |
+| news_findings | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| agent_scorecard | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
 | sentinel_events | 16,319 | — | ✅ |
 
 ---
 
 ## 🩺 Health
 
-- ⚠️ 26 uncommitted file(s):
+- ⚠️ 27 uncommitted file(s):
+-    - 1 modified
 -    - 26 new/untracked
 
 ---
