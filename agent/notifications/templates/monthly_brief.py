@@ -25,11 +25,78 @@ def _fmt(v, suffix="", dash="—"):
     return f"{v}{suffix}"
 
 
-def render_monthly_email(row):
-    """Render the standalone weekly summary email.
+def _render_detail(detail):
+    """TASK-48: render the 3 detail sections (per-stock / quality / exploratory).
+    Returns '' when detail is falsy, so render_monthly_email stays backward compatible.
+    Section C is explicitly labeled exploratory/descriptive — NOT a trading trigger."""
+    if not detail:
+        return ""
+    d = detail
+    esc = _html.escape
+
+    def _trade_rows(rows, color):
+        return "".join(
+            f'<tr><td style="padding:3px 8px;">{esc(str(r.get("ticker","?")))}</td>'
+            f'<td style="padding:3px 8px;color:{color};">{_fmt(r.get("pnl_pct"),"%")}</td>'
+            f'<td style="padding:3px 8px;color:{color};">${r.get("pnl_usd")}</td></tr>'
+            for r in (rows or [])
+        )
+
+    dp = d.get("dominant_pos", {}) or {}
+    dn = d.get("dominant_neg", {}) or {}
+    sec_a = (
+        '<h3 style="margin-top:20px;">🏆 ביצועים פר-מניה</h3>'
+        '<table style="border-collapse:collapse;font-size:13px;width:100%;">'
+        f'<tr><td colspan="3" style="font-weight:bold;color:{_WIN_COLOR};padding:4px 8px;">Top 5 מנצחות</td></tr>'
+        f'{_trade_rows(d.get("top5"), _WIN_COLOR)}'
+        f'<tr><td colspan="3" style="font-weight:bold;color:{_LOSS_COLOR};padding:8px 8px 4px;">Top 5 מפסידות</td></tr>'
+        f'{_trade_rows(d.get("bottom5"), _LOSS_COLOR)}'
+        '</table>'
+        '<p style="font-size:13px;margin:8px 0;">'
+        f'💰 דומיננטית לחיוב: <b>{esc(str(dp.get("ticker","—")))}</b> (${dp.get("pnl_usd","—")}) · '
+        f'🔻 דומיננטית לשלילה: <b>{esc(str(dn.get("ticker","—")))}</b> (${dn.get("pnl_usd","—")})</p>'
+    )
+
+    er = d.get("exit_reason_counts", {}) or {}
+    er_str = " · ".join(f"{esc(str(k))}: {v}" for k, v in er.items()) or "—"
+    sec_b = (
+        '<h3 style="margin-top:20px;">🔧 איכות והתנהגות</h3>'
+        '<p style="font-size:13px;margin:6px 0;">'
+        f'סיבות יציאה: {er_str}<br>'
+        f'ניקויים ידניים (MANUAL_CLEANUP): <b>{d.get("manual_cleanup",0)}</b> · '
+        f'דאטה PRE_FIX: <b>{d.get("pre_fix",0)}</b></p>'
+    )
+
+    w = d.get("entry_metrics_win", {}) or {}
+    l = d.get("entry_metrics_loss", {}) or {}
+    labels = [("score_at_entry", "Score"), ("run_up", "RunUp"), ("atrx", "ATRX"), ("float_pct", "Float%")]
+    rows_c = "".join(
+        f'<tr><td style="padding:3px 8px;">{lbl}</td>'
+        f'<td style="padding:3px 8px;color:{_WIN_COLOR};">{_fmt(w.get(k))}</td>'
+        f'<td style="padding:3px 8px;color:{_LOSS_COLOR};">{_fmt(l.get(k))}</td></tr>'
+        for k, lbl in labels
+    )
+    sec_c = (
+        '<div style="background:#eef2ff;border-right:4px solid #6366f1;padding:10px;margin-top:20px;border-radius:4px;">'
+        '<b>🔬 חקרני — תיאורי, לא טריגר מסחר</b>'
+        '<table style="border-collapse:collapse;font-size:13px;width:100%;margin-top:6px;">'
+        f'<tr><td style="padding:3px 8px;">מדד כניסה</td>'
+        f'<td style="padding:3px 8px;color:{_WIN_COLOR};">ממוצע מנצחות</td>'
+        f'<td style="padding:3px 8px;color:{_LOSS_COLOR};">ממוצע מפסידות</td></tr>'
+        f'{rows_c}</table>'
+        f'<div style="font-size:12px;color:{_NEUTRAL};margin-top:4px;">חוזרים סדרתיים (≥2 הופעות): {d.get("serial_count",0)}</div>'
+        '</div>'
+    )
+    return sec_a + sec_b + sec_c
+
+
+def render_monthly_email(row, detail=None):
+    """Render the standalone monthly summary email.
 
     Args:
         row: dict from CriticAgent.build_monthly_row() (16 keys).
+        detail: optional dict from CriticAgent.build_monthly_detail(). When None,
+            output is identical to the pre-detail aggregate email (backward compatible).
     Returns:
         (subject, html) tuple — same shape as render_critic_email.
     """
@@ -88,6 +155,7 @@ margin:0 auto;color:#111827;">
   </div>
 
   {flag_note}
+  {_render_detail(detail)}
 
   <div style="background:#f8f9fa;padding:14px;border-radius:6px;margin-top:16px;
 border-right:4px solid {pnl_color};">

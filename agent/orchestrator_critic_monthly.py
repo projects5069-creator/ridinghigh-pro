@@ -42,11 +42,20 @@ def run():
         return summary
 
     try:
-        row = critic.build_monthly_row(today)
+        trades = critic.review_completed_trades()
+        row = critic.build_monthly_row(today, trades=trades)
     except Exception as e:
         logger.error("build_monthly_row failed: %s", e, exc_info=True)
         summary["errors"] += 1
         return summary
+
+    # TASK-48: per-stock + cross-sectional detail (email-only; never breaks the email)
+    detail = None
+    try:
+        mt = critic._month_trades(trades, row.get("MonthOf"))
+        detail = critic.build_monthly_detail(mt)
+    except Exception as e:
+        logger.error("build_monthly_detail failed (email sends aggregate-only): %s", e, exc_info=True)
 
     try:
         if critic.write_monthly_summary(row):
@@ -58,7 +67,7 @@ def run():
 
     try:
         if int(row.get("Trades", 0) or 0) > 0:
-            subject, html = render_monthly_email(row)
+            subject, html = render_monthly_email(row, detail)
             if send_email(subject, html):
                 summary["email_sent"] = True
                 logger.info("monthly email sent for month %s", row.get("MonthOf"))

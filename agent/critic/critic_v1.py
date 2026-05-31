@@ -289,6 +289,73 @@ class CriticAgent:
             "SampleSizeFlag": flag, "GeneratedAt": _dt.now(peru).isoformat(),
         }
 
+    @staticmethod
+    def _month_trades(trades, month_of):
+        """Filter trades whose exit month == month_of ('YYYY-MM').
+        Mirrors build_monthly_row's _in_month predicate (shared selection logic)."""
+        def _in_month(t):
+            return str(t.get("ExitDate") or t.get("exit_date") or "")[:7] == month_of
+        return [t for t in (trades or []) if _in_month(t)]
+
+    @staticmethod
+    def build_monthly_detail(month_trades):
+        """TASK-48 monthly DETAIL — email-only, NOT written to the 16-col sheet.
+        Pure: given the month's trades, return per-stock + cross-sectional + exploratory cuts.
+        Returns {} on empty input. Section C (entry-metric averages) is DESCRIPTIVE, not a trigger.
+        """
+        import collections as _c
+        mt = month_trades or []
+        if not mt:
+            return {}
+
+        # --- Section A: performance (per-stock) ---
+        by_pnl = sorted(mt, key=lambda t: _safe_float(t.get("RealizedPnL")), reverse=True)
+
+        def _row(t):
+            return {
+                "ticker": t.get("ticker", "?"),
+                "pnl_pct": _safe_float(t.get("pnl_pct")),
+                "pnl_usd": round(_safe_float(t.get("RealizedPnL")), 2),
+            }
+        top5 = [_row(t) for t in by_pnl[:5]]
+        bottom5 = [_row(t) for t in by_pnl[-5:][::-1]]
+        # dominant = aggregated RealizedPnL ($) per ticker (NOT avg %)
+        agg = _c.defaultdict(float)
+        for t in mt:
+            agg[t.get("ticker", "?")] += _safe_float(t.get("RealizedPnL"))
+        dom_pos_tkr = max(agg, key=agg.get)
+        dom_neg_tkr = min(agg, key=agg.get)
+        dominant_pos = {"ticker": dom_pos_tkr, "pnl_usd": round(agg[dom_pos_tkr], 2)}
+        dominant_neg = {"ticker": dom_neg_tkr, "pnl_usd": round(agg[dom_neg_tkr], 2)}
+
+        # --- Section B: quality / behavior ---
+        exit_reason_counts = dict(_c.Counter(t.get("exit_reason", "?") for t in mt))
+        manual_cleanup = sum(1 for t in mt if t.get("exit_reason") == "MANUAL_CLEANUP")
+        pre_fix = sum(1 for t in mt if t.get("data_quality") == "PRE_FIX")
+
+        # --- Section C: exploratory entry-metric averages (DESCRIPTIVE, not a trigger) ---
+        _METRICS = ("score_at_entry", "run_up", "atrx", "float_pct")  # mxv dropped — sentinel pollution (separate TASK)
+        wins = [t for t in mt if t.get("verdict") == "WIN"]
+        losses = [t for t in mt if t.get("verdict") == "LOSS"]
+
+        def _avgs(group):
+            if not group:
+                return {m: None for m in _METRICS}
+            return {m: round(sum(_safe_float(t.get(m)) for t in group) / len(group), 2) for m in _METRICS}
+        entry_metrics_win = _avgs(wins)
+        entry_metrics_loss = _avgs(losses)
+        tk = _c.Counter(t.get("ticker", "?") for t in mt)
+        serial_count = sum(1 for c in tk.values() if c >= 2)
+
+        return {
+            "top5": top5, "bottom5": bottom5,
+            "dominant_pos": dominant_pos, "dominant_neg": dominant_neg,
+            "exit_reason_counts": exit_reason_counts,
+            "manual_cleanup": manual_cleanup, "pre_fix": pre_fix,
+            "entry_metrics_win": entry_metrics_win, "entry_metrics_loss": entry_metrics_loss,
+            "serial_count": serial_count,
+        }
+
     def write_monthly_summary(self, row, dedup=True):
         """TASK-48 monthly: append one monthly_summary row to the per-year RH-Summaries tab.
         Column order from AGENT_SHEET_HEADERS (SSoT). Idempotent on MonthOf (col 0).
