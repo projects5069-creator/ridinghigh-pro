@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-05-30 17:46:21 -05
+**Generated:** 2026-05-31 00:50:12 -05
 **Branch:** `main`
-**Latest commit:** `83996c4` — chore(backlog): close session — TASK-48 In Progress (code-complete), TASK-62 net%-edge requirement, handoff insight
+**Latest commit:** `e255fff` — TASK-62: weekly retrospective + DropsLab investigation; session close (PK v2.50)
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `83996c4 (HEAD -> main) chore(backlog): close session — TASK-48 In Progress (code-complete), TASK-62 net%-edge requirement, handoff insight`
-- `587f9f4 (origin/main, origin/HEAD) chore(backlog): TASK-48 code-complete + 3 follow-up tasks (60/61/62)`
+- `e255fff (HEAD -> main) TASK-62: weekly retrospective + DropsLab investigation; session close (PK v2.50)`
+- `31138e1 (origin/main, origin/HEAD) chore(backlog): close session — TASK-48 In Progress (code-complete), TASK-62 net%-edge requirement, handoff insight`
+- `587f9f4 chore(backlog): TASK-48 code-complete + 3 follow-up tasks (60/61/62)`
 - `5354dc4 docs(critic-email): TASK-48 close — PK v2.49 + drift fix + session handoff`
 - `a64d470 feat(critic-email): activate monthly workflow — TASK-48 COMPLETE`
-- `0caf8c6 fix(critic-email): recursion in _gc_or_raise + headers/deprecation polish (TASK-48 2b)`
 
 ---
 
@@ -66,15 +66,15 @@ _Months in config: `2026-04`, `2026-05`, `2026-06`_
 | borrow_data | 0 | — | ⚠️ empty |
 | market_context | 33 | — | ✅ |
 | news_findings | 17,156 | — | ✅ |
-| agent_scorecard | 68 | 2026-05-29 | ✅ |
-| sentinel_events | 16,319 | — | ✅ |
+| agent_scorecard | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| sentinel_events | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
 
 ---
 
 ## 🩺 Health
 
-- ⚠️ 25 uncommitted file(s):
--    - 25 new/untracked
+- ⚠️ 26 uncommitted file(s):
+-    - 26 new/untracked
 
 ---
 
