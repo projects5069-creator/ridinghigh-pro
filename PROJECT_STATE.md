@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-05-31 20:23:11 -05
+**Generated:** 2026-05-31 20:34:08 -05
 **Branch:** `main`
-**Latest commit:** `0690cc7` — chore(backlog): 3 follow-ups — monthly charts, anomaly days, split cleanup
+**Latest commit:** `46ae932` — docs(handoff): session close 2026-05-31 evening — TASK-80 closed, CI rescue, monthly email (TASK-48) + PK v2.54
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `0690cc7 (HEAD -> main) chore(backlog): 3 follow-ups — monthly charts, anomaly days, split cleanup`
-- `198e898 (origin/main, origin/HEAD) feat(critic-monthly): rich monthly report — per-ticker movers + metric-quality table (TASK-48)`
+- `46ae932 (HEAD -> main) docs(handoff): session close 2026-05-31 evening — TASK-80 closed, CI rescue, monthly email (TASK-48) + PK v2.54`
+- `1ed42ca (origin/main, origin/HEAD) chore(backlog): 3 follow-ups — monthly charts, anomaly days, split cleanup`
+- `198e898 feat(critic-monthly): rich monthly report — per-ticker movers + metric-quality table (TASK-48)`
 - `46b10cc feat(critic-monthly): per-stock + cross-sectional detail in monthly email (TASK-48)`
 - `c6d9032 chore(backlog): open TASK-84/85/86 — CI follow-ups from session-open`
-- `e7dc0dd fix(backlog): shorten 5 task filenames >255B breaking CI checkout`
 
 ---
 
