@@ -224,6 +224,21 @@ If you respond without reading a relevant SKILL.md when one applies:
 ### v3.1 (2026-05-28) — HARD GATE ACTIVE
 A PreToolUse hook now BLOCKS Bash/Edit/Write/NotebookEdit until a SKILL.md is Read (or a Skill tool loaded) in the session. This enforces RULE #11 at the kernel level — declaration alone is no longer enough. Recovery if locked out: ~/.claude/hooks/RECOVERY.md (disableAllHooks=true via native terminal). KNOWN HOLE: any SKILL.md satisfies it, not necessarily the relevant one (TASK-54).
 
+### v3.2 (2026-06-01) — END-OF-OUTPUT PROOF (mandatory)
+At the END of EVERY response that did real work (bash/edit/investigation),
+write a block titled "✅ סקילים שבוצעו" listing, for each skill actually used:
+  • skill-name | full path to SKILL.md | wc -l line count
+The path + line count are the proof — they cannot be fabricated without
+reading the file. The before-block ("🛠️ סקילים פעילים") states intent;
+this end-block proves execution.
+
+If NO skill was used, state explicitly: "✅ סקילים שבוצעו: אין — לא נדרש סקיל".
+A response doing real work with neither a skill nor this explicit line is a
+RULE #11 violation; the chat-side reviewer treats it as a red flag and tells the user.
+
+Plugin skills live under ~/.claude/plugins/cache/<marketplace>/.../skills/<name>/SKILL.md
+— NOT under ~/.claude/skills/. Cite the real cache path.
+
 ## RULE #12: All bash commands must wrap through .rh-run.sh
 
 Every Bash tool invocation in this project MUST be wrapped:
