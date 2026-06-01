@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-05-31 17:00:53 -05
+**Generated:** 2026-05-31 20:15:14 -05
 **Branch:** `main`
-**Latest commit:** `b0b0ad1` — feat(critic-monthly): per-stock + cross-sectional detail in monthly email (TASK-48)
+**Latest commit:** `bc6fb0c` — feat(critic-monthly): rich monthly report — per-ticker movers + metric-quality table (TASK-48)
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `b0b0ad1 (HEAD -> main) feat(critic-monthly): per-stock + cross-sectional detail in monthly email (TASK-48)`
-- `c6d9032 (origin/main, origin/HEAD) chore(backlog): open TASK-84/85/86 — CI follow-ups from session-open`
+- `bc6fb0c (HEAD -> main) feat(critic-monthly): rich monthly report — per-ticker movers + metric-quality table (TASK-48)`
+- `46b10cc (origin/main, origin/HEAD) feat(critic-monthly): per-stock + cross-sectional detail in monthly email (TASK-48)`
+- `c6d9032 chore(backlog): open TASK-84/85/86 — CI follow-ups from session-open`
 - `e7dc0dd fix(backlog): shorten 5 task filenames >255B breaking CI checkout`
 - `5563a4c research(TASK-80): serial fallers investigation — no predictive edge found`
-- `b5ddc94 docs(protocol): forbid 'pasted PK outdated' note at session-open (TASK-81)`
 
 ---
 
@@ -66,15 +66,15 @@ _Months in config: `2026-04`, `2026-05`, `2026-06`_
 | borrow_data | 0 | — | ⚠️ empty |
 | market_context | 33 | — | ✅ |
 | news_findings | 17,156 | — | ✅ |
-| agent_scorecard | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| sentinel_events | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| agent_scorecard | 68 | 2026-05-29 | ✅ |
+| sentinel_events | 16,319 | — | ✅ |
 
 ---
 
 ## 🩺 Health
 
-- ⚠️ 28 uncommitted file(s):
--    - 2 modified
+- ⚠️ 27 uncommitted file(s):
+-    - 1 modified
 -    - 26 new/untracked
 
 ---

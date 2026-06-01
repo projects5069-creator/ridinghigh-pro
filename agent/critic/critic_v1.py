@@ -308,25 +308,32 @@ class CriticAgent:
         if not mt:
             return {}
 
-        # --- Section A: performance (per-stock) ---
-        by_pnl = sorted(mt, key=lambda t: _safe_float(t.get("RealizedPnL")), reverse=True)
-
-        def _row(t):
-            return {
-                "ticker": t.get("ticker", "?"),
-                "pnl_pct": _safe_float(t.get("pnl_pct")),
-                "pnl_usd": round(_safe_float(t.get("RealizedPnL")), 2),
-            }
-        top5 = [_row(t) for t in by_pnl[:5]]
-        bottom5 = [_row(t) for t in by_pnl[-5:][::-1]]
-        # dominant = aggregated RealizedPnL ($) per ticker (NOT avg %)
-        agg = _c.defaultdict(float)
+        # --- Section A: performance AGGREGATED per ticker (sum $, count entries, avg %) ---
+        agg = {}
         for t in mt:
-            agg[t.get("ticker", "?")] += _safe_float(t.get("RealizedPnL"))
-        dom_pos_tkr = max(agg, key=agg.get)
-        dom_neg_tkr = min(agg, key=agg.get)
-        dominant_pos = {"ticker": dom_pos_tkr, "pnl_usd": round(agg[dom_pos_tkr], 2)}
-        dominant_neg = {"ticker": dom_neg_tkr, "pnl_usd": round(agg[dom_neg_tkr], 2)}
+            _tk = t.get("ticker", "?")
+            a = agg.setdefault(_tk, {"ticker": _tk, "entries": 0, "pnl_usd": 0.0, "_pct_sum": 0.0})
+            a["entries"] += 1
+            a["pnl_usd"] += _safe_float(t.get("RealizedPnL"))
+            a["_pct_sum"] += _safe_float(t.get("pnl_pct"))
+        per_ticker = [
+            {"ticker": a["ticker"], "entries": a["entries"],
+             "pnl_usd": round(a["pnl_usd"], 2),
+             "avg_pct": round(a["_pct_sum"] / a["entries"], 2) if a["entries"] else None}
+            for a in agg.values()
+        ]
+        per_ticker.sort(key=lambda r: r["pnl_usd"], reverse=True)
+        top5 = per_ticker[:5]
+        bottom5 = list(reversed(per_ticker[-5:]))
+        # dominant = #1 / last of the per-ticker aggregation (consistent with top5/bottom5)
+        dominant_pos = {"ticker": top5[0]["ticker"], "pnl_usd": top5[0]["pnl_usd"]} if top5 else {}
+        dominant_neg = ({"ticker": per_ticker[-1]["ticker"], "pnl_usd": per_ticker[-1]["pnl_usd"]}
+                        if per_ticker else {})
+        # Profit Factor = gross $ won / gross $ lost (None when no losses)
+        _pnls = [_safe_float(t.get("RealizedPnL")) for t in mt]
+        win_usd = sum(p for p in _pnls if p > 0)
+        loss_usd = sum(p for p in _pnls if p < 0)
+        profit_factor = round(win_usd / abs(loss_usd), 2) if loss_usd else None
 
         # --- Section B: quality / behavior ---
         exit_reason_counts = dict(_c.Counter(t.get("exit_reason", "?") for t in mt))
@@ -344,6 +351,20 @@ class CriticAgent:
             return {m: round(sum(_safe_float(t.get(m)) for t in group) / len(group), 2) for m in _METRICS}
         entry_metrics_win = _avgs(wins)
         entry_metrics_loss = _avgs(losses)
+        # Per-metric quality: how well each entry metric separated winners from losers.
+        # rel = |gap| / max(|win|,|loss|) normalizes across metric scales. DESCRIPTIVE only.
+        _LABELS = {"score_at_entry": "Score", "run_up": "RunUp", "atrx": "ATRX", "float_pct": "Float%"}
+        metric_quality = []
+        for _k in _METRICS:
+            _wv, _lv = entry_metrics_win.get(_k), entry_metrics_loss.get(_k)
+            if _wv is None or _lv is None:
+                continue
+            _gap = round(_wv - _lv, 2)
+            _rel = abs(_gap) / max(abs(_wv), abs(_lv), 1e-9)
+            _rating = "strong" if _rel >= 0.20 else "medium" if _rel >= 0.08 else "weak"
+            metric_quality.append({"key": _k, "label": _LABELS.get(_k, _k), "win": _wv,
+                                   "loss": _lv, "gap": _gap, "rel": round(_rel, 3), "rating": _rating})
+        metric_quality.sort(key=lambda m: m["rel"], reverse=True)
         tk = _c.Counter(t.get("ticker", "?") for t in mt)
         serial_count = sum(1 for c in tk.values() if c >= 2)
 
@@ -353,7 +374,8 @@ class CriticAgent:
             "exit_reason_counts": exit_reason_counts,
             "manual_cleanup": manual_cleanup, "pre_fix": pre_fix,
             "entry_metrics_win": entry_metrics_win, "entry_metrics_loss": entry_metrics_loss,
-            "serial_count": serial_count,
+            "serial_count": serial_count, "profit_factor": profit_factor,
+            "metric_quality": metric_quality,
         }
 
     def write_monthly_summary(self, row, dedup=True):
