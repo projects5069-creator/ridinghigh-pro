@@ -42,6 +42,19 @@
     "portfolio_live": "1mbTGTC8nQUtZh4RW003srQhGDdJi9CLOcdWM3HfCIpQ",
     "score_tracker": "1MQwNUehCpfDGjBo9eB2Z3DwPjNOyQBt_NOqdws1Rt5k",
     "live_trades": "1MQwNUehCpfDGjBo9eB2Z3DwPjNOyQBt_NOqdws1Rt5k",
-    "ticker_follow_up": "1Xd6x0xxlImA_ym251zLLFyDJ-Voxpps5kh01ZVa6H0M"
+    "ticker_follow_up": "1Xd6x0xxlImA_ym251zLLFyDJ-Voxpps5kh01ZVa6H0M",
+    "decision_log": "1jZA7tf_Y7w0tK9Q5k_gfv1pHaPDylOTrkLuBarLUlDg",
+    "paper_portfolio": "1UhB8-grktDs4M2h_KtqzFV3pDL70G_6avcehsrgUfvo",
+    "score_analytics": "1VpV3YVAdu60Us8_g5YH8xOPkJLhgnhe0vEML4fSg7qc",
+    "postmortems": "1s9mt0FklOesna-tElapboOrgIouVOBjmHKCDJvyPuvA",
+    "sentinel_events": "1kAm61DsoYfFRpE7ALBlCLDeJg6FtM8KC0iWjwiCsEbE",
+    "system_events": "12CDW4dQf4Oc1S_Upir76DpJU3tcyHmfr0XgweWKPAYA",
+    "market_context": "1pfpxrUaYRq6BySI3ZXApDwDGg-nUGxuRKizMjCLu7cA",
+    "news_findings": "1nYii4yrJKsY70JPavmacyQ2Dw2M3XsZI9BGPjJZYr8E",
+    "pending_suggestions": "1KYYd6CeP84u7i2SSOT-qL0KiwXJXdZ0XBioVhx5yW6Y",
+    "config_history": "1ftaB2gHpxorEfezSLok-OonykcqnXoWu1xDvX2nT590",
+    "borrow_data": "1A_yVqR959D1x_mqn_fOYKhf-lb3ZPvcQa3qFnwOM4nI",
+    "agent_scorecard": "1hkpTKkl-0bfEJydCnmO5MAz-cV6Ioo2ynkLsezdJIoc",
+    "weekly_summary": "1T57uW41FSC4RJgvNnh4AhTB9LqpmexkLWWftAyxZlDg"
   }
 }

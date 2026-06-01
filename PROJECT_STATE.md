@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-05-31 20:34:08 -05
+**Generated:** 2026-06-01 11:15:43 -05
 **Branch:** `main`
-**Latest commit:** `46ae932` — docs(handoff): session close 2026-05-31 evening — TASK-80 closed, CI rescue, monthly email (TASK-48) + PK v2.54
+**Latest commit:** `ed100db` — fix(provisioning): create 13 June agent sheets — paper_portfolio KeyError root fix
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `46ae932 (HEAD -> main) docs(handoff): session close 2026-05-31 evening — TASK-80 closed, CI rescue, monthly email (TASK-48) + PK v2.54`
-- `1ed42ca (origin/main, origin/HEAD) chore(backlog): 3 follow-ups — monthly charts, anomaly days, split cleanup`
+- `ed100db (HEAD -> main) fix(provisioning): create 13 June agent sheets — paper_portfolio KeyError root fix`
+- `f96b3c4 (origin/main, origin/HEAD) docs(handoff): session close 2026-05-31 evening — TASK-80 closed, CI rescue, monthly email (TASK-48) + PK v2.54`
+- `1ed42ca chore(backlog): 3 follow-ups — monthly charts, anomaly days, split cleanup`
 - `198e898 feat(critic-monthly): rich monthly report — per-ticker movers + metric-quality table (TASK-48)`
 - `46b10cc feat(critic-monthly): per-stock + cross-sectional detail in monthly email (TASK-48)`
-- `c6d9032 chore(backlog): open TASK-84/85/86 — CI follow-ups from session-open`
 
 ---
 
@@ -32,42 +32,43 @@ _See `OPEN_ISSUES.md` for full list_
 
 | Workflow | Status | Conclusion | Started |
 |---|---|---|---|
-| Health Audit | completed | ✅ success | 2026-05-31 18:01 UTC |
-| Health Audit | completed | ❌ failure | 2026-05-31 17:55 UTC |
-| Warm OAuth Token | completed | ❌ failure | 2026-05-31 13:50 UTC |
-| Health Audit | completed | ❌ failure | 2026-05-31 12:07 UTC |
-| Health Audit | completed | ❌ failure | 2026-05-31 07:00 UTC |
+| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-06-01 16:15 UTC |
+| Agent — Every Minute (DRY_RUN) | in_progress | ⏳ — | 2026-06-01 16:15 UTC |
+| RidingHigh Auto Scanner | completed | ✅ success | 2026-06-01 16:14 UTC |
+| Agent — Every Minute (DRY_RUN) | completed | ✅ success | 2026-06-01 16:14 UTC |
+| Agent — Every Minute (DRY_RUN) | completed | ✅ success | 2026-06-01 16:13 UTC |
 
 ---
 
-## 📊 Google Sheets — showing month `2026-05`
+## 📊 Google Sheets — showing month `2026-06`
 
-_Selection: current Peru month (2026-05) has data_
+_Selection: current Peru month (2026-06) has data_
 _Months in config: `2026-04`, `2026-05`, `2026-06`_
 
 | Sheet | Total rows | Last date | Status |
 |---|---|---|---|
-| timeline_live | 301,321 | 2026-05-29 | ✅ |
-| daily_snapshots | 1,638 | 2026-05-29 | ✅ |
-| daily_summary | 1,783 | 2026-05-29 | ✅ |
-| post_analysis | 78 | 2026-05-29 | ✅ |
-| portfolio | 88 | 2026-05-29 | ✅ |
-| portfolio_live | 35 | 2026-05-29 | ✅ |
-| score_tracker | 1,538 | 2026-05-29 | ✅ |
-| live_trades | 1,538 | 2026-05-29 | ✅ |
-| ticker_follow_up | 12,477 | 2026-05-08 | ✅ |
-| decision_log | 16,249 | — | ✅ |
-| paper_portfolio | 115 | — | ✅ |
+| timeline_live | 3,981 | — | ✅ |
+| daily_snapshots | 0 | — | ⚠️ empty |
+| daily_summary | 0 | — | ⚠️ empty |
+| post_analysis | 0 | — | ⚠️ empty |
+| portfolio | 0 | — | ⚠️ empty |
+| portfolio_live | 0 | — | ⚠️ empty |
+| score_tracker | 0 | — | ⚠️ empty |
+| live_trades | 0 | — | ⚠️ empty |
+| ticker_follow_up | 0 | — | ⚠️ empty |
+| decision_log | 0 | — | ⚠️ empty |
+| paper_portfolio | 0 | — | ⚠️ empty |
 | score_analytics | 0 | — | ⚠️ empty |
-| postmortems | 95 | — | ✅ |
-| system_events | 16,319 | — | ✅ |
-| pending_suggestions | 0 | — | ⚠️ empty |
-| config_history | 0 | — | ⚠️ empty |
-| borrow_data | 0 | — | ⚠️ empty |
-| market_context | 33 | — | ✅ |
-| news_findings | 17,156 | — | ✅ |
-| agent_scorecard | 68 | 2026-05-29 | ✅ |
-| sentinel_events | 16,319 | — | ✅ |
+| postmortems | 0 | — | ⚠️ empty |
+| sentinel_events | 0 | — | ⚠️ empty |
+| system_events | 0 | — | ⚠️ empty |
+| market_context | 0 | — | ⚠️ empty |
+| news_findings | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| pending_suggestions | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| config_history | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| borrow_data | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| agent_scorecard | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| weekly_summary | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
 
 ---
 
