@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-05-31 20:15:14 -05
+**Generated:** 2026-05-31 20:23:11 -05
 **Branch:** `main`
-**Latest commit:** `bc6fb0c` — feat(critic-monthly): rich monthly report — per-ticker movers + metric-quality table (TASK-48)
+**Latest commit:** `0690cc7` — chore(backlog): 3 follow-ups — monthly charts, anomaly days, split cleanup
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `bc6fb0c (HEAD -> main) feat(critic-monthly): rich monthly report — per-ticker movers + metric-quality table (TASK-48)`
-- `46b10cc (origin/main, origin/HEAD) feat(critic-monthly): per-stock + cross-sectional detail in monthly email (TASK-48)`
+- `0690cc7 (HEAD -> main) chore(backlog): 3 follow-ups — monthly charts, anomaly days, split cleanup`
+- `198e898 (origin/main, origin/HEAD) feat(critic-monthly): rich monthly report — per-ticker movers + metric-quality table (TASK-48)`
+- `46b10cc feat(critic-monthly): per-stock + cross-sectional detail in monthly email (TASK-48)`
 - `c6d9032 chore(backlog): open TASK-84/85/86 — CI follow-ups from session-open`
 - `e7dc0dd fix(backlog): shorten 5 task filenames >255B breaking CI checkout`
-- `5563a4c research(TASK-80): serial fallers investigation — no predictive edge found`
 
 ---
 
