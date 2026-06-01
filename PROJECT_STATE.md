@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-06-01 13:46:45 -05
+**Generated:** 2026-06-01 13:58:29 -05
 **Branch:** `main`
-**Latest commit:** `7035ce7` — docs(rule11): v3.2 — mandatory end-of-output skill proof
+**Latest commit:** `671b158` — feat(skills): end-of-output proof in hook + fix plugin cache paths in MAP
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `7035ce7 (HEAD -> main) docs(rule11): v3.2 — mandatory end-of-output skill proof`
-- `7ceb1b1 (origin/main, origin/HEAD) fix(provisioning): create 13 June agent sheets — paper_portfolio KeyError root fix`
+- `671b158 (HEAD -> main) feat(skills): end-of-output proof in hook + fix plugin cache paths in MAP`
+- `016e375 (origin/main, origin/HEAD) docs(rule11): v3.2 — mandatory end-of-output skill proof`
+- `7ceb1b1 fix(provisioning): create 13 June agent sheets — paper_portfolio KeyError root fix`
 - `f96b3c4 docs(handoff): session close 2026-05-31 evening — TASK-80 closed, CI rescue, monthly email (TASK-48) + PK v2.54`
 - `1ed42ca chore(backlog): 3 follow-ups — monthly charts, anomaly days, split cleanup`
-- `198e898 feat(critic-monthly): rich monthly report — per-ticker movers + metric-quality table (TASK-48)`
 
 ---
 
@@ -32,11 +32,11 @@ _See `OPEN_ISSUES.md` for full list_
 
 | Workflow | Status | Conclusion | Started |
 |---|---|---|---|
-| Daily Backup — post_analysis | in_progress | ⏳ — | 2026-06-01 18:46 UTC |
-| Agent — Every Minute (DRY_RUN) | in_progress | ⏳ — | 2026-06-01 18:46 UTC |
-| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-06-01 18:46 UTC |
-| Agent — Every Minute (DRY_RUN) | completed | ✅ success | 2026-06-01 18:45 UTC |
-| RidingHigh Auto Scanner | completed | ✅ success | 2026-06-01 18:45 UTC |
+| Agent — Every Minute (DRY_RUN) | in_progress | ⏳ — | 2026-06-01 18:58 UTC |
+| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-06-01 18:58 UTC |
+| RidingHigh Auto Scanner | completed | ✅ success | 2026-06-01 18:57 UTC |
+| Agent — Every Minute (DRY_RUN) | completed | ✅ success | 2026-06-01 18:57 UTC |
+| RidingHigh Auto Scanner | completed | ✅ success | 2026-06-01 18:56 UTC |
 
 ---
 
@@ -47,22 +47,22 @@ _Months in config: `2026-04`, `2026-05`, `2026-06`_
 
 | Sheet | Total rows | Last date | Status |
 |---|---|---|---|
-| timeline_live | 11,332 | — | ✅ |
-| daily_snapshots | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| daily_summary | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| timeline_live | 12,025 | — | ✅ |
+| daily_snapshots | 0 | — | ⚠️ empty |
+| daily_summary | 0 | — | ⚠️ empty |
 | post_analysis | 0 | — | ⚠️ empty |
 | portfolio | 0 | — | ⚠️ empty |
 | portfolio_live | 0 | — | ⚠️ empty |
 | score_tracker | 0 | — | ⚠️ empty |
 | live_trades | 0 | — | ⚠️ empty |
-| ticker_follow_up | 0 | — | ⚠️ empty |
-| decision_log | 0 | — | ⚠️ empty |
-| paper_portfolio | 0 | — | ⚠️ empty |
-| score_analytics | 0 | — | ⚠️ empty |
-| postmortems | 0 | — | ⚠️ empty |
-| sentinel_events | 8 | — | ✅ |
-| system_events | 0 | — | ⚠️ empty |
-| market_context | 0 | — | ⚠️ empty |
+| ticker_follow_up | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| decision_log | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| paper_portfolio | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| score_analytics | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| postmortems | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| sentinel_events | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| system_events | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| market_context | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
 | news_findings | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
 | pending_suggestions | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
 | config_history | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
@@ -74,8 +74,8 @@ _Months in config: `2026-04`, `2026-05`, `2026-06`_
 
 ## 🩺 Health
 
-- ⚠️ 29 uncommitted file(s):
--    - 2 modified
+- ⚠️ 30 uncommitted file(s):
+-    - 3 modified
 -    - 27 new/untracked
 
 ---
