@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-06-02 13:44:36 -05
+**Generated:** 2026-06-02 13:57:06 -05
 **Branch:** `main`
-**Latest commit:** `024f3d4` — feat(health): check_28 guards agent-sheets completeness for active month (TASK-91 scope-2)
+**Latest commit:** `9f9b1d8` — fix(critic): build_weekly_row reads all months a cross-boundary week spans (TASK-99)
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `024f3d4 (HEAD -> main) feat(health): check_28 guards agent-sheets completeness for active month (TASK-91 scope-2)`
-- `b9a5dcd (origin/main, origin/HEAD) fix(critic): RH-Summaries monthly host falls back to env var for CI (TASK-97)`
+- `9f9b1d8 (HEAD -> main) fix(critic): build_weekly_row reads all months a cross-boundary week spans (TASK-99)`
+- `5f1067a (origin/main, origin/HEAD) feat(health): check_28 guards agent-sheets completeness for active month (TASK-91 scope-2)`
+- `b9a5dcd fix(critic): RH-Summaries monthly host falls back to env var for CI (TASK-97)`
 - `816d135 fix(critic): monthly email reads PREVIOUS month's paper_portfolio (TASK-60)`
 - `6cb5891 docs(session): close night-run 2026-06-01 — TASK-85/30/84 Done, PK v2.57, gitignore fix`
-- `b98ae90 Merge pull request #2 from projects5069-creator/claude/task-85-backlog-filename-guard`
 
 ---
 
@@ -32,38 +32,38 @@ _See `OPEN_ISSUES.md` for full list_
 
 | Workflow | Status | Conclusion | Started |
 |---|---|---|---|
-| Agent — Every Minute (DRY_RUN) | in_progress | ⏳ — | 2026-06-02 18:44 UTC |
-| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-06-02 18:44 UTC |
-| Agent — Every Minute (DRY_RUN) | in_progress | ⏳ — | 2026-06-02 18:43 UTC |
-| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-06-02 18:43 UTC |
-| Agent — Every Minute (DRY_RUN) | in_progress | ⏳ — | 2026-06-02 18:42 UTC |
+| RidingHigh Auto Scanner | queued | ⏳ — | 2026-06-02 18:57 UTC |
+| Agent — Every Minute (DRY_RUN) | queued | ⏳ — | 2026-06-02 18:57 UTC |
+| Agent — Every Minute (DRY_RUN) | in_progress | ⏳ — | 2026-06-02 18:56 UTC |
+| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-06-02 18:56 UTC |
+| RidingHigh Auto Scanner | completed | ✅ success | 2026-06-02 18:55 UTC |
 
 ---
 
-## 📊 Google Sheets — showing month `2026-07`
+## 📊 Google Sheets — showing month `2026-06`
 
-_Selection: most recent month with data (2026-07)_
+_Selection: current Peru month (2026-06) has data_
 _Months in config: `2026-04`, `2026-05`, `2026-06`, `2026-07`_
 
 | Sheet | Total rows | Last date | Status |
 |---|---|---|---|
-| timeline_live | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| daily_snapshots | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| daily_summary | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| post_analysis | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| portfolio | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| portfolio_live | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| timeline_live | 33,323 | 2026-06-02 | ✅ |
+| daily_snapshots | 96 | 2026-06-01 | ✅ |
+| daily_summary | 109 | 2026-06-01 | ✅ |
+| post_analysis | 4 | 2026-06-01 | ✅ |
+| portfolio | 9 | 2026-06-01 | ✅ |
+| portfolio_live | 9 | 2026-06-01 | ✅ |
 | score_tracker | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| ticker_follow_up | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| live_trades | 0 | — | ⚠️ empty |
-| decision_log | 0 | — | ⚠️ empty |
-| paper_portfolio | 0 | — | ⚠️ empty |
-| score_analytics | 0 | — | ⚠️ empty |
-| postmortems | 0 | — | ⚠️ empty |
-| sentinel_events | 0 | — | ⚠️ empty |
-| system_events | 0 | — | ⚠️ empty |
-| market_context | 0 | — | ⚠️ empty |
-| news_findings | 0 | — | ⚠️ empty |
+| live_trades | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| ticker_follow_up | 2,498 | 2026-06-02 | ✅ |
+| decision_log | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| paper_portfolio | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| score_analytics | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| postmortems | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| sentinel_events | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| system_events | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| market_context | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| news_findings | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
 | pending_suggestions | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
 | config_history | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
 | borrow_data | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |

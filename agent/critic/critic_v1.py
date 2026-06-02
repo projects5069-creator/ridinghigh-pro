@@ -232,7 +232,19 @@ class CriticAgent:
         friday = monday + _td(days=4)
         week_of = monday.strftime("%Y-%m-%d"); fri_s = friday.strftime("%Y-%m-%d")
         if trades is None:
-            trades = self.review_completed_trades()
+            # TASK-99: a week may straddle a month boundary; read every month the
+            # Mon-Fri window touches (<=2) and merge, dedup by position_id.
+            _months = sorted({monday.strftime("%Y-%m"), friday.strftime("%Y-%m")})
+            _seen = set()
+            trades = []
+            for _m in _months:
+                for _t in self.review_completed_trades(month=_m):
+                    _pid = _t.get("position_id")
+                    if _pid and _pid in _seen:
+                        continue
+                    if _pid:
+                        _seen.add(_pid)
+                    trades.append(_t)
         def _in_week(t):
             ed = str(t.get("ExitDate") or t.get("exit_date") or "")[:10]
             return week_of <= ed <= fri_s
