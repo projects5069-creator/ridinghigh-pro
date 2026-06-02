@@ -66,6 +66,10 @@ provider_validation_report.json
 
 # Backup files created by RULE #4
 *.bak_*
+# Exception: backlog task description files (.md) may legitimately contain
+# ".bak" in their title (e.g. TASK-30). Keep them tracked. Real *.bak backups
+# do not end in .md, so they remain ignored. (TASK-85 filename-hygiene family.)
+!backlog/tasks/*.md
 *.bak
 .skill_audit.log
 .rh_summaries_sheet_id

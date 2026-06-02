@@ -1,9 +1,10 @@
 ---
 id: TASK-85
 title: 'Pre-commit guard: reject backlog filenames over 200 bytes'
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-05-31 18:27'
+updated_date: '2026-06-02 04:38'
 labels:
   - infra
   - backlog
@@ -21,6 +22,12 @@ On 5/31 five backlog task files (66/67/69/71/72) had Hebrew-title filenames 271-
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 Pre-commit hook rejects basename >200 bytes
-- [ ] #2 Existing files all pass
+- [x] #1 Pre-commit hook rejects basename >200 bytes
+- [x] #2 Existing files all pass
 <!-- AC:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+Pre-commit guard added (scripts/git_hooks/pre-commit + install.sh), rejects staged backlog/*.md basenames >200B; PR#2 merged b98ae90; installed locally. 3 files 200-255B grandfathered (staged-only scope).
+<!-- SECTION:FINAL_SUMMARY:END -->
