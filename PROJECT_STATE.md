@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-06-02 14:59:05 -05
+**Generated:** 2026-06-02 15:19:01 -05
 **Branch:** `main`
-**Latest commit:** `2a05e8c` — chore(backlog): sync 2026-06-02 thread — TASK-60/91/97/98/99/100 status
+**Latest commit:** `4f80393` — chore(backlog): persist TASK-96/101/102/103 created in 2026-06-02 thread
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `2a05e8c (HEAD -> main) chore(backlog): sync 2026-06-02 thread — TASK-60/91/97/98/99/100 status`
-- `27c9049 (origin/main, origin/HEAD) docs(session): close 2026-06-02 — monthly-email/rotation thread complete (TASK-60/97/98/99/100/91)`
+- `4f80393 (HEAD -> main) chore(backlog): persist TASK-96/101/102/103 created in 2026-06-02 thread`
+- `bf8f0a2 (origin/main, origin/HEAD) chore(backlog): sync 2026-06-02 thread — TASK-60/91/97/98/99/100 status`
+- `27c9049 docs(session): close 2026-06-02 — monthly-email/rotation thread complete (TASK-60/97/98/99/100/91)`
 - `bb5ecb9 fix(rotation): create_agent_sheets fails loud on incomplete provisioning + 11->13 (TASK-91 scope-1+4)`
 - `d33b963 fix(critic): build_weekly_row reads all months a cross-boundary week spans (TASK-99)`
-- `5f1067a feat(health): check_28 guards agent-sheets completeness for active month (TASK-91 scope-2)`
 
 ---
 
@@ -32,11 +32,11 @@ _See `OPEN_ISSUES.md` for full list_
 
 | Workflow | Status | Conclusion | Started |
 |---|---|---|---|
-| Agent — Every Minute (DRY_RUN) | queued | ⏳ — | 2026-06-02 19:59 UTC |
-| RidingHigh Auto Scanner | queued | ⏳ — | 2026-06-02 19:59 UTC |
-| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-06-02 19:58 UTC |
-| Agent — Every Minute (DRY_RUN) | in_progress | ⏳ — | 2026-06-02 19:58 UTC |
-| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-06-02 19:57 UTC |
+| RidingHigh Auto Scanner | queued | ⏳ — | 2026-06-02 20:19 UTC |
+| Agent — Every Minute (DRY_RUN) | queued | ⏳ — | 2026-06-02 20:19 UTC |
+| RidingHigh Auto Scanner | completed | ✅ success | 2026-06-02 20:18 UTC |
+| Agent — Every Minute (DRY_RUN) | completed | ✅ success | 2026-06-02 20:18 UTC |
+| Agent — Every Minute (DRY_RUN) | completed | ✅ success | 2026-06-02 20:17 UTC |
 
 ---
 
@@ -47,35 +47,35 @@ _Months in config: `2026-04`, `2026-05`, `2026-06`, `2026-07`_
 
 | Sheet | Total rows | Last date | Status |
 |---|---|---|---|
-| timeline_live | 37,076 | 2026-06-02 | ✅ |
-| daily_snapshots | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| daily_summary | 204 | 2026-06-02 | ✅ |
-| post_analysis | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| portfolio | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| portfolio_live | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| score_tracker | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| live_trades | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| ticker_follow_up | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| decision_log | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| paper_portfolio | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| score_analytics | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| postmortems | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| sentinel_events | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| system_events | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| market_context | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| news_findings | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| pending_suggestions | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| config_history | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| borrow_data | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| agent_scorecard | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| weekly_summary | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| timeline_live | 37,597 | 2026-06-02 | ✅ |
+| daily_snapshots | 184 | 2026-06-02 | ✅ |
+| daily_summary | 206 | 2026-06-02 | ✅ |
+| post_analysis | 4 | 2026-06-01 | ✅ |
+| portfolio | 13 | 2026-06-02 | ✅ |
+| portfolio_live | 13 | 2026-06-02 | ✅ |
+| score_tracker | 220 | 2026-06-02 | ✅ |
+| live_trades | 220 | 2026-06-02 | ✅ |
+| ticker_follow_up | 2,498 | 2026-06-02 | ✅ |
+| decision_log | 8 | — | ✅ |
+| paper_portfolio | 8 | — | ✅ |
+| score_analytics | 0 | — | ⚠️ empty |
+| postmortems | 0 | — | ⚠️ empty |
+| sentinel_events | 472 | — | ✅ |
+| system_events | 0 | — | ⚠️ empty |
+| market_context | 5 | — | ✅ |
+| news_findings | 97 | — | ✅ |
+| pending_suggestions | 0 | — | ⚠️ empty |
+| config_history | 0 | — | ⚠️ empty |
+| borrow_data | 0 | — | ⚠️ empty |
+| agent_scorecard | 4 | 2026-06-01 | ✅ |
+| weekly_summary | 0 | — | ⚠️ empty |
 
 ---
 
 ## 🩺 Health
 
-- ⚠️ 30 uncommitted file(s):
--    - 30 new/untracked
+- ⚠️ 26 uncommitted file(s):
+-    - 26 new/untracked
 
 ---
 
