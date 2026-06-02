@@ -1698,6 +1698,38 @@ def send_email_alert(results):
         return False
 
 
+def check_28_agent_sheets_complete():
+    """AS1: active (current Peru) month has all agent sheets in sheets_config.
+    Guards the Bug-A / TASK-91 silent-rotation gap that crashed the 1/6 monthly
+    Critic. Config-only (no Sheets I/O) — mirrors check_11."""
+    if not SHEETS_CONFIG.exists():
+        return CheckResult("AS1", "Agent sheets complete", "Config",
+                           CRITICAL, "sheets_config.json not found")
+    try:
+        config = json.loads(SHEETS_CONFIG.read_text())
+    except Exception as e:
+        return CheckResult("AS1", "Agent sheets complete", "Config",
+                           CRITICAL, f"Invalid JSON: {e}")
+    try:
+        from agent.setup.create_agent_sheets import AGENT_SHEET_NAMES
+    except Exception as e:
+        return CheckResult("AS1", "Agent sheets complete", "Config",
+                           WARNING, f"could not import AGENT_SHEET_NAMES: {e}")
+    current = now_peru().strftime("%Y-%m")
+    month_cfg = config.get(current, {})
+    if not month_cfg:
+        return CheckResult("AS1", "Agent sheets complete", "Config",
+                           CRITICAL, f"No config entry for active month {current}")
+    missing = [n for n in AGENT_SHEET_NAMES if n not in month_cfg]
+    if missing:
+        return CheckResult("AS1", "Agent sheets complete", "Config",
+                           CRITICAL,
+                           f"{current}: {len(missing)}/{len(AGENT_SHEET_NAMES)} agent sheet(s) missing",
+                           f"Missing: {missing} — rotation/create_agent_sheets incomplete (TASK-91)")
+    return CheckResult("AS1", "Agent sheets complete", "Config",
+                       PASSED, f"{current}: all {len(AGENT_SHEET_NAMES)} agent sheets present")
+
+
 def main():
     args = sys.argv[1:]
     local_mode = "--local" in args
@@ -1748,6 +1780,7 @@ def main():
     results.append(check_11_sheets_config_current_month())
     results.append(check_12_score_weights_sum())
     results.append(check_13_critical_files())
+    results.append(check_28_agent_sheets_complete())
 
     # Repo health
     results.append(check_14_uncommitted_count())
