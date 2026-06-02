@@ -402,9 +402,22 @@ def run_scan():
         new_rows.insert(0, 'Date', today)
         new_rows = new_rows[slim_cols]  # enforce exact column order
 
-        # Quota fix (2026-05-19): row_count is worksheet metadata (0 API
-        # cost) — no need to pull all ~220k rows just to test emptiness.
-        if ws_timeline.row_count <= 1:
+        # Header-aware, 3-state write (2026-06-01 perfect fix):
+        # row_count is GRID size (fresh sheet = 1000 rows) so the old
+        # row_count<=1 check never fired → header never written (June break).
+        # We read ONLY row 1 (cheap) WITH retry, and distinguish three states:
+        #   - read failed (429 after retries): SKIP this scan entirely — never
+        #     write headerless data, never overwrite. Next scan handles it.
+        #   - row 1 != header (fresh/empty sheet): write header + data.
+        #   - row 1 == header (live sheet): safe append.
+        try:
+            _hdr = sheets_manager._with_retry(ws_timeline.row_values, 1)
+        except Exception as _e:
+            _hdr = None
+            print(f"⚠️ timeline_live header read failed ({_e}) — skipping write this scan")
+        if _hdr is None:
+            pass  # transient read failure — do nothing, next scan retries
+        elif _hdr != list(slim_cols):
             df_to_sheet(ws_timeline, new_rows)
         else:
             # safe_append_rows with retry + dedup by ScanTime (col 1).
