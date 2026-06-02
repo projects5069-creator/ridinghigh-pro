@@ -1,0 +1,52 @@
+#!/bin/bash
+#
+# pre-commit hook — reject backlog filenames whose basename exceeds 200 BYTES.
+#
+# Why (TASK-85): Linux ext4 caps a filename at 255 BYTES, and Hebrew is 2 bytes
+# per character. On 2026-05-31 five Hebrew-title backlog files (271-326 B) made
+# actions/checkout fail on EVERY GitHub Actions workflow. The backlog CLI embeds
+# the full task title into the filename, so a long title silently produces an
+# over-long filename. 200 B is a safety margin under the 255 B hard cap.
+#
+# Scope:  staged *.md files under backlog/ (Added/Copied/Modified/Renamed).
+# Action: reject the commit if any such basename is > 200 bytes.
+#
+# Install: scripts/git_hooks/install.sh copies this file into .git/hooks/pre-commit
+#          (mirrors the post-commit convention; does NOT set core.hooksPath).
+#
+# Exemptions / notes:
+#   - This guard inspects STAGED files only. Files already committed before the
+#     hook existed are grandfathered (e.g. task-62/63/64 are 204-219 B: over the
+#     200 B margin but under the 255 B hard cap, so they never broke checkout).
+#     They are only re-checked if you re-stage them.
+#   - To bypass intentionally for a single commit: git commit --no-verify
+
+set -eu
+
+LIMIT=200
+violations=""
+
+while IFS= read -r path; do
+    [ -n "$path" ] || continue
+    case "$path" in
+        backlog/*.md) ;;
+        *) continue ;;
+    esac
+    base=$(basename -- "$path")
+    bytes=$(printf '%s' "$base" | wc -c | tr -d ' ')
+    if [ "$bytes" -gt "$LIMIT" ]; then
+        violations="${violations}  ${bytes} bytes: ${base}\n"
+    fi
+done < <(git diff --cached --name-only --diff-filter=ACMR)
+
+if [ -n "$violations" ]; then
+    printf '\n❌ pre-commit (TASK-85): backlog filename(s) exceed %s bytes:\n' "$LIMIT" >&2
+    printf '%b' "$violations" >&2
+    printf '\nLinux ext4 caps filenames at 255 bytes (Hebrew = 2 B/char); long names\n' >&2
+    printf 'break actions/checkout on every workflow. Fix: shorten the task TITLE\n' >&2
+    printf '(the backlog CLI embeds the title into the filename), then re-stage.\n' >&2
+    printf 'Override (only if you are sure): git commit --no-verify\n\n' >&2
+    exit 1
+fi
+
+exit 0
