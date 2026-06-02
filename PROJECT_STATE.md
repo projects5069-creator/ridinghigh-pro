@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-06-02 15:19:01 -05
+**Generated:** 2026-06-02 17:28:08 -05
 **Branch:** `main`
-**Latest commit:** `4f80393` — chore(backlog): persist TASK-96/101/102/103 created in 2026-06-02 thread
+**Latest commit:** `0aef320` — feat(infra): RUN_MODE_DECISION.md decision tree + SESSION_PROTOCOL §2 hook (closes TASK-103)
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `4f80393 (HEAD -> main) chore(backlog): persist TASK-96/101/102/103 created in 2026-06-02 thread`
-- `bf8f0a2 (origin/main, origin/HEAD) chore(backlog): sync 2026-06-02 thread — TASK-60/91/97/98/99/100 status`
+- `0aef320 (HEAD -> main) feat(infra): RUN_MODE_DECISION.md decision tree + SESSION_PROTOCOL §2 hook (closes TASK-103)`
+- `2216450 (origin/main, origin/HEAD) chore(backlog): persist TASK-96/101/102/103 created in 2026-06-02 thread`
+- `bf8f0a2 chore(backlog): sync 2026-06-02 thread — TASK-60/91/97/98/99/100 status`
 - `27c9049 docs(session): close 2026-06-02 — monthly-email/rotation thread complete (TASK-60/97/98/99/100/91)`
 - `bb5ecb9 fix(rotation): create_agent_sheets fails loud on incomplete provisioning + 11->13 (TASK-91 scope-1+4)`
-- `d33b963 fix(critic): build_weekly_row reads all months a cross-boundary week spans (TASK-99)`
 
 ---
 
@@ -32,11 +32,11 @@ _See `OPEN_ISSUES.md` for full list_
 
 | Workflow | Status | Conclusion | Started |
 |---|---|---|---|
-| RidingHigh Auto Scanner | queued | ⏳ — | 2026-06-02 20:19 UTC |
-| Agent — Every Minute (DRY_RUN) | queued | ⏳ — | 2026-06-02 20:19 UTC |
-| RidingHigh Auto Scanner | completed | ✅ success | 2026-06-02 20:18 UTC |
-| Agent — Every Minute (DRY_RUN) | completed | ✅ success | 2026-06-02 20:18 UTC |
-| Agent — Every Minute (DRY_RUN) | completed | ✅ success | 2026-06-02 20:17 UTC |
+| Daily Backup — post_analysis | completed | ✅ success | 2026-06-02 22:26 UTC |
+| Agent — Market Context (Hourly) | completed | ✅ success | 2026-06-02 21:53 UTC |
+| Agent — Daily Brief Email | completed | ✅ success | 2026-06-02 21:30 UTC |
+| Daily Backup — post_analysis | completed | ✅ success | 2026-06-02 21:21 UTC |
+| Agent — End of Day | completed | ✅ success | 2026-06-02 21:00 UTC |
 
 ---
 
@@ -62,7 +62,7 @@ _Months in config: `2026-04`, `2026-05`, `2026-06`, `2026-07`_
 | postmortems | 0 | — | ⚠️ empty |
 | sentinel_events | 472 | — | ✅ |
 | system_events | 0 | — | ⚠️ empty |
-| market_context | 5 | — | ✅ |
+| market_context | 6 | — | ✅ |
 | news_findings | 97 | — | ✅ |
 | pending_suggestions | 0 | — | ⚠️ empty |
 | config_history | 0 | — | ⚠️ empty |

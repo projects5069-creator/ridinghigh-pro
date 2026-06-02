@@ -1,9 +1,10 @@
 ---
 id: TASK-103
 title: קובץ כלל-החלטה לבחירת מצב ריצה (ping-pong / auto-mode / goal)
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-06-02 17:50'
+updated_date: '2026-06-02 22:24'
 labels:
   - infra
   - auto-mode
