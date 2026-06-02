@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-06-01 20:29:40 -05
+**Generated:** 2026-06-01 20:36:42 -05
 **Branch:** `main`
-**Latest commit:** `35fb62d` — docs(pk): v2.55 — timeline_live header fix (June dashboard rescue + 3-state root fix)
+**Latest commit:** `f723ab3` — docs(handoff): session close 2026-06-01 evening — timeline header fix + skills infra
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `35fb62d (HEAD -> main) docs(pk): v2.55 — timeline_live header fix (June dashboard rescue + 3-state root fix)`
-- `4526296 (origin/main, origin/HEAD) fix(scanner): timeline_live header-aware 3-state write (root cause of June dashboard break)`
+- `f723ab3 (HEAD -> main) docs(handoff): session close 2026-06-01 evening — timeline header fix + skills infra`
+- `c1f0308 (origin/main, origin/HEAD) docs(pk): v2.55 — timeline_live header fix (June dashboard rescue + 3-state root fix)`
+- `4526296 fix(scanner): timeline_live header-aware 3-state write (root cause of June dashboard break)`
 - `1ebe459 Auto: Add sheets_config for new month`
 - `8fee2b5 Monthly rotation: add sheets for 2026-07`
-- `1f4bf5d feat(skills): end-of-output proof in hook + fix plugin cache paths in MAP`
 
 ---
 
@@ -74,9 +74,8 @@ _Months in config: `2026-04`, `2026-05`, `2026-06`, `2026-07`_
 
 ## 🩺 Health
 
-- ⚠️ 31 uncommitted file(s):
--    - 3 modified
--    - 28 new/untracked
+- ⚠️ 26 uncommitted file(s):
+-    - 26 new/untracked
 
 ---
 
