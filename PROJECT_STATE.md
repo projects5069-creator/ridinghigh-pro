@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-06-02 17:28:08 -05
+**Generated:** 2026-06-02 18:12:18 -05
 **Branch:** `main`
-**Latest commit:** `0aef320` — feat(infra): RUN_MODE_DECISION.md decision tree + SESSION_PROTOCOL §2 hook (closes TASK-103)
+**Latest commit:** `db7f7bd` — feat(infra): NIGHT_RUN_TEMPLATE.md + bidirectional link with RUN_MODE_DECISION (closes TASK-102)
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `0aef320 (HEAD -> main) feat(infra): RUN_MODE_DECISION.md decision tree + SESSION_PROTOCOL §2 hook (closes TASK-103)`
-- `2216450 (origin/main, origin/HEAD) chore(backlog): persist TASK-96/101/102/103 created in 2026-06-02 thread`
+- `db7f7bd (HEAD -> main) feat(infra): NIGHT_RUN_TEMPLATE.md + bidirectional link with RUN_MODE_DECISION (closes TASK-102)`
+- `08ce896 (origin/main, origin/HEAD) feat(infra): RUN_MODE_DECISION.md decision tree + SESSION_PROTOCOL §2 hook (closes TASK-103)`
+- `2216450 chore(backlog): persist TASK-96/101/102/103 created in 2026-06-02 thread`
 - `bf8f0a2 chore(backlog): sync 2026-06-02 thread — TASK-60/91/97/98/99/100 status`
 - `27c9049 docs(session): close 2026-06-02 — monthly-email/rotation thread complete (TASK-60/97/98/99/100/91)`
-- `bb5ecb9 fix(rotation): create_agent_sheets fails loud on incomplete provisioning + 11->13 (TASK-91 scope-1+4)`
 
 ---
 
@@ -32,11 +32,11 @@ _See `OPEN_ISSUES.md` for full list_
 
 | Workflow | Status | Conclusion | Started |
 |---|---|---|---|
+| Post Analysis Collector | completed | ✅ success | 2026-06-02 23:06 UTC |
+| Agent — End of Day | completed | ✅ success | 2026-06-02 22:52 UTC |
+| Agent — Every Minute (DRY_RUN) | completed | ✅ success | 2026-06-02 22:28 UTC |
 | Daily Backup — post_analysis | completed | ✅ success | 2026-06-02 22:26 UTC |
 | Agent — Market Context (Hourly) | completed | ✅ success | 2026-06-02 21:53 UTC |
-| Agent — Daily Brief Email | completed | ✅ success | 2026-06-02 21:30 UTC |
-| Daily Backup — post_analysis | completed | ✅ success | 2026-06-02 21:21 UTC |
-| Agent — End of Day | completed | ✅ success | 2026-06-02 21:00 UTC |
 
 ---
 
@@ -50,7 +50,7 @@ _Months in config: `2026-04`, `2026-05`, `2026-06`, `2026-07`_
 | timeline_live | 37,597 | 2026-06-02 | ✅ |
 | daily_snapshots | 184 | 2026-06-02 | ✅ |
 | daily_summary | 206 | 2026-06-02 | ✅ |
-| post_analysis | 4 | 2026-06-01 | ✅ |
+| post_analysis | 12 | 2026-06-02 | ✅ |
 | portfolio | 13 | 2026-06-02 | ✅ |
 | portfolio_live | 13 | 2026-06-02 | ✅ |
 | score_tracker | 220 | 2026-06-02 | ✅ |
@@ -66,9 +66,9 @@ _Months in config: `2026-04`, `2026-05`, `2026-06`, `2026-07`_
 | news_findings | 97 | — | ✅ |
 | pending_suggestions | 0 | — | ⚠️ empty |
 | config_history | 0 | — | ⚠️ empty |
-| borrow_data | 0 | — | ⚠️ empty |
-| agent_scorecard | 4 | 2026-06-01 | ✅ |
-| weekly_summary | 0 | — | ⚠️ empty |
+| borrow_data | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| agent_scorecard | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| weekly_summary | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
 
 ---
 

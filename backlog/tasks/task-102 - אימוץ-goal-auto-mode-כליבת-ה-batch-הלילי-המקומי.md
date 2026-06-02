@@ -1,9 +1,10 @@
 ---
 id: TASK-102
 title: אימוץ /goal + auto mode כליבת ה-batch הלילי המקומי
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-06-02 17:44'
+updated_date: '2026-06-02 23:10'
 labels:
   - infra
   - auto-mode
