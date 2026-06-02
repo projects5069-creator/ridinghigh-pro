@@ -226,7 +226,7 @@ def _get_month_key(month_arg: str = None, next_month: bool = False) -> str:
 
 
 def _already_done(month_key: str) -> bool:
-    """True if sheets_config.json already has all 11 agent sheets for month_key."""
+    """True if sheets_config.json already has all 13 agent sheets for month_key."""
     config = sheets_manager._load_config()
     if month_key not in config:
         return False
@@ -244,14 +244,14 @@ def _set_headers(gc, sheet_id: str, headers: list):
 
 
 def create_agent_sheets(month_key: str, dry_run: bool = False):
-    """Create all 11 agent sheets for the given month."""
+    """Create all 13 agent sheets for the given month."""
     print(f"\n{'='*60}")
     print(f"  Agent Sheets Setup — {month_key}  {'(DRY-RUN)' if dry_run else ''}")
     print(f"{'='*60}")
 
     # Check idempotency
     if _already_done(month_key):
-        print(f"\n✅ All 11 agent sheets already exist for {month_key}")
+        print(f"\n✅ All 13 agent sheets already exist for {month_key}")
         config = sheets_manager._load_config()
         for name in AGENT_SHEET_NAMES:
             print(f"   {name}: {config[month_key][name]}")
@@ -262,7 +262,7 @@ def create_agent_sheets(month_key: str, dry_run: bool = False):
         for name in AGENT_SHEET_NAMES:
             col_count = len(AGENT_SHEET_HEADERS[name])
             print(f"   RH-{month_key}-{name} ({col_count} columns)")
-        print(f"\n[DRY-RUN] Would update sheets_config.json with 11 new IDs")
+        print(f"\n[DRY-RUN] Would update sheets_config.json with 13 new IDs")
         print(f"[DRY-RUN] No changes made.")
         return None
 
@@ -304,7 +304,7 @@ def create_agent_sheets(month_key: str, dry_run: bool = False):
         print(f"   Created new folder: {folder_id}")
 
     # Create each sheet
-    print(f"\n📄 Creating 11 Agent Sheets:")
+    print(f"\n📄 Creating 13 Agent Sheets:")
     config = sheets_manager._load_config()
     month_cfg = config.get(month_key, {})
     created_ids = {}
@@ -371,7 +371,7 @@ def create_agent_sheets(month_key: str, dry_run: bool = False):
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Create 11 Agent Google Sheets for a given month"
+        description="Create 13 Agent Google Sheets for a given month"
     )
     parser.add_argument(
         "--month", type=str, default=None,
@@ -389,6 +389,18 @@ def main():
 
     month_key = _get_month_key(args.month, next_month=args.next_month)
     create_agent_sheets(month_key, dry_run=args.dry_run)
+
+    # TASK-91 scope-1: fail LOUD if any agent sheet is missing after creation.
+    # A partial/failed run must abort so the workflow never commits an incomplete
+    # sheets_config (the silent gap that left June with 9 sheets on 1/5).
+    if not args.dry_run:
+        _cfg = sheets_manager._load_config()
+        _missing = [n for n in AGENT_SHEET_NAMES if n not in _cfg.get(month_key, {})]
+        if _missing:
+            print(f"\n❌ TASK-91: {len(_missing)}/{len(AGENT_SHEET_NAMES)} agent sheet(s) "
+                  f"missing for {month_key} after creation: {_missing}")
+            sys.exit(1)
+        print(f"\n✅ TASK-91: verified all {len(AGENT_SHEET_NAMES)} agent sheets for {month_key}")
 
 
 if __name__ == "__main__":
