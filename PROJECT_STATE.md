@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-06-01 20:08:01 -05
+**Generated:** 2026-06-01 20:29:40 -05
 **Branch:** `main`
-**Latest commit:** `d1b0ab3` — fix(scanner): timeline_live header-aware 3-state write (root cause of June dashboard break)
+**Latest commit:** `35fb62d` — docs(pk): v2.55 — timeline_live header fix (June dashboard rescue + 3-state root fix)
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `d1b0ab3 (HEAD -> main) fix(scanner): timeline_live header-aware 3-state write (root cause of June dashboard break)`
+- `35fb62d (HEAD -> main) docs(pk): v2.55 — timeline_live header fix (June dashboard rescue + 3-state root fix)`
+- `4526296 (origin/main, origin/HEAD) fix(scanner): timeline_live header-aware 3-state write (root cause of June dashboard break)`
+- `1ebe459 Auto: Add sheets_config for new month`
+- `8fee2b5 Monthly rotation: add sheets for 2026-07`
 - `1f4bf5d feat(skills): end-of-output proof in hook + fix plugin cache paths in MAP`
-- `016e375 docs(rule11): v3.2 — mandatory end-of-output skill proof`
-- `7ceb1b1 fix(provisioning): create 13 June agent sheets — paper_portfolio KeyError root fix`
-- `f96b3c4 docs(handoff): session close 2026-05-31 evening — TASK-80 closed, CI rescue, monthly email (TASK-48) + PK v2.54`
 
 ---
 
@@ -43,7 +43,7 @@ _See `OPEN_ISSUES.md` for full list_
 ## 📊 Google Sheets — showing month `2026-06`
 
 _Selection: current Peru month (2026-06) has data_
-_Months in config: `2026-04`, `2026-05`, `2026-06`_
+_Months in config: `2026-04`, `2026-05`, `2026-06`, `2026-07`_
 
 | Sheet | Total rows | Last date | Status |
 |---|---|---|---|
@@ -65,10 +65,10 @@ _Months in config: `2026-04`, `2026-05`, `2026-06`_
 | market_context | 3 | — | ✅ |
 | news_findings | 81 | — | ✅ |
 | pending_suggestions | 0 | — | ⚠️ empty |
-| config_history | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| borrow_data | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| config_history | 0 | — | ⚠️ empty |
+| borrow_data | 0 | — | ⚠️ empty |
 | agent_scorecard | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| weekly_summary | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| weekly_summary | 0 | — | ⚠️ empty |
 
 ---
 
