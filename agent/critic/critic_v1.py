@@ -74,7 +74,7 @@ def _get_monthly_worksheet():
 class CriticAgent:
     """Reviews completed trades and produces factual summaries."""
 
-    def review_completed_trades(self) -> List[Dict[str, Any]]:
+    def review_completed_trades(self, month: str = None) -> List[Dict[str, Any]]:
         """Read paper_portfolio + decision_log, return per-trade verdicts.
 
         Returns list of dicts, one per closed trade, with keys:
@@ -85,7 +85,7 @@ class CriticAgent:
         import sheets_manager as sm
 
         # --- Load paper_portfolio ---
-        port_rows = sm.get_sheet_values("paper_portfolio")
+        port_rows = sm.get_sheet_values("paper_portfolio", month=month)
         if len(port_rows) <= 1:
             logger.warning("paper_portfolio is empty")
             return []
@@ -109,7 +109,7 @@ class CriticAgent:
         pi_dq = _pcol("DataQuality")
 
         # --- Load decision_log for cross-reference ---
-        dec_rows = sm.get_sheet_values("decision_log")
+        dec_rows = sm.get_sheet_values("decision_log", month=month)
         dec_header = dec_rows[0] if dec_rows else []
         dec_data = dec_rows[1:] if len(dec_rows) > 1 else []
 
@@ -265,7 +265,7 @@ class CriticAgent:
         run_date = _dt.strptime(run_date_str, "%Y-%m-%d").date()
         month_of = (run_date - _rd(months=1)).strftime("%Y-%m")
         if trades is None:
-            trades = self.review_completed_trades()
+            trades = self.review_completed_trades(month=month_of)
         def _in_month(t):
             return str(t.get("ExitDate") or t.get("exit_date") or "")[:7] == month_of
         mt = [t for t in (trades or []) if _in_month(t)]

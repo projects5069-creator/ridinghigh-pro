@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-06-01 23:49:00 -05
+**Generated:** 2026-06-02 11:04:40 -05
 **Branch:** `main`
-**Latest commit:** `20043bb` — docs(session): close night-run 2026-06-01 — TASK-85/30/84 Done, PK v2.57, gitignore fix
+**Latest commit:** `48fe3dd` — fix(critic): monthly email reads PREVIOUS month's paper_portfolio (TASK-60)
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `20043bb (HEAD -> main) docs(session): close night-run 2026-06-01 — TASK-85/30/84 Done, PK v2.57, gitignore fix`
-- `b98ae90 (origin/main, origin/HEAD) Merge pull request #2 from projects5069-creator/claude/task-85-backlog-filename-guard`
+- `48fe3dd (HEAD -> main) fix(critic): monthly email reads PREVIOUS month's paper_portfolio (TASK-60)`
+- `6cb5891 (origin/main, origin/HEAD) docs(session): close night-run 2026-06-01 — TASK-85/30/84 Done, PK v2.57, gitignore fix`
+- `b98ae90 Merge pull request #2 from projects5069-creator/claude/task-85-backlog-filename-guard`
 - `d772c5c (origin/claude/task-85-backlog-filename-guard, claude/task-85-backlog-filename-guard) feat(hooks): pre-commit guard rejecting backlog filenames >200 bytes (TASK-85)`
 - `f5a3529 docs(session): close 2026-06-01 — TASK-40+77 done, add 93/94/95, PK v2.56`
-- `9111c8e chore(backlog): sync — TASK-40+77 Done, add TASK-93/94/95 (routines+agent8)`
 
 ---
 
@@ -32,39 +32,39 @@ _See `OPEN_ISSUES.md` for full list_
 
 | Workflow | Status | Conclusion | Started |
 |---|---|---|---|
-| Agent — Critic (daily) | completed | ✅ success | 2026-06-01 23:20 UTC |
-| Daily Backup — post_analysis | completed | ✅ success | 2026-06-01 23:13 UTC |
-| Agent — Daily Brief Email | completed | ✅ success | 2026-06-01 23:13 UTC |
-| Post Analysis Collector | completed | ✅ success | 2026-06-01 23:06 UTC |
-| Agent — End of Day | completed | ✅ success | 2026-06-01 22:54 UTC |
+| Agent — Every Minute (DRY_RUN) | in_progress | ⏳ — | 2026-06-02 16:04 UTC |
+| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-06-02 16:04 UTC |
+| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-06-02 16:03 UTC |
+| Agent — Every Minute (DRY_RUN) | in_progress | ⏳ — | 2026-06-02 16:03 UTC |
+| RidingHigh Auto Scanner | completed | ✅ success | 2026-06-02 16:02 UTC |
 
 ---
 
-## 📊 Google Sheets — showing month `2026-06`
+## 📊 Google Sheets — showing month `2026-07`
 
-_Selection: current Peru month (2026-06) has data_
+_Selection: most recent month with data (2026-07)_
 _Months in config: `2026-04`, `2026-05`, `2026-06`, `2026-07`_
 
 | Sheet | Total rows | Last date | Status |
 |---|---|---|---|
-| timeline_live | 16,540 | 2026-06-01 | ✅ |
-| daily_snapshots | 96 | 2026-06-01 | ✅ |
-| daily_summary | 109 | 2026-06-01 | ✅ |
-| post_analysis | 4 | 2026-06-01 | ✅ |
-| portfolio | 9 | 2026-06-01 | ✅ |
-| portfolio_live | 4 | 2026-06-01 | ✅ |
-| score_tracker | 4 | 2026-06-01 | ✅ |
-| live_trades | 4 | 2026-06-01 | ✅ |
+| timeline_live | 0 | — | ⚠️ empty |
+| daily_snapshots | 0 | — | ⚠️ empty |
+| daily_summary | 0 | — | ⚠️ empty |
+| post_analysis | 0 | — | ⚠️ empty |
+| portfolio | 0 | — | ⚠️ empty |
+| portfolio_live | 0 | — | ⚠️ empty |
+| score_tracker | 0 | — | ⚠️ empty |
 | ticker_follow_up | 0 | — | ⚠️ empty |
-| decision_log | 6 | — | ✅ |
-| paper_portfolio | 6 | — | ✅ |
-| score_analytics | 0 | — | ⚠️ empty |
-| postmortems | 0 | — | ⚠️ empty |
-| sentinel_events | 111 | — | ✅ |
-| system_events | 0 | — | ⚠️ empty |
-| market_context | 3 | — | ✅ |
-| news_findings | 81 | — | ✅ |
-| pending_suggestions | 0 | — | ⚠️ empty |
+| live_trades | 0 | — | ⚠️ empty |
+| decision_log | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| paper_portfolio | 0 | — | ⚠️ empty |
+| score_analytics | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| postmortems | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| sentinel_events | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| system_events | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| market_context | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| news_findings | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| pending_suggestions | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
 | config_history | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
 | borrow_data | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
 | agent_scorecard | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
@@ -74,8 +74,8 @@ _Months in config: `2026-04`, `2026-05`, `2026-06`, `2026-07`_
 
 ## 🩺 Health
 
-- ⚠️ 26 uncommitted file(s):
--    - 26 new/untracked
+- ⚠️ 27 uncommitted file(s):
+-    - 27 new/untracked
 
 ---
 

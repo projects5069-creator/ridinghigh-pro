@@ -42,7 +42,9 @@ def run():
         return summary
 
     try:
-        trades = critic.review_completed_trades()
+        from dateutil.relativedelta import relativedelta as _rd
+        month_of = (datetime.strptime(today, "%Y-%m-%d").date() - _rd(months=1)).strftime("%Y-%m")
+        trades = critic.review_completed_trades(month=month_of)
         row = critic.build_monthly_row(today, trades=trades)
     except Exception as e:
         logger.error("build_monthly_row failed: %s", e, exc_info=True)
