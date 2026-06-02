@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-06-02 11:04:40 -05
+**Generated:** 2026-06-02 12:36:09 -05
 **Branch:** `main`
-**Latest commit:** `48fe3dd` — fix(critic): monthly email reads PREVIOUS month's paper_portfolio (TASK-60)
+**Latest commit:** `372a7b4` — fix(critic): RH-Summaries monthly host falls back to env var for CI (TASK-97)
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `48fe3dd (HEAD -> main) fix(critic): monthly email reads PREVIOUS month's paper_portfolio (TASK-60)`
-- `6cb5891 (origin/main, origin/HEAD) docs(session): close night-run 2026-06-01 — TASK-85/30/84 Done, PK v2.57, gitignore fix`
+- `372a7b4 (HEAD -> main) fix(critic): RH-Summaries monthly host falls back to env var for CI (TASK-97)`
+- `816d135 (origin/main, origin/HEAD) fix(critic): monthly email reads PREVIOUS month's paper_portfolio (TASK-60)`
+- `6cb5891 docs(session): close night-run 2026-06-01 — TASK-85/30/84 Done, PK v2.57, gitignore fix`
 - `b98ae90 Merge pull request #2 from projects5069-creator/claude/task-85-backlog-filename-guard`
 - `d772c5c (origin/claude/task-85-backlog-filename-guard, claude/task-85-backlog-filename-guard) feat(hooks): pre-commit guard rejecting backlog filenames >200 bytes (TASK-85)`
-- `f5a3529 docs(session): close 2026-06-01 — TASK-40+77 done, add 93/94/95, PK v2.56`
 
 ---
 
@@ -32,32 +32,32 @@ _See `OPEN_ISSUES.md` for full list_
 
 | Workflow | Status | Conclusion | Started |
 |---|---|---|---|
-| Agent — Every Minute (DRY_RUN) | in_progress | ⏳ — | 2026-06-02 16:04 UTC |
-| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-06-02 16:04 UTC |
-| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-06-02 16:03 UTC |
-| Agent — Every Minute (DRY_RUN) | in_progress | ⏳ — | 2026-06-02 16:03 UTC |
-| RidingHigh Auto Scanner | completed | ✅ success | 2026-06-02 16:02 UTC |
+| Agent — Every Minute (DRY_RUN) | in_progress | ⏳ — | 2026-06-02 17:36 UTC |
+| RidingHigh Auto Scanner | queued | ⏳ — | 2026-06-02 17:36 UTC |
+| Agent — Every Minute (DRY_RUN) | in_progress | ⏳ — | 2026-06-02 17:35 UTC |
+| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-06-02 17:35 UTC |
+| Agent — Every Minute (DRY_RUN) | completed | ✅ success | 2026-06-02 17:34 UTC |
 
 ---
 
-## 📊 Google Sheets — showing month `2026-07`
+## 📊 Google Sheets — showing month `2026-06`
 
-_Selection: most recent month with data (2026-07)_
+_Selection: current Peru month (2026-06) has data_
 _Months in config: `2026-04`, `2026-05`, `2026-06`, `2026-07`_
 
 | Sheet | Total rows | Last date | Status |
 |---|---|---|---|
-| timeline_live | 0 | — | ⚠️ empty |
-| daily_snapshots | 0 | — | ⚠️ empty |
-| daily_summary | 0 | — | ⚠️ empty |
-| post_analysis | 0 | — | ⚠️ empty |
-| portfolio | 0 | — | ⚠️ empty |
-| portfolio_live | 0 | — | ⚠️ empty |
-| score_tracker | 0 | — | ⚠️ empty |
-| ticker_follow_up | 0 | — | ⚠️ empty |
-| live_trades | 0 | — | ⚠️ empty |
+| timeline_live | 28,040 | 2026-06-02 | ✅ |
+| daily_snapshots | 96 | 2026-06-01 | ✅ |
+| daily_summary | 109 | 2026-06-01 | ✅ |
+| post_analysis | 4 | 2026-06-01 | ✅ |
+| portfolio | 9 | 2026-06-01 | ✅ |
+| portfolio_live | 9 | 2026-06-01 | ✅ |
+| score_tracker | 220 | 2026-06-02 | ✅ |
+| live_trades | 220 | 2026-06-02 | ✅ |
+| ticker_follow_up | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
 | decision_log | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| paper_portfolio | 0 | — | ⚠️ empty |
+| paper_portfolio | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
 | score_analytics | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
 | postmortems | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
 | sentinel_events | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
@@ -74,8 +74,9 @@ _Months in config: `2026-04`, `2026-05`, `2026-06`, `2026-07`_
 
 ## 🩺 Health
 
-- ⚠️ 27 uncommitted file(s):
--    - 27 new/untracked
+- ⚠️ 33 uncommitted file(s):
+-    - 1 modified
+-    - 32 new/untracked
 
 ---
 

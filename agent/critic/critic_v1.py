@@ -45,9 +45,10 @@ def _get_monthly_worksheet():
     RH-Summaries spreadsheet. Single tab 'monthly_summary' (MonthOf carries the
     year). Returns ws, or None if not provisioned / on any error (caller degrades)."""
     try:
-        if not _SUMMARIES_DOTFILE.exists():
-            return None
-        sid = _SUMMARIES_DOTFILE.read_text().strip()
+        import os as _os
+        sid = (_os.environ.get("RH_SUMMARIES_SHEET_ID") or "").strip()
+        if not sid and _SUMMARIES_DOTFILE.exists():
+            sid = _SUMMARIES_DOTFILE.read_text().strip()
         if not sid:
             return None
         import sheets_manager as sm
