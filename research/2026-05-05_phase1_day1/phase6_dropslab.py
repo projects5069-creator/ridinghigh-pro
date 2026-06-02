@@ -7,7 +7,7 @@ import gspread
 from google.oauth2.service_account import Credentials
 
 CREDS_PATH = "/Users/adilevy/RidingHighPro/google_credentials.json"
-DROPSLAB_ID = "1M-ofmSmUHAb7o8J_pZFKYHh4N1aZVOXVWngFzTYxjZQ"
+DROPSLAB_ID = "1XM-qId7HAwEu-8-1GGHcy3RoyyAnsYshjZfDrKFnTMI"
 DROPSLAB_TAB = "DropsLab-Data"
 
 scopes = ["https://www.googleapis.com/auth/spreadsheets.readonly","https://www.googleapis.com/auth/drive.readonly"]
