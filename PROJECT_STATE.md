@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-06-02 14:38:55 -05
+**Generated:** 2026-06-02 14:43:39 -05
 **Branch:** `main`
-**Latest commit:** `3936d46` — fix(rotation): create_agent_sheets fails loud on incomplete provisioning + 11->13 (TASK-91 scope-1+4)
+**Latest commit:** `72e5347` — docs(session): close 2026-06-02 — monthly-email/rotation thread complete (TASK-60/97/98/99/100/91)
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `3936d46 (HEAD -> main) fix(rotation): create_agent_sheets fails loud on incomplete provisioning + 11->13 (TASK-91 scope-1+4)`
-- `d33b963 (origin/main, origin/HEAD) fix(critic): build_weekly_row reads all months a cross-boundary week spans (TASK-99)`
+- `72e5347 (HEAD -> main) docs(session): close 2026-06-02 — monthly-email/rotation thread complete (TASK-60/97/98/99/100/91)`
+- `bb5ecb9 (origin/main, origin/HEAD) fix(rotation): create_agent_sheets fails loud on incomplete provisioning + 11->13 (TASK-91 scope-1+4)`
+- `d33b963 fix(critic): build_weekly_row reads all months a cross-boundary week spans (TASK-99)`
 - `5f1067a feat(health): check_28 guards agent-sheets completeness for active month (TASK-91 scope-2)`
 - `b9a5dcd fix(critic): RH-Summaries monthly host falls back to env var for CI (TASK-97)`
-- `816d135 fix(critic): monthly email reads PREVIOUS month's paper_portfolio (TASK-60)`
 
 ---
 
@@ -32,11 +32,11 @@ _See `OPEN_ISSUES.md` for full list_
 
 | Workflow | Status | Conclusion | Started |
 |---|---|---|---|
-| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-06-02 19:38 UTC |
-| Agent — Every Minute (DRY_RUN) | in_progress | ⏳ — | 2026-06-02 19:38 UTC |
-| Agent — Every Minute (DRY_RUN) | in_progress | ⏳ — | 2026-06-02 19:37 UTC |
-| RidingHigh Auto Scanner | completed | ✅ success | 2026-06-02 19:37 UTC |
-| Agent — Every Minute (DRY_RUN) | in_progress | ⏳ — | 2026-06-02 19:36 UTC |
+| Agent — Every Minute (DRY_RUN) | in_progress | ⏳ — | 2026-06-02 19:43 UTC |
+| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-06-02 19:43 UTC |
+| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-06-02 19:42 UTC |
+| Agent — Every Minute (DRY_RUN) | in_progress | ⏳ — | 2026-06-02 19:42 UTC |
+| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-06-02 19:41 UTC |
 
 ---
 
@@ -47,7 +47,7 @@ _Months in config: `2026-04`, `2026-05`, `2026-06`, `2026-07`_
 
 | Sheet | Total rows | Last date | Status |
 |---|---|---|---|
-| timeline_live | 35,649 | 2026-06-02 | ✅ |
+| timeline_live | 35,900 | 2026-06-02 | ✅ |
 | daily_snapshots | 96 | 2026-06-01 | ✅ |
 | daily_summary | 109 | 2026-06-01 | ✅ |
 | post_analysis | 4 | 2026-06-01 | ✅ |
@@ -55,10 +55,10 @@ _Months in config: `2026-04`, `2026-05`, `2026-06`, `2026-07`_
 | portfolio_live | 9 | 2026-06-01 | ✅ |
 | score_tracker | 220 | 2026-06-02 | ✅ |
 | live_trades | 220 | 2026-06-02 | ✅ |
-| ticker_follow_up | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| decision_log | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| ticker_follow_up | 2,498 | 2026-06-02 | ✅ |
+| decision_log | 8 | — | ✅ |
 | paper_portfolio | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| score_analytics | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| score_analytics | 0 | — | ⚠️ empty |
 | postmortems | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
 | sentinel_events | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
 | system_events | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
