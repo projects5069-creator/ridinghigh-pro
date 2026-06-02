@@ -1,9 +1,10 @@
 ---
 id: TASK-40
 title: AUDIT.5 — Delete dummy_allow.py (dead code)
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-05-24 20:59'
+updated_date: '2026-06-02 02:45'
 labels: []
 dependencies: []
 priority: low

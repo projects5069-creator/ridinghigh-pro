@@ -1,9 +1,10 @@
 ---
 id: TASK-77
 title: 'תיקון DropsLab Sheet ID בריפו/PK — homoglyph I/l (הנכון: 1XM-qId7...)'
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-05-31 05:11'
+updated_date: '2026-06-02 03:06'
 labels:
   - bug
   - dropslab

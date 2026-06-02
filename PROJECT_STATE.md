@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-06-01 21:54:04 -05
-**Branch:** `claude/task-77-fix-dropslab-id-research`
-**Latest commit:** `14550c6` — fix(research): correct DropsLab Sheet ID in dated research scripts; docs preserved (TASK-77)
+**Generated:** 2026-06-01 22:06:48 -05
+**Branch:** `main`
+**Latest commit:** `a3f841c` — chore(backlog): sync — TASK-40+77 Done, add TASK-93/94/95 (routines+agent8)
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `14550c6 (HEAD -> claude/task-77-fix-dropslab-id-research) fix(research): correct DropsLab Sheet ID in dated research scripts; docs preserved (TASK-77)`
-- `5e83513 (origin/main, origin/HEAD, main) Merge TASK-40: remove dead dummy_allow.py orphan`
+- `a3f841c (HEAD -> main) chore(backlog): sync — TASK-40+77 Done, add TASK-93/94/95 (routines+agent8)`
+- `7b0754d Merge TASK-77: correct DropsLab Sheet ID in research scripts; docs preserved`
+- `fa841c8 (origin/claude/task-77-fix-dropslab-id-research, claude/task-77-fix-dropslab-id-research) fix(research): correct DropsLab Sheet ID in dated research scripts; docs preserved (TASK-77)`
+- `5e83513 (origin/main, origin/HEAD) Merge TASK-40: remove dead dummy_allow.py orphan`
 - `124ed65 (claude/task-40-remove-dummy-allow) chore(sentinel): remove dead dummy_allow.py orphan (TASK-40)`
-- `4283b77 docs(handoff): session close 2026-06-01 evening — timeline header fix + skills infra`
-- `c1f0308 docs(pk): v2.55 — timeline_live header fix (June dashboard rescue + 3-state root fix)`
 
 ---
 
@@ -66,7 +66,7 @@ _Months in config: `2026-04`, `2026-05`, `2026-06`, `2026-07`_
 | news_findings | 81 | — | ✅ |
 | pending_suggestions | 0 | — | ⚠️ empty |
 | config_history | 0 | — | ⚠️ empty |
-| borrow_data | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| borrow_data | 0 | — | ⚠️ empty |
 | agent_scorecard | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
 | weekly_summary | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
 
@@ -74,9 +74,8 @@ _Months in config: `2026-04`, `2026-05`, `2026-06`, `2026-07`_
 
 ## 🩺 Health
 
-- ⚠️ 28 uncommitted file(s):
--    - 1 modified
--    - 27 new/untracked
+- ⚠️ 26 uncommitted file(s):
+-    - 26 new/untracked
 
 ---
 
