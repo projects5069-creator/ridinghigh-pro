@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-06-03 15:31:29 -05
-**Branch:** `feat/task58-phase2-scanner-timeline-cache`
-**Latest commit:** `a0c699c` — perf(scanner): TASK-58 Phase 2 S1 — cache timeline_live reads (4 -> 2)
+**Generated:** 2026-06-03 15:40:52 -05
+**Branch:** `main`
+**Latest commit:** `938f409` — docs(session): close 2026-06-03 — 7 merges (schema fix, sentinel immunization+shadow, write-surface, reconcile, reads phase1+2)
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `a0c699c (HEAD -> feat/task58-phase2-scanner-timeline-cache) perf(scanner): TASK-58 Phase 2 S1 — cache timeline_live reads (4 -> 2)`
-- `960618a (origin/main, origin/HEAD, main) Merge pull request #6 from projects5069-creator/feat/task58-phase1-reduce-reads`
+- `938f409 (HEAD -> main) docs(session): close 2026-06-03 — 7 merges (schema fix, sentinel immunization+shadow, write-surface, reconcile, reads phase1+2)`
+- `3ecbd20 (origin/main, origin/HEAD) Merge pull request #7 from projects5069-creator/feat/task58-phase2-scanner-timeline-cache`
+- `1451889 (origin/feat/task58-phase2-scanner-timeline-cache, feat/task58-phase2-scanner-timeline-cache) perf(scanner): TASK-58 Phase 2 S1 — cache timeline_live reads (4 -> 2)`
+- `960618a Merge pull request #6 from projects5069-creator/feat/task58-phase1-reduce-reads`
 - `7740174 (origin/feat/task58-phase1-reduce-reads, feat/task58-phase1-reduce-reads) perf(reads): TASK-58 Phase 1 — single paper_portfolio read in build_account_state + read counter`
-- `fb923df config(sentinel): SENTINEL_MODE active -> shadow (TASK-66)`
-- `5eac2a6 docs/backlog: close TASK-105 + TASK-106 (done today); note TASK-49`
 
 ---
 
@@ -32,11 +32,11 @@ _See `OPEN_ISSUES.md` for full list_
 
 | Workflow | Status | Conclusion | Started |
 |---|---|---|---|
-| Agent — Every Minute (DRY_RUN) | in_progress | ⏳ — | 2026-06-03 20:31 UTC |
-| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-06-03 20:31 UTC |
-| Agent — Every Minute (DRY_RUN) | completed | ✅ success | 2026-06-03 20:30 UTC |
-| RidingHigh Auto Scanner | completed | ✅ success | 2026-06-03 20:30 UTC |
-| Agent — Every Minute (DRY_RUN) | completed | ✅ success | 2026-06-03 20:29 UTC |
+| RidingHigh Auto Scanner | completed | ✅ success | 2026-06-03 20:40 UTC |
+| Agent — Every Minute (DRY_RUN) | completed | ✅ success | 2026-06-03 20:40 UTC |
+| RidingHigh Auto Scanner | completed | ✅ success | 2026-06-03 20:39 UTC |
+| Agent — Every Minute (DRY_RUN) | completed | ✅ success | 2026-06-03 20:39 UTC |
+| Agent — Every Minute (DRY_RUN) | completed | ✅ success | 2026-06-03 20:38 UTC |
 
 ---
 
