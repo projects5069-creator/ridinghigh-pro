@@ -69,6 +69,18 @@ def df_to_sheet(ws, df):
     sheets_manager._with_retry(ws.clear)
     sheets_manager.safe_update(ws, data)
 
+
+def _read_timeline_live(gc=None):
+    """TASK-58 S1: read timeline_live through the 60s cache (get_sheet_values)
+    instead of raw get_all_values, so the 4 reads/run collapse to 2 (one
+    pre-write, one post-write). Callers MUST invalidate_cache("timeline_live")
+    immediately after writing the scan rows, else the post-write reads are
+    stale. Returns rows (list of lists), same shape as ws.get_all_values().
+    The gc arg is accepted for call-site compatibility; get_sheet_values
+    manages its own client.
+    """
+    return sheets_manager.get_sheet_values("timeline_live")
+
 # ── Market Cap cache ─────────────────────────────────────────────────────────
 _mc_cache = {}
 
@@ -338,8 +350,7 @@ def run_scan():
     # ── Scan tracked tickers not in FINVIZ ──────────────────────────────────
     try:
         gc = get_gsheets_client()
-        ws_tl = sheets_manager.get_worksheet("timeline_live", gc=gc)
-        tl_data = ws_tl.get_all_values() if ws_tl else []
+        tl_data = _read_timeline_live(gc)  # TASK-58 S1: cached read (was raw get_all_values)
         if len(tl_data) > 1:
             tl_df = pd.DataFrame(tl_data[1:], columns=tl_data[0])
             today_str = now_peru.strftime('%Y-%m-%d')
@@ -432,6 +443,12 @@ def run_scan():
                 dedup_vals={scan_time_str},
             )
 
+        # TASK-58 S1: invalidate the cached timeline_live snapshot after the
+        # write so the post-write reads (daily_summary, ticker_follow_up) see
+        # this minute's rows. Skip when the write was skipped (_hdr is None).
+        if _hdr is not None:
+            sheets_manager.invalidate_cache("timeline_live")
+
         # ── Daily snapshot at 14:59 ───────────────────────────────────────────
         if is_snapshot_time():
             ws_snap = sheets_manager.get_worksheet("daily_snapshots", gc=gc)
@@ -519,7 +536,7 @@ def run_scan():
 def _save_daily_summary(gc, today: str, ws_timeline):
     """Build and upsert daily_summary: one row per ticker with peak-score stats."""
     try:
-        tl_raw = ws_timeline.get_all_values()
+        tl_raw = _read_timeline_live(gc)  # TASK-58 S1: cached read (post-write; was raw get_all_values)
         if len(tl_raw) <= 1:
             return
         tl_df = pd.DataFrame(tl_raw[1:], columns=tl_raw[0])
@@ -741,10 +758,8 @@ def update_ticker_follow_up(gc, now_peru):
         today_date = now_peru.date()
 
         # Load timeline_live to find tickers that need follow-up
-        ws_tl = sheets_manager.get_worksheet("timeline_live", gc=gc)
-        if not ws_tl:
-            return
-        tl_data = ws_tl.get_all_values()
+        # TASK-58 S1: cached read (was get_worksheet + raw get_all_values).
+        tl_data = _read_timeline_live(gc)
         if len(tl_data) <= 1:
             return
 
