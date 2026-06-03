@@ -28,6 +28,11 @@ TODAY = datetime.now(pytz.timezone("America/Lima")).strftime("%Y-%m-%d")
 RESULTS = []
 
 
+def _record(name, ok, detail=""):
+    RESULTS.append((name, ok))
+    print(f"  [{'PASS' if ok else 'FAIL'}] {name}{(' — ' + detail) if detail else ''}")
+
+
 def _enter(ticker):
     """A decision_log ENTER row for today."""
     return {"Timestamp": f"{TODAY}T08:48:03", "Action": "ENTER", "Ticker": ticker}
@@ -85,6 +90,56 @@ def _case(name, pf_records, dec_records, exp_total, exp_recognized, exp_open,
     return ok
 
 
+def _counting_build(pf_records, dec_records):
+    """Run build_account_state with per-tab read counting. Returns (state, counts)."""
+    counts = {}
+    orig_ws = sheets_manager.get_worksheet
+    orig_recs = sheets_manager.get_sheet_records
+
+    def counting_recs(tab, *a, **k):
+        counts[tab] = counts.get(tab, 0) + 1
+        if tab == "paper_portfolio":
+            return list(pf_records)
+        if tab == "decision_log":
+            return list(dec_records)
+        return []
+
+    sheets_manager.get_worksheet = lambda tab, *a, **k: True
+    sheets_manager.get_sheet_records = counting_recs
+    try:
+        state = build_account_state(broker=None)
+    finally:
+        sheets_manager.get_worksheet = orig_ws
+        sheets_manager.get_sheet_records = orig_recs
+    return state, counts
+
+
+def test_reads_paper_portfolio_once():
+    # TASK-58 R1: build_account_state must read each tab ONCE per run.
+    pf = [{"Ticker": "ANY", "Status": "DRY_RUN_OPEN", "EntryDate": TODAY, "ExitDate": ""}]
+    state, counts = _counting_build(pf, [_enter("ANY")])
+    ok = counts.get("paper_portfolio") == 1 and counts.get("decision_log") == 1
+    _record("reads_paper_portfolio_once", ok, f"counts={counts}")
+
+
+def test_exited_today_from_single_read():
+    # A ticker entered AND closed today: derived from the single pp read,
+    # it must NOT be in existing_positions (re-entry allowed), but still
+    # counted in cold_start_daily_used + entries_today_by_ticker.
+    pf = [{"Ticker": "XOS", "Status": "DRY_RUN_CLOSED", "EntryDate": TODAY,
+           "ExitDate": TODAY}]
+    state, counts = _counting_build(pf, [_enter("XOS")])
+    ok = ("XOS" not in state["existing_positions"]
+          and state["cold_start_daily_used"] == 1
+          and state["entries_today_by_ticker"].get("XOS") == 1
+          and state["open_position_count"] == 0
+          and state["pf_total_rows"] == 1
+          and state["pf_status_recognized_count"] == 1
+          and counts.get("paper_portfolio") == 1)
+    _record("exited_today_from_single_read", ok,
+            f"existing={state['existing_positions']}, daily={state['cold_start_daily_used']}, counts={counts}")
+
+
 def run():
     print("=== test_account_state_v1 (producer: build_account_state) ===")
 
@@ -115,6 +170,10 @@ def run():
           [], [_enter("XOS")],
           exp_total=0, exp_recognized=0, exp_open=0,
           exp_decision="BLOCK", exp_reason="POSITION_SYNC_FAILED")
+
+    # TASK-58 R1: read-once + exited_today from the single read
+    test_reads_paper_portfolio_once()
+    test_exited_today_from_single_read()
 
     passed = sum(1 for _, ok in RESULTS if ok)
     total = len(RESULTS)

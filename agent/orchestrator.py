@@ -204,83 +204,76 @@ def build_account_state(broker=None) -> Dict[str, Any]:
 
     try:
         import sheets_manager
-        # Open positions from paper_portfolio
-        ws_pf = sheets_manager.get_worksheet("paper_portfolio")
         today = datetime.now(PERU_TZ).strftime("%Y-%m-%d")
-        if ws_pf:
-            try:
-                records = sheets_manager.get_sheet_records("paper_portfolio")
-            except Exception as fetch_err:
-                # 2026-05-20: catch fetch failure (e.g. 429) so position_sync
-                # can distinguish quota issues from real position drift.
-                logger.warning("build_account_state: paper_portfolio fetch failed (%s) — "
-                               "setting paper_portfolio_fetch_failed=True", fetch_err)
-                state["paper_portfolio_fetch_failed"] = True
-                records = []
-            for row in records:
-                status = str(row.get("Status", "")).upper()
-                ticker = str(row.get("Ticker", "")).strip().upper()
-                # 2026-06-03 immunization: count every row + rows with a
-                # recognized Status, so position_sync can distinguish an
-                # unreadable portfolio (rows>0 but recognized==0) from drift.
-                state["pf_total_rows"] += 1
-                if status in ("OPEN", "DRY_RUN_OPEN", "CLOSED", "DRY_RUN_CLOSED"):
-                    state["pf_status_recognized_count"] += 1
-                if status in ("OPEN", "DRY_RUN_OPEN"):
-                    if ticker:
-                        state["existing_positions"].add(ticker)
-                    # Count every OPEN row — duplicate tickers count separately.
-                    state["open_position_count"] += 1
-                # 2026-05-23 Fix D: ALSO count today ENTRIES per ticker from
-                # paper_portfolio (any status — OPEN or already closed today).
-                # This is a SECONDARY source that runs in union with decision_log.
-                # Rationale: Google Sheets eventual-consistency can hide recent
-                # writes from one sheet for minutes. Counting BOTH sources and
-                # taking the max ensures Filter 9 sees the highest available
-                # count regardless of which sheet is currently lagging.
-                entry_date = str(row.get("EntryDate", "")).strip()
-                if entry_date == today and ticker:
-                    state["entries_today_by_ticker_pf"][ticker] = (
-                        state["entries_today_by_ticker_pf"].get(ticker, 0) + 1
-                    )
 
-        # cold_start cap now reflects real concurrent positions, not unique tickers.
+        # ── paper_portfolio: SINGLE read (TASK-58). Derive open/existing,
+        #    pf_total_rows/pf_status_recognized_count, today's per-ticker
+        #    entries, AND today's exits — all from one fetch (was 2 reads +
+        #    redundant get_worksheet truthiness calls). get_sheet_records
+        #    returns [] for a missing sheet, so no truthiness probe needed.
+        try:
+            pf_records = sheets_manager.get_sheet_records("paper_portfolio")
+        except Exception as fetch_err:
+            # 2026-05-20: a fetch failure (e.g. 429) is a quota/network issue,
+            # not real position drift — flag it so position_sync returns WARN.
+            logger.warning("build_account_state: paper_portfolio fetch failed (%s) — "
+                           "setting paper_portfolio_fetch_failed=True", fetch_err)
+            state["paper_portfolio_fetch_failed"] = True
+            pf_records = []
+
+        exited_today = set()
+        for row in pf_records:
+            status = str(row.get("Status", "")).upper()
+            ticker = str(row.get("Ticker", "")).strip().upper()
+            # 2026-06-03 immunization: count every row + rows with a recognized
+            # Status, so position_sync can tell an unreadable portfolio
+            # (rows>0 but recognized==0) apart from a genuine drift.
+            state["pf_total_rows"] += 1
+            if status in ("OPEN", "DRY_RUN_OPEN", "CLOSED", "DRY_RUN_CLOSED"):
+                state["pf_status_recognized_count"] += 1
+            if status in ("OPEN", "DRY_RUN_OPEN"):
+                if ticker:
+                    state["existing_positions"].add(ticker)
+                # Count every OPEN row — duplicate tickers count separately.
+                state["open_position_count"] += 1
+            # 2026-05-23 Fix D: per-ticker entries today from paper_portfolio
+            # (any status) — secondary source, unioned with decision_log below.
+            entry_date = str(row.get("EntryDate", "")).strip()
+            if entry_date == today and ticker:
+                state["entries_today_by_ticker_pf"][ticker] = (
+                    state["entries_today_by_ticker_pf"].get(ticker, 0) + 1
+                )
+            # Tickers that exited today (so a re-entry isn't blocked) — derived
+            # from the SAME read (TASK-58: previously a second paper_portfolio fetch).
+            exit_date = str(row.get("ExitDate", "")).strip()
+            if exit_date == today and status not in ("OPEN", "DRY_RUN_OPEN") and ticker:
+                exited_today.add(ticker)
+
+        # cold_start cap reflects real concurrent positions, not unique tickers.
         state["cold_start_concurrent_used"] = state["open_position_count"]
 
-        # Today's ENTER decisions from decision_log
-        # ALSO add tickers to existing_positions to prevent duplicate ENTER
-        # when paper_portfolio sheet write hasn't propagated yet (race condition fix)
-        ws_dl = sheets_manager.get_worksheet("decision_log")
-        if ws_dl:
-            records = sheets_manager.get_sheet_records("decision_log")
-            today = datetime.now(PERU_TZ).strftime("%Y-%m-%d")
-            # Build set of tickers that exited today (so we can re-enter them)
-            exited_today = set()
-            ws_pf2 = sheets_manager.get_worksheet("paper_portfolio")
-            if ws_pf2:
-                pf_records = sheets_manager.get_sheet_records("paper_portfolio")
-                for pf_row in pf_records:
-                    exit_date = str(pf_row.get("ExitDate", "")).strip()
-                    status = str(pf_row.get("Status", "")).upper()
-                    if exit_date == today and status not in ("OPEN", "DRY_RUN_OPEN"):
-                        ticker = str(pf_row.get("Ticker", "")).strip().upper()
-                        if ticker:
-                            exited_today.add(ticker)
-            # Add today's ENTER tickers to existing_positions UNLESS they exited today
-            for row in records:
-                ts = str(row.get("Timestamp", ""))
-                if ts.startswith(today) and str(row.get("Action", "")).upper() == "ENTER":
-                    state["cold_start_daily_used"] += 1
-                    # Bug #5 root-cause fix: count per-ticker entries from
-                    # decision_log (reliable SSoT), not paper_portfolio.
-                    _tk = str(row.get("Ticker", "")).strip().upper()
-                    if _tk:
-                        state["entries_today_by_ticker"][_tk] = (
-                            state["entries_today_by_ticker"].get(_tk, 0) + 1
-                        )
-                    ticker = str(row.get("Ticker", "")).strip().upper()
-                    if ticker and ticker not in exited_today:
-                        state["existing_positions"].add(ticker)
+        # ── decision_log: SINGLE read. Today's ENTERs feed cold_start_daily_used
+        #    + per-ticker counts; add tickers to existing_positions UNLESS they
+        #    exited today (race-condition fix for un-propagated pp writes).
+        try:
+            dl_records = sheets_manager.get_sheet_records("decision_log")
+        except Exception as dl_err:
+            logger.warning("build_account_state: decision_log fetch failed (%s)", dl_err)
+            state["paper_portfolio_fetch_failed"] = True
+            dl_records = []
+        for row in dl_records:
+            ts = str(row.get("Timestamp", ""))
+            if ts.startswith(today) and str(row.get("Action", "")).upper() == "ENTER":
+                state["cold_start_daily_used"] += 1
+                # Bug #5 root-cause fix: count per-ticker entries from
+                # decision_log (reliable SSoT), not paper_portfolio.
+                _tk = str(row.get("Ticker", "")).strip().upper()
+                if _tk:
+                    state["entries_today_by_ticker"][_tk] = (
+                        state["entries_today_by_ticker"].get(_tk, 0) + 1
+                    )
+                    if _tk not in exited_today:
+                        state["existing_positions"].add(_tk)
 
         # 2026-05-23 Fix D: union the two counters — for each ticker that
         # appears in either source, take the max. This protects Filter 9
@@ -452,6 +445,14 @@ def run() -> Dict[str, Any]:
     now = datetime.now(PERU_TZ)
     logger.info("=" * 60)
     logger.info("Agent run started at %s Peru", now.strftime("%Y-%m-%d %H:%M:%S"))
+
+    # TASK-58: reset per-tab read counter so the end-of-run summary reflects
+    # this run's actual API reads (for measuring read-reduction).
+    try:
+        import sheets_manager as _sm_rc
+        _sm_rc.reset_read_counts()
+    except Exception:
+        pass
 
     # Safety check 1: market hours
     if not is_market_hours(now):
@@ -770,6 +771,15 @@ def run() -> Dict[str, Any]:
         summary["enters"], summary["skips"], summary["errors"],
         sentinel_blocks,
     )
+    # TASK-58: one-line read summary per run (per-tab API reads, cache misses only).
+    try:
+        import sheets_manager as _sm_rc
+        _rc = _sm_rc.get_read_counts()
+        summary["sheet_reads"] = _rc
+        logger.info("Sheets API reads this run (cache misses): total=%d %s",
+                    sum(_rc.values()), _rc)
+    except Exception:
+        pass
     return summary
 
 

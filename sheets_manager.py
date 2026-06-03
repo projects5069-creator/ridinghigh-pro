@@ -394,6 +394,28 @@ def _with_retry(fn, *args, **kwargs):
     raise last_error
 
 
+# ── Per-tab read counter (TASK-58): mirror of the write counter, for
+#    measuring reads/run before vs after read-reduction. In-process (resets
+#    each orchestrator run via reset_read_counts()). Counts only actual API
+#    fetches (cache hits are free and not counted).
+_read_counts = {}
+
+
+def record_read(tab_name):
+    """Record one actual API read for a tab (cache miss). Best-effort."""
+    _read_counts[tab_name] = _read_counts.get(tab_name, 0) + 1
+
+
+def get_read_counts() -> dict:
+    """Return a copy of the per-tab API-read counts for this process."""
+    return dict(_read_counts)
+
+
+def reset_read_counts():
+    """Reset the per-tab read counter (call at the start of a run)."""
+    _read_counts.clear()
+
+
 def get_sheet_values(tab_name: str, month: str = None):
     """Return all rows of a worksheet, with 60s cache + 429 retry.
 
@@ -407,6 +429,7 @@ def get_sheet_values(tab_name: str, month: str = None):
     cached = _sheet_values_cache.get(key)
     if cached is not None and (now - cached[0]) < _SHEET_CACHE_TTL:
         return cached[1]
+    record_read(tab_name)  # TASK-58: count actual API fetch (cache miss)
     ws = _with_retry(get_worksheet, tab_name, month)
     if ws is None:
         return []
