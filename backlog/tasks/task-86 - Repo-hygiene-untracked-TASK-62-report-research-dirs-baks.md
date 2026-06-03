@@ -1,9 +1,10 @@
 ---
 id: TASK-86
 title: 'Repo hygiene: untracked TASK-62 report + research dirs + baks'
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-05-31 18:27'
+updated_date: '2026-06-03 00:38'
 labels:
   - hygiene
   - repo

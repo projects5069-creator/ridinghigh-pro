@@ -73,3 +73,8 @@ provider_validation_report.json
 *.bak
 .skill_audit.log
 .rh_summaries_sheet_id
+
+# Research artifacts — kept locally, not tracked (TASK-86)
+research/
+# numbered backup variants (.bak2_, .bak3b_) not caught by *.bak_* (TASK-86)
+*.bak[0-9]*

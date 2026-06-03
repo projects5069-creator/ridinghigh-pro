@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-06-02 19:14:24 -05
+**Generated:** 2026-06-02 19:38:39 -05
 **Branch:** `main`
-**Latest commit:** `d97683a` — docs(data): DATA_SOURCES_MAP.md — central map of all sheets+files (closes TASK-64)
+**Latest commit:** `fde4d30` — chore(hygiene): clean untracked .bak + gitignore research/ + commit TASK-62 report (closes TASK-86)
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `d97683a (HEAD -> main) docs(data): DATA_SOURCES_MAP.md — central map of all sheets+files (closes TASK-64)`
-- `4f73f25 (origin/main, origin/HEAD) feat(infra): NIGHT_RUN_TEMPLATE.md + bidirectional link with RUN_MODE_DECISION (closes TASK-102)`
+- `fde4d30 (HEAD -> main) chore(hygiene): clean untracked .bak + gitignore research/ + commit TASK-62 report (closes TASK-86)`
+- `3a15953 (origin/main, origin/HEAD) docs(data): DATA_SOURCES_MAP.md — central map of all sheets+files (closes TASK-64)`
+- `4f73f25 feat(infra): NIGHT_RUN_TEMPLATE.md + bidirectional link with RUN_MODE_DECISION (closes TASK-102)`
 - `08ce896 feat(infra): RUN_MODE_DECISION.md decision tree + SESSION_PROTOCOL §2 hook (closes TASK-103)`
 - `2216450 chore(backlog): persist TASK-96/101/102/103 created in 2026-06-02 thread`
-- `bf8f0a2 chore(backlog): sync 2026-06-02 thread — TASK-60/91/97/98/99/100 status`
 
 ---
 
@@ -73,9 +73,7 @@ _Months in config: `2026-04`, `2026-05`, `2026-06`, `2026-07`_
 ---
 
 ## 🩺 Health
-
-- ⚠️ 26 uncommitted file(s):
--    - 26 new/untracked
+✅ All checks passed.
 
 ---
 
