@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-06-02 19:38:39 -05
+**Generated:** 2026-06-02 20:04:36 -05
 **Branch:** `main`
-**Latest commit:** `fde4d30` — chore(hygiene): clean untracked .bak + gitignore research/ + commit TASK-62 report (closes TASK-86)
+**Latest commit:** `dcb77db` — docs(session): close 2026-06-02 evening — night-run infra + data map (TASK-103/102/64/86)
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `fde4d30 (HEAD -> main) chore(hygiene): clean untracked .bak + gitignore research/ + commit TASK-62 report (closes TASK-86)`
-- `3a15953 (origin/main, origin/HEAD) docs(data): DATA_SOURCES_MAP.md — central map of all sheets+files (closes TASK-64)`
+- `dcb77db (HEAD -> main) docs(session): close 2026-06-02 evening — night-run infra + data map (TASK-103/102/64/86)`
+- `7caeb6c (origin/main, origin/HEAD) chore(hygiene): clean untracked .bak + gitignore research/ + commit TASK-62 report (closes TASK-86)`
+- `3a15953 docs(data): DATA_SOURCES_MAP.md — central map of all sheets+files (closes TASK-64)`
 - `4f73f25 feat(infra): NIGHT_RUN_TEMPLATE.md + bidirectional link with RUN_MODE_DECISION (closes TASK-102)`
 - `08ce896 feat(infra): RUN_MODE_DECISION.md decision tree + SESSION_PROTOCOL §2 hook (closes TASK-103)`
-- `2216450 chore(backlog): persist TASK-96/101/102/103 created in 2026-06-02 thread`
 
 ---
 
@@ -65,8 +65,8 @@ _Months in config: `2026-04`, `2026-05`, `2026-06`, `2026-07`_
 | market_context | 6 | — | ✅ |
 | news_findings | 97 | — | ✅ |
 | pending_suggestions | 0 | — | ⚠️ empty |
-| config_history | 0 | — | ⚠️ empty |
-| borrow_data | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| config_history | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| borrow_data | 0 | — | ⚠️ empty |
 | agent_scorecard | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
 | weekly_summary | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
 
