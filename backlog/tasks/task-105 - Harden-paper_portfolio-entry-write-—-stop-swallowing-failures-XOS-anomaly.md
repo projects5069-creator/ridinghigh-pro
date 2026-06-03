@@ -1,9 +1,10 @@
 ---
 id: TASK-105
 title: Harden paper_portfolio entry-write — stop swallowing failures (XOS anomaly)
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-06-03 18:13'
+updated_date: '2026-06-03 19:06'
 labels:
   - order-manager
   - robustness
@@ -24,6 +25,12 @@ Today's only ENTER (XOS @ 08:48) was logged in decision_log but produced ZERO ro
 - [ ] #1 A failed paper_portfolio entry-write is no longer swallowed silently — it either retries robustly (idempotent, dedup by PositionID) or surfaces a clear alert/log that makes the failure visible (e.g. sentinel_events / system_events / counted as error in run summary).
 - [ ] #2 decision_log ENTER and paper_portfolio write no longer diverge silently: a write failure is observable, not lost.
 <!-- AC:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+Resolved by PR #4 (commit dc3ddbf, 2026-06-03): order_manager now returns write status, execute() sets decision.portfolio_written, orchestrator._record_entry_outcome counts a failed write as error (not silent success); _APPEND_RETRY_MAX=4. Verified green on main (517e701..). PK v2.66.
+<!-- SECTION:NOTES:END -->
 
 ## Definition of Done
 <!-- DOD:BEGIN -->
