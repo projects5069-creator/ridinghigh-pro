@@ -33,6 +33,7 @@ def run() -> Dict[str, Any]:
     summary = {
         "timestamp": datetime.now(PERU_TZ).isoformat(),
         "reconciler_drift": 0,
+        "reconcile_missing_portfolio": 0,   # TASK-106: decision_log ENTERs w/o portfolio row
         "daily_analytics": None,
         "weekly_analytics": None,
         "weekly_suggestions": 0,
@@ -48,10 +49,39 @@ def run() -> Dict[str, Any]:
         from agent.execution.alpaca_broker import AlpacaBroker
         from agent.execution.reconciler import Reconciler
         broker = AlpacaBroker()
-        reconciler = Reconciler(broker=broker)
+
+        # TASK-106: alert_writer flags reconciliation gaps to system_events
+        # (non-Sentinel tab; best-effort — never breaks the EOD run).
+        def _system_events_alert(event):
+            try:
+                import json as _json
+                import sheets_manager as _sm
+                ws = _sm.get_worksheet("system_events")
+                if not ws:
+                    return
+                row = [
+                    event.get("timestamp", datetime.now(PERU_TZ).isoformat()),
+                    "RECONCILE_" + str(event.get("type", "DRIFT")),
+                    "WARNING",
+                    "reconciler",
+                    str(event.get("type", "")),
+                    _json.dumps({"ticker": event.get("ticker"),
+                                 "decision_id": event.get("decision_id")}, default=str)[:500],
+                    str(event.get("action_taken", "flag")),
+                ]
+                _sm.safe_append_row(ws, row)
+            except Exception as _e:
+                logger.warning("system_events alert write failed (non-fatal): %s", _e)
+
+        reconciler = Reconciler(broker=broker, alert_writer=_system_events_alert)
         drift_stats = reconciler.reconcile()
         summary["reconciler_drift"] = drift_stats.get("phantom_open", 0) + drift_stats.get("orphan_position", 0)
         logger.info("Reconciler: %s", drift_stats)
+
+        # TASK-106 (flag-only): decision_log ENTER without a matching
+        # paper_portfolio row (the XOS pattern). Works in DRY_RUN.
+        missing_stats = reconciler.reconcile_decision_log_vs_portfolio(summary)
+        logger.info("Reconcile decision_log↔portfolio: %s missing", missing_stats["missing_portfolio_row"])
     except Exception as e:
         summary["errors"] += 1
         logger.error("Reconciler failed: %s", e, exc_info=True)
@@ -101,6 +131,7 @@ def run() -> Dict[str, Any]:
                 f"{summary['errors']} error(s) in EOD orchestrator",
                 f"Run at {summary['timestamp']}\n"
                 f"Reconciler drift: {summary['reconciler_drift']}\n"
+                f"Missing portfolio rows (decision_log↔pf): {summary['reconcile_missing_portfolio']}\n"
                 f"Daily analytics: {summary['daily_analytics']}\n"
                 f"Weekly suggestions: {summary['weekly_suggestions']}\n"
                 f"Errors: {summary['errors']}"

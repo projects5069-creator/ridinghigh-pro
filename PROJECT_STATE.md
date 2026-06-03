@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-06-03 13:39:57 -05
-**Branch:** `main`
-**Latest commit:** `1dc5298` — docs/backlog: add TASK-106 reconciliation
+**Generated:** 2026-06-03 13:55:20 -05
+**Branch:** `feat/task106-reconcile-flag`
+**Latest commit:** `9f763d2` — feat(reconciler): flag decision_log ENTERs without a paper_portfolio row (TASK-106)
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `1dc5298 (HEAD -> main) docs/backlog: add TASK-106 reconciliation`
-- `ef681e7 (origin/main, origin/HEAD) Merge pull request #4 from projects5069-creator/feat/task105-surface-write-failure`
+- `9f763d2 (HEAD -> feat/task106-reconcile-flag) feat(reconciler): flag decision_log ENTERs without a paper_portfolio row (TASK-106)`
+- `0f80603 (origin/main, origin/HEAD, main) docs/backlog: add TASK-106 reconciliation`
+- `ef681e7 Merge pull request #4 from projects5069-creator/feat/task105-surface-write-failure`
 - `dc3ddbf (origin/feat/task105-surface-write-failure, feat/task105-surface-write-failure) feat(order-manager): surface paper_portfolio write failures (TASK-105)`
 - `517e701 Merge pull request #3 from projects5069-creator/feat/possync-dataquality-warn`
-- `91a9a15 (origin/feat/possync-dataquality-warn, feat/possync-dataquality-warn) feat(sentinel): position_sync immunization — data-quality WARN vs drift BLOCK`
 
 ---
 
@@ -32,11 +32,11 @@ _See `OPEN_ISSUES.md` for full list_
 
 | Workflow | Status | Conclusion | Started |
 |---|---|---|---|
-| Agent — Every Minute (DRY_RUN) | in_progress | ⏳ — | 2026-06-03 18:39 UTC |
-| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-06-03 18:39 UTC |
-| Agent — Every Minute (DRY_RUN) | completed | ✅ success | 2026-06-03 18:38 UTC |
-| RidingHigh Auto Scanner | completed | ✅ success | 2026-06-03 18:38 UTC |
-| Agent — Every Minute (DRY_RUN) | completed | ✅ success | 2026-06-03 18:37 UTC |
+| Agent — Every Minute (DRY_RUN) | in_progress | ⏳ — | 2026-06-03 18:55 UTC |
+| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-06-03 18:55 UTC |
+| Agent — Every Minute (DRY_RUN) | in_progress | ⏳ — | 2026-06-03 18:54 UTC |
+| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-06-03 18:54 UTC |
+| Agent — Every Minute (DRY_RUN) | completed | ✅ success | 2026-06-03 18:53 UTC |
 
 ---
 
@@ -47,28 +47,28 @@ _Months in config: `2026-04`, `2026-05`, `2026-06`, `2026-07`_
 
 | Sheet | Total rows | Last date | Status |
 |---|---|---|---|
-| timeline_live | 46,373 | 2026-06-03 | ✅ |
+| timeline_live | 46,947 | 2026-06-03 | ✅ |
 | daily_snapshots | 184 | 2026-06-02 | ✅ |
 | daily_summary | 206 | 2026-06-02 | ✅ |
 | post_analysis | 12 | 2026-06-02 | ✅ |
-| portfolio | 13 | 2026-06-02 | ✅ |
+| portfolio | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
 | portfolio_live | 13 | 2026-06-02 | ✅ |
-| score_tracker | 688 | 2026-06-03 | ✅ |
-| live_trades | 688 | 2026-06-03 | ✅ |
-| ticker_follow_up | 8,810 | 2026-06-03 | ✅ |
+| score_tracker | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| live_trades | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| ticker_follow_up | 9,136 | 2026-06-03 | ✅ |
 | decision_log | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
 | paper_portfolio | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| score_analytics | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| postmortems | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| sentinel_events | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| system_events | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| market_context | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| news_findings | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| pending_suggestions | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| config_history | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| borrow_data | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| agent_scorecard | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| weekly_summary | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| score_analytics | 0 | — | ⚠️ empty |
+| postmortems | 2 | — | ✅ |
+| sentinel_events | 809 | — | ✅ |
+| system_events | 0 | — | ⚠️ empty |
+| market_context | 8 | — | ✅ |
+| news_findings | 298 | — | ✅ |
+| pending_suggestions | 0 | — | ⚠️ empty |
+| config_history | 0 | — | ⚠️ empty |
+| borrow_data | 0 | — | ⚠️ empty |
+| agent_scorecard | 8 | 2026-06-02 | ✅ |
+| weekly_summary | 0 | — | ⚠️ empty |
 
 ---
 
