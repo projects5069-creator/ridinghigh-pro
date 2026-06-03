@@ -80,8 +80,8 @@ AGENT_SHEET_HEADERS = {
         "PositionID", "Ticker", "EntryDate", "EntryTime",
         # Entry (4)
         "EntryPrice", "Quantity", "PositionSizeUSD", "Side",
-        # Orders (3)
-        "EntryOrderID", "TPOrderID", "SLOrderID",
+        # Orders (5)
+        "EntryOrderID", "TPOrderID", "SLOrderID", "TPPrice", "SLPrice",
         # Current state (4)
         "CurrentPrice", "UnrealizedPnL", "UnrealizedPnLPct", "Status",
         # Exit (4)

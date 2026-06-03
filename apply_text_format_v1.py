@@ -30,7 +30,7 @@ TIME_COLUMNS = {
     "live_trades":      [("ScanTime", 1)],
     "ticker_follow_up": [("ScanTime", 1)],
     "portfolio_live":   [("LastUpdated", 9)],
-    "paper_portfolio":  [("EntryTime", 3), ("ExitTime", 17)],
+    "paper_portfolio":  [("EntryTime", 3), ("ExitTime", 19)],
     "borrow_data":      [("CheckTime", 2)],
 }
 
@@ -38,7 +38,7 @@ SHEET_COLUMN_COUNTS = {
     "timeline_live": 28, "daily_snapshots": 27, "daily_summary": 10,
     "post_analysis": 105, "portfolio": 6, "portfolio_live": 10,
     "score_tracker": 7, "live_trades": 7, "ticker_follow_up": 30,
-    "paper_portfolio": 23, "decision_log": 41, "score_analytics": 25,
+    "paper_portfolio": 25, "decision_log": 41, "score_analytics": 25,
     "postmortems": 17, "system_events": 7, "market_context": 11,
     "news_findings": 11, "pending_suggestions": 14, "config_history": 10,
     "borrow_data": 9, "agent_scorecard": 7,
