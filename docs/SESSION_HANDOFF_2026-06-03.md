@@ -33,15 +33,16 @@
 ## משימות פתוחות
 - **TASK-107** (HIGH) — closed-same-day FP: position_sync חוסם כש-כל הפוזיציות נסגרו באותו יום (open=0, statuses קריאים). היום זה גרם HALT אחה"צ. רלוונטי כשנחזור ל-active.
 - **TASK-58 S2** (אופציונלי) — portfolio read 2→1 + invalidate. החלטה אחרי מדידת מונה-הקריאות מחר.
-- **auto-repair phase-2** (אין TASK עדיין) — שחזור שורת paper_portfolio חסרה מ-decision_log (כמעט-lossless; lossy רק ב-TPOrderID/SLOrderID). defense-in-depth מעל reconciliation flag-only.
+- **TASK-108** (MEDIUM) — reconciliation auto-repair (phase-2 של TASK-106): שחזור שורת paper_portfolio חסרה מ-decision_log (כמעט-lossless; lossy רק ב-TPOrderID/SLOrderID). **GATE:** להפעיל רק אחרי שה-flag-only (TASK-106) הוכח מדויק לאורך זמן — auto-repair כותב ל-sheet, ו-false-positive ייצור שורה שגויה. אידמפוטני (PositionID dedup).
 - **TASK-66 follow-up** — Sentinel ב-shadow אוסף counterfactual נקי; לחזור להכרעת active-vs-shadow אחרי מדגם רב-רגיים (n כיום 36 רגיים-יחיד).
 - שאר ה-Backlog: 52 פתוחות (ראה backlog task list). מועמדים: TASK-61 (date-gated 6/6), TASK-94/95 (Agent #8), TASK-48 (in progress).
 
 ## עקרון תיעוד
-מצביע, לא משכפל: כל הפרטים החיים ב-PK v2.70 (changelog v2.64–2.70 מתעד כל שינוי) +
+מצביע, לא משכפל: כל הפרטים החיים ב-PK v2.72 (changelog v2.64–2.72 מתעד כל שינוי) +
 Backlog החי. ה-handoff הזה = משימות+סטטוס בלבד, לא PK.
 
 ## מצב בסגירה
-main נקי · HEAD 3ecbd20 · מסונכרן (0/0) · PK 2.70 · **Sentinel=shadow** · מצב מסחר DRY_RUN.
+main נקי · מסונכרן (0/0) · PK 2.72 · **Sentinel=shadow** · מצב מסחר DRY_RUN.
+משימות פתוחות מרכזיות: TASK-107 (closed-same-day FP) · TASK-108 (reconciliation auto-repair) · TASK-58 S2 (אופציונלי).
 כל הטסטים ירוקים: scanner-cache 2/2 · account_state 5/5 · position_sync 8/8 ·
 write_surfaced 3/3 · reconciler 4/4 · test_formulas 107/107 · sentinel_selftest 16/16.

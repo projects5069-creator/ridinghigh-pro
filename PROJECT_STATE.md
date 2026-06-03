@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-06-03 15:40:52 -05
+**Generated:** 2026-06-03 17:36:33 -05
 **Branch:** `main`
-**Latest commit:** `938f409` — docs(session): close 2026-06-03 — 7 merges (schema fix, sentinel immunization+shadow, write-surface, reconcile, reads phase1+2)
+**Latest commit:** `05392e2` — docs(session): open TASK-108 (reconciliation auto-repair); refresh EOD close 2026-06-03
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `938f409 (HEAD -> main) docs(session): close 2026-06-03 — 7 merges (schema fix, sentinel immunization+shadow, write-surface, reconcile, reads phase1+2)`
-- `3ecbd20 (origin/main, origin/HEAD) Merge pull request #7 from projects5069-creator/feat/task58-phase2-scanner-timeline-cache`
+- `05392e2 (HEAD -> main) docs(session): open TASK-108 (reconciliation auto-repair); refresh EOD close 2026-06-03`
+- `b96d449 (origin/main, origin/HEAD) docs(session): close 2026-06-03 — 7 merges (schema fix, sentinel immunization+shadow, write-surface, reconcile, reads phase1+2)`
+- `3ecbd20 Merge pull request #7 from projects5069-creator/feat/task58-phase2-scanner-timeline-cache`
 - `1451889 (origin/feat/task58-phase2-scanner-timeline-cache, feat/task58-phase2-scanner-timeline-cache) perf(scanner): TASK-58 Phase 2 S1 — cache timeline_live reads (4 -> 2)`
 - `960618a Merge pull request #6 from projects5069-creator/feat/task58-phase1-reduce-reads`
-- `7740174 (origin/feat/task58-phase1-reduce-reads, feat/task58-phase1-reduce-reads) perf(reads): TASK-58 Phase 1 — single paper_portfolio read in build_account_state + read counter`
 
 ---
 
@@ -32,11 +32,11 @@ _See `OPEN_ISSUES.md` for full list_
 
 | Workflow | Status | Conclusion | Started |
 |---|---|---|---|
-| RidingHigh Auto Scanner | completed | ✅ success | 2026-06-03 20:40 UTC |
-| Agent — Every Minute (DRY_RUN) | completed | ✅ success | 2026-06-03 20:40 UTC |
-| RidingHigh Auto Scanner | completed | ✅ success | 2026-06-03 20:39 UTC |
-| Agent — Every Minute (DRY_RUN) | completed | ✅ success | 2026-06-03 20:39 UTC |
-| Agent — Every Minute (DRY_RUN) | completed | ✅ success | 2026-06-03 20:38 UTC |
+| Daily Backup — post_analysis | completed | ✅ success | 2026-06-03 22:31 UTC |
+| Agent — Market Context (Hourly) | completed | ✅ success | 2026-06-03 21:54 UTC |
+| Agent — Daily Brief Email | completed | ✅ success | 2026-06-03 21:30 UTC |
+| Daily Backup — post_analysis | completed | ✅ success | 2026-06-03 21:27 UTC |
+| Agent — End of Day | completed | ✅ success | 2026-06-03 21:00 UTC |
 
 ---
 
@@ -61,12 +61,12 @@ _Months in config: `2026-04`, `2026-05`, `2026-06`, `2026-07`_
 | score_analytics | 0 | — | ⚠️ empty |
 | postmortems | 2 | — | ✅ |
 | sentinel_events | 973 | — | ✅ |
-| system_events | 0 | — | ⚠️ empty |
-| market_context | 8 | — | ✅ |
+| system_events | 2 | — | ✅ |
+| market_context | 9 | — | ✅ |
 | news_findings | 649 | — | ✅ |
-| pending_suggestions | 0 | — | ⚠️ empty |
+| pending_suggestions | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
 | config_history | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| borrow_data | 0 | — | ⚠️ empty |
+| borrow_data | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
 | agent_scorecard | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
 | weekly_summary | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
 
