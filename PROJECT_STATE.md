@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-06-02 18:12:18 -05
+**Generated:** 2026-06-02 19:14:24 -05
 **Branch:** `main`
-**Latest commit:** `db7f7bd` — feat(infra): NIGHT_RUN_TEMPLATE.md + bidirectional link with RUN_MODE_DECISION (closes TASK-102)
+**Latest commit:** `d97683a` — docs(data): DATA_SOURCES_MAP.md — central map of all sheets+files (closes TASK-64)
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `db7f7bd (HEAD -> main) feat(infra): NIGHT_RUN_TEMPLATE.md + bidirectional link with RUN_MODE_DECISION (closes TASK-102)`
-- `08ce896 (origin/main, origin/HEAD) feat(infra): RUN_MODE_DECISION.md decision tree + SESSION_PROTOCOL §2 hook (closes TASK-103)`
+- `d97683a (HEAD -> main) docs(data): DATA_SOURCES_MAP.md — central map of all sheets+files (closes TASK-64)`
+- `4f73f25 (origin/main, origin/HEAD) feat(infra): NIGHT_RUN_TEMPLATE.md + bidirectional link with RUN_MODE_DECISION (closes TASK-102)`
+- `08ce896 feat(infra): RUN_MODE_DECISION.md decision tree + SESSION_PROTOCOL §2 hook (closes TASK-103)`
 - `2216450 chore(backlog): persist TASK-96/101/102/103 created in 2026-06-02 thread`
 - `bf8f0a2 chore(backlog): sync 2026-06-02 thread — TASK-60/91/97/98/99/100 status`
-- `27c9049 docs(session): close 2026-06-02 — monthly-email/rotation thread complete (TASK-60/97/98/99/100/91)`
 
 ---
 
@@ -32,11 +32,11 @@ _See `OPEN_ISSUES.md` for full list_
 
 | Workflow | Status | Conclusion | Started |
 |---|---|---|---|
+| Agent — Critic (daily) | completed | ✅ success | 2026-06-02 23:24 UTC |
+| Daily Backup — post_analysis | completed | ✅ success | 2026-06-02 23:17 UTC |
+| Agent — Daily Brief Email | completed | ✅ success | 2026-06-02 23:16 UTC |
 | Post Analysis Collector | completed | ✅ success | 2026-06-02 23:06 UTC |
 | Agent — End of Day | completed | ✅ success | 2026-06-02 22:52 UTC |
-| Agent — Every Minute (DRY_RUN) | completed | ✅ success | 2026-06-02 22:28 UTC |
-| Daily Backup — post_analysis | completed | ✅ success | 2026-06-02 22:26 UTC |
-| Agent — Market Context (Hourly) | completed | ✅ success | 2026-06-02 21:53 UTC |
 
 ---
 

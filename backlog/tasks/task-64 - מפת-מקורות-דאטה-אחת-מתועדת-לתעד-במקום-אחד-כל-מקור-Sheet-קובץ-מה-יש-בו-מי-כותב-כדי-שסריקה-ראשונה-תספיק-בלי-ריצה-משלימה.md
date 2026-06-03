@@ -3,9 +3,10 @@ id: TASK-64
 title: >-
   מפת מקורות דאטה אחת מתועדת: לתעד במקום אחד כל מקור (Sheet/קובץ, מה יש בו, מי
   כותב) כדי שסריקה ראשונה תספיק בלי ריצה משלימה
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-05-31 00:48'
+updated_date: '2026-06-03 00:14'
 labels:
   - docs
   - data-map
