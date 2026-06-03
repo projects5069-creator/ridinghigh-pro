@@ -62,6 +62,27 @@ def check_position_sync(account_state: Dict[str, Any],
     # Suspicious: ENTERs happened but no open positions visible
     # (and fetch did NOT fail — so this is a real drift, not a quota issue)
     if today_enters > 0 and open_count == 0:
+        # 2026-06-03 immunization: distinguish an UNREADABLE portfolio (rows
+        # present but no recognized Status — e.g. a column-alignment bug like
+        # the one fixed in PK v2.64) from a genuine drift. Unreadable data is
+        # a data-quality problem, NOT missing positions, so it must WARN
+        # (non-blocking) rather than HALT all trading. A real drift —
+        # readable portfolio with 0 open, or zero rows written at all — still
+        # BLOCKs. Signals default to 0 so old callers keep current behavior.
+        pf_total = account_state.get("pf_total_rows", 0)
+        pf_recognized = account_state.get("pf_status_recognized_count", 0)
+        if pf_total > 0 and pf_recognized == 0:
+            return SentinelResult(
+                decision="WARN",
+                reason="POSITION_SYNC_DATA_QUALITY",
+                details={
+                    "today_enters": today_enters,
+                    "open_positions": open_count,
+                    "pf_total_rows": pf_total,
+                    "pf_status_recognized_count": pf_recognized,
+                    "hint": "paper_portfolio has rows but no recognized Status — data-quality (likely schema/alignment), not drift",
+                },
+            )
         return SentinelResult(
             decision="BLOCK",
             reason="POSITION_SYNC_FAILED",
