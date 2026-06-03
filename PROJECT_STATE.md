@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-06-03 14:07:00 -05
+**Generated:** 2026-06-03 14:26:04 -05
 **Branch:** `main`
-**Latest commit:** `ebcdf29` — docs/backlog: close TASK-105 + TASK-106 (done today); note TASK-49
+**Latest commit:** `7ee6e99` — config(sentinel): SENTINEL_MODE active -> shadow (TASK-66)
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `ebcdf29 (HEAD -> main) docs/backlog: close TASK-105 + TASK-106 (done today); note TASK-49`
-- `3c631d9 (origin/main, origin/HEAD) Merge pull request #5 from projects5069-creator/feat/task106-reconcile-flag`
+- `7ee6e99 (HEAD -> main) config(sentinel): SENTINEL_MODE active -> shadow (TASK-66)`
+- `5eac2a6 (origin/main, origin/HEAD) docs/backlog: close TASK-105 + TASK-106 (done today); note TASK-49`
+- `3c631d9 Merge pull request #5 from projects5069-creator/feat/task106-reconcile-flag`
 - `c210f9a (origin/feat/task106-reconcile-flag, feat/task106-reconcile-flag) feat(reconciler): flag decision_log ENTERs without a paper_portfolio row (TASK-106)`
 - `0f80603 docs/backlog: add TASK-106 reconciliation`
-- `ef681e7 Merge pull request #4 from projects5069-creator/feat/task105-surface-write-failure`
 
 ---
 
@@ -32,11 +32,11 @@ _See `OPEN_ISSUES.md` for full list_
 
 | Workflow | Status | Conclusion | Started |
 |---|---|---|---|
-| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-06-03 19:06 UTC |
-| Agent — Every Minute (DRY_RUN) | completed | ✅ success | 2026-06-03 19:06 UTC |
-| Agent — Every Minute (DRY_RUN) | completed | ✅ success | 2026-06-03 19:05 UTC |
-| RidingHigh Auto Scanner | completed | ✅ success | 2026-06-03 19:05 UTC |
-| Agent — Every Minute (DRY_RUN) | completed | ✅ success | 2026-06-03 19:04 UTC |
+| Agent — Every Minute (DRY_RUN) | queued | ⏳ — | 2026-06-03 19:26 UTC |
+| RidingHigh Auto Scanner | queued | ⏳ — | 2026-06-03 19:26 UTC |
+| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-06-03 19:25 UTC |
+| Agent — Every Minute (DRY_RUN) | in_progress | ⏳ — | 2026-06-03 19:25 UTC |
+| RidingHigh Auto Scanner | completed | ✅ success | 2026-06-03 19:24 UTC |
 
 ---
 
@@ -47,15 +47,15 @@ _Months in config: `2026-04`, `2026-05`, `2026-06`, `2026-07`_
 
 | Sheet | Total rows | Last date | Status |
 |---|---|---|---|
-| timeline_live | 47,363 | 2026-06-03 | ✅ |
-| daily_snapshots | 184 | 2026-06-02 | ✅ |
+| timeline_live | 48,145 | 2026-06-03 | ✅ |
+| daily_snapshots | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
 | daily_summary | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
 | post_analysis | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
 | portfolio | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| portfolio_live | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| score_tracker | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| live_trades | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| ticker_follow_up | 9,299 | 2026-06-03 | ✅ |
+| portfolio_live | 13 | 2026-06-02 | ✅ |
+| score_tracker | 727 | 2026-06-03 | ✅ |
+| live_trades | 727 | 2026-06-03 | ✅ |
+| ticker_follow_up | 9,625 | 2026-06-03 | ✅ |
 | decision_log | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
 | paper_portfolio | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
 | score_analytics | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
