@@ -355,6 +355,11 @@ import time as _time
 
 _RETRY_MAX = 3
 _RETRY_BACKOFF_BASE = 2          # seconds: 2, 4, 8
+# TASK-105 (light Option 1): the paper_portfolio entry-write gets one extra
+# retry vs reads. safe_append_row dedups by PositionID before each retry, so
+# the extra attempt cannot double-write. Isolated to appends to bound blast
+# radius — reads keep _RETRY_MAX.
+_APPEND_RETRY_MAX = 4
 _SHEET_CACHE_TTL = 60            # seconds — short, for batch reads (weekly_summary)
 _sheet_values_cache = {}         # {(tab_name, month): (timestamp, rows)}
 
@@ -471,7 +476,7 @@ def safe_append_row(ws, row, dedup_col=None, dedup_val=None, **kwargs):
     """
     kwargs.setdefault("value_input_option", "USER_ENTERED")
     last_error = None
-    for attempt in range(_RETRY_MAX):
+    for attempt in range(_APPEND_RETRY_MAX):
         try:
             result = ws.append_row(row, **kwargs)
             _track_write_quota()
@@ -480,9 +485,9 @@ def safe_append_row(ws, row, dedup_col=None, dedup_val=None, **kwargs):
             last_error = e
             if not _is_quota_error(e):
                 raise
-            if attempt < _RETRY_MAX - 1:
+            if attempt < _APPEND_RETRY_MAX - 1:
                 wait = _RETRY_BACKOFF_BASE ** (attempt + 1)
-                print(f"[sheets_manager] append 429 — retry {attempt+1}/{_RETRY_MAX} "
+                print(f"[sheets_manager] append 429 — retry {attempt+1}/{_APPEND_RETRY_MAX} "
                       f"after {wait}s: {e}")
                 _time.sleep(wait)
                 if dedup_col is not None and dedup_val is not None:
@@ -494,7 +499,7 @@ def safe_append_row(ws, row, dedup_col=None, dedup_val=None, **kwargs):
                             return None
                     except Exception as de:
                         print(f"[sheets_manager] dedup check failed (will retry blind): {de}")
-    print(f"[sheets_manager] append: all {_RETRY_MAX} retries exhausted: {last_error}")
+    print(f"[sheets_manager] append: all {_APPEND_RETRY_MAX} retries exhausted: {last_error}")
     raise last_error
 
 

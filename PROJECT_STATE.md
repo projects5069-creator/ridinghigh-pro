@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-06-03 13:06:58 -05
-**Branch:** `feat/possync-dataquality-warn`
-**Latest commit:** `de25307` — feat(sentinel): position_sync immunization — data-quality WARN vs drift BLOCK
+**Generated:** 2026-06-03 13:35:04 -05
+**Branch:** `feat/task105-surface-write-failure`
+**Latest commit:** `82ca000` — feat(order-manager): surface paper_portfolio write failures (TASK-105)
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `de25307 (HEAD -> feat/possync-dataquality-warn) feat(sentinel): position_sync immunization — data-quality WARN vs drift BLOCK`
-- `1c26a00 (origin/main, origin/HEAD, main) fix(schema): align paper_portfolio header to 25-col writer schema (Option A)`
+- `82ca000 (HEAD -> feat/task105-surface-write-failure) feat(order-manager): surface paper_portfolio write failures (TASK-105)`
+- `517e701 (origin/main, origin/HEAD, main) Merge pull request #3 from projects5069-creator/feat/possync-dataquality-warn`
+- `91a9a15 (origin/feat/possync-dataquality-warn, feat/possync-dataquality-warn) feat(sentinel): position_sync immunization — data-quality WARN vs drift BLOCK`
+- `1c26a00 fix(schema): align paper_portfolio header to 25-col writer schema (Option A)`
 - `c2531cf docs(session): close 2026-06-02 evening — night-run infra + data map (TASK-103/102/64/86)`
-- `7caeb6c chore(hygiene): clean untracked .bak + gitignore research/ + commit TASK-62 report (closes TASK-86)`
-- `3a15953 docs(data): DATA_SOURCES_MAP.md — central map of all sheets+files (closes TASK-64)`
 
 ---
 
@@ -32,11 +32,11 @@ _See `OPEN_ISSUES.md` for full list_
 
 | Workflow | Status | Conclusion | Started |
 |---|---|---|---|
-| Agent — Every Minute (DRY_RUN) | in_progress | ⏳ — | 2026-06-03 18:06 UTC |
-| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-06-03 18:06 UTC |
-| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-06-03 18:05 UTC |
-| Agent — Every Minute (DRY_RUN) | completed | ✅ success | 2026-06-03 18:05 UTC |
-| RidingHigh Auto Scanner | completed | ✅ success | 2026-06-03 18:04 UTC |
+| RidingHigh Auto Scanner | queued | ⏳ — | 2026-06-03 18:35 UTC |
+| Agent — Every Minute (DRY_RUN) | queued | ⏳ — | 2026-06-03 18:35 UTC |
+| Agent — Every Minute (DRY_RUN) | in_progress | ⏳ — | 2026-06-03 18:34 UTC |
+| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-06-03 18:34 UTC |
+| RidingHigh Auto Scanner | completed | ✅ success | 2026-06-03 18:33 UTC |
 
 ---
 
@@ -47,15 +47,15 @@ _Months in config: `2026-04`, `2026-05`, `2026-06`, `2026-07`_
 
 | Sheet | Total rows | Last date | Status |
 |---|---|---|---|
-| timeline_live | 45,143 | 2026-06-03 | ✅ |
-| daily_snapshots | 184 | 2026-06-02 | ✅ |
-| daily_summary | 206 | 2026-06-02 | ✅ |
+| timeline_live | 46,250 | 2026-06-03 | ✅ |
+| daily_snapshots | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| daily_summary | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
 | post_analysis | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
 | portfolio | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
 | portfolio_live | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
 | score_tracker | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
 | live_trades | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| ticker_follow_up | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| ticker_follow_up | 8,647 | 2026-06-03 | ✅ |
 | decision_log | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
 | paper_portfolio | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
 | score_analytics | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |

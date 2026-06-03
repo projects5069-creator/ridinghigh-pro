@@ -111,6 +111,10 @@ class Decision:
     order_id: Optional[str] = None
     order_status: Optional[str] = None
     execution_price: Optional[float] = None
+    # TASK-105: True until a paper_portfolio write fails. Set False by
+    # OrderManager.execute() when the entry-write is not persisted, so the
+    # orchestrator can surface/count the failure instead of swallowing it.
+    portfolio_written: bool = True
 
 
 # ── Helper functions ──────────────────────────────────────────────────────────
