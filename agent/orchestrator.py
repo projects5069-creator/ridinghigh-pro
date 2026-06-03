@@ -182,6 +182,12 @@ def build_account_state(broker=None) -> Dict[str, Any]:
         "cold_start_daily_used": 0,
         # Bug #2/#4 fix: count actual OPEN rows, not unique tickers.
         "open_position_count": 0,
+        # 2026-06-03 immunization: signals for position_sync to tell an
+        # UNREADABLE portfolio (rows present but no recognized Status, e.g. a
+        # column-alignment bug) apart from a genuine drift. Computed in the
+        # records loop below — no extra sheet read.
+        "pf_total_rows": 0,
+        "pf_status_recognized_count": 0,
         # Bug #5 fix: per-ticker entry count for today (re-entry limit).
         # 2026-05-23 Fix D: kept as union of two sources — decision_log
         # (primary SSoT) AND paper_portfolio (backup). Google Sheets
@@ -214,6 +220,12 @@ def build_account_state(broker=None) -> Dict[str, Any]:
             for row in records:
                 status = str(row.get("Status", "")).upper()
                 ticker = str(row.get("Ticker", "")).strip().upper()
+                # 2026-06-03 immunization: count every row + rows with a
+                # recognized Status, so position_sync can distinguish an
+                # unreadable portfolio (rows>0 but recognized==0) from drift.
+                state["pf_total_rows"] += 1
+                if status in ("OPEN", "DRY_RUN_OPEN", "CLOSED", "DRY_RUN_CLOSED"):
+                    state["pf_status_recognized_count"] += 1
                 if status in ("OPEN", "DRY_RUN_OPEN"):
                     if ticker:
                         state["existing_positions"].add(ticker)
