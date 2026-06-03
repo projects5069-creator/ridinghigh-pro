@@ -44,6 +44,7 @@ STATUS_CLOSED = "CLOSED"
 DRIFT_OK = "OK"
 DRIFT_PHANTOM_OPEN = "PHANTOM_OPEN"
 DRIFT_ORPHAN_POSITION = "ORPHAN_POSITION"
+DRIFT_MISSING_PORTFOLIO_ROW = "MISSING_PORTFOLIO_ROW"  # TASK-106: decision_log ENTER w/o paper_portfolio row
 
 
 class Reconciler:
@@ -57,6 +58,8 @@ class Reconciler:
         sheet_reader=None,
         sheet_writer=None,
         alert_writer=None,
+        decision_log_reader=None,
+        portfolio_all_reader=None,
     ):
         """
         Args:
@@ -64,11 +67,90 @@ class Reconciler:
             sheet_reader: callable() → list of position dicts from paper_portfolio
             sheet_writer: callable(pos, updates) → None
             alert_writer: callable(event_dict) → None (writes to system_events — non-Sentinel tab)
+            decision_log_reader: callable() → list of decision_log row dicts (TASK-106)
+            portfolio_all_reader: callable() → list of ALL paper_portfolio row dicts,
+                                  any status (TASK-106 — match across statuses)
         """
         self.broker = broker
         self._sheet_reader = sheet_reader
         self._sheet_writer = sheet_writer
         self._alert_writer = alert_writer
+        self._decision_log_reader = decision_log_reader
+        self._portfolio_all_reader = portfolio_all_reader
+
+    def reconcile_decision_log_vs_portfolio(self, summary: Dict[str, Any] = None) -> Dict[str, Any]:
+        """TASK-106 (flag-only): detect today's decision_log ENTERs that have NO
+        matching paper_portfolio row (key: PositionID == DecisionID), matched
+        across ALL statuses so a same-day close is not a false positive.
+
+        Works in DRY_RUN (no Alpaca). Flags each gap via alert_writer +
+        run-summary count + log. Does NOT repair (phase-2, separate task).
+        """
+        dec_rows = self._read_decision_log()
+        pf_rows = self._read_portfolio_all()
+        pf_ids = {
+            str(r.get("PositionID", "")).strip()
+            for r in pf_rows
+            if str(r.get("PositionID", "")).strip()
+        }
+        today = datetime.now(PERU_TZ).strftime("%Y-%m-%d")
+
+        report = {"checked_enters": 0, "missing_portfolio_row": 0, "details": []}
+        for r in dec_rows:
+            if not str(r.get("Timestamp", "")).startswith(today):
+                continue
+            if str(r.get("Action", "")).upper() != "ENTER":
+                continue
+            report["checked_enters"] += 1
+            did = str(r.get("DecisionID", "")).strip()
+            if not did or did in pf_ids:
+                continue
+            report["missing_portfolio_row"] += 1
+            event = {
+                "type": DRIFT_MISSING_PORTFOLIO_ROW,
+                "ticker": r.get("Ticker"),
+                "decision_id": did,
+                "action_taken": "flag",
+                "timestamp": datetime.now(PERU_TZ).isoformat(),
+                "details": (
+                    f"decision_log ENTER {did} ({r.get('Ticker')}) has NO matching "
+                    f"paper_portfolio row — likely a swallowed/failed write (TASK-105). "
+                    f"Flagged, not repaired."
+                ),
+            }
+            report["details"].append(event)
+            logger.warning("Reconcile MISSING_PORTFOLIO_ROW: %s", event["details"])
+            if self._alert_writer:
+                self._alert_writer(event)
+
+        if summary is not None:
+            summary["reconcile_missing_portfolio"] = (
+                summary.get("reconcile_missing_portfolio", 0)
+                + report["missing_portfolio_row"]
+            )
+        return report
+
+    def _read_decision_log(self) -> List[Dict[str, Any]]:
+        """Read decision_log rows (injectable; falls back to sheets_manager)."""
+        if self._decision_log_reader:
+            return self._decision_log_reader()
+        try:
+            import sheets_manager
+            return sheets_manager.get_sheet_records("decision_log") or []
+        except Exception as e:
+            logger.error("Failed to read decision_log: %s", e)
+            return []
+
+    def _read_portfolio_all(self) -> List[Dict[str, Any]]:
+        """Read ALL paper_portfolio rows, any status (injectable)."""
+        if self._portfolio_all_reader:
+            return self._portfolio_all_reader()
+        try:
+            import sheets_manager
+            return sheets_manager.get_sheet_records("paper_portfolio") or []
+        except Exception as e:
+            logger.error("Failed to read paper_portfolio: %s", e)
+            return []
 
     def reconcile(self) -> Dict[str, Any]:
         """
