@@ -7,9 +7,9 @@ name: Health Audit
 #   22:00 Peru = 03:00 UTC (next day) — end-of-day check
 on:
   schedule:
-    - cron: '0 11 * * *'  # 06:00 Peru
-    - cron: '0 17 * * *'  # 12:00 Peru
-    - cron: '0 3 * * *'   # 22:00 Peru
+    - cron: '0 11 * * *'   # 06:00 Peru
+    - cron: '30 20 * * *'  # 15:30 Peru (after 15:00 close) — TASK-58: moved off market hours (was 12:00 / '0 17') to cut read-quota contention
+    - cron: '0 3 * * *'    # 22:00 Peru
   workflow_dispatch:       # Allow manual trigger from GitHub UI
 
 jobs:
