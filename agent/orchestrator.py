@@ -308,6 +308,27 @@ def build_account_state(broker=None) -> Dict[str, Any]:
     return state
 
 
+def _record_entry_outcome(decision, summary) -> bool:
+    """TASK-105: account for an executed ENTER based on whether its
+    paper_portfolio write actually persisted.
+
+    Mirrors the decision_log failure handling: a successful write counts as a
+    real ENTER; a failed write is surfaced as an error (counted + logged), NOT
+    silently counted as a successful entry. Returns True if persisted.
+    """
+    if getattr(decision, "portfolio_written", True):
+        summary["enters"] += 1
+        return True
+    summary["errors"] += 1
+    logger.warning(
+        "paper_portfolio write FAILED for ENTER %s — surfaced, not counted as a "
+        "successful entry (likely 429 quota; decision_log ENTER may now lack a "
+        "matching portfolio row)",
+        getattr(decision, "ticker", "?"),
+    )
+    return False
+
+
 # ════════════════════════════════════════════════════════════════════
 # Helper: read latest signals from timeline_live
 # ════════════════════════════════════════════════════════════════════
@@ -685,7 +706,10 @@ def run() -> Dict[str, Any]:
 
                 if decision.action == "ENTER":
                     enriched = order_manager.execute(decision)
-                    summary["enters"] += 1
+                    # TASK-105: count a real ENTER only if the portfolio write
+                    # persisted; a failed write is surfaced as an error, not a
+                    # silent success.
+                    _record_entry_outcome(enriched, summary)
                     # Update local state for next signal in batch
                     account_state["existing_positions"].add(ticker)
                     account_state["cold_start_concurrent_used"] += 1

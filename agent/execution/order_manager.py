@@ -138,8 +138,10 @@ class OrderManager:
         # Extract TP/SL order IDs from bracket legs
         tp_order_id, sl_order_id = self._extract_leg_ids(final_order)
 
-        # Write to paper_portfolio
-        self._write_to_portfolio(decision, final_order, tp_order_id, sl_order_id)
+        # Write to paper_portfolio (TASK-105: surface failures, don't swallow)
+        decision.portfolio_written = self._write_to_portfolio(
+            decision, final_order, tp_order_id, sl_order_id
+        )
 
         return decision
 
@@ -219,8 +221,9 @@ class OrderManager:
     # Sheet writing
     # ════════════════════════════════════════════════════════════════════
 
-    def _write_to_portfolio(self, decision: Decision, order, tp_order_id: str, sl_order_id: str):
-        """Write a row to paper_portfolio Sheet (22 columns)."""
+    def _write_to_portfolio(self, decision: Decision, order, tp_order_id: str, sl_order_id: str) -> bool:
+        """Write a row to paper_portfolio Sheet. Returns True if persisted,
+        False if the write failed (TASK-105 — surfaced, not swallowed)."""
         is_dry_run = AGENT_DRY_RUN or isinstance(order, SimulatedOrder)
         status = STATUS_DRY_RUN_OPEN if is_dry_run else STATUS_OPEN
 
@@ -263,23 +266,32 @@ class OrderManager:
             "CLEAN",                          # DataQuality (post-2026-05-16 bug fixes)
         ]
 
+        # TASK-105: return whether the row was persisted so execute() can
+        # surface a failed write instead of swallowing it silently.
         if self._sheet_writer:
             try:
                 self._sheet_writer(row)
+                return True
             except Exception as e:
                 logger.error("paper_portfolio write failed: %s", e)
-        else:
-            self._default_sheet_write(row)
+                return False
+        return self._default_sheet_write(row)
 
-    def _default_sheet_write(self, row: list):
-        """Write row using sheets_manager (production path)."""
+    def _default_sheet_write(self, row: list) -> bool:
+        """Write row using sheets_manager (production path).
+
+        Returns True on success, False if the row could not be persisted
+        (e.g. 429 retries exhausted) — TASK-105: the caller surfaces it.
+        """
         try:
             import sheets_manager
             ws = sheets_manager.get_worksheet("paper_portfolio")
             if ws:
                 sheets_manager.safe_append_row(ws, row, dedup_col=0, dedup_val=row[0])
                 sheets_manager.invalidate_cache("paper_portfolio")  # fresh read next time
-            else:
-                logger.error("paper_portfolio worksheet not available")
+                return True
+            logger.error("paper_portfolio worksheet not available")
+            return False
         except Exception as e:
             logger.error("paper_portfolio write failed: %s", e)
+            return False
