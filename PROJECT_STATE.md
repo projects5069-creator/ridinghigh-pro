@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-06-03 15:04:22 -05
-**Branch:** `feat/task58-phase1-reduce-reads`
-**Latest commit:** `d46591e` — perf(reads): TASK-58 Phase 1 — single paper_portfolio read in build_account_state + read counter
+**Generated:** 2026-06-03 15:31:29 -05
+**Branch:** `feat/task58-phase2-scanner-timeline-cache`
+**Latest commit:** `a0c699c` — perf(scanner): TASK-58 Phase 2 S1 — cache timeline_live reads (4 -> 2)
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `d46591e (HEAD -> feat/task58-phase1-reduce-reads) perf(reads): TASK-58 Phase 1 — single paper_portfolio read in build_account_state + read counter`
-- `fb923df (origin/main, origin/HEAD, main) config(sentinel): SENTINEL_MODE active -> shadow (TASK-66)`
+- `a0c699c (HEAD -> feat/task58-phase2-scanner-timeline-cache) perf(scanner): TASK-58 Phase 2 S1 — cache timeline_live reads (4 -> 2)`
+- `960618a (origin/main, origin/HEAD, main) Merge pull request #6 from projects5069-creator/feat/task58-phase1-reduce-reads`
+- `7740174 (origin/feat/task58-phase1-reduce-reads, feat/task58-phase1-reduce-reads) perf(reads): TASK-58 Phase 1 — single paper_portfolio read in build_account_state + read counter`
+- `fb923df config(sentinel): SENTINEL_MODE active -> shadow (TASK-66)`
 - `5eac2a6 docs/backlog: close TASK-105 + TASK-106 (done today); note TASK-49`
-- `3c631d9 Merge pull request #5 from projects5069-creator/feat/task106-reconcile-flag`
-- `c210f9a (origin/feat/task106-reconcile-flag, feat/task106-reconcile-flag) feat(reconciler): flag decision_log ENTERs without a paper_portfolio row (TASK-106)`
 
 ---
 
@@ -32,11 +32,11 @@ _See `OPEN_ISSUES.md` for full list_
 
 | Workflow | Status | Conclusion | Started |
 |---|---|---|---|
-| Agent — Every Minute (DRY_RUN) | in_progress | ⏳ — | 2026-06-03 20:04 UTC |
-| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-06-03 20:04 UTC |
-| Agent — Every Minute (DRY_RUN) | completed | ✅ success | 2026-06-03 20:03 UTC |
-| RidingHigh Auto Scanner | completed | ✅ success | 2026-06-03 20:03 UTC |
-| Agent — Every Minute (DRY_RUN) | completed | ✅ success | 2026-06-03 20:02 UTC |
+| Agent — Every Minute (DRY_RUN) | in_progress | ⏳ — | 2026-06-03 20:31 UTC |
+| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-06-03 20:31 UTC |
+| Agent — Every Minute (DRY_RUN) | completed | ✅ success | 2026-06-03 20:30 UTC |
+| RidingHigh Auto Scanner | completed | ✅ success | 2026-06-03 20:30 UTC |
+| Agent — Every Minute (DRY_RUN) | completed | ✅ success | 2026-06-03 20:29 UTC |
 
 ---
 
@@ -65,10 +65,10 @@ _Months in config: `2026-04`, `2026-05`, `2026-06`, `2026-07`_
 | market_context | 8 | — | ✅ |
 | news_findings | 649 | — | ✅ |
 | pending_suggestions | 0 | — | ⚠️ empty |
-| config_history | 0 | — | ⚠️ empty |
+| config_history | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
 | borrow_data | 0 | — | ⚠️ empty |
-| agent_scorecard | 8 | 2026-06-02 | ✅ |
-| weekly_summary | 0 | — | ⚠️ empty |
+| agent_scorecard | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| weekly_summary | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
 
 ---
 
