@@ -8,11 +8,10 @@
 - **Live state:** Run `backlog task list --plain`
 - **Detailed task files:** `backlog/tasks/`
 - **Allocation policy:** `docs/WORK_ALLOCATION.md`
-- **Session continuity:** `NEXT_SESSION.md`
+- **Session continuity:** `docs/SESSION_HANDOFF_*.md`
 
 ## Where to find historical context
 
-- **Pre-2026-05-23 issues archive:** `OPEN_ISSUES_archive.md` (frozen for reference)
 - **PK changelog:** `docs/RidingHigh_Pro_PK_v2.md` (system-level decisions)
 - **Research artifacts:** `research/` (investigations, postmortems)
 

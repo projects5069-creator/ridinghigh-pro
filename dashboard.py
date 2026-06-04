@@ -3786,7 +3786,6 @@ def system_overview_page():
                     "**prepare_next_month.py** — יוצר תיקייה+9 sheets לחודש הבא",
                     "**warm_oauth_token.py** — מרענן OAuth token כל 3 ימים",
                     "**backup_manager.py** — CSV backup 3 פעמים ביום",
-                    "**mark_score_version.py** — one-shot tagger v1/v2 (רץ פעם אחת)",
                 ],
             },
             {
