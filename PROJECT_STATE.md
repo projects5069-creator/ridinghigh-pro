@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-06-04 11:41:42 -05
+**Generated:** 2026-06-04 12:02:19 -05
 **Branch:** `main`
-**Latest commit:** `17a852b` — docs(pk): TASK-104 Done — system_events dual-writer is BENIGN (append-only, not §910 violation); document allowed exception; PK v2.79
+**Latest commit:** `1ba670d` — refactor(hooks): consolidate skill_enforcement_hook to single canonical mirror scripts/claude_hooks/ (Option A) — sync v3.3, rm loose dup, unify PK §316/§291, install.sh deploy; TASK-111 Done; PK v2.80
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `17a852b (HEAD -> main) docs(pk): TASK-104 Done — system_events dual-writer is BENIGN (append-only, not §910 violation); document allowed exception; PK v2.79`
-- `daf109e (origin/main, origin/HEAD) docs(pk): v2.78 — TASK-58 Phase 1 verified (total=4, all tabs x1=consolidation); precise per-tab framing, no unverified per-function claim; S2 deferred`
+- `1ba670d (HEAD -> main) refactor(hooks): consolidate skill_enforcement_hook to single canonical mirror scripts/claude_hooks/ (Option A) — sync v3.3, rm loose dup, unify PK §316/§291, install.sh deploy; TASK-111 Done; PK v2.80`
+- `ffd22df (origin/main, origin/HEAD) docs(pk): TASK-104 Done — system_events dual-writer is BENIGN (append-only, not §910 violation); document allowed exception; PK v2.79`
+- `daf109e docs(pk): v2.78 — TASK-58 Phase 1 verified (total=4, all tabs x1=consolidation); precise per-tab framing, no unverified per-function claim; S2 deferred`
 - `777fcc5 docs(pk): TASK-47 Done — portfolio sheet ALIVE, document purpose in §14:1301 (prevent re-deprecation); PK v2.77`
 - `23ecff0 feat(hook): RULE #11 v3.3 — mandatory skill-scan line + TASK-TYPE mapping; sync live->canonical; PK v2.76; TASK-54 progress (still open, fail-open)`
-- `40fb2ef docs(pk): v2.75 + close TASK-45 — 5 obsolete files removed, 2 dangling refs fixed, 58MB local pkl freed`
 
 ---
 
@@ -32,26 +32,26 @@ _See `OPEN_ISSUES.md` for full list_
 
 | Workflow | Status | Conclusion | Started |
 |---|---|---|---|
-| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-06-04 16:41 UTC |
-| Agent — Every Minute (DRY_RUN) | in_progress | ⏳ — | 2026-06-04 16:41 UTC |
-| Agent — Every Minute (DRY_RUN) | in_progress | ⏳ — | 2026-06-04 16:40 UTC |
-| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-06-04 16:40 UTC |
-| Agent — Every Minute (DRY_RUN) | in_progress | ⏳ — | 2026-06-04 16:39 UTC |
+| Agent — Every Minute (DRY_RUN) | in_progress | ⏳ — | 2026-06-04 17:02 UTC |
+| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-06-04 17:02 UTC |
+| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-06-04 17:01 UTC |
+| Agent — Every Minute (DRY_RUN) | in_progress | ⏳ — | 2026-06-04 17:01 UTC |
+| Agent — Every Minute (DRY_RUN) | in_progress | ⏳ — | 2026-06-04 17:00 UTC |
 
 ---
 
 ## 📊 Google Sheets — showing month `2026-07`
 
-_Selection: most recent month with data (2026-07)_
+_Selection: fallback — no month has data, using latest key (2026-07)_
 _Months in config: `2026-04`, `2026-05`, `2026-06`, `2026-07`_
 
 | Sheet | Total rows | Last date | Status |
 |---|---|---|---|
-| timeline_live | 0 | — | ⚠️ empty |
-| daily_snapshots | 0 | — | ⚠️ empty |
-| daily_summary | 0 | — | ⚠️ empty |
-| post_analysis | 0 | — | ⚠️ empty |
-| portfolio | 0 | — | ⚠️ empty |
+| timeline_live | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| daily_snapshots | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| daily_summary | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| post_analysis | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| portfolio | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
 | portfolio_live | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
 | score_tracker | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
 | ticker_follow_up | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |

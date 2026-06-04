@@ -7,16 +7,30 @@
 cat <<'INJECT_EOF'
 
 ═══════════════════════════════════════════════════════════
-🛠️ MANDATORY SKILL ACTIVATION — RidingHigh Pro RULE #11 v3
+🛠️ MANDATORY SKILL ACTIVATION — RidingHigh Pro RULE #11 v3.3
 ═══════════════════════════════════════════════════════════
 
 BEFORE any tool call or implementation, you MUST:
 
-1. Check <available_skills> for relevance to the user's request.
-2. If ANY skill is relevant, state:
+1. SCAN ALL available skills (8 RH-dedicated + superpowers + anthropic) for
+   relevance — do NOT default to rhpro-live without examining the rest.
+
+2. (v3.3 — mandatory) State an explicit SCAN line BEFORE the active-skills block:
+   "🔍 סריקת סקילים — נטענו: X (כי...). נשקלו ונדחו: Y (לא רלוונטי כי...)."
+   • Cover at minimum the 8 dedicated skills by name.
+   • Group clearly-irrelevant ones into one phrase (e.g. "נדחו: anthropic docx/pdf/pptx/xlsx — לא מסמכים").
+   • TASK-TYPE MAPPING — verify the matching dedicated skill is LOADED, not skipped:
+       ניתוח / score / data quality      → data-quality-checker
+       backtest / strategy validation     → backtest-expert
+       position sizing / risk shares      → position-sizer
+       postmortem / win-rate / WHIPSAW    → signal-postmortem
+       thesis lifecycle / trading journal → trader-memory-core
+       bug / investigation                → systematic-debugging
+
+3. If ANY skill is relevant, state:
    "🛠️ סקילים פעילים:" followed by skill name + 1-line reason for each.
-3. Read the relevant SKILL.md file(s) via Read tool (not just mention).
-4. ONLY THEN proceed with implementation.
+4. Read the relevant SKILL.md file(s) via Read tool (not just mention).
+5. ONLY THEN proceed with implementation.
 
 Available RH-specific skills (~/.claude/skills/):
   rhpro-live, rhpro-session, backtest-expert, data-quality-checker,
