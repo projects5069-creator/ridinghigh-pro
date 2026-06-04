@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-06-04 10:30:56 -05
+**Generated:** 2026-06-04 10:55:57 -05
 **Branch:** `main`
-**Latest commit:** `8ff3c3f` — docs(pk): v2.75 + close TASK-45 — 5 obsolete files removed, 2 dangling refs fixed, 58MB local pkl freed
+**Latest commit:** `227b7f9` — feat(hook): RULE #11 v3.3 — mandatory skill-scan line + TASK-TYPE mapping; sync live->canonical; PK v2.76; TASK-54 progress (still open, fail-open)
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `8ff3c3f (HEAD -> main) docs(pk): v2.75 + close TASK-45 — 5 obsolete files removed, 2 dangling refs fixed, 58MB local pkl freed`
-- `844615d (origin/main, origin/HEAD) chore(cleanup): TASK-45 remove 2 dead one-shot scripts + 3 obsolete docs; fix dangling refs in OPEN_ISSUES.md + dashboard.py`
+- `227b7f9 (HEAD -> main) feat(hook): RULE #11 v3.3 — mandatory skill-scan line + TASK-TYPE mapping; sync live->canonical; PK v2.76; TASK-54 progress (still open, fail-open)`
+- `40fb2ef (origin/main, origin/HEAD) docs(pk): v2.75 + close TASK-45 — 5 obsolete files removed, 2 dangling refs fixed, 58MB local pkl freed`
+- `844615d chore(cleanup): TASK-45 remove 2 dead one-shot scripts + 3 obsolete docs; fix dangling refs in OPEN_ISSUES.md + dashboard.py`
 - `732d51c chore(backlog): TASK-110 Done — clipboard wrapper byte-exact self-verify`
 - `b06eda2 fix(wrapper): TASK-110 byte-exact pbcopy + char-count self-verify`
-- `1f30e67 docs(handoff): 2026-06-03 Session 2 — close TASK-108 + TASK-78, daily health review`
 
 ---
 
@@ -32,11 +32,11 @@ _See `OPEN_ISSUES.md` for full list_
 
 | Workflow | Status | Conclusion | Started |
 |---|---|---|---|
-| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-06-04 15:30 UTC |
-| Agent — Every Minute (DRY_RUN) | in_progress | ⏳ — | 2026-06-04 15:30 UTC |
-| Agent — Every Minute (DRY_RUN) | in_progress | ⏳ — | 2026-06-04 15:29 UTC |
-| RidingHigh Auto Scanner | completed | ✅ success | 2026-06-04 15:29 UTC |
-| RidingHigh Auto Scanner | completed | ✅ success | 2026-06-04 15:28 UTC |
+| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-06-04 15:55 UTC |
+| Agent — Every Minute (DRY_RUN) | in_progress | ⏳ — | 2026-06-04 15:55 UTC |
+| Agent — Every Minute (DRY_RUN) | in_progress | ⏳ — | 2026-06-04 15:54 UTC |
+| RidingHigh Auto Scanner | completed | ✅ success | 2026-06-04 15:54 UTC |
+| Agent — Every Minute (DRY_RUN) | completed | ✅ success | 2026-06-04 15:53 UTC |
 
 ---
 
@@ -47,11 +47,11 @@ _Months in config: `2026-04`, `2026-05`, `2026-06`, `2026-07`_
 
 | Sheet | Total rows | Last date | Status |
 |---|---|---|---|
-| timeline_live | 51,304 | 2026-06-04 | ✅ |
-| daily_snapshots | 184 | 2026-06-02 | ✅ |
-| daily_summary | 252 | 2026-06-03 | ✅ |
-| post_analysis | 24 | 2026-06-03 | ✅ |
-| portfolio | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| timeline_live | 51,646 | 2026-06-04 | ✅ |
+| daily_snapshots | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| daily_summary | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| post_analysis | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| portfolio | 19 | 2026-06-03 | ✅ |
 | portfolio_live | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
 | score_tracker | 746 | 2026-06-04 | ✅ |
 | live_trades | 746 | 2026-06-04 | ✅ |

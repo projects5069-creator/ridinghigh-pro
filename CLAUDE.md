@@ -222,7 +222,7 @@ If you respond without reading a relevant SKILL.md when one applies:
 
 
 ### v3.1 (2026-05-28) — HARD GATE ACTIVE
-A PreToolUse hook now BLOCKS Bash/Edit/Write/NotebookEdit until a SKILL.md is Read (or a Skill tool loaded) in the session. This enforces RULE #11 at the kernel level — declaration alone is no longer enough. Recovery if locked out: ~/.claude/hooks/RECOVERY.md (disableAllHooks=true via native terminal). KNOWN HOLE: any SKILL.md satisfies it, not necessarily the relevant one (TASK-54).
+A PreToolUse hook now BLOCKS Bash/Edit/Write/NotebookEdit until a SKILL.md is Read (or a Skill tool loaded) in the session. This enforces RULE #11 at the kernel level — declaration alone is no longer enough. Recovery if locked out: ~/.claude/hooks/RECOVERY.md (disableAllHooks=true via native terminal). KNOWN HOLE (still open, TASK-54): gate is fail-open — any SKILL.md satisfies it. v3.3 adds a mandatory scan-line + TASK-TYPE mapping (guidance, not enforcement) to push toward the relevant skill; deterministic enforcement still pending.
 
 ### v3.2 (2026-06-01) — END-OF-OUTPUT PROOF (mandatory)
 At the END of EVERY response that did real work (bash/edit/investigation),
