@@ -3,9 +3,10 @@ id: TASK-108
 title: >-
   reconciliation auto-repair — rebuild missing paper_portfolio row from
   decision_log
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-06-03 22:34'
+updated_date: '2026-06-04 00:27'
 labels:
   - reconciler
   - robustness

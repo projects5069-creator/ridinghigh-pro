@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-06-03 19:27:03 -05
+**Generated:** 2026-06-03 19:30:14 -05
 **Branch:** `main`
-**Latest commit:** `1238ad9` — chore(gitignore): ignore docs/superpowers brainstorming artifacts
+**Latest commit:** `adc1e01` — chore(backlog): TASK-108 Done + open TASK-109 (RECONCILE_AUTO_REPAIR activation, gated)
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `1238ad9 (HEAD -> main) chore(gitignore): ignore docs/superpowers brainstorming artifacts`
-- `b0543f8 (origin/main, origin/HEAD) feat(reconciler): TASK-108 auto-repair missing paper_portfolio rows from decision_log — dormant behind RECONCILE_AUTO_REPAIR=False (GATE: flag-only proof pending) (#8)`
+- `adc1e01 (HEAD -> main) chore(backlog): TASK-108 Done + open TASK-109 (RECONCILE_AUTO_REPAIR activation, gated)`
+- `102fa6a (origin/main, origin/HEAD) chore(gitignore): ignore docs/superpowers brainstorming artifacts`
+- `b0543f8 feat(reconciler): TASK-108 auto-repair missing paper_portfolio rows from decision_log — dormant behind RECONCILE_AUTO_REPAIR=False (GATE: flag-only proof pending) (#8)`
 - `89117cd docs(session): open TASK-108 (reconciliation auto-repair); refresh EOD close 2026-06-03`
 - `b96d449 docs(session): close 2026-06-03 — 7 merges (schema fix, sentinel immunization+shadow, write-surface, reconcile, reads phase1+2)`
-- `3ecbd20 Merge pull request #7 from projects5069-creator/feat/task58-phase2-scanner-timeline-cache`
 
 ---
 
@@ -67,16 +67,13 @@ _Months in config: `2026-04`, `2026-05`, `2026-06`, `2026-07`_
 | pending_suggestions | 0 | — | ⚠️ empty |
 | config_history | 0 | — | ⚠️ empty |
 | borrow_data | 0 | — | ⚠️ empty |
-| agent_scorecard | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| agent_scorecard | 12 | 2026-06-03 | ✅ |
 | weekly_summary | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
 
 ---
 
 ## 🩺 Health
-
-- ⚠️ 2 uncommitted file(s):
--    - 1 modified
--    - 1 new/untracked
+✅ All checks passed.
 
 ---
 
