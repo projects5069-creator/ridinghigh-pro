@@ -78,3 +78,5 @@ provider_validation_report.json
 research/
 # numbered backup variants (.bak2_, .bak3b_) not caught by *.bak_* (TASK-86)
 *.bak[0-9]*
+# brainstorming/plan artifacts — kept locally, not tracked (TASK-108 closeout)
+docs/superpowers/

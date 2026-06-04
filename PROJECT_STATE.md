@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-06-03 19:12:06 -05
-**Branch:** `feat/task108-reconcile-auto-repair`
-**Latest commit:** `95ed4cb` — feat(reconciler): TASK-108 auto-repair missing paper_portfolio rows from decision_log — dormant behind RECONCILE_AUTO_REPAIR=False (GATE: flag-only proof pending)
+**Generated:** 2026-06-03 19:27:03 -05
+**Branch:** `main`
+**Latest commit:** `1238ad9` — chore(gitignore): ignore docs/superpowers brainstorming artifacts
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `95ed4cb (HEAD -> feat/task108-reconcile-auto-repair) feat(reconciler): TASK-108 auto-repair missing paper_portfolio rows from decision_log — dormant behind RECONCILE_AUTO_REPAIR=False (GATE: flag-only proof pending)`
-- `89117cd (origin/main, origin/HEAD, main) docs(session): open TASK-108 (reconciliation auto-repair); refresh EOD close 2026-06-03`
+- `1238ad9 (HEAD -> main) chore(gitignore): ignore docs/superpowers brainstorming artifacts`
+- `b0543f8 (origin/main, origin/HEAD) feat(reconciler): TASK-108 auto-repair missing paper_portfolio rows from decision_log — dormant behind RECONCILE_AUTO_REPAIR=False (GATE: flag-only proof pending) (#8)`
+- `89117cd docs(session): open TASK-108 (reconciliation auto-repair); refresh EOD close 2026-06-03`
 - `b96d449 docs(session): close 2026-06-03 — 7 merges (schema fix, sentinel immunization+shadow, write-surface, reconcile, reads phase1+2)`
 - `3ecbd20 Merge pull request #7 from projects5069-creator/feat/task58-phase2-scanner-timeline-cache`
-- `1451889 (origin/feat/task58-phase2-scanner-timeline-cache, feat/task58-phase2-scanner-timeline-cache) perf(scanner): TASK-58 Phase 2 S1 — cache timeline_live reads (4 -> 2)`
 
 ---
 
@@ -66,7 +66,7 @@ _Months in config: `2026-04`, `2026-05`, `2026-06`, `2026-07`_
 | news_findings | 649 | — | ✅ |
 | pending_suggestions | 0 | — | ⚠️ empty |
 | config_history | 0 | — | ⚠️ empty |
-| borrow_data | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| borrow_data | 0 | — | ⚠️ empty |
 | agent_scorecard | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
 | weekly_summary | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
 
@@ -74,7 +74,8 @@ _Months in config: `2026-04`, `2026-05`, `2026-06`, `2026-07`_
 
 ## 🩺 Health
 
-- ⚠️ 1 uncommitted file(s):
+- ⚠️ 2 uncommitted file(s):
+-    - 1 modified
 -    - 1 new/untracked
 
 ---
