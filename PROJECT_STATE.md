@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-06-03 19:30:14 -05
-**Branch:** `main`
-**Latest commit:** `adc1e01` — chore(backlog): TASK-108 Done + open TASK-109 (RECONCILE_AUTO_REPAIR activation, gated)
+**Generated:** 2026-06-03 20:18:33 -05
+**Branch:** `docs/task78-dropslab-status`
+**Latest commit:** `eab7d05` — docs(task78): DropsLab verified full (raw 2851/post 2156) — correct 'empty' claim, unblock #N25, PK v2.74, mark TASK-78 Done
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `adc1e01 (HEAD -> main) chore(backlog): TASK-108 Done + open TASK-109 (RECONCILE_AUTO_REPAIR activation, gated)`
-- `102fa6a (origin/main, origin/HEAD) chore(gitignore): ignore docs/superpowers brainstorming artifacts`
+- `eab7d05 (HEAD -> docs/task78-dropslab-status) docs(task78): DropsLab verified full (raw 2851/post 2156) — correct 'empty' claim, unblock #N25, PK v2.74, mark TASK-78 Done`
+- `1584632 (origin/main, origin/HEAD, main) chore(backlog): TASK-108 Done + open TASK-109 (RECONCILE_AUTO_REPAIR activation, gated)`
+- `102fa6a chore(gitignore): ignore docs/superpowers brainstorming artifacts`
 - `b0543f8 feat(reconciler): TASK-108 auto-repair missing paper_portfolio rows from decision_log — dormant behind RECONCILE_AUTO_REPAIR=False (GATE: flag-only proof pending) (#8)`
 - `89117cd docs(session): open TASK-108 (reconciliation auto-repair); refresh EOD close 2026-06-03`
-- `b96d449 docs(session): close 2026-06-03 — 7 merges (schema fix, sentinel immunization+shadow, write-surface, reconcile, reads phase1+2)`
 
 ---
 
@@ -65,9 +65,9 @@ _Months in config: `2026-04`, `2026-05`, `2026-06`, `2026-07`_
 | market_context | 9 | — | ✅ |
 | news_findings | 649 | — | ✅ |
 | pending_suggestions | 0 | — | ⚠️ empty |
-| config_history | 0 | — | ⚠️ empty |
-| borrow_data | 0 | — | ⚠️ empty |
-| agent_scorecard | 12 | 2026-06-03 | ✅ |
+| config_history | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| borrow_data | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| agent_scorecard | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
 | weekly_summary | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
 
 ---
