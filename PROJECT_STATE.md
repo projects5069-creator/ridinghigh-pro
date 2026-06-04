@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-06-04 12:45:43 -05
+**Generated:** 2026-06-04 12:52:06 -05
 **Branch:** `main`
-**Latest commit:** `0097524` — chore(backlog): TASK-112 In Progress — code done, awaiting live scan verification
+**Latest commit:** `be51e36` — docs(pk): TASK-112 Done — scanner read-counter verified live (timeline_live=1 cache-miss/run); caching-effective finding + miss-vs-raw caveat; open TASK-113 for literal raw-read verify; PK v2.81
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `0097524 (HEAD -> main) chore(backlog): TASK-112 In Progress — code done, awaiting live scan verification`
-- `51e8785 (origin/main, origin/HEAD) feat(scanner): TASK-112 — per-run Sheets API read-counter in auto_scanner __main__ (mirror agent Phase 1); fail-safe reset+summary; enables live timeline_live 4->2 verification`
+- `be51e36 (HEAD -> main) docs(pk): TASK-112 Done — scanner read-counter verified live (timeline_live=1 cache-miss/run); caching-effective finding + miss-vs-raw caveat; open TASK-113 for literal raw-read verify; PK v2.81`
+- `8bcc90e (origin/main, origin/HEAD) chore(backlog): TASK-112 In Progress — code done, awaiting live scan verification`
+- `51e8785 feat(scanner): TASK-112 — per-run Sheets API read-counter in auto_scanner __main__ (mirror agent Phase 1); fail-safe reset+summary; enables live timeline_live 4->2 verification`
 - `673f5da chore(backlog): open TASK-112 — add scanner read-counter for live timeline_live 4->2 verification (Phase 2 S1)`
 - `deda398 refactor(hooks): consolidate skill_enforcement_hook to single canonical mirror scripts/claude_hooks/ (Option A) — sync v3.3, rm loose dup, unify PK §316/§291, install.sh deploy; TASK-111 Done; PK v2.80`
-- `ffd22df docs(pk): TASK-104 Done — system_events dual-writer is BENIGN (append-only, not §910 violation); document allowed exception; PK v2.79`
 
 ---
 
@@ -32,30 +32,30 @@ _See `OPEN_ISSUES.md` for full list_
 
 | Workflow | Status | Conclusion | Started |
 |---|---|---|---|
-| Agent — Every Minute (DRY_RUN) | in_progress | ⏳ — | 2026-06-04 17:45 UTC |
-| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-06-04 17:45 UTC |
-| Agent — Every Minute (DRY_RUN) | in_progress | ⏳ — | 2026-06-04 17:44 UTC |
-| RidingHigh Auto Scanner | completed | ✅ success | 2026-06-04 17:44 UTC |
-| Agent — Every Minute (DRY_RUN) | in_progress | ⏳ — | 2026-06-04 17:43 UTC |
+| Agent — Every Minute (DRY_RUN) | queued | ⏳ — | 2026-06-04 17:52 UTC |
+| RidingHigh Auto Scanner | queued | ⏳ — | 2026-06-04 17:52 UTC |
+| Agent — Every Minute (DRY_RUN) | in_progress | ⏳ — | 2026-06-04 17:51 UTC |
+| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-06-04 17:51 UTC |
+| RidingHigh Auto Scanner | completed | ✅ success | 2026-06-04 17:50 UTC |
 
 ---
 
-## 📊 Google Sheets — showing month `2026-07`
+## 📊 Google Sheets — showing month `2026-06`
 
-_Selection: fallback — no month has data, using latest key (2026-07)_
+_Selection: current Peru month (2026-06) has data_
 _Months in config: `2026-04`, `2026-05`, `2026-06`, `2026-07`_
 
 | Sheet | Total rows | Last date | Status |
 |---|---|---|---|
-| timeline_live | 0 | — | ⚠️ empty |
-| daily_snapshots | 0 | — | ⚠️ empty |
-| daily_summary | 0 | — | ⚠️ empty |
-| post_analysis | 0 | — | ⚠️ empty |
-| portfolio | 0 | — | ⚠️ empty |
-| portfolio_live | 0 | — | ⚠️ empty |
-| score_tracker | 0 | — | ⚠️ empty |
+| timeline_live | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| daily_snapshots | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| daily_summary | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| post_analysis | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| portfolio | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| portfolio_live | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| score_tracker | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| live_trades | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
 | ticker_follow_up | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| live_trades | 0 | — | ⚠️ empty |
 | decision_log | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
 | paper_portfolio | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
 | score_analytics | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
