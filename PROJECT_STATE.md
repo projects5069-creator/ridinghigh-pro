@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-06-04 11:19:55 -05
+**Generated:** 2026-06-04 11:34:13 -05
 **Branch:** `main`
-**Latest commit:** `5bee61c` — docs(pk): TASK-47 Done — portfolio sheet ALIVE, document purpose in §14:1301 (prevent re-deprecation); PK v2.77
+**Latest commit:** `c4cc871` — docs(pk): v2.78 — TASK-58 Phase 1 verified (total=4, all tabs x1=consolidation); precise per-tab framing, no unverified per-function claim; S2 deferred
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `5bee61c (HEAD -> main) docs(pk): TASK-47 Done — portfolio sheet ALIVE, document purpose in §14:1301 (prevent re-deprecation); PK v2.77`
-- `23ecff0 (origin/main, origin/HEAD) feat(hook): RULE #11 v3.3 — mandatory skill-scan line + TASK-TYPE mapping; sync live->canonical; PK v2.76; TASK-54 progress (still open, fail-open)`
+- `c4cc871 (HEAD -> main) docs(pk): v2.78 — TASK-58 Phase 1 verified (total=4, all tabs x1=consolidation); precise per-tab framing, no unverified per-function claim; S2 deferred`
+- `777fcc5 (origin/main, origin/HEAD) docs(pk): TASK-47 Done — portfolio sheet ALIVE, document purpose in §14:1301 (prevent re-deprecation); PK v2.77`
+- `23ecff0 feat(hook): RULE #11 v3.3 — mandatory skill-scan line + TASK-TYPE mapping; sync live->canonical; PK v2.76; TASK-54 progress (still open, fail-open)`
 - `40fb2ef docs(pk): v2.75 + close TASK-45 — 5 obsolete files removed, 2 dangling refs fixed, 58MB local pkl freed`
 - `844615d chore(cleanup): TASK-45 remove 2 dead one-shot scripts + 3 obsolete docs; fix dangling refs in OPEN_ISSUES.md + dashboard.py`
-- `732d51c chore(backlog): TASK-110 Done — clipboard wrapper byte-exact self-verify`
 
 ---
 
@@ -32,17 +32,17 @@ _See `OPEN_ISSUES.md` for full list_
 
 | Workflow | Status | Conclusion | Started |
 |---|---|---|---|
-| Agent — Every Minute (DRY_RUN) | in_progress | ⏳ — | 2026-06-04 16:19 UTC |
-| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-06-04 16:19 UTC |
-| Agent — Every Minute (DRY_RUN) | in_progress | ⏳ — | 2026-06-04 16:18 UTC |
-| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-06-04 16:18 UTC |
-| RidingHigh Auto Scanner | completed | ✅ success | 2026-06-04 16:17 UTC |
+| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-06-04 16:34 UTC |
+| Agent — Every Minute (DRY_RUN) | in_progress | ⏳ — | 2026-06-04 16:34 UTC |
+| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-06-04 16:33 UTC |
+| Agent — Every Minute (DRY_RUN) | completed | ✅ success | 2026-06-04 16:33 UTC |
+| Agent — Morning Brief Email | completed | ✅ success | 2026-06-04 16:32 UTC |
 
 ---
 
-## 📊 Google Sheets — showing month `2026-06`
+## 📊 Google Sheets — showing month `2026-07`
 
-_Selection: current Peru month (2026-06) has data_
+_Selection: most recent month with data (2026-07)_
 _Months in config: `2026-04`, `2026-05`, `2026-06`, `2026-07`_
 
 | Sheet | Total rows | Last date | Status |
@@ -51,11 +51,11 @@ _Months in config: `2026-04`, `2026-05`, `2026-06`, `2026-07`_
 | daily_snapshots | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
 | daily_summary | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
 | post_analysis | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| portfolio | 19 | 2026-06-03 | ✅ |
+| portfolio | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
 | portfolio_live | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
 | score_tracker | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| live_trades | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
 | ticker_follow_up | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| live_trades | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
 | decision_log | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
 | paper_portfolio | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
 | score_analytics | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
