@@ -1364,7 +1364,17 @@ def run_eod():
 
 if __name__ == "__main__":
     import sys
+    try:
+        sheets_manager.reset_read_counts()
+    except Exception:
+        pass
     if len(sys.argv) > 1 and sys.argv[1] == "--eod":
         run_eod()
     else:
         run_scan()
+    # TASK-112: per-run Sheets API read summary (fail-safe; never breaks the per-minute scan).
+    try:
+        _rc = sheets_manager.get_read_counts()
+        print(f"Sheets API reads this run (cache misses): total={sum(_rc.values())} {_rc}")
+    except Exception as _e:
+        print(f"read-counter summary failed (non-fatal): {_e}")
