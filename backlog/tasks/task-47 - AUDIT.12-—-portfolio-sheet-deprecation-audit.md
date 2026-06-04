@@ -1,9 +1,10 @@
 ---
 id: TASK-47
 title: AUDIT.12 — portfolio sheet deprecation audit
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-05-25 10:25'
+updated_date: '2026-06-04 16:19'
 labels: []
 dependencies: []
 priority: low
@@ -19,19 +20,5 @@ The portfolio sheet (6 cols: PositionKey, Date, Ticker, Score, BuyPrice, Status)
 ## Implementation Notes
 
 <!-- SECTION:NOTES:BEGIN -->
-Discovered during task-44 (AUDIT.9). Full audit: research/2026-05-25_winrate_audit.md.
-
-Investigation steps:
-1. Who writes to portfolio sheet? (auto_scanner.update_live_trades per PK §14, but verify against actual code)
-2. Does Score Tracker page actually USE the data, or just load it? (line 2819 reads, but is the output displayed?)
-3. If dead — git rm the sheet creation from sheets_manager.py? Or just stop populating it?
-4. Update sheets_config.json if removed.
-
-Acceptance criteria:
-- Definitive answer: dead or alive?
-- If dead — deprecation plan with backward compat for old months
-- If alive — document its actual purpose in PK §14
-
-Estimated effort: 30min.
-Priority: LOW — disk/quota cleanup, not user-facing.
+Audit 4/6: ALIVE. auto_scanner writes (468/1319) + reads SoT (604/1139 D1-D3); dashboard displays (2819 Score Tracker/1019 fallback); monthly_rotation (57/85). PK 14 line 1301 EXPANDED with purpose (source-of-truth + D1-D3 tracking, not deprecated) to prevent future re-deprecation (task-44 mistake). Deprecation premise WRONG.
 <!-- SECTION:NOTES:END -->
