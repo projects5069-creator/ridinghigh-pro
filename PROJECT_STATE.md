@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-06-03 20:18:33 -05
-**Branch:** `docs/task78-dropslab-status`
-**Latest commit:** `eab7d05` — docs(task78): DropsLab verified full (raw 2851/post 2156) — correct 'empty' claim, unblock #N25, PK v2.74, mark TASK-78 Done
+**Generated:** 2026-06-03 20:59:55 -05
+**Branch:** `main`
+**Latest commit:** `31ca72a` — docs(handoff): 2026-06-03 Session 2 — close TASK-108 + TASK-78, daily health review
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `eab7d05 (HEAD -> docs/task78-dropslab-status) docs(task78): DropsLab verified full (raw 2851/post 2156) — correct 'empty' claim, unblock #N25, PK v2.74, mark TASK-78 Done`
-- `1584632 (origin/main, origin/HEAD, main) chore(backlog): TASK-108 Done + open TASK-109 (RECONCILE_AUTO_REPAIR activation, gated)`
+- `31ca72a (HEAD -> main) docs(handoff): 2026-06-03 Session 2 — close TASK-108 + TASK-78, daily health review`
+- `85a1303 (origin/main, origin/HEAD) docs(task78): DropsLab verified full (raw 2851/post 2156) — correct 'empty' claim, unblock #N25, PK v2.74, mark TASK-78 Done (#9)`
+- `1584632 chore(backlog): TASK-108 Done + open TASK-109 (RECONCILE_AUTO_REPAIR activation, gated)`
 - `102fa6a chore(gitignore): ignore docs/superpowers brainstorming artifacts`
 - `b0543f8 feat(reconciler): TASK-108 auto-repair missing paper_portfolio rows from decision_log — dormant behind RECONCILE_AUTO_REPAIR=False (GATE: flag-only proof pending) (#8)`
-- `89117cd docs(session): open TASK-108 (reconciliation auto-repair); refresh EOD close 2026-06-03`
 
 ---
 
@@ -50,7 +50,7 @@ _Months in config: `2026-04`, `2026-05`, `2026-06`, `2026-07`_
 | timeline_live | 48,839 | 2026-06-03 | ✅ |
 | daily_snapshots | 184 | 2026-06-02 | ✅ |
 | daily_summary | 252 | 2026-06-03 | ✅ |
-| post_analysis | 12 | 2026-06-02 | ✅ |
+| post_analysis | 24 | 2026-06-03 | ✅ |
 | portfolio | 19 | 2026-06-03 | ✅ |
 | portfolio_live | 13 | 2026-06-02 | ✅ |
 | score_tracker | 727 | 2026-06-03 | ✅ |
