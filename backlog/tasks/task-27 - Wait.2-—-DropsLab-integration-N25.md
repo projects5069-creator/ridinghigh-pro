@@ -14,11 +14,13 @@ ordinal: 27000
 ## Description
 
 <!-- SECTION:DESCRIPTION:BEGIN -->
-Integrate DropsLab scanner signals as input to RidingHigh Pro Trader. Issue #N25. BLOCKED — needs DropsLab data accumulation first.
+Integrate DropsLab scanner signals as input to RidingHigh Pro Trader. Issue #N25. UNBLOCKED 2026-06-03 (TASK-78) — the data-accumulation precondition is met (DropsLab sheet verified full: drops_raw 2851 / drops_post 2156 non-empty rows).
 <!-- SECTION:DESCRIPTION:END -->
 
 ## Implementation Notes
 
 <!-- SECTION:NOTES:BEGIN -->
-TASK-62 finding (2026-05-30): DropsLab main sheet EMPTY (0 rows) despite valid SA access + 1000-row quota. PRECONDITION before any integration: investigate why DropsLab is not collecting/saving data — integration is pointless on an empty source.
+CORRECTED 2026-06-03 (TASK-78): the "EMPTY (0 rows)" finding was a WRONG Sheet ID (homoglyph I/l), fixed in TASK-77. Verified live 2026-06-03 — opened BY NAME (ID 1XM-qId7HAwEu-8-1GGHcy3RoyyAnsYshjZfDrKFnTMI): drops_raw 2851 + drops_post 2156 non-empty rows. The data-accumulation precondition is MET — #N25 is unblocked.
+
+(History — superseded) TASK-62 finding (2026-05-30): DropsLab main sheet reported EMPTY (0 rows); root cause was the homoglyph Sheet ID, not missing data.
 <!-- SECTION:NOTES:END -->
