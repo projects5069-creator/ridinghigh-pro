@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-06-04 15:00:44 -05
+**Generated:** 2026-06-04 15:13:53 -05
 **Branch:** `main`
-**Latest commit:** `bf754f2` — chore(backlog): TASK-41 analysis-only — skip_reason distribution + KEY insight (filter order = attribution not behavior); reorder is behavior-neutral LOW; recommend wontfix-or-leave; code untouched
+**Latest commit:** `734ecb9` — docs(session): close 2026-06-04 — SESSION_HANDOFF + PK v2.82; 17 commits, 7 tasks Done, RULE #11 v3.3, 58MB freed
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `bf754f2 (HEAD -> main) chore(backlog): TASK-41 analysis-only — skip_reason distribution + KEY insight (filter order = attribution not behavior); reorder is behavior-neutral LOW; recommend wontfix-or-leave; code untouched`
-- `2e87123 (origin/main, origin/HEAD) chore(backlog): TASK-96 — add design note (recovering/clustered/sample-size gate + test cases) for dedicated session; not started, code untouched`
+- `734ecb9 (HEAD -> main) docs(session): close 2026-06-04 — SESSION_HANDOFF + PK v2.82; 17 commits, 7 tasks Done, RULE #11 v3.3, 58MB freed`
+- `429b793 (origin/main, origin/HEAD) chore(backlog): TASK-41 analysis-only — skip_reason distribution + KEY insight (filter order = attribution not behavior); reorder is behavior-neutral LOW; recommend wontfix-or-leave; code untouched`
+- `2e87123 chore(backlog): TASK-96 — add design note (recovering/clustered/sample-size gate + test cases) for dedicated session; not started, code untouched`
 - `912d58c chore(backlog): TASK-59 Done — §2 ritual hardening already in SESSION_PROTOCOL (landed 2026-05-29, verified live); 4 AC checked`
 - `0e4a9cb chore(backlog): TASK-101 — record verified findings (plugin+marketplace exist, install valid, skill-gate conflict LOW); stays gated on TASK-93/94, not installed`
-- `78a842b docs(pk): TASK-112 Done — scanner read-counter verified live (timeline_live=1 cache-miss/run); caching-effective finding + miss-vs-raw caveat; open TASK-113 for literal raw-read verify; PK v2.81`
 
 ---
 
@@ -32,11 +32,11 @@ _See `OPEN_ISSUES.md` for full list_
 
 | Workflow | Status | Conclusion | Started |
 |---|---|---|---|
-| Agent — Every Minute (DRY_RUN) | in_progress | ⏳ — | 2026-06-04 20:00 UTC |
-| RidingHigh Auto Scanner | completed | ✅ success | 2026-06-04 20:00 UTC |
-| RidingHigh Auto Scanner | completed | ✅ success | 2026-06-04 19:59 UTC |
-| Agent — Every Minute (DRY_RUN) | in_progress | ⏳ — | 2026-06-04 19:59 UTC |
-| Agent — Every Minute (DRY_RUN) | in_progress | ⏳ — | 2026-06-04 19:58 UTC |
+| RidingHigh Auto Scanner | completed | ✅ success | 2026-06-04 20:13 UTC |
+| Agent — Every Minute (DRY_RUN) | completed | ✅ success | 2026-06-04 20:13 UTC |
+| RidingHigh Auto Scanner | completed | ✅ success | 2026-06-04 20:12 UTC |
+| Agent — Every Minute (DRY_RUN) | completed | ✅ success | 2026-06-04 20:12 UTC |
+| RidingHigh Auto Scanner | completed | ✅ success | 2026-06-04 20:11 UTC |
 
 ---
 
@@ -47,24 +47,24 @@ _Months in config: `2026-04`, `2026-05`, `2026-06`, `2026-07`_
 
 | Sheet | Total rows | Last date | Status |
 |---|---|---|---|
-| timeline_live | 56,384 | 2026-06-04 | ✅ |
+| timeline_live | 56,470 | 2026-06-04 | ✅ |
 | daily_snapshots | 270 | 2026-06-04 | ✅ |
-| daily_summary | 349 | 2026-06-04 | ✅ |
+| daily_summary | 351 | 2026-06-04 | ✅ |
 | post_analysis | 24 | 2026-06-03 | ✅ |
 | portfolio | 22 | 2026-06-04 | ✅ |
 | portfolio_live | 22 | 2026-06-04 | ✅ |
 | score_tracker | 746 | 2026-06-04 | ✅ |
 | live_trades | 746 | 2026-06-04 | ✅ |
 | ticker_follow_up | 10,364 | 2026-06-04 | ✅ |
-| decision_log | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| paper_portfolio | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| score_analytics | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| postmortems | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| sentinel_events | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| system_events | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| market_context | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| news_findings | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| pending_suggestions | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| decision_log | 20 | — | ✅ |
+| paper_portfolio | 18 | — | ✅ |
+| score_analytics | 0 | — | ⚠️ empty |
+| postmortems | 7 | — | ✅ |
+| sentinel_events | 3,019 | — | ✅ |
+| system_events | 4 | — | ✅ |
+| market_context | 11 | — | ✅ |
+| news_findings | 3,552 | — | ✅ |
+| pending_suggestions | 0 | — | ⚠️ empty |
 | config_history | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
 | borrow_data | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
 | agent_scorecard | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
