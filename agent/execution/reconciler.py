@@ -39,6 +39,7 @@ except ImportError:
 STATUS_OPEN = "OPEN"
 STATUS_DRY_RUN_OPEN = "DRY_RUN_OPEN"
 STATUS_CLOSED = "CLOSED"
+STATUS_DRY_RUN_CLOSED = "DRY_RUN_CLOSED"
 
 # Drift types
 DRIFT_OK = "OK"
@@ -60,6 +61,7 @@ class Reconciler:
         alert_writer=None,
         decision_log_reader=None,
         portfolio_all_reader=None,
+        portfolio_row_appender=None,
     ):
         """
         Args:
@@ -77,14 +79,21 @@ class Reconciler:
         self._alert_writer = alert_writer
         self._decision_log_reader = decision_log_reader
         self._portfolio_all_reader = portfolio_all_reader
+        self._portfolio_row_appender = portfolio_row_appender
 
-    def reconcile_decision_log_vs_portfolio(self, summary: Dict[str, Any] = None) -> Dict[str, Any]:
-        """TASK-106 (flag-only): detect today's decision_log ENTERs that have NO
-        matching paper_portfolio row (key: PositionID == DecisionID), matched
-        across ALL statuses so a same-day close is not a false positive.
+    def reconcile_decision_log_vs_portfolio(
+        self, summary: Dict[str, Any] = None, auto_repair: bool = False, today: str = None
+    ) -> Dict[str, Any]:
+        """TASK-106 (flag-only) + TASK-108 (auto-repair): detect today's
+        decision_log ENTERs that have NO matching paper_portfolio row (key:
+        PositionID == DecisionID), matched across ALL statuses so a same-day
+        close is not a false positive.
 
         Works in DRY_RUN (no Alpaca). Flags each gap via alert_writer +
-        run-summary count + log. Does NOT repair (phase-2, separate task).
+        run-summary count + log. When auto_repair is True (TASK-108), also
+        reconstructs and appends the missing row from decision_log. Idempotency
+        is structural: a row already present is never flagged, so it is never
+        re-appended (the blind first-append dedup is NOT relied upon).
         """
         dec_rows = self._read_decision_log()
         pf_rows = self._read_portfolio_all()
@@ -93,7 +102,8 @@ class Reconciler:
             for r in pf_rows
             if str(r.get("PositionID", "")).strip()
         }
-        today = datetime.now(PERU_TZ).strftime("%Y-%m-%d")
+        if today is None:
+            today = datetime.now(PERU_TZ).strftime("%Y-%m-%d")
 
         report = {"checked_enters": 0, "missing_portfolio_row": 0, "details": []}
         for r in dec_rows:
@@ -120,6 +130,10 @@ class Reconciler:
             }
             report["details"].append(event)
             logger.warning("Reconcile MISSING_PORTFOLIO_ROW: %s", event["details"])
+            if auto_repair:
+                _row = self._build_portfolio_row_from_decision(r)
+                _ok = self._append_portfolio_row(_row)
+                event["action_taken"] = "repaired" if _ok else "repair_failed"
             if self._alert_writer:
                 self._alert_writer(event)
 
@@ -151,6 +165,63 @@ class Reconciler:
         except Exception as e:
             logger.error("Failed to read paper_portfolio: %s", e)
             return []
+
+    def _build_portfolio_row_from_decision(self, r: Dict[str, Any]) -> List[Any]:
+        """TASK-108: rebuild a 25-col paper_portfolio row from a decision_log
+        ENTER dict. Lossy: Entry/TP/SL OrderID (set in execute(), AFTER log()),
+        ExitPrice/RealizedPnL (outcome never recorded). EntryPrice falls back to
+        Price (ExecutionPrice is empty at log time). Status from AgentMode.
+        ExitDate/ExitTime = EntryDate/EntryTime (decision a: same-instant)."""
+        ts = str(r.get("Timestamp", ""))
+        entry_date, entry_time = ts[:10], ts[11:19]
+        is_dry = str(r.get("AgentMode", "DRY_RUN")).upper() != "LIVE_PAPER"
+        status = STATUS_DRY_RUN_CLOSED if is_dry else STATUS_CLOSED
+        entry_price = r.get("ExecutionPrice") or r.get("Price") or ""
+        now_iso = datetime.now(PERU_TZ).isoformat()
+        return [
+            str(r.get("DecisionID", "")).strip(),  # PositionID
+            r.get("Ticker", ""),                   # Ticker
+            entry_date,                            # EntryDate
+            entry_time,                            # EntryTime
+            entry_price,                           # EntryPrice (Price)
+            r.get("Quantity", ""),                 # Quantity
+            r.get("PositionSizeUSD", ""),          # PositionSizeUSD
+            "short",                               # Side
+            "",                                    # EntryOrderID (lossy)
+            "",                                    # TPOrderID (lossy)
+            "",                                    # SLOrderID (lossy)
+            r.get("TPPrice", ""),                  # TPPrice
+            r.get("SLPrice", ""),                  # SLPrice
+            "",                                    # CurrentPrice
+            "",                                    # UnrealizedPnL
+            "",                                    # UnrealizedPnLPct
+            status,                                # Status
+            "",                                    # ExitPrice (lossy)
+            entry_date,                            # ExitDate (= EntryDate)
+            entry_time,                            # ExitTime (= EntryTime)
+            "RECONCILER_BACKFILL",                 # ExitReason
+            "",                                    # RealizedPnL (lossy)
+            "",                                    # RealizedPnLPct (lossy)
+            now_iso,                               # LastUpdated
+            "BACKFILL",                            # DataQuality
+        ]
+
+    def _append_portfolio_row(self, row: List[Any]) -> bool:
+        """Idempotent append to paper_portfolio. Injectable for tests."""
+        if self._portfolio_row_appender:
+            return bool(self._portfolio_row_appender(row))
+        try:
+            import sheets_manager
+            ws = sheets_manager.get_worksheet("paper_portfolio")
+            if not ws:
+                logger.error("auto-repair: paper_portfolio worksheet not available")
+                return False
+            sheets_manager.safe_append_row(ws, row, dedup_col=0, dedup_val=row[0])
+            sheets_manager.invalidate_cache("paper_portfolio")
+            return True
+        except Exception as e:
+            logger.error("auto-repair append failed: %s", e)
+            return False
 
     def reconcile(self) -> Dict[str, Any]:
         """

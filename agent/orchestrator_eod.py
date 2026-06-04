@@ -78,9 +78,12 @@ def run() -> Dict[str, Any]:
         summary["reconciler_drift"] = drift_stats.get("phantom_open", 0) + drift_stats.get("orphan_position", 0)
         logger.info("Reconciler: %s", drift_stats)
 
-        # TASK-106 (flag-only): decision_log ENTER without a matching
-        # paper_portfolio row (the XOS pattern). Works in DRY_RUN.
-        missing_stats = reconciler.reconcile_decision_log_vs_portfolio(summary)
+        # TASK-106 (flag-only) + TASK-108 (auto-repair, default OFF):
+        # decision_log ENTER without a matching paper_portfolio row (the XOS
+        # pattern). Works in DRY_RUN. Repair gated by RECONCILE_AUTO_REPAIR.
+        from config import RECONCILE_AUTO_REPAIR
+        missing_stats = reconciler.reconcile_decision_log_vs_portfolio(
+            summary, auto_repair=RECONCILE_AUTO_REPAIR)
         logger.info("Reconcile decision_log↔portfolio: %s missing", missing_stats["missing_portfolio_row"])
     except Exception as e:
         summary["errors"] += 1

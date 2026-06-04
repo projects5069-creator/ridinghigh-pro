@@ -284,6 +284,7 @@ AGENT_NO_TIME_LIMIT = True         # ⚠️ DIFFERENT from MAX_HOLDING_DAYS=5
 # Open positions roll over to next trading day.
 AGENT_FORCE_EOD_CLOSE = False
 AGENT_EOD_CLOSE_MIN_BEFORE = 5     # Close 5 min before market close
+RECONCILE_AUTO_REPAIR = False      # TASK-108: EOD auto-repair of missing paper_portfolio rows from decision_log. GATE: keep OFF until TASK-106 flag-only proves accurate over time (0 proof days as of 2026-06-03); auto-repair WRITES to the sheet.
 
 # Position sizing
 AGENT_POSITION_SIZE_USD = 1000     # Same as POSITION_SIZE_USD
