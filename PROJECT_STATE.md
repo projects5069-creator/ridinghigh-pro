@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-06-03 20:59:55 -05
+**Generated:** 2026-06-04 09:48:31 -05
 **Branch:** `main`
-**Latest commit:** `31ca72a` — docs(handoff): 2026-06-03 Session 2 — close TASK-108 + TASK-78, daily health review
+**Latest commit:** `f87aec4` — fix(wrapper): TASK-110 byte-exact pbcopy + char-count self-verify
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `31ca72a (HEAD -> main) docs(handoff): 2026-06-03 Session 2 — close TASK-108 + TASK-78, daily health review`
-- `85a1303 (origin/main, origin/HEAD) docs(task78): DropsLab verified full (raw 2851/post 2156) — correct 'empty' claim, unblock #N25, PK v2.74, mark TASK-78 Done (#9)`
+- `f87aec4 (HEAD -> main) fix(wrapper): TASK-110 byte-exact pbcopy + char-count self-verify`
+- `1f30e67 (origin/main, origin/HEAD) docs(handoff): 2026-06-03 Session 2 — close TASK-108 + TASK-78, daily health review`
+- `85a1303 docs(task78): DropsLab verified full (raw 2851/post 2156) — correct 'empty' claim, unblock #N25, PK v2.74, mark TASK-78 Done (#9)`
 - `1584632 chore(backlog): TASK-108 Done + open TASK-109 (RECONCILE_AUTO_REPAIR activation, gated)`
 - `102fa6a chore(gitignore): ignore docs/superpowers brainstorming artifacts`
-- `b0543f8 feat(reconciler): TASK-108 auto-repair missing paper_portfolio rows from decision_log — dormant behind RECONCILE_AUTO_REPAIR=False (GATE: flag-only proof pending) (#8)`
 
 ---
 
@@ -32,39 +32,39 @@ _See `OPEN_ISSUES.md` for full list_
 
 | Workflow | Status | Conclusion | Started |
 |---|---|---|---|
-| Agent — Critic (daily) | completed | ✅ success | 2026-06-03 23:25 UTC |
-| Daily Backup — post_analysis | completed | ✅ success | 2026-06-03 23:18 UTC |
-| Agent — Daily Brief Email | completed | ✅ success | 2026-06-03 23:17 UTC |
-| Post Analysis Collector | completed | ❌ failure | 2026-06-03 23:08 UTC |
-| Agent — End of Day | completed | ✅ success | 2026-06-03 22:55 UTC |
+| Agent — Every Minute (DRY_RUN) | in_progress | ⏳ — | 2026-06-04 14:48 UTC |
+| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-06-04 14:48 UTC |
+| Agent — Every Minute (DRY_RUN) | in_progress | ⏳ — | 2026-06-04 14:47 UTC |
+| RidingHigh Auto Scanner | completed | ✅ success | 2026-06-04 14:47 UTC |
+| Agent — Every Minute (DRY_RUN) | completed | ✅ success | 2026-06-04 14:46 UTC |
 
 ---
 
-## 📊 Google Sheets — showing month `2026-06`
+## 📊 Google Sheets — showing month `2026-07`
 
-_Selection: current Peru month (2026-06) has data_
+_Selection: most recent month with data (2026-07)_
 _Months in config: `2026-04`, `2026-05`, `2026-06`, `2026-07`_
 
 | Sheet | Total rows | Last date | Status |
 |---|---|---|---|
-| timeline_live | 48,839 | 2026-06-03 | ✅ |
-| daily_snapshots | 184 | 2026-06-02 | ✅ |
-| daily_summary | 252 | 2026-06-03 | ✅ |
-| post_analysis | 24 | 2026-06-03 | ✅ |
-| portfolio | 19 | 2026-06-03 | ✅ |
-| portfolio_live | 13 | 2026-06-02 | ✅ |
-| score_tracker | 727 | 2026-06-03 | ✅ |
-| live_trades | 727 | 2026-06-03 | ✅ |
-| ticker_follow_up | 9,625 | 2026-06-03 | ✅ |
-| decision_log | 12 | — | ✅ |
-| paper_portfolio | 10 | — | ✅ |
-| score_analytics | 0 | — | ⚠️ empty |
-| postmortems | 2 | — | ✅ |
-| sentinel_events | 973 | — | ✅ |
-| system_events | 4 | — | ✅ |
-| market_context | 9 | — | ✅ |
-| news_findings | 649 | — | ✅ |
-| pending_suggestions | 0 | — | ⚠️ empty |
+| timeline_live | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| daily_snapshots | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| daily_summary | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| post_analysis | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| portfolio | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| portfolio_live | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| score_tracker | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| ticker_follow_up | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| live_trades | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| decision_log | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| paper_portfolio | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| score_analytics | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| postmortems | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| sentinel_events | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| system_events | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| market_context | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| news_findings | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+| pending_suggestions | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
 | config_history | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
 | borrow_data | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
 | agent_scorecard | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
@@ -73,7 +73,9 @@ _Months in config: `2026-04`, `2026-05`, `2026-06`, `2026-07`_
 ---
 
 ## 🩺 Health
-✅ All checks passed.
+
+- ⚠️ 1 uncommitted file(s):
+-    - 1 new/untracked
 
 ---
 
