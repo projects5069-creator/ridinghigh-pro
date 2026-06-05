@@ -1,3 +1,12 @@
+# 🚨 CLIPBOARD RULE — READ FIRST 🚨
+To send Claude Code output to the user's chat there is NO automatic method. The user must
+MANUALLY select the response text (mouse + Cmd+C) then Cmd+V into the chat, OR run a command
+through `~/bin/ccrun` in a REAL Terminal — never inside Claude Code (CC's pbcopy is sandboxed,
+so Cmd+V returns stale text). Prefix ccrun with the project dir `cd ... &&`. No Stop hooks /
+auto-copy — none work here. Remind the user of this in ONE line at the start of every session.
+
+---
+
 # Claude Code Behavior Rules — RidingHigh Pro
 
 **READ THIS BEFORE EVERY TASK.** These rules are non-negotiable.

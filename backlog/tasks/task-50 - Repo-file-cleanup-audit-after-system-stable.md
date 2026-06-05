@@ -1,9 +1,10 @@
 ---
 id: TASK-50
 title: Repo file cleanup + audit (after system stable)
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-05-28 15:40'
+updated_date: '2026-06-05 23:21'
 labels: []
 dependencies: []
 ordinal: 50000
