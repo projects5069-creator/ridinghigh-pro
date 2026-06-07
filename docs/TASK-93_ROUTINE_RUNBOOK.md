@@ -90,7 +90,7 @@
 
 > ⚠️ שני ה-prompts **מוכנים בלבד**. לא נוצר routine, לא נורה `/fire`.
 > הרצה רק אחרי (א) Part B1+B2 מותקנים, (ב) אישור מפורש מעמיחי.
-> רצף: create routine (עם `sources`) → `/fire` PROBE → `/fire` FULL.
+> רצף: create (sources + run_once_at רחוק) → action:run PROBE → update(FULL) → action:run FULL.
 > כל prompt משנה רק `docs/.routine_conn_test`. PROBE = push בלבד; FULL = פותח PR, **DO NOT merge**.
 
 **גוף ה-event ל-PROBE** (push branch claude/* בלבד, ללא PR):
