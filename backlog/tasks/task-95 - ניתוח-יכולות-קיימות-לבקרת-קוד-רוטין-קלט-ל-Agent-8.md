@@ -1,9 +1,10 @@
 ---
 id: TASK-95
 title: 'ניתוח יכולות קיימות לבקרת קוד/רוטין (קלט ל-Agent #8)'
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-06-02 03:00'
+updated_date: '2026-06-07 23:38'
 labels:
   - agent8
   - research
