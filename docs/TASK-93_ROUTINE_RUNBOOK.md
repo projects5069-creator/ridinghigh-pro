@@ -84,7 +84,7 @@
         "sources": [
           {"git_repository": {"url": "https://github.com/projects5069-creator/ridinghigh-pro"}}
         ],
-        "allowed_tools": ["Read", "Write", "Edit", "Glob", "Grep"]
+        "allowed_tools": ["Bash", "Read", "Write", "Edit", "Glob", "Grep"]
       },
       "events": [
         {"data": {
