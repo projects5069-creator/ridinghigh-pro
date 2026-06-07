@@ -4,7 +4,7 @@ title: חיבור GitHub credentials ל-Cloud Routines — לאפשר push/PR א
 status: To Do
 assignee: []
 created_date: '2026-06-02 02:28'
-updated_date: '2026-06-07 15:53'
+updated_date: '2026-06-07 18:07'
 labels:
   - infra
   - routines
@@ -25,7 +25,7 @@ ordinal: 93000
 <!-- AC:BEGIN -->
 - [ ] #1 AC1: Claude GitHub App מותקן על projects5069-creator/ridinghigh-pro (write: Contents + Pull requests); ריצת-טסט דוחפת branch בלי כשל 403. (OAuth-בלבד = נתיב רעוע, באג #57009 → 403; הקריטריון הוא התקנת App.)
 - [ ] #2 AC2: session_context.sources=[{git_repository:{url:".../ridinghigh-pro"}}] רשום ב-config של ה-routine — מבטל "400 missing source".
-- [ ] #3 AC3: ריצת run-once פותחת PR מ-branch claude/* מול main, ללא merge; מוחזר PR URL ללא push ידני.
+- [ ] #3 AC3: routine נוצר עם sources רשום; ירי PROBE (action:run) דוחף branch claude/* ללא 403; update→ירי FULL פותח PR מ-claude/* מול main, ללא merge. (/fire+token מתועד כשכבת foundation ל-Agent #8 — לא נדרש לטסט הזה.)
 - [ ] #4 AC4: Least-privilege מאומת ומתועד: (א) ה-App מוגבל לריפו היחיד הזה (לא all-repos/org/admin); (ב) push מוגבל ל-working branch ע"י proxy התשתית — ברירת מחדל מובנית.
 <!-- AC:END -->
 
