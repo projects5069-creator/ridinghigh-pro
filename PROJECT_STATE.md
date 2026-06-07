@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-06-07 16:16:51 (local)
+**Generated:** 2026-06-07 16:42:05 (local)
 **Branch:** `main`
-**Latest commit:** `9962b44` — chore(backlog): close TASK-41 (wontfix) + TASK-116 (post-commit hook local fix); open hook-durability follow-up
+**Latest commit:** `039e5db` — chore(backlog): close TASK-76, TASK-79 (research insights documented, action routed to 69/71) + TASK-115 (wontfix)
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `9962b44 (HEAD -> main) chore(backlog): close TASK-41 (wontfix) + TASK-116 (post-commit hook local fix); open hook-durability follow-up`
-- `79c2124 (origin/main, origin/HEAD) feat(task-93): Cloud Routine push+PR verified end-to-end (PR #10); GitHub identity fixed to projects5069-creator`
+- `039e5db (HEAD -> main) chore(backlog): close TASK-76, TASK-79 (research insights documented, action routed to 69/71) + TASK-115 (wontfix)`
+- `ebee82e (origin/main, origin/HEAD) chore(backlog): close TASK-41 (wontfix) + TASK-116 (post-commit hook local fix); open hook-durability follow-up`
+- `79c2124 feat(task-93): Cloud Routine push+PR verified end-to-end (PR #10); GitHub identity fixed to projects5069-creator`
 - `ee4de0a docs(task-93): align section 5 intro to action:run sequence`
 - `adcdb00 docs(task-93): two-phase test via action:run (documented); /fire kept as Agent#8 foundation layer`
-- `02911af docs(task-93): restore Bash in staged routine tools (prompt is git-driven; least-priv via scoped App + working-branch proxy)`
 
 ---
 

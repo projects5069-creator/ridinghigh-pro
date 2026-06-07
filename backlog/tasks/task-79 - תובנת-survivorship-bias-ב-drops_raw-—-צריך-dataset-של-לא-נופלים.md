@@ -1,9 +1,10 @@
 ---
 id: TASK-79
 title: תובנת survivorship bias ב-drops_raw — צריך dataset של לא-נופלים
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-05-31 05:11'
+updated_date: '2026-06-07 21:41'
 labels:
   - insight
   - strategy
@@ -20,3 +21,9 @@ ordinal: 79000
 
 עלה ב-TASK-62 30/5, מאומת בשתי שיטות (scipy+ידני, פער 0.000). התובנה המרכזית של היום. משנה גישת המחקר. קושר ל-TASK-71 (הצד השני). P2.
 <!-- SECTION:DESCRIPTION:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+CLOSED-AS-DOCUMENTED (2026-06-07): התובנה (survivorship bias ב-drops_raw, מאומת scipy+ידני פער 0.000) רשומה במלואה. ה-actionable (dataset לא-נופלים) נותב ל-TASK-71. נסגר — תובנה נלכדה, פעולה נמשכת ב-71. ללא שינוי קוד.
+<!-- SECTION:NOTES:END -->
