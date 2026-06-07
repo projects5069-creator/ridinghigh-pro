@@ -1,10 +1,10 @@
 ---
 id: TASK-93
 title: חיבור GitHub credentials ל-Cloud Routines — לאפשר push/PR אוטומטי בענן
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-06-02 02:28'
-updated_date: '2026-06-07 18:07'
+updated_date: '2026-06-07 20:42'
 labels:
   - infra
   - routines
@@ -23,10 +23,10 @@ ordinal: 93000
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 AC1: Claude GitHub App מותקן על projects5069-creator/ridinghigh-pro (write: Contents + Pull requests); ריצת-טסט דוחפת branch בלי כשל 403. (OAuth-בלבד = נתיב רעוע, באג #57009 → 403; הקריטריון הוא התקנת App.)
-- [ ] #2 AC2: session_context.sources=[{git_repository:{url:".../ridinghigh-pro"}}] רשום ב-config של ה-routine — מבטל "400 missing source".
-- [ ] #3 AC3: routine נוצר עם sources רשום; ירי PROBE (action:run) דוחף branch claude/* ללא 403; update→ירי FULL פותח PR מ-claude/* מול main, ללא merge. (/fire+token מתועד כשכבת foundation ל-Agent #8 — לא נדרש לטסט הזה.)
-- [ ] #4 AC4: Least-privilege מאומת ומתועד: (א) ה-App מוגבל לריפו היחיד הזה (לא all-repos/org/admin); (ב) push מוגבל ל-working branch ע"י proxy התשתית — ברירת מחדל מובנית.
+- [x] #1 AC1: Claude GitHub App מותקן על projects5069-creator/ridinghigh-pro (write: Contents + Pull requests); ריצת-טסט דוחפת branch בלי כשל 403. (OAuth-בלבד = נתיב רעוע, באג #57009 → 403; הקריטריון הוא התקנת App.)
+- [x] #2 AC2: session_context.sources=[{git_repository:{url:".../ridinghigh-pro"}}] רשום ב-config של ה-routine — מבטל "400 missing source".
+- [x] #3 AC3: routine נוצר עם sources רשום; ירי PROBE (action:run) דוחף branch claude/* ללא 403; update→ירי FULL פותח PR מ-claude/* מול main, ללא merge. (/fire+token מתועד כשכבת foundation ל-Agent #8 — לא נדרש לטסט הזה.)
+- [x] #4 AC4: Least-privilege מאומת ומתועד: (א) ה-App מוגבל לריפו היחיד הזה (לא all-repos/org/admin); (ב) push מוגבל ל-working branch ע"י proxy התשתית — ברירת מחדל מובנית.
 <!-- AC:END -->
 
 ## Implementation Plan
@@ -37,8 +37,8 @@ A חיבור GitHub ידני → B routine JSON עם sources → C run-once test
 
 ## Definition of Done
 <!-- DOD:BEGIN -->
-- [ ] #1 Runbook ב-docs/ (צעדי App + JSON מאומת + פקודות אימות)
-- [ ] #2 PK bump + changelog
-- [ ] #3 TASK-93→Done רק אחרי שה-test PR נצפה פתוח ואז נוקה (אין branch/PR יתום)
-- [ ] #4 ממצאי הפיילוט מתועדים
+- [x] #1 Runbook ב-docs/ (צעדי App + JSON מאומת + פקודות אימות)
+- [x] #2 PK bump + changelog
+- [x] #3 TASK-93→Done רק אחרי שה-test PR נצפה פתוח ואז נוקה (אין branch/PR יתום)
+- [x] #4 ממצאי הפיילוט מתועדים
 <!-- DOD:END -->
