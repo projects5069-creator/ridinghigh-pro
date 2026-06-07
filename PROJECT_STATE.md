@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-06-04 15:13:53 -05
+**Generated:** 2026-06-07 16:16:51 (local)
 **Branch:** `main`
-**Latest commit:** `734ecb9` — docs(session): close 2026-06-04 — SESSION_HANDOFF + PK v2.82; 17 commits, 7 tasks Done, RULE #11 v3.3, 58MB freed
+**Latest commit:** `9962b44` — chore(backlog): close TASK-41 (wontfix) + TASK-116 (post-commit hook local fix); open hook-durability follow-up
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `734ecb9 (HEAD -> main) docs(session): close 2026-06-04 — SESSION_HANDOFF + PK v2.82; 17 commits, 7 tasks Done, RULE #11 v3.3, 58MB freed`
-- `429b793 (origin/main, origin/HEAD) chore(backlog): TASK-41 analysis-only — skip_reason distribution + KEY insight (filter order = attribution not behavior); reorder is behavior-neutral LOW; recommend wontfix-or-leave; code untouched`
-- `2e87123 chore(backlog): TASK-96 — add design note (recovering/clustered/sample-size gate + test cases) for dedicated session; not started, code untouched`
-- `912d58c chore(backlog): TASK-59 Done — §2 ritual hardening already in SESSION_PROTOCOL (landed 2026-05-29, verified live); 4 AC checked`
-- `0e4a9cb chore(backlog): TASK-101 — record verified findings (plugin+marketplace exist, install valid, skill-gate conflict LOW); stays gated on TASK-93/94, not installed`
+- `9962b44 (HEAD -> main) chore(backlog): close TASK-41 (wontfix) + TASK-116 (post-commit hook local fix); open hook-durability follow-up`
+- `79c2124 (origin/main, origin/HEAD) feat(task-93): Cloud Routine push+PR verified end-to-end (PR #10); GitHub identity fixed to projects5069-creator`
+- `ee4de0a docs(task-93): align section 5 intro to action:run sequence`
+- `adcdb00 docs(task-93): two-phase test via action:run (documented); /fire kept as Agent#8 foundation layer`
+- `02911af docs(task-93): restore Bash in staged routine tools (prompt is git-driven; least-priv via scoped App + working-branch proxy)`
 
 ---
 
@@ -32,43 +32,16 @@ _See `OPEN_ISSUES.md` for full list_
 
 | Workflow | Status | Conclusion | Started |
 |---|---|---|---|
-| RidingHigh Auto Scanner | completed | ✅ success | 2026-06-04 20:13 UTC |
-| Agent — Every Minute (DRY_RUN) | completed | ✅ success | 2026-06-04 20:13 UTC |
-| RidingHigh Auto Scanner | completed | ✅ success | 2026-06-04 20:12 UTC |
-| Agent — Every Minute (DRY_RUN) | completed | ✅ success | 2026-06-04 20:12 UTC |
-| RidingHigh Auto Scanner | completed | ✅ success | 2026-06-04 20:11 UTC |
+| Warm OAuth Token | completed | ✅ success | 2026-06-07 14:00 UTC |
+| Health Audit | completed | ✅ success | 2026-06-07 12:17 UTC |
+| Health Audit | completed | ✅ success | 2026-06-07 07:07 UTC |
+| Agent — End of Day | completed | ✅ success | 2026-06-06 21:52 UTC |
+| Health Audit | completed | ✅ success | 2026-06-06 21:38 UTC |
 
 ---
 
-## 📊 Google Sheets — showing month `2026-06`
-
-_Selection: current Peru month (2026-06) has data_
-_Months in config: `2026-04`, `2026-05`, `2026-06`, `2026-07`_
-
-| Sheet | Total rows | Last date | Status |
-|---|---|---|---|
-| timeline_live | 56,470 | 2026-06-04 | ✅ |
-| daily_snapshots | 270 | 2026-06-04 | ✅ |
-| daily_summary | 351 | 2026-06-04 | ✅ |
-| post_analysis | 24 | 2026-06-03 | ✅ |
-| portfolio | 22 | 2026-06-04 | ✅ |
-| portfolio_live | 22 | 2026-06-04 | ✅ |
-| score_tracker | 746 | 2026-06-04 | ✅ |
-| live_trades | 746 | 2026-06-04 | ✅ |
-| ticker_follow_up | 10,364 | 2026-06-04 | ✅ |
-| decision_log | 20 | — | ✅ |
-| paper_portfolio | 18 | — | ✅ |
-| score_analytics | 0 | — | ⚠️ empty |
-| postmortems | 7 | — | ✅ |
-| sentinel_events | 3,019 | — | ✅ |
-| system_events | 4 | — | ✅ |
-| market_context | 11 | — | ✅ |
-| news_findings | 3,552 | — | ✅ |
-| pending_suggestions | 0 | — | ⚠️ empty |
-| config_history | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| borrow_data | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| agent_scorecard | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
-| weekly_summary | ? | ? | ❌ APIError: [429]: Quota exceeded for quot |
+## 📊 Google Sheets
+_gspread not installed — `pip install gspread google-auth`_
 
 ---
 
