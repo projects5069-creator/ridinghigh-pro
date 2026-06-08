@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-06-08 10:52:13 (local)
-**Branch:** `feat/task94b-routine-checker`
-**Latest commit:** `59f5627` — feat(task-94b): פרסונת rh-routine-checker (Agent #8 core) — system-prompt read-only מקודד §3 (auto-safe paths + 7 בדיקות + פורמט §3.3); dry-run אומת (A→Needs-Work, Clean-B→Ready); TASK-94.1→Done
+**Generated:** 2026-06-08 11:11:57 (local)
+**Branch:** `main`
+**Latest commit:** `0fdf7b8` — chore(backlog): TASK-94.2 Done + TASK-94.3 AC (subagent reload caveat)
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `59f5627 (HEAD -> feat/task94b-routine-checker) feat(task-94b): פרסונת rh-routine-checker (Agent #8 core) — system-prompt read-only מקודד §3 (auto-safe paths + 7 בדיקות + פורמט §3.3); dry-run אומת (A→Needs-Work, Clean-B→Ready); TASK-94.1→Done`
-- `3f3df15 (origin/main, origin/HEAD, main) docs(task-94a): סגירת §3 ב-AGENT8_CAPABILITIES_MAP (auto-safe paths + 7 בדיקות + פורמט דו"ח) + הרחבת נתיבים אסורים §7.2 ל-5 (RUN_MODE_DECISION + NIGHT_RUN_TEMPLATE), PK 2.87, פיצול 94.1/.2/.3 (#11)`
+- `0fdf7b8 (HEAD -> main) chore(backlog): TASK-94.2 Done + TASK-94.3 AC (subagent reload caveat)`
+- `430e7f7 (origin/main, origin/HEAD) feat(task-94b): פרסונת rh-routine-checker (Agent #8 core) — system-prompt read-only מקודד §3 (auto-safe paths + 7 בדיקות + פורמט §3.3); dry-run אומת (A→Needs-Work, Clean-B→Ready); TASK-94.1→Done (#12)`
+- `3f3df15 docs(task-94a): סגירת §3 ב-AGENT8_CAPABILITIES_MAP (auto-safe paths + 7 בדיקות + פורמט דו"ח) + הרחבת נתיבים אסורים §7.2 ל-5 (RUN_MODE_DECISION + NIGHT_RUN_TEMPLATE), PK 2.87, פיצול 94.1/.2/.3 (#11)`
 - `ff95585 docs(handoff): mark TASK-95 done post-handoff, next=TASK-94`
 - `9e3898d docs(task-95): AGENT8_CAPABILITIES_MAP — מיפוי 9 מקורות + תיקון 7/9→4/3/2; TASK-95 Done, PK 2.86`
-- `17818e8 docs(session): close 2026-06-07 — 6 tasks done, OPEN 52→47, PK v2.85, next=TASK-95`
 
 ---
 
@@ -32,11 +32,11 @@ _See `OPEN_ISSUES.md` for full list_
 
 | Workflow | Status | Conclusion | Started |
 |---|---|---|---|
-| Agent — Every Minute (DRY_RUN) | in_progress | ⏳ — | 2026-06-08 15:52 UTC |
-| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-06-08 15:52 UTC |
-| Agent — Every Minute (DRY_RUN) | in_progress | ⏳ — | 2026-06-08 15:51 UTC |
-| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-06-08 15:51 UTC |
-| Agent — Every Minute (DRY_RUN) | in_progress | ⏳ — | 2026-06-08 15:50 UTC |
+| Agent — Every Minute (DRY_RUN) | in_progress | ⏳ — | 2026-06-08 16:11 UTC |
+| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-06-08 16:11 UTC |
+| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-06-08 16:10 UTC |
+| Agent — Every Minute (DRY_RUN) | in_progress | ⏳ — | 2026-06-08 16:10 UTC |
+| Agent — Every Minute (DRY_RUN) | completed | ✅ success | 2026-06-08 16:09 UTC |
 
 ---
 
@@ -46,9 +46,7 @@ _gspread not installed — `pip install gspread google-auth`_
 ---
 
 ## 🩺 Health
-
-- ⚠️ 1 uncommitted file(s):
--    - 1 modified
+✅ All checks passed.
 
 ---
 

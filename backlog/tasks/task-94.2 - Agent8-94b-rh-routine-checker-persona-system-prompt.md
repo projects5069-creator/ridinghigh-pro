@@ -1,9 +1,10 @@
 ---
 id: TASK-94.2
 title: 'Agent8 94b: rh-routine-checker persona system-prompt'
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-06-08 14:33'
+updated_date: '2026-06-08 16:05'
 labels:
   - agent8
   - persona
