@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-06-08 14:29:51 (local)
-**Branch:** `night/TASK-114`
-**Latest commit:** `d15c4cc` — feat(task-114): scripts/prune_baks.sh — keep 3 newest .bak per basename (gen-2 night-run 2a)
+**Generated:** 2026-06-08 14:38:19 (local)
+**Branch:** `main`
+**Latest commit:** `6b91c52` — chore(backlog): TASK-114 Done — gen-2 night-run 2a complete (rule-5 closed)
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `d15c4cc (HEAD -> night/TASK-114) feat(task-114): scripts/prune_baks.sh — keep 3 newest .bak per basename (gen-2 night-run 2a)`
-- `20ecae1 (origin/main, origin/HEAD, main) docs(task-121): gen-2 prep — Run Log section + §3.2 rule-5 wiring (closes "לא-ודאי" gap)`
+- `6b91c52 (HEAD -> main) chore(backlog): TASK-114 Done — gen-2 night-run 2a complete (rule-5 closed)`
+- `7298004 (origin/main, origin/HEAD) feat(task-114): scripts/prune_baks.sh — keep 3 newest .bak per basename (gen-2 night-run 2a) (#14)`
+- `20ecae1 docs(task-121): gen-2 prep — Run Log section + §3.2 rule-5 wiring (closes "לא-ודאי" gap)`
 - `57e7eb2 chore(backlog): TASK-120 Done — gen-2 supervised test complete`
 - `81313d1 chore(task-120): remove 2 orphan SENT.3 debris files (TASK-HIGH.1/.2)`
-- `6c2a64d docs(task-94): epic Agent #8 closed + session close 2026-06-08`
 
 ---
 
@@ -32,11 +32,11 @@ _See `OPEN_ISSUES.md` for full list_
 
 | Workflow | Status | Conclusion | Started |
 |---|---|---|---|
-| Agent — Every Minute (DRY_RUN) | in_progress | ⏳ — | 2026-06-08 19:29 UTC |
-| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-06-08 19:29 UTC |
-| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-06-08 19:28 UTC |
-| Agent — Every Minute (DRY_RUN) | completed | ✅ success | 2026-06-08 19:28 UTC |
-| Agent — Every Minute (DRY_RUN) | in_progress | ⏳ — | 2026-06-08 19:27 UTC |
+| Agent — Every Minute (DRY_RUN) | in_progress | ⏳ — | 2026-06-08 19:38 UTC |
+| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-06-08 19:38 UTC |
+| Agent — Every Minute (DRY_RUN) | in_progress | ⏳ — | 2026-06-08 19:37 UTC |
+| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-06-08 19:37 UTC |
+| RidingHigh Auto Scanner | completed | ✅ success | 2026-06-08 19:36 UTC |
 
 ---
 
