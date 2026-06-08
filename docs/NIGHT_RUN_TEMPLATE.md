@@ -23,9 +23,28 @@
 3. צור branch ייעודי: git checkout -b night/TASK-NN-<slug>.
 4. הגדר /goal עם תנאי-סיום מדיד אובייקטיבי (ראה דוגמאות למטה).
 5. עבוד עד השגת התנאי — CC לולאה תור-אחר-תור, Haiku בודק כל תור.
-6. בסיום: git add <שמות מפורשים> + commit ב-branch. שום push ל-main, שום merge.
+6. בסיום: כתוב `docs/NIGHT_RUN_<date>.md` — ה-goal + section `## Run Log` (ראה למטה, **חובה** ל-Agent #8). git add <שמות מפורשים> + commit ב-branch. שום push ל-main, שום merge.
 7. פתח PR (לא merge). עמיחי בודק diff בבוקר ומאשר merge ידנית.
 8. נקה: restart session (ביטול /goal ודאי) או /clear.
+
+---
+
+## ⚠️ Run Log — חובה (G5 · סוגר כלל-5 של Agent #8)
+כל ריצת-לילה **חייבת** לכתוב את ה-section הזה בתוך `docs/NIGHT_RUN_<date>.md` (committed ל-branch),
+כדי ש-Agent #8 יאמת את כלל-5 (ספי-עצירה) באופן **ודאי** במקום לדווח "לא-ודאי — חסר metadata":
+
+```
+## Run Log
+- mode: auto-mode (--permission-mode auto) · /goal: <התנאי המדיד שהוגדר>
+- steps: <רשימת צעדים תמציתית turn-by-turn>
+- stop-counters: consecutive_blocks=<n> · total_blocks=<n> · stopped_reason=<goal-met | 3-consecutive | 20-total | manual>
+- result: <goal met? PR opened? branch name>
+```
+
+איך Agent #8 קורא (כלל-5):
+- `stopped_reason=goal-met` ו-counters מתחת לספים (3 רצופות / 20 בסה"כ) → **✅**.
+- נעצר על-סף (3-consecutive / 20-total) → **דגל** לפי `AGENT8_CAPABILITIES_MAP §3.2`.
+- ה-section חסר → "לא-ודאי — חסר metadata" (התנהגות נוכחית, לא חוסם verdict לבד).
 
 ---
 

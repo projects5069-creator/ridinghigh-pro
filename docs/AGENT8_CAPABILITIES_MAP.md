@@ -70,7 +70,7 @@
 | 6 — תקרת לילה (3 משימות, branch לכל) | ספירת `night/*` בחלון ≤ 3 · משימה=branch ייחודי | git state | **קשיח ✅** |
 | 3 — Group A (אין IO חיצוני) | grep בקוד-שנוסף ל-finviz/gspread/news/requests | static | best-effort ⚠️ |
 | 4 — /goal עם תנאי מדיד | קריאת prompt/config הרוטינה — תנאי-סיום קונקרטי | routine metadata | best-effort ⚠️ |
-| 5 — ספי עצירה (3/20) | קריאת wrap-up/log — האם נעצר בזמן | run log | best-effort ⚠️ |
+| 5 — ספי עצירה (3/20) | קריאת `## Run Log` ב-`NIGHT_RUN_<date>.md` → שדה `stop-counters` (consecutive/total/stopped_reason): `goal-met` + counters מתחת לספים → ✅ · נעצר על-סף → דגל · section חסר → לא-ודאי | run log | best-effort → ✅ כשהלוג קיים |
 | 7 — תקופת מבחן בפיקוח | דגל policy — שורת-תזכורת | meta | תזכורת ↔️ |
 
 **חוקי-דיווח:** קשיח (1/2/6) = מ-git, ודאי. best-effort (3/4/5) = כשחסר prompt/log, #8 מדווח עם הסתייגות מפורשת **"לא-ודאי — חסר metadata"** ולא קובע verdict שלילי על-בסיסם. כלל 7 = שורת-תזכורת בלבד. #8 לעולם **לא חוסם merge ולא עורך** — verdict בלבד.
