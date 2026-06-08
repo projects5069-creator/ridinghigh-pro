@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-06-07 18:42:36 (local)
+**Generated:** 2026-06-07 19:02:34 (local)
 **Branch:** `main`
-**Latest commit:** `cc11096` — docs(task-95): AGENT8_CAPABILITIES_MAP — מיפוי 9 מקורות + תיקון 7/9→4/3/2; TASK-95 Done, PK 2.86
+**Latest commit:** `d85b25f` — docs(handoff): mark TASK-95 done post-handoff, next=TASK-94
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `cc11096 (HEAD -> main) docs(task-95): AGENT8_CAPABILITIES_MAP — מיפוי 9 מקורות + תיקון 7/9→4/3/2; TASK-95 Done, PK 2.86`
-- `17818e8 (origin/main, origin/HEAD) docs(session): close 2026-06-07 — 6 tasks done, OPEN 52→47, PK v2.85, next=TASK-95`
+- `d85b25f (HEAD -> main) docs(handoff): mark TASK-95 done post-handoff, next=TASK-94`
+- `9e3898d (origin/main, origin/HEAD) docs(task-95): AGENT8_CAPABILITIES_MAP — מיפוי 9 מקורות + תיקון 7/9→4/3/2; TASK-95 Done, PK 2.86`
+- `17818e8 docs(session): close 2026-06-07 — 6 tasks done, OPEN 52→47, PK v2.85, next=TASK-95`
 - `509f983 chore(backlog): close TASK-76, TASK-79 (research insights documented, action routed to 69/71) + TASK-115 (wontfix)`
 - `ebee82e chore(backlog): close TASK-41 (wontfix) + TASK-116 (post-commit hook local fix); open hook-durability follow-up`
-- `79c2124 feat(task-93): Cloud Routine push+PR verified end-to-end (PR #10); GitHub identity fixed to projects5069-creator`
 
 ---
 

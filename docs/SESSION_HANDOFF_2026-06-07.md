@@ -1,6 +1,8 @@
 # SESSION HANDOFF — 2026-06-07 (ראשון, שוק סגור)
 
 ## מה נסגר היום (6 משימות)
+
+> **עדכון post-handoff (2026-06-07):** TASK-95 (Agent #8 capabilities map) — בוצעה ונסגרה לאחר ה-handoff, commit 9e3898d, PK→2.86. docs/AGENT8_CAPABILITIES_MAP.md חי ב-main.
 1. **TASK-93 — Cloud Routine push+PR end-to-end ⭐** (HIGH).
    - שורש הכשל מהפיילוט נחשף חי (`RemoteTrigger list`): config הפיילוט ללא `sources` (→"400 missing source") + ללא GitHub auth (→push נכשל).
    - תוקן: זהות GitHub חוברה מחדש (Ambroseius→**projects5069-creator**) + Claude GitHub App; `session_context.sources` נרשם.
@@ -17,19 +19,18 @@
 - **TASK-117** (LOW) — post-commit hook עמיד: מקור tracked (`scripts/git_hooks/post-commit`) + חיווט `install.sh`. מסיר את ההפניה המתה ל-setup_project_state.sh, הופך את תיקון TASK-116 לבר-clone.
 
 ## מספרים (מול הרשימה החיה)
-- **OPEN: 52 → 47** (HIGH 4 · MEDIUM 17 · LOW 6 · ללא-עדיפות 20).
+- **OPEN: 52 → 46** (HIGH 3 · MEDIUM 17 · LOW 6 · ללא-עדיפות 20). *(47→46 post-handoff: TASK-95 נסגרה)*
 - **PK: 2.83 → 2.85** (2.84 = TASK-93; 2.85 = סגירת היום).
 - HEAD: `509f983` (לפני commit הסגירה) · main = origin/main, נקי.
 - Sentinel = shadow · DRY_RUN · אפס שינוי לוגיקת מסחר היום.
 
 ## קריאה חובה לסשן הבא
-- ⭐ **המשימה הבאה: TASK-95** (HIGH) — Agent #8 capabilities map. מחקר→מסמך `docs/AGENT8_CAPABILITIES_MAP.md`.
-  ה-scope כבר תחום: טבלת 9 מקורות (Code Review / custom code-reviewer / HAMY verdict / /simplify / VoltAgent / /loop / /goal / Dispatch-Remote / auto wrap-up) × [מה עושה · זמין בסביבה · לאמץ ל-#8?] + סעיף "הפער הייחודי". 7/9 מאומתים חי בסביבה; 2 (HAMY/VoltAgent) reference-only. בלי קוד/Sheets/ענן.
-  **מזינה את TASK-94** (Agent #8 — Routine Checker, HIGH; unblocked אחרי TASK-93).
+- ✅ **TASK-95 בוצעה ונסגרה** (post-handoff): docs/AGENT8_CAPABILITIES_MAP.md חי ב-main (commit 9e3898d). נרטיב 7/9 תוקן ל-4✅/3⚠️/2❌ לפי אימות-חי.
+- ⭐ **המשימה הבאה: TASK-94** (בניית Agent #8 — Routine Checker, HIGH). תהליך ארוך, סביר לפצל למשימות-משנה. תלות חוסמת: אימות זמינות headless של /code-review + /simplify ב-routine. סעיף "הפער הייחודי" (auto-safe paths · ניסוח בדיקות · פורמט דו"ח-בוקר) נשאר 🔓 לסגירה עם agent-builder.
 
 ## תעדוף למחר
-- **חובה:** TASK-95 (מחקר→מסמך, פותח את מסלול Agent #8).
-- **חשוב:** TASK-94 (בניית Agent #8) אחרי 95 · TASK-61 (אימות weekly_summary אחרי רוטציית 1/6, Sheets חי).
+- **חובה:** TASK-94 (בניית Agent #8 — תהליך ארוך, סביר לפצל; תלות חוסמת: אימות זמינות headless של /code-review + /simplify).
+- **חשוב:** TASK-61 (אימות weekly_summary אחרי רוטציית 1/6, Sheets חי). *(TASK-94 עלה ל-חובה post-handoff)*
 - **רצוי:** TASK-96 (check_06 robustness — סשן TDD ייעודי) · TASK-117 (hook עמיד).
 
 ## הכרעות פתוחות / לטיפול ניהולי
@@ -39,6 +40,6 @@
 - ה-routine `trig_01JkqdLBASKN43QsmmNTffmE` — `enabled:false` (לא יירה); מחיקה מלאה רק ב-UI אם תרצה.
 
 ## שורה תחתונה
-יום ניקוי-backlog פורה: 6 נסגרו, 1 נפתחה, OPEN 52→47, ה-post-commit hook מתוקן ועובד, TASK-93 הוכח end-to-end. הריפו נקי ומסונכרן. הסשן הבא מתחיל ב-TASK-95.
+יום ניקוי-backlog פורה: 6 נסגרו, 1 נפתחה, OPEN 52→46 (47→46 post-handoff: TASK-95 נסגרה), ה-post-commit hook מתוקן ועובד, TASK-93 הוכח end-to-end. הריפו נקי ומסונכרן. הסשן הבא מתחיל ב-TASK-94.
 
 *— END —*
