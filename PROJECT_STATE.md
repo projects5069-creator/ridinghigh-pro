@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-06-07 19:02:34 (local)
-**Branch:** `main`
-**Latest commit:** `d85b25f` — docs(handoff): mark TASK-95 done post-handoff, next=TASK-94
+**Generated:** 2026-06-08 09:54:15 (local)
+**Branch:** `docs/task94a-close-section3`
+**Latest commit:** `91022ad` — docs(task-94a): סגירת §3 ב-AGENT8_CAPABILITIES_MAP (auto-safe paths + 7 בדיקות + פורמט דו"ח) + הרחבת נתיבים אסורים §7.2 ל-5 (RUN_MODE_DECISION + NIGHT_RUN_TEMPLATE), PK 2.87, פיצול 94.1/.2/.3
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `d85b25f (HEAD -> main) docs(handoff): mark TASK-95 done post-handoff, next=TASK-94`
-- `9e3898d (origin/main, origin/HEAD) docs(task-95): AGENT8_CAPABILITIES_MAP — מיפוי 9 מקורות + תיקון 7/9→4/3/2; TASK-95 Done, PK 2.86`
+- `91022ad (HEAD -> docs/task94a-close-section3) docs(task-94a): סגירת §3 ב-AGENT8_CAPABILITIES_MAP (auto-safe paths + 7 בדיקות + פורמט דו"ח) + הרחבת נתיבים אסורים §7.2 ל-5 (RUN_MODE_DECISION + NIGHT_RUN_TEMPLATE), PK 2.87, פיצול 94.1/.2/.3`
+- `ff95585 (origin/main, origin/HEAD, main) docs(handoff): mark TASK-95 done post-handoff, next=TASK-94`
+- `9e3898d docs(task-95): AGENT8_CAPABILITIES_MAP — מיפוי 9 מקורות + תיקון 7/9→4/3/2; TASK-95 Done, PK 2.86`
 - `17818e8 docs(session): close 2026-06-07 — 6 tasks done, OPEN 52→47, PK v2.85, next=TASK-95`
 - `509f983 chore(backlog): close TASK-76, TASK-79 (research insights documented, action routed to 69/71) + TASK-115 (wontfix)`
-- `ebee82e chore(backlog): close TASK-41 (wontfix) + TASK-116 (post-commit hook local fix); open hook-durability follow-up`
 
 ---
 
@@ -32,11 +32,11 @@ _See `OPEN_ISSUES.md` for full list_
 
 | Workflow | Status | Conclusion | Started |
 |---|---|---|---|
-| Health Audit | completed | ✅ success | 2026-06-07 21:45 UTC |
-| Warm OAuth Token | completed | ✅ success | 2026-06-07 14:00 UTC |
-| Health Audit | completed | ✅ success | 2026-06-07 12:17 UTC |
-| Health Audit | completed | ✅ success | 2026-06-07 07:07 UTC |
-| Agent — End of Day | completed | ✅ success | 2026-06-06 21:52 UTC |
+| Agent — Every Minute (DRY_RUN) | in_progress | ⏳ — | 2026-06-08 14:54 UTC |
+| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-06-08 14:54 UTC |
+| RidingHigh Auto Scanner | completed | ✅ success | 2026-06-08 14:53 UTC |
+| Agent — Every Minute (DRY_RUN) | in_progress | ⏳ — | 2026-06-08 14:53 UTC |
+| RidingHigh Auto Scanner | completed | ✅ success | 2026-06-08 14:52 UTC |
 
 ---
 
