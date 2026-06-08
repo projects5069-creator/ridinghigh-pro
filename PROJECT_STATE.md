@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-06-08 11:50:19 (local)
-**Branch:** `docs/task94c-morning-runbook`
-**Latest commit:** `a9de6bf` — docs(task-94c): AGENT8_MORNING_RUNBOOK — מסילת בקרת-בוקר ענן (גילוי night/* → פרסונה per-branch → דו"ח §3.3 מאוחד); routine staged enabled:false; Phase-0 reload = תנאי חוסם
+**Generated:** 2026-06-08 11:58:42 (local)
+**Branch:** `main`
+**Latest commit:** `ba52f06` — docs(handoff): midday handoff before reload — TASK-94.3 Phase 0 pending
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `a9de6bf (HEAD -> docs/task94c-morning-runbook) docs(task-94c): AGENT8_MORNING_RUNBOOK — מסילת בקרת-בוקר ענן (גילוי night/* → פרסונה per-branch → דו"ח §3.3 מאוחד); routine staged enabled:false; Phase-0 reload = תנאי חוסם`
-- `5ca1127 (origin/main, origin/HEAD, main) chore(backlog): TASK-94.2 Done + TASK-94.3 AC (subagent reload caveat)`
+- `ba52f06 (HEAD -> main) docs(handoff): midday handoff before reload — TASK-94.3 Phase 0 pending`
+- `077be17 (origin/main, origin/HEAD) docs(task-94c): AGENT8_MORNING_RUNBOOK — מסילת בקרת-בוקר ענן (גילוי night/* → פרסונה per-branch → דו"ח §3.3 מאוחד); routine staged enabled:false; Phase-0 reload = תנאי חוסם (#13)`
+- `5ca1127 chore(backlog): TASK-94.2 Done + TASK-94.3 AC (subagent reload caveat)`
 - `430e7f7 feat(task-94b): פרסונת rh-routine-checker (Agent #8 core) — system-prompt read-only מקודד §3 (auto-safe paths + 7 בדיקות + פורמט §3.3); dry-run אומת (A→Needs-Work, Clean-B→Ready); TASK-94.1→Done (#12)`
 - `3f3df15 docs(task-94a): סגירת §3 ב-AGENT8_CAPABILITIES_MAP (auto-safe paths + 7 בדיקות + פורמט דו"ח) + הרחבת נתיבים אסורים §7.2 ל-5 (RUN_MODE_DECISION + NIGHT_RUN_TEMPLATE), PK 2.87, פיצול 94.1/.2/.3 (#11)`
-- `ff95585 docs(handoff): mark TASK-95 done post-handoff, next=TASK-94`
 
 ---
 
@@ -32,11 +32,11 @@ _See `OPEN_ISSUES.md` for full list_
 
 | Workflow | Status | Conclusion | Started |
 |---|---|---|---|
-| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-06-08 16:50 UTC |
-| Agent — Every Minute (DRY_RUN) | in_progress | ⏳ — | 2026-06-08 16:50 UTC |
-| Agent — Every Minute (DRY_RUN) | in_progress | ⏳ — | 2026-06-08 16:49 UTC |
-| RidingHigh Auto Scanner | completed | ✅ success | 2026-06-08 16:49 UTC |
-| Agent — Every Minute (DRY_RUN) | in_progress | ⏳ — | 2026-06-08 16:48 UTC |
+| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-06-08 16:58 UTC |
+| Agent — Every Minute (DRY_RUN) | in_progress | ⏳ — | 2026-06-08 16:58 UTC |
+| Agent — Every Minute (DRY_RUN) | in_progress | ⏳ — | 2026-06-08 16:57 UTC |
+| RidingHigh Auto Scanner | completed | ✅ success | 2026-06-08 16:57 UTC |
+| Agent — Morning Brief Email | completed | ✅ success | 2026-06-08 16:56 UTC |
 
 ---
 
