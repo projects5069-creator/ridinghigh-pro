@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-06-08 14:08:14 (local)
-**Branch:** `main`
-**Latest commit:** `71c0c1f` — docs(task-121): gen-2 prep — Run Log section + §3.2 rule-5 wiring (closes "לא-ודאי" gap)
+**Generated:** 2026-06-08 14:29:51 (local)
+**Branch:** `night/TASK-114`
+**Latest commit:** `d15c4cc` — feat(task-114): scripts/prune_baks.sh — keep 3 newest .bak per basename (gen-2 night-run 2a)
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `71c0c1f (HEAD -> main) docs(task-121): gen-2 prep — Run Log section + §3.2 rule-5 wiring (closes "לא-ודאי" gap)`
-- `57e7eb2 (origin/main, origin/HEAD) chore(backlog): TASK-120 Done — gen-2 supervised test complete`
+- `d15c4cc (HEAD -> night/TASK-114) feat(task-114): scripts/prune_baks.sh — keep 3 newest .bak per basename (gen-2 night-run 2a)`
+- `20ecae1 (origin/main, origin/HEAD, main) docs(task-121): gen-2 prep — Run Log section + §3.2 rule-5 wiring (closes "לא-ודאי" gap)`
+- `57e7eb2 chore(backlog): TASK-120 Done — gen-2 supervised test complete`
 - `81313d1 chore(task-120): remove 2 orphan SENT.3 debris files (TASK-HIGH.1/.2)`
 - `6c2a64d docs(task-94): epic Agent #8 closed + session close 2026-06-08`
-- `6dd5531 docs(handoff): midday handoff before reload — TASK-94.3 Phase 0 pending`
 
 ---
 
@@ -32,11 +32,11 @@ _See `OPEN_ISSUES.md` for full list_
 
 | Workflow | Status | Conclusion | Started |
 |---|---|---|---|
-| Agent — Every Minute (DRY_RUN) | in_progress | ⏳ — | 2026-06-08 19:08 UTC |
-| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-06-08 19:08 UTC |
-| Agent — Every Minute (DRY_RUN) | in_progress | ⏳ — | 2026-06-08 19:07 UTC |
-| Agent — Every Minute (DRY_RUN) | completed | ✅ success | 2026-06-08 19:07 UTC |
-| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-06-08 19:07 UTC |
+| Agent — Every Minute (DRY_RUN) | in_progress | ⏳ — | 2026-06-08 19:29 UTC |
+| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-06-08 19:29 UTC |
+| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-06-08 19:28 UTC |
+| Agent — Every Minute (DRY_RUN) | completed | ✅ success | 2026-06-08 19:28 UTC |
+| Agent — Every Minute (DRY_RUN) | in_progress | ⏳ — | 2026-06-08 19:27 UTC |
 
 ---
 
