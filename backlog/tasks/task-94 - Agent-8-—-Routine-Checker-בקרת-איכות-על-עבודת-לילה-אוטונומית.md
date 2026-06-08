@@ -1,9 +1,10 @@
 ---
 id: TASK-94
 title: 'Agent #8 — Routine Checker: בקרת איכות על עבודת לילה אוטונומית'
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-06-02 03:00'
+updated_date: '2026-06-08 17:52'
 labels:
   - agent
   - agent8
