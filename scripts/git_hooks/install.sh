@@ -2,11 +2,11 @@
 #
 # install.sh — install the project's tracked git hooks into .git/hooks/.
 #
-# Mirrors the existing post-commit convention (a script installs hooks into
-# .git/hooks/). Deliberately does NOT set core.hooksPath, because that would
-# disable the existing local .git/hooks/post-commit hook. This script installs
-# the pre-commit git hook AND deploys the tracked Claude Code hooks
-# (scripts/claude_hooks/) to ~/.claude/hooks/ (RULE #11 skill enforcement).
+# Mirrors the git-hook convention (a script copies hooks into .git/hooks/).
+# Deliberately does NOT set core.hooksPath, because that would bypass any other
+# local .git/hooks/ scripts. This script installs the pre-commit AND post-commit
+# git hooks AND deploys the tracked Claude Code hooks (scripts/claude_hooks/) to
+# ~/.claude/hooks/ (RULE #11 skill enforcement).
 #
 # Usage:
 #   scripts/git_hooks/install.sh
@@ -16,17 +16,19 @@
 set -eu
 
 repo_root="$(git rev-parse --show-toplevel)"
-src="$repo_root/scripts/git_hooks/pre-commit"
-dst="$repo_root/.git/hooks/pre-commit"
 
-if [ ! -f "$src" ]; then
-    echo "error: source hook not found: $src" >&2
-    exit 1
-fi
-
-cp "$src" "$dst"
-chmod +x "$dst"
-echo "Installed pre-commit hook -> $dst"
+# -- git hooks (pre-commit + post-commit) ------------------------------------
+for hook in pre-commit post-commit; do
+    src="$repo_root/scripts/git_hooks/$hook"
+    dst="$repo_root/.git/hooks/$hook"
+    if [ ! -f "$src" ]; then
+        echo "error: source hook not found: $src" >&2
+        exit 1
+    fi
+    cp "$src" "$dst"
+    chmod +x "$dst"
+    echo "Installed $hook hook -> $dst"
+done
 
 
 # -- Claude Code hooks (RULE #11 skill enforcement) --------------------------

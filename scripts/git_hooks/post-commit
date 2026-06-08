@@ -1,0 +1,82 @@
+#!/bin/bash
+#
+# post-commit hook — auto-update PROJECT_STATE.md after every commit.
+#
+# Installed by scripts/git_hooks/install.sh into .git/hooks/post-commit.
+# (TASK-117: tracked source + installer, replacing the old header that pointed at
+# a never-tracked ghost installer. TASK-116 fixed the generator invocation to
+# `uv run python3`; tracking the source makes that fix clone-survivable.)
+#
+# To disable temporarily:
+#   chmod -x .git/hooks/post-commit
+#
+# To re-enable:
+#   chmod +x .git/hooks/post-commit
+#
+# To skip update for a single commit:
+#   SKIP_PROJECT_STATE=1 git commit -m "..."
+
+set -e
+
+# Skip if user explicitly requested
+if [ "$SKIP_PROJECT_STATE" = "1" ]; then
+    echo "[post-commit] PROJECT_STATE update skipped (SKIP_PROJECT_STATE=1)"
+    exit 0
+fi
+
+# Skip if we're already amending (avoid infinite loop)
+if [ -n "$IN_PROJECT_STATE_HOOK" ]; then
+    exit 0
+fi
+
+REPO_ROOT="$(git rev-parse --show-toplevel)"
+SCRIPT="$REPO_ROOT/generate_project_state.py"
+
+if [ ! -f "$SCRIPT" ]; then
+    echo "[post-commit] generate_project_state.py not found — skipping"
+    exit 0
+fi
+
+echo "[post-commit] updating PROJECT_STATE.md (this takes ~30-60s)..."
+
+# Run generator
+export IN_PROJECT_STATE_HOOK=1
+uv run python3 "$SCRIPT" || {
+    echo "[post-commit] ⚠️  generator failed, but commit succeeded"
+    exit 0
+}
+
+# Amend commit ONLY if PROJECT_STATE.md actually changed
+if git diff --quiet PROJECT_STATE.md 2>/dev/null; then
+    echo "[post-commit] no changes to PROJECT_STATE.md"
+else
+    echo "[post-commit] amending commit with updated PROJECT_STATE.md"
+    git add PROJECT_STATE.md
+    git commit --amend --no-edit --no-verify
+fi
+
+echo "[post-commit] ✅ done"
+
+# ── Push reminder (added 2026-04-28, check_19 companion) ─────────────
+# Warn if there are unpushed commits older than 30 minutes.
+PUSH_TS_FILE="$REPO_ROOT/.git/.last_unpushed_ts"
+
+# Record timestamp if ahead of origin
+_ahead=$(git log origin/main..HEAD --oneline 2>/dev/null | wc -l | tr -d ' ')
+if [ "$_ahead" -gt 0 ] 2>/dev/null; then
+    if [ ! -f "$PUSH_TS_FILE" ]; then
+        date +%s > "$PUSH_TS_FILE"
+    else
+        _saved=$(cat "$PUSH_TS_FILE")
+        _now=$(date +%s)
+        _diff=$(( (_now - _saved) / 60 ))
+        if [ "$_diff" -gt 30 ]; then
+            echo "" >&2
+            echo "⚠️  You have $_ahead unpushed commit(s) older than ${_diff} minutes." >&2
+            echo "    Run: git push" >&2
+            echo "" >&2
+        fi
+    fi
+else
+    rm -f "$PUSH_TS_FILE" 2>/dev/null
+fi
