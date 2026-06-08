@@ -43,26 +43,64 @@
 
 ---
 
-## 3. 🔓 הפער הייחודי של עמיחי *(פתוח לדיון)*
+## 3. ליבת Agent #8 — בדיקות מודעות-לחוקי-RidingHigh *(סגור, TASK-94 v1)*
 
-כלי 1–9 הם סוקרי-קוד גנריים. **ליבת Agent #8 (first-class)** היא דווקא מה שאף כלי מהמדף לא מכסה — בדיקות מודעות-לחוקי-RidingHigh. סקירת-הקוד הגנרית היא המשנית.
+כלי 1–9 הם סוקרי-קוד גנריים. **ליבת #8 (first-class)** היא מה שאף כלי מהמדף לא מכסה: בדיקות מודעות לחוקי-הבטיחות של ריצת-לילה. v1 = **ליבה-בלבד (מסלול ב — פרסונת-סוקר ב-prompt)**; סקירה גנרית (`/code-review`+`/simplify`) נדחתה ל-v2 כשכבת-משני, מותנית באימות headless (TASK משני לא-חוסם).
 
-**ליבה א — ציות ל-7 כללי הבטיחות (`RUN_MODE_DECISION.md` §7):**
-- נגעה הרוטינה ב**נתיב אסור**? (`config.py`, `formulas.py`, `~/.claude/skills/*`)
-- היה **push ל-main / merge**? (אסור בלילה — branch+PR בלבד)
-- חרגה מ**תקרת הלילה** (3 משימות, branch לכל אחת)?
-- נשארה **Group-A** (repo-scoped, בלי FINVIZ/news/Sheets)?
+---
 
-**ליבה ב — Drift ספציפי-למערכת:**
-- חוזה **Anti-Drift** — אם נגעה בנוסחאות/workflows/config: עודכן PK (bump+changelog)?
-- **PROJECT_STATE.md** עקבי מול מה שבוצע?
+### 3.1 — auto-safe paths (רשימה שאוכפת ליבה א)
 
-**ליבה ג — פער "התבקש מול בוצע":**
-- דו"ח עברי **מאוחד רב-ענפי** — מה התבקש בכל branch-לילה מול מה שבוצע בפועל (לא סקירת-diff נקודתית per-PR).
+| רשימה | נתיבים | תגובת #8 |
+|---|---|---|
+| 🔴 **אסור** | `config.py` · `formulas.py` · `~/.claude/skills/*` · `.github/workflows/*` · `orchestrator.py` | נגיעה → **CRITICAL** (Needs-Work) |
+| 🟢 **ירוק (safe)** | `docs/` · `tests/` · `backlog/` · `research/` · `scripts/` (לא-core) | מותר ללא דגל |
+| 🟡 **אפור** | `dashboard.py` · `utils.py` · `auto_scanner.py` | **WARNING** (Needs-Attention), לא חוסם |
 
-**משני — סקירת-קוד גנרית:** איכות/באגים/כפילות (מ-`/code-review`, `/simplify`).
+**הרחבה מעבר ל-`RUN_MODE_DECISION.md §7.2` המקורי:** `.github/workflows/*` + `orchestrator.py` נוספו לרשימה ה-🔴 (CI יכול להריץ מסחר חי; orchestrator = ליבת-מסחר). **חוק ברזל:** ההרחבה נכתבה גם ב-`RUN_MODE_DECISION.md §7.2` וב-`NIGHT_RUN_TEMPLATE.md` — לא רק בלוגיקת #8 — כדי למנוע drift בין מה ש-#8 אוכף למה שהמסמך מגדיר.
 
-> **🔓 דורש החלטות עמיחי לפני בנייה:** הרשימה המדויקת של auto-safe paths · ניסוח הבדיקות לכל כלל-בטיחות · פורמט דו"ח-הבוקר. סעיף זה ייסגר ב-TASK-94 עם agent-builder.
+---
+
+### 3.2 — ניסוח הבדיקות ל-7 כללי הבטיחות (read-only verdict, לא enforcer)
+
+| כלל (§7) | בדיקת #8 | סוג | רמה |
+|---|---|---|---|
+| 1 — אין push/merge ל-main | main HEAD לא זז · קיים `night/*` · PR פתוח לא-merged | git state | **קשיח ✅** |
+| 2 — נתיבים אסורים | `git diff --name-only main..branch` ∩ 🔴 = ∅ | diff | **קשיח ✅** |
+| 6 — תקרת לילה (3 משימות, branch לכל) | ספירת `night/*` בחלון ≤ 3 · משימה=branch ייחודי | git state | **קשיח ✅** |
+| 3 — Group A (אין IO חיצוני) | grep בקוד-שנוסף ל-finviz/gspread/news/requests | static | best-effort ⚠️ |
+| 4 — /goal עם תנאי מדיד | קריאת prompt/config הרוטינה — תנאי-סיום קונקרטי | routine metadata | best-effort ⚠️ |
+| 5 — ספי עצירה (3/20) | קריאת wrap-up/log — האם נעצר בזמן | run log | best-effort ⚠️ |
+| 7 — תקופת מבחן בפיקוח | דגל policy — שורת-תזכורת | meta | תזכורת ↔️ |
+
+**חוקי-דיווח:** קשיח (1/2/6) = מ-git, ודאי. best-effort (3/4/5) = כשחסר prompt/log, #8 מדווח עם הסתייגות מפורשת **"לא-ודאי — חסר metadata"** ולא קובע verdict שלילי על-בסיסם. כלל 7 = שורת-תזכורת בלבד. #8 לעולם **לא חוסם merge ולא עורך** — verdict בלבד.
+
+---
+
+### 3.3 — פורמט דו"ח-הבוקר העברי (מאוחד רב-ענפי)
+
+```
+🌅 דו"ח-בוקר Agent #8 — <תאריך>
+verdict כולל: Ready / Needs-Attention / Needs-Work · N branches נבדקו
+─────────────
+לכל branch (night/TASK-NN):
+  📌 מה התבקש  — config הרוטינה / גוף ה-TASK
+  ✅ מה בוצע   — commits · קבצים · סיכום diff
+  🛡️ 7-כללי בטיחות — טבלת pass/flag (§3.2)
+  ⚠️ פערים/דילמות
+  🎯 verdict ל-branch
+─────────────
+🔚 שורה תחתונה — אילו PRs לאשר/לעכב (פעולה לעמיחי)
+```
+
+**granularity:** verdict לכל branch בנפרד **+** verdict כולל ללילה.
+**ערוץ מסירה v1:** הטקסט-הסופי של ריצת #8 (auto-wrap-up, מקור #9) = הדו"ח עצמו. ללא תשתית מייל ב-v1. עקבי עם תבנית-התגובה `rhpro-live §6` (סיכום → פירוט → דגלים → המלצה).
+
+---
+
+### 3.4 — דגלים ל-scope הבנייה (TASK-94)
+1. עדכון `RUN_MODE_DECISION.md §7.2` + `NIGHT_RUN_TEMPLATE.md` עם הנתיבים האסורים החדשים (Anti-Drift) — **בוצע ב-94a**.
+2. גישה ל-routine metadata (prompt/log) דרך `RemoteTrigger`/session-context — תנאי ל-best-effort של כללים 3/4/5 (94c).
 
 ---
 
@@ -70,7 +108,7 @@
 
 **בנה את #8 מ:**
 - **🏗️ Backbone (✅ מאומת R):** RemoteTrigger / `/schedule` — הרצת-ענן רב-ענפית (TASK-93-proven, PR #10). מאתר את branch-ים של הלילה.
-- **🔍 מנוע סקירה (⚠️ זמינות headless טרם אומתה):** `/code-review` (diff) + `/simplify` (איכות) — שכבת ה"משני". **אזהרה:** שניהם S:✅·R:❓ בטבלה; #8 רץ headless ב-routine — חובה לאמת זמינותם ב-routine לפני הסתמכות.
+- **🔍 מנוע סקירה — נדחה ל-v2 (לא ב-v1):** `/code-review` (diff) + `/simplify` (איכות) = שכבת ה"משני". v1 = ליבה-בלבד (מסלול ב, ראה §3). הסתמכות עליהם מותנית באימות זמינות headless ב-routine — נרשם כ-TASK משני לא-חוסם, ירד מהנתיב הקריטי.
 - **🎭 פרסונת-סוקר (⚠️ לבנות):** custom `code-reviewer` ב-`.claude/agents/` עם system-prompt **מודע-לחוקי-RidingHigh** — כאן נכנסת ליבה א+ב.
 - **📋 דו"ח-בוקר (⚠️):** auto-wrap-up — הטקסט-הסופי = הדו"ח העברי המאוחד (ליבה ג).
 - **⚙️ טריגר (⚠️):** `/goal`+auto-mode (מצב-ריצה, בכפוף לאימות זמינות ב-routine).

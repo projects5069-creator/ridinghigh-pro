@@ -40,7 +40,8 @@
 
 ## 7 כללי הבטיחות (מ-RUN_MODE_DECISION.md — מחייבים)
 1. שום push ל-main, שום merge. branch + PR בלבד. עמיחי מאשר merge בבוקר.
-2. נתיבים אסורים לעריכה אוטומטית: config.py, formulas.py, ~/.claude/skills/*.
+2. נתיבים אסורים לעריכה אוטומטית: config.py, formulas.py, ~/.claude/skills/*,
+   .github/workflows/*, orchestrator.py. (הורחב ב-TASK-94/94a — ראה RUN_MODE_DECISION §7.2.)
 3. קבוצה A בלבד: repo-scoped + לא קוראת FINVIZ/news/Sheets (prompt-injection).
 4. /goal רק עם תנאי-סיום מדיד.
 5. ספי עצירה מובנים: 3 חסימות רצופות או 20 בסה"כ → CC עוצר.

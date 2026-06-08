@@ -35,8 +35,10 @@
 ## 7 כללי הבטיחות (מחייבים בכל מצב אוטומטי)
 1. שום push ל-main, שום merge — לעולם. בלילה: branch נפרד + PR בלבד.
    עמיחי בודק diff ומאשר merge ידנית בבוקר.
-2. נתיבים אסורים לעריכה אוטומטית: config.py, formulas.py, ~/.claude/skills/*.
-   ליבת מסחר + תשתית — דורשים את עמיחי ער.
+2. נתיבים אסורים לעריכה אוטומטית: config.py, formulas.py, ~/.claude/skills/*,
+   .github/workflows/*, orchestrator.py.
+   ליבת מסחר + תשתית — דורשים את עמיחי ער. (.github/workflows/* = CI שיכול להריץ
+   מסחר חי; orchestrator.py = ליבת-מסחר. הורחב ב-TASK-94/94a, נאכף ע"י Agent #8.)
 3. קבוצה A בלבד ל-auto: repo-scoped + לא קוראת תוכן חיצוני.
    תוכן חיצוני (FINVIZ/news/Sheets) = חשיפת prompt-injection → needs-approval.
 4. goal רק עם תנאי-סיום מדיד. "כמה שיותר טוב" אינו תנאי — לולאה אינסופית.
