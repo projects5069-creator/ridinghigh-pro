@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-06-08 12:57:40 (local)
+**Generated:** 2026-06-08 13:30:12 (local)
 **Branch:** `main`
-**Latest commit:** `32e7cb9` — docs(task-94): epic Agent #8 closed + session close 2026-06-08
+**Latest commit:** `da17526` — chore(task-120): remove 2 orphan SENT.3 debris files (TASK-HIGH.1/.2)
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `32e7cb9 (HEAD -> main) docs(task-94): epic Agent #8 closed + session close 2026-06-08`
-- `6dd5531 (origin/main, origin/HEAD) docs(handoff): midday handoff before reload — TASK-94.3 Phase 0 pending`
+- `da17526 (HEAD -> main) chore(task-120): remove 2 orphan SENT.3 debris files (TASK-HIGH.1/.2)`
+- `6c2a64d (origin/main, origin/HEAD) docs(task-94): epic Agent #8 closed + session close 2026-06-08`
+- `6dd5531 docs(handoff): midday handoff before reload — TASK-94.3 Phase 0 pending`
 - `077be17 docs(task-94c): AGENT8_MORNING_RUNBOOK — מסילת בקרת-בוקר ענן (גילוי night/* → פרסונה per-branch → דו"ח §3.3 מאוחד); routine staged enabled:false; Phase-0 reload = תנאי חוסם (#13)`
 - `5ca1127 chore(backlog): TASK-94.2 Done + TASK-94.3 AC (subagent reload caveat)`
-- `430e7f7 feat(task-94b): פרסונת rh-routine-checker (Agent #8 core) — system-prompt read-only מקודד §3 (auto-safe paths + 7 בדיקות + פורמט §3.3); dry-run אומת (A→Needs-Work, Clean-B→Ready); TASK-94.1→Done (#12)`
 
 ---
 
@@ -32,11 +32,11 @@ _See `OPEN_ISSUES.md` for full list_
 
 | Workflow | Status | Conclusion | Started |
 |---|---|---|---|
-| Agent — Every Minute (DRY_RUN) | in_progress | ⏳ — | 2026-06-08 17:57 UTC |
-| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-06-08 17:57 UTC |
-| Agent — Every Minute (DRY_RUN) | in_progress | ⏳ — | 2026-06-08 17:56 UTC |
-| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-06-08 17:56 UTC |
-| Agent — Every Minute (DRY_RUN) | completed | ✅ success | 2026-06-08 17:55 UTC |
+| RidingHigh Auto Scanner | queued | ⏳ — | 2026-06-08 18:30 UTC |
+| Agent — Every Minute (DRY_RUN) | queued | ⏳ — | 2026-06-08 18:30 UTC |
+| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-06-08 18:29 UTC |
+| Agent — Every Minute (DRY_RUN) | in_progress | ⏳ — | 2026-06-08 18:29 UTC |
+| Agent — Every Minute (DRY_RUN) | in_progress | ⏳ — | 2026-06-08 18:28 UTC |
 
 ---
 
