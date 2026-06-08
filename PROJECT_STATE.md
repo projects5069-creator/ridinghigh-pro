@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-06-08 13:30:12 (local)
+**Generated:** 2026-06-08 13:31:06 (local)
 **Branch:** `main`
-**Latest commit:** `da17526` — chore(task-120): remove 2 orphan SENT.3 debris files (TASK-HIGH.1/.2)
+**Latest commit:** `ab4b352` — chore(backlog): TASK-120 Done — gen-2 supervised test complete
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `da17526 (HEAD -> main) chore(task-120): remove 2 orphan SENT.3 debris files (TASK-HIGH.1/.2)`
-- `6c2a64d (origin/main, origin/HEAD) docs(task-94): epic Agent #8 closed + session close 2026-06-08`
+- `ab4b352 (HEAD -> main) chore(backlog): TASK-120 Done — gen-2 supervised test complete`
+- `81313d1 (origin/main, origin/HEAD) chore(task-120): remove 2 orphan SENT.3 debris files (TASK-HIGH.1/.2)`
+- `6c2a64d docs(task-94): epic Agent #8 closed + session close 2026-06-08`
 - `6dd5531 docs(handoff): midday handoff before reload — TASK-94.3 Phase 0 pending`
 - `077be17 docs(task-94c): AGENT8_MORNING_RUNBOOK — מסילת בקרת-בוקר ענן (גילוי night/* → פרסונה per-branch → דו"ח §3.3 מאוחד); routine staged enabled:false; Phase-0 reload = תנאי חוסם (#13)`
-- `5ca1127 chore(backlog): TASK-94.2 Done + TASK-94.3 AC (subagent reload caveat)`
 
 ---
 
@@ -32,11 +32,11 @@ _See `OPEN_ISSUES.md` for full list_
 
 | Workflow | Status | Conclusion | Started |
 |---|---|---|---|
-| RidingHigh Auto Scanner | queued | ⏳ — | 2026-06-08 18:30 UTC |
-| Agent — Every Minute (DRY_RUN) | queued | ⏳ — | 2026-06-08 18:30 UTC |
-| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-06-08 18:29 UTC |
-| Agent — Every Minute (DRY_RUN) | in_progress | ⏳ — | 2026-06-08 18:29 UTC |
-| Agent — Every Minute (DRY_RUN) | in_progress | ⏳ — | 2026-06-08 18:28 UTC |
+| Agent — Every Minute (DRY_RUN) | in_progress | ⏳ — | 2026-06-08 18:31 UTC |
+| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-06-08 18:31 UTC |
+| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-06-08 18:30 UTC |
+| Agent — Every Minute (DRY_RUN) | in_progress | ⏳ — | 2026-06-08 18:30 UTC |
+| RidingHigh Auto Scanner | completed | ✅ success | 2026-06-08 18:29 UTC |
 
 ---
 
