@@ -1,9 +1,10 @@
 ---
 id: TASK-107
 title: position_sync immunization phase-2 — closed-same-day must not BLOCK as drift
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-06-03 19:22'
+updated_date: '2026-06-09 22:35'
 labels:
   - sentinel
   - robustness

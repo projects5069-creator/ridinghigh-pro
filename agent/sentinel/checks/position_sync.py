@@ -83,6 +83,25 @@ def check_position_sync(account_state: Dict[str, Any],
                     "hint": "paper_portfolio has rows but no recognized Status — data-quality (likely schema/alignment), not drift",
                 },
             )
+        # TASK-107: closed-same-day is NOT drift. If today's ENTERs are fully
+        # accounted for by today's closes (closed_today_count is a row-count,
+        # mirroring today_enters which counts re-entries), the positions
+        # legitimately opened AND closed within the day — 0 open is correct,
+        # not missing positions. A partial cover (closed_today < enters) leaves
+        # some enters unexplained, so it still falls through to BLOCK below.
+        # Signal defaults to 0 so old callers keep current behavior.
+        closed_today = account_state.get("closed_today_count", 0)
+        if closed_today >= today_enters:
+            return SentinelResult(
+                decision="ALLOW",
+                reason="POSITION_SYNC_CLOSED_SAME_DAY",
+                details={
+                    "today_enters": today_enters,
+                    "open_positions": open_count,
+                    "closed_today_count": closed_today,
+                    "hint": "0 open but today's closes account for today's enters — legitimate same-day open→close, not drift",
+                },
+            )
         return SentinelResult(
             decision="BLOCK",
             reason="POSITION_SYNC_FAILED",

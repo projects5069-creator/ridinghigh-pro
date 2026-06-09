@@ -78,6 +78,24 @@ def run():
            {"open_position_count": 0, "paper_portfolio_fetch_failed": False},
            today_enters=1, exp_decision="BLOCK", exp_reason="POSITION_SYNC_FAILED")
 
+    # 9. TASK-107: closed-same-day — today's ENTERs all closed today (readable) → ALLOW not BLOCK
+    _check("closed_same_day_allows",
+           {"open_position_count": 0, "paper_portfolio_fetch_failed": False,
+            "pf_total_rows": 9, "pf_status_recognized_count": 9, "closed_today_count": 9},
+           today_enters=9, exp_decision="ALLOW", exp_reason="POSITION_SYNC_CLOSED_SAME_DAY")
+
+    # 10. TASK-107: duplicate-ticker re-entries closed same day (row-count, not set) → ALLOW
+    _check("closed_same_day_dup_tickers",
+           {"open_position_count": 0, "paper_portfolio_fetch_failed": False,
+            "pf_total_rows": 2, "pf_status_recognized_count": 2, "closed_today_count": 2},
+           today_enters=2, exp_decision="ALLOW", exp_reason="POSITION_SYNC_CLOSED_SAME_DAY")
+
+    # 11. TASK-107: partial — some ENTERs NOT accounted by today's closes → still BLOCK
+    _check("closed_same_day_partial_blocks",
+           {"open_position_count": 0, "paper_portfolio_fetch_failed": False,
+            "pf_total_rows": 2, "pf_status_recognized_count": 2, "closed_today_count": 1},
+           today_enters=2, exp_decision="BLOCK", exp_reason="POSITION_SYNC_FAILED")
+
     passed = sum(1 for r in RESULTS if r[1])
     total = len(RESULTS)
     print(f"\nResults: {passed}/{total} passed")

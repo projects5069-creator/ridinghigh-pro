@@ -182,6 +182,10 @@ def build_account_state(broker=None) -> Dict[str, Any]:
         "cold_start_daily_used": 0,
         # Bug #2/#4 fix: count actual OPEN rows, not unique tickers.
         "open_position_count": 0,
+        # TASK-107: count today's CLOSED rows (line-count, incl. duplicates —
+        # mirrors today_enters which counts re-entries) so position_sync can
+        # tell legitimate open→close-same-day from genuine drift.
+        "closed_today_count": 0,
         # 2026-06-03 immunization: signals for position_sync to tell an
         # UNREADABLE portfolio (rows present but no recognized Status, e.g. a
         # column-alignment bug) apart from a genuine drift. Computed in the
@@ -248,6 +252,11 @@ def build_account_state(broker=None) -> Dict[str, Any]:
             exit_date = str(row.get("ExitDate", "")).strip()
             if exit_date == today and status not in ("OPEN", "DRY_RUN_OPEN") and ticker:
                 exited_today.add(ticker)
+            # TASK-107: row-count of today's CLOSED positions (incl. duplicate
+            # tickers — re-entries closed same day), so position_sync can treat
+            # a fully-accounted same-day open→close as ALLOW, not drift BLOCK.
+            if exit_date == today and status in ("CLOSED", "DRY_RUN_CLOSED") and ticker:
+                state["closed_today_count"] += 1
 
         # cold_start cap reflects real concurrent positions, not unique tickers.
         state["cold_start_concurrent_used"] = state["open_position_count"]

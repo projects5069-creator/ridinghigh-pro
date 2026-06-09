@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-06-08 14:38:19 (local)
+**Generated:** 2026-06-09 17:37:13 (local)
 **Branch:** `main`
-**Latest commit:** `6b91c52` — chore(backlog): TASK-114 Done — gen-2 night-run 2a complete (rule-5 closed)
+**Latest commit:** `9ba54e6` — fix(sentinel): position_sync ALLOW closed-same-day (TASK-107)
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `6b91c52 (HEAD -> main) chore(backlog): TASK-114 Done — gen-2 night-run 2a complete (rule-5 closed)`
-- `7298004 (origin/main, origin/HEAD) feat(task-114): scripts/prune_baks.sh — keep 3 newest .bak per basename (gen-2 night-run 2a) (#14)`
-- `20ecae1 docs(task-121): gen-2 prep — Run Log section + §3.2 rule-5 wiring (closes "לא-ודאי" gap)`
-- `57e7eb2 chore(backlog): TASK-120 Done — gen-2 supervised test complete`
-- `81313d1 chore(task-120): remove 2 orphan SENT.3 debris files (TASK-HIGH.1/.2)`
+- `9ba54e6 (HEAD -> main) fix(sentinel): position_sync ALLOW closed-same-day (TASK-107)`
+- `c9fdeca (origin/main, origin/HEAD) docs(task-121): שמירת-ביניים — 2a+2b-prep Done, PK 2.90, handoff PAUSE`
+- `83f7707 chore(backlog): TASK-117 Done — post-commit hook tracked + installer wired (PR #15)`
+- `ff9b1c9 feat(task-117): tracked post-commit hook + installer wiring (#15)`
+- `7ac62a6 chore(backlog): TASK-114 Done — gen-2 night-run 2a complete (rule-5 closed)`
 
 ---
 
@@ -32,11 +32,11 @@ _See `OPEN_ISSUES.md` for full list_
 
 | Workflow | Status | Conclusion | Started |
 |---|---|---|---|
-| Agent — Every Minute (DRY_RUN) | in_progress | ⏳ — | 2026-06-08 19:38 UTC |
-| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-06-08 19:38 UTC |
-| Agent — Every Minute (DRY_RUN) | in_progress | ⏳ — | 2026-06-08 19:37 UTC |
-| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-06-08 19:37 UTC |
-| RidingHigh Auto Scanner | completed | ✅ success | 2026-06-08 19:36 UTC |
+| Agent — End of Day | completed | ✅ success | 2026-06-09 22:16 UTC |
+| Health Audit | completed | ✅ success | 2026-06-09 22:07 UTC |
+| Daily Backup — post_analysis | completed | ✅ success | 2026-06-09 21:57 UTC |
+| Daily Backup — post_analysis | completed | ✅ success | 2026-06-09 21:56 UTC |
+| Agent — Market Context (Hourly) | completed | ✅ success | 2026-06-09 21:52 UTC |
 
 ---
 

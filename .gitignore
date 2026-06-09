@@ -80,3 +80,4 @@ research/
 *.bak[0-9]*
 # brainstorming/plan artifacts — kept locally, not tracked (TASK-108 closeout)
 docs/superpowers/
+.rh_chat_out.txt
