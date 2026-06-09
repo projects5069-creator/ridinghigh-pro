@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-06-09 17:37:13 (local)
+**Generated:** 2026-06-09 17:51:15 (local)
 **Branch:** `main`
-**Latest commit:** `9ba54e6` — fix(sentinel): position_sync ALLOW closed-same-day (TASK-107)
+**Latest commit:** `881a190` — docs(pk): Generated->Last updated, v2.92 (TASK-119)
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `9ba54e6 (HEAD -> main) fix(sentinel): position_sync ALLOW closed-same-day (TASK-107)`
-- `c9fdeca (origin/main, origin/HEAD) docs(task-121): שמירת-ביניים — 2a+2b-prep Done, PK 2.90, handoff PAUSE`
+- `881a190 (HEAD -> main) docs(pk): Generated->Last updated, v2.92 (TASK-119)`
+- `d9f2e92 (origin/main, origin/HEAD) fix(sentinel): position_sync ALLOW closed-same-day (TASK-107)`
+- `c9fdeca docs(task-121): שמירת-ביניים — 2a+2b-prep Done, PK 2.90, handoff PAUSE`
 - `83f7707 chore(backlog): TASK-117 Done — post-commit hook tracked + installer wired (PR #15)`
 - `ff9b1c9 feat(task-117): tracked post-commit hook + installer wiring (#15)`
-- `7ac62a6 chore(backlog): TASK-114 Done — gen-2 night-run 2a complete (rule-5 closed)`
 
 ---
 
@@ -32,11 +32,11 @@ _See `OPEN_ISSUES.md` for full list_
 
 | Workflow | Status | Conclusion | Started |
 |---|---|---|---|
+| Post Analysis Collector | completed | ❌ failure | 2026-06-09 22:43 UTC |
 | Agent — End of Day | completed | ✅ success | 2026-06-09 22:16 UTC |
 | Health Audit | completed | ✅ success | 2026-06-09 22:07 UTC |
 | Daily Backup — post_analysis | completed | ✅ success | 2026-06-09 21:57 UTC |
 | Daily Backup — post_analysis | completed | ✅ success | 2026-06-09 21:56 UTC |
-| Agent — Market Context (Hourly) | completed | ✅ success | 2026-06-09 21:52 UTC |
 
 ---
 
