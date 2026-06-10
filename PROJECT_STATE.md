@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-06-10 17:51:29 (local)
-**Branch:** `task-125-skip-summary`
-**Latest commit:** `e76427b` — chore(backlog): open TASK-135..138; add skip-parser test w/ guard (TASK-126 wip)
+**Generated:** 2026-06-10 18:25:03 (local)
+**Branch:** `main`
+**Latest commit:** `072c6a3` — chore(sheets): add skip_summary tab to 2026-07 pre-rotation (TASK-125 follow-up)
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `e76427b (HEAD -> task-125-skip-summary) chore(backlog): open TASK-135..138; add skip-parser test w/ guard (TASK-126 wip)`
+- `072c6a3 (HEAD -> main) chore(sheets): add skip_summary tab to 2026-07 pre-rotation (TASK-125 follow-up)`
+- `01f1846 (origin/main, origin/HEAD, task-125-skip-summary) chore(backlog): open TASK-135..138; add skip-parser test w/ guard (TASK-126 wip)`
 - `2e88383 feat(logging): skip_summary aggregated per-run writes (TASK-125); PK 2.98`
 - `cf33833 fix(pipeline): post_analysis backfill v1->v2 --recent 2 (TASK-124); PK 2.97`
 - `e061978 feat(dashboard): basic page-visit logger via session counter + log line (TASK-43)`
-- `c146a9d fix(calendar): trading_days_after holiday-aware via utils.is_trading_day (TASK-130); PK 2.96`
 
 ---
 
@@ -32,11 +32,11 @@ _See `OPEN_ISSUES.md` for full list_
 
 | Workflow | Status | Conclusion | Started |
 |---|---|---|---|
+| Agent — Critic (daily) | completed | ✅ success | 2026-06-10 23:17 UTC |
+| Daily Backup — post_analysis | completed | ✅ success | 2026-06-10 23:09 UTC |
+| Agent — Daily Brief Email | completed | ✅ success | 2026-06-10 23:08 UTC |
+| Post Analysis Collector | completed | ✅ success | 2026-06-10 22:54 UTC |
 | Agent — End of Day | completed | ✅ success | 2026-06-10 22:44 UTC |
-| Health Audit | completed | ✅ success | 2026-06-10 22:27 UTC |
-| Daily Backup — post_analysis | completed | ✅ success | 2026-06-10 22:18 UTC |
-| Daily Backup — post_analysis | completed | ✅ success | 2026-06-10 22:17 UTC |
-| Agent — Daily Brief Email | completed | ✅ success | 2026-06-10 21:30 UTC |
 
 ---
 
