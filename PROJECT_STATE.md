@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-06-09 21:07:35 (local)
+**Generated:** 2026-06-10 11:41:51 (local)
 **Branch:** `main`
-**Latest commit:** `bac1fc6` — docs(close): session handoff 2026-06-09 + PK v2.95; open TASK-131/132
+**Latest commit:** `b6441a8` — fix(ci): rename task-122 filename 347B->51B — unblocks checkout on Linux runners
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `bac1fc6 (HEAD -> main) docs(close): session handoff 2026-06-09 + PK v2.95; open TASK-131/132`
-- `60fc009 (origin/main, origin/HEAD) feat(backfill): backfill_ohlc_v2 cross-month fill-only (TASK-123); PK v2.94`
+- `b6441a8 (HEAD -> main) fix(ci): rename task-122 filename 347B->51B — unblocks checkout on Linux runners`
+- `f57a343 (origin/main, origin/HEAD) docs(close): session handoff 2026-06-09 + PK v2.95; open TASK-131/132`
+- `60fc009 feat(backfill): backfill_ohlc_v2 cross-month fill-only (TASK-123); PK v2.94`
 - `2e4b770 docs: system audit + fix plan + tasks 123-129; PK v2.93 (read-only findings, no code change)`
 - `d3659ad docs(pk): Generated->Last updated, v2.92 (TASK-119)`
-- `d9f2e92 fix(sentinel): position_sync ALLOW closed-same-day (TASK-107)`
 
 ---
 
@@ -32,11 +32,11 @@ _See `OPEN_ISSUES.md` for full list_
 
 | Workflow | Status | Conclusion | Started |
 |---|---|---|---|
-| Agent — Critic (daily) | completed | ❌ failure | 2026-06-09 23:07 UTC |
-| Daily Backup — post_analysis | completed | ❌ failure | 2026-06-09 23:01 UTC |
-| Agent — Daily Brief Email | completed | ❌ failure | 2026-06-09 22:59 UTC |
-| Post Analysis Collector | completed | ❌ failure | 2026-06-09 22:43 UTC |
-| Agent — End of Day | completed | ✅ success | 2026-06-09 22:16 UTC |
+| Agent — Every Minute (DRY_RUN) | completed | ❌ failure | 2026-06-10 16:41 UTC |
+| RidingHigh Auto Scanner | completed | ❌ failure | 2026-06-10 16:41 UTC |
+| Agent — Every Minute (DRY_RUN) | completed | ❌ failure | 2026-06-10 16:40 UTC |
+| RidingHigh Auto Scanner | completed | ❌ failure | 2026-06-10 16:40 UTC |
+| RidingHigh Auto Scanner | completed | ❌ failure | 2026-06-10 16:39 UTC |
 
 ---
 
