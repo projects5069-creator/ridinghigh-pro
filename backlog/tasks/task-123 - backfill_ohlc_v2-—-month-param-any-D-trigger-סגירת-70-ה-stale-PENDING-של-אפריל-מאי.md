@@ -3,9 +3,10 @@ id: TASK-123
 title: >-
   backfill_ohlc_v2 — month param + any-D trigger: סגירת 70 ה-stale-PENDING של
   אפריל-מאי
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-06-10 01:03'
+updated_date: '2026-06-10 01:55'
 labels: []
 dependencies: []
 priority: high
