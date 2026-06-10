@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-06-09 20:58:17 (local)
+**Generated:** 2026-06-09 21:07:35 (local)
 **Branch:** `main`
-**Latest commit:** `2b7f1fa` — feat(backfill): backfill_ohlc_v2 cross-month fill-only (TASK-123); PK v2.94
+**Latest commit:** `bac1fc6` — docs(close): session handoff 2026-06-09 + PK v2.95; open TASK-131/132
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `2b7f1fa (HEAD -> main) feat(backfill): backfill_ohlc_v2 cross-month fill-only (TASK-123); PK v2.94`
-- `2e4b770 (origin/main, origin/HEAD) docs: system audit + fix plan + tasks 123-129; PK v2.93 (read-only findings, no code change)`
+- `bac1fc6 (HEAD -> main) docs(close): session handoff 2026-06-09 + PK v2.95; open TASK-131/132`
+- `60fc009 (origin/main, origin/HEAD) feat(backfill): backfill_ohlc_v2 cross-month fill-only (TASK-123); PK v2.94`
+- `2e4b770 docs: system audit + fix plan + tasks 123-129; PK v2.93 (read-only findings, no code change)`
 - `d3659ad docs(pk): Generated->Last updated, v2.92 (TASK-119)`
 - `d9f2e92 fix(sentinel): position_sync ALLOW closed-same-day (TASK-107)`
-- `c9fdeca docs(task-121): שמירת-ביניים — 2a+2b-prep Done, PK 2.90, handoff PAUSE`
 
 ---
 
