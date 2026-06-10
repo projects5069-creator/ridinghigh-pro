@@ -965,6 +965,13 @@ SHEET_ID = "1oyefUPV52SMeAlC4UejECYoPRNRudJJS42rukNGYx5k"  # legacy backup
 PERU_TZ = pytz.timezone("America/Lima")
 
 
+def _record_page_visit(visits: dict, page: str) -> int:
+    """Increment visit count for page in the visits dict. Returns new count.
+    Pure — no st.* calls (TASK-43; unit-tested, the Streamlit wiring is not)."""
+    visits[page] = visits.get(page, 0) + 1
+    return visits[page]
+
+
 # ── Cached sheet loaders ──────────────────────────────────────────────────────
 
 @st.cache_data(ttl=120)
@@ -5148,6 +5155,12 @@ def main():
         st.session_state["nav_page"] = "🏠 Home"
 
     page = st.sidebar.radio("🧭 Navigation", _PAGE_NAMES, key="nav_page")
+
+    # TASK-43: page-usage visibility — session counter + Streamlit-log line.
+    # Zero Sheets writes (quota) and no local file (Streamlit Cloud FS is ephemeral).
+    st.session_state.setdefault("_page_visits", {})
+    _n = _record_page_visit(st.session_state["_page_visits"], page)
+    print(f"[PAGE_VISIT] {page} count={_n} ts={datetime.now(PERU_TZ).strftime('%Y-%m-%d %H:%M:%S')}", flush=True)
 
     st.sidebar.divider()
     now_peru = datetime.now(PERU_TZ)
