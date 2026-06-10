@@ -22,7 +22,12 @@ Usage (run off-market-hours):
 
 import argparse
 import sys, os, time, json
-sys.path.insert(0, os.path.expanduser("~/RidingHighPro"))
+
+# TASK-124: repo-relative paths — the old ~/RidingHighPro literals crashed on
+# GitHub Actions runners (repo lives under /home/runner/work/...).
+REPO_DIR = os.path.dirname(os.path.abspath(__file__))
+CONFIG_PATH = os.path.join(REPO_DIR, "sheets_config.json")
+sys.path.insert(0, REPO_DIR)
 
 import pandas as pd
 from datetime import datetime
@@ -39,6 +44,26 @@ from utils import (
 )
 
 OHLC_FIELDS = ("Open", "High", "Low", "Close")
+
+
+def recent_months(n, today=None, config_months=None):
+    """Up to n most-recent month keys (YYYY-MM, newest first): the current
+    month and n-1 predecessors, intersected with sheets_config (TASK-124 —
+    bounded scope for the daily workflow, instead of all-months-forever)."""
+    from dateutil.relativedelta import relativedelta
+    if today is None:
+        today = datetime.now(PERU_TZ).date()
+    elif isinstance(today, str):
+        today = datetime.strptime(today, "%Y-%m-%d").date()
+    if config_months is None:
+        with open(CONFIG_PATH) as fh:
+            config_months = set(json.load(fh).keys())
+    months = []
+    for i in range(n):
+        key = (today - relativedelta(months=i)).strftime("%Y-%m")
+        if key in config_months:
+            months.append(key)
+    return months
 STATS_KEYS = ("MaxDrop%", "BestDay", "TP10_Hit", "TP15_Hit", "TP20_Hit",
               "D1_Gap%", "SL_Hit_D5", "IntraDay_SL")
 
@@ -192,11 +217,19 @@ def run(months, apply: bool):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Cross-month post_analysis OHLC backfill (TASK-123)")
-    with open(os.path.expanduser("~/RidingHighPro/sheets_config.json")) as fh:
-        _default_months = ",".join(sorted(json.load(fh).keys()))
-    parser.add_argument("--months", type=str, default=_default_months,
-                        help="comma-separated YYYY-MM list (default: all in sheets_config)")
+    scope = parser.add_mutually_exclusive_group()
+    scope.add_argument("--months", type=str, default=None,
+                       help="comma-separated YYYY-MM list (default: all in sheets_config)")
+    scope.add_argument("--recent", type=int, default=None, metavar="N",
+                       help="current month + N-1 previous, from sheets_config (TASK-124 daily workflow mode)")
     parser.add_argument("--apply", action="store_true",
                         help="actually write to Sheets (default: dry-run, zero writes)")
     args = parser.parse_args()
-    run([m.strip() for m in args.months.split(",") if m.strip()], apply=args.apply)
+    if args.recent:
+        _months = recent_months(args.recent)
+    elif args.months:
+        _months = [m.strip() for m in args.months.split(",") if m.strip()]
+    else:
+        with open(CONFIG_PATH) as fh:
+            _months = sorted(json.load(fh).keys())
+    run(_months, apply=args.apply)

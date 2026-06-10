@@ -59,4 +59,7 @@ jobs:
           DATA_PROVIDER: alpaca
           ALPACA_PAPER: "true"
         run: |
-          python backfill_ohlc.py
+          # TASK-124: v2 cross-month (current + previous) heals end-of-month
+          # rows that v1 (active-month, D1-only trigger) left PENDING forever.
+          # v1 stays in the repo (§12); only this step stops calling it.
+          python backfill_ohlc_v2.py --recent 2 --apply

@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-06-10 17:29:09 (local)
+**Generated:** 2026-06-10 17:36:59 (local)
 **Branch:** `task-125-skip-summary`
-**Latest commit:** `94ebd4e` — feat(dashboard): basic page-visit logger via session counter + log line (TASK-43)
+**Latest commit:** `7c69983` — fix(pipeline): post_analysis backfill v1->v2 --recent 2 (TASK-124); PK 2.97
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `94ebd4e (HEAD -> task-125-skip-summary) feat(dashboard): basic page-visit logger via session counter + log line (TASK-43)`
+- `7c69983 (HEAD -> task-125-skip-summary) fix(pipeline): post_analysis backfill v1->v2 --recent 2 (TASK-124); PK 2.97`
+- `e061978 feat(dashboard): basic page-visit logger via session counter + log line (TASK-43)`
 - `c146a9d fix(calendar): trading_days_after holiday-aware via utils.is_trading_day (TASK-130); PK 2.96`
 - `307c0e5 (origin/main, origin/HEAD, main) fix(ci): rename task-122 filename 347B->51B — unblocks checkout on Linux runners`
 - `f57a343 docs(close): session handoff 2026-06-09 + PK v2.95; open TASK-131/132`
-- `60fc009 feat(backfill): backfill_ohlc_v2 cross-month fill-only (TASK-123); PK v2.94`
 
 ---
 
@@ -47,9 +47,9 @@ _gspread not installed — `pip install gspread google-auth`_
 
 ## 🩺 Health
 
-- ⚠️ 15 uncommitted file(s):
--    - 8 modified
--    - 7 new/untracked
+- ⚠️ 12 uncommitted file(s):
+-    - 6 modified
+-    - 6 new/untracked
 
 ---
 
