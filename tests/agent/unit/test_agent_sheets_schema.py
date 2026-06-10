@@ -23,3 +23,17 @@ def test_monthly_not_yet_in_rotation():
 def test_every_name_has_headers():
     for n in cs.AGENT_SHEET_NAMES:
         assert n in cs.AGENT_SHEET_HEADERS, f"{n} missing headers"
+
+
+# TASK-125 — skip_summary (per-run aggregated SKIP counts by reason)
+
+EXPECTED_SKIP_SUMMARY = [
+    "Timestamp", "RunID",
+    "SkipReason", "Count", "Tickers", "ScoreMin", "ScoreMax",
+]
+
+def test_skip_summary_in_names():
+    assert "skip_summary" in cs.AGENT_SHEET_NAMES
+
+def test_skip_summary_headers():
+    assert cs.AGENT_SHEET_HEADERS.get("skip_summary") == EXPECTED_SKIP_SUMMARY

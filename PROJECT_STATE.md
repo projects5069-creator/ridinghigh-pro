@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-06-10 17:36:59 (local)
+**Generated:** 2026-06-10 17:49:35 (local)
 **Branch:** `task-125-skip-summary`
-**Latest commit:** `7c69983` — fix(pipeline): post_analysis backfill v1->v2 --recent 2 (TASK-124); PK 2.97
+**Latest commit:** `2c06b48` — feat(logging): skip_summary aggregated per-run writes (TASK-125); PK 2.98
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `7c69983 (HEAD -> task-125-skip-summary) fix(pipeline): post_analysis backfill v1->v2 --recent 2 (TASK-124); PK 2.97`
+- `2c06b48 (HEAD -> task-125-skip-summary) feat(logging): skip_summary aggregated per-run writes (TASK-125); PK 2.98`
+- `cf33833 fix(pipeline): post_analysis backfill v1->v2 --recent 2 (TASK-124); PK 2.97`
 - `e061978 feat(dashboard): basic page-visit logger via session counter + log line (TASK-43)`
 - `c146a9d fix(calendar): trading_days_after holiday-aware via utils.is_trading_day (TASK-130); PK 2.96`
 - `307c0e5 (origin/main, origin/HEAD, main) fix(ci): rename task-122 filename 347B->51B — unblocks checkout on Linux runners`
-- `f57a343 docs(close): session handoff 2026-06-09 + PK v2.95; open TASK-131/132`
 
 ---
 
@@ -32,11 +32,11 @@ _See `OPEN_ISSUES.md` for full list_
 
 | Workflow | Status | Conclusion | Started |
 |---|---|---|---|
+| Agent — End of Day | completed | ✅ success | 2026-06-10 22:44 UTC |
 | Health Audit | completed | ✅ success | 2026-06-10 22:27 UTC |
 | Daily Backup — post_analysis | completed | ✅ success | 2026-06-10 22:18 UTC |
 | Daily Backup — post_analysis | completed | ✅ success | 2026-06-10 22:17 UTC |
 | Agent — Daily Brief Email | completed | ✅ success | 2026-06-10 21:30 UTC |
-| RidingHigh Auto Scanner | completed | ✅ success | 2026-06-10 21:28 UTC |
 
 ---
 
@@ -47,9 +47,8 @@ _gspread not installed — `pip install gspread google-auth`_
 
 ## 🩺 Health
 
-- ⚠️ 12 uncommitted file(s):
--    - 6 modified
--    - 6 new/untracked
+- ⚠️ 5 uncommitted file(s):
+-    - 5 new/untracked
 
 ---
 

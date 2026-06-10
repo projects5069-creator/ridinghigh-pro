@@ -4,7 +4,10 @@ Writes Decision objects as rows in decision_log Sheet.
 42 Decision fields mapped 1:1 to 42 Sheet columns (preserving order).
 
 Strategy:
-- Each log() call writes immediately (not batched) — every decision matters
+- ENTER: each log() call writes immediately (not batched) — every entry matters
+- SKIP (Route B): stdout line per decision (Actions audit) + in-run aggregation;
+  flush_skip_summary() writes ONE batched append per run to the skip_summary
+  tab (one row per skip-reason) — TASK-125. Max +1 Sheets write per run.
 - None -> "" (matches scanner convention via .astype(str))
 - bool -> str() ("True"/"False")
 - Failures logged to stderr, return None (signal still processed)
@@ -20,13 +23,21 @@ Used by: trader.py (M3 wiring in M4), orchestrator.py (M10)
 
 import sys
 import os
+from datetime import datetime
 from typing import Optional, List, Any
+
+import pytz
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
 import sheets_manager
 from agent.trader.decision_logic import Decision
 from agent.logging.decision_id_generator import DecisionIDGenerator
+
+PERU_TZ = pytz.timezone("America/Lima")
+
+# skip_summary tab schema (TASK-125) — must match create_agent_sheets.py
+SKIP_SUMMARY_TICKER_CAP = 25
 
 
 # Explicit ordered mapping: Decision field -> Sheet column
@@ -116,6 +127,75 @@ class DecisionLogger:
         """
         self.sheet_id = sheet_id
         self.id_generator = DecisionIDGenerator(sheet_id)
+        # TASK-125: in-run SKIP aggregation (one container per GH-Actions run;
+        # state dies with the container — exactly the intended scope).
+        _now = datetime.now(PERU_TZ)
+        self.run_start = _now.strftime("%Y-%m-%d %H:%M:%S")
+        self.run_id = os.environ.get("GITHUB_RUN_ID") or _now.strftime("%Y%m%d-%H%M%S")
+        self._skip_acc = {}  # reason_key -> {count, tickers[], score_min, score_max}
+
+    def _accumulate_skip(self, decision: Decision) -> None:
+        """Add one SKIP decision to the in-run accumulator (never raises)."""
+        reason_raw = (
+            getattr(decision, "skip_reason", "") or getattr(decision, "reason", "") or "UNKNOWN"
+        )
+        key = reason_raw.split(":")[0].strip() or "UNKNOWN"
+        score = float(getattr(decision, "score", 0.0) or 0.0)
+        ticker = getattr(decision, "ticker", "?") or "?"
+        entry = self._skip_acc.get(key)
+        if entry is None:
+            self._skip_acc[key] = {
+                "count": 1,
+                "tickers": [ticker],
+                "score_min": score,
+                "score_max": score,
+            }
+        else:
+            entry["count"] += 1
+            entry["tickers"].append(ticker)
+            entry["score_min"] = min(entry["score_min"], score)
+            entry["score_max"] = max(entry["score_max"], score)
+
+    def flush_skip_summary(self) -> int:
+        """Write the aggregated SKIP counts to the skip_summary tab.
+
+        ONE batched safe_append_rows call per run (one row per skip-reason).
+        Worksheet is resolved lazily so a missing tab/config entry can never
+        break logger construction. Never raises — visibility must not fail
+        the trading run. Returns the number of rows written (0 on no-op/error).
+        """
+        if not self._skip_acc:
+            return 0
+        try:
+            ws = sheets_manager.get_worksheet("skip_summary")
+            if ws is None:
+                print("[DecisionLogger] skip_summary worksheet unavailable", file=sys.stderr)
+                return 0
+            rows = []
+            for key, entry in self._skip_acc.items():
+                tickers = entry["tickers"]
+                if len(tickers) > SKIP_SUMMARY_TICKER_CAP:
+                    shown = ",".join(tickers[:SKIP_SUMMARY_TICKER_CAP])
+                    tickers_cell = f"{shown} +{len(tickers) - SKIP_SUMMARY_TICKER_CAP} more"
+                else:
+                    tickers_cell = ",".join(tickers)
+                rows.append([
+                    self.run_start,
+                    self.run_id,
+                    key,
+                    entry["count"],
+                    tickers_cell,
+                    round(entry["score_min"], 2),
+                    round(entry["score_max"], 2),
+                ])
+            sheets_manager.safe_append_rows(
+                ws, rows, dedup_col=1, dedup_vals={self.run_id}
+            )
+            self._skip_acc = {}
+            return len(rows)
+        except Exception as e:
+            print(f"[DecisionLogger] skip_summary flush failed (non-fatal): {e}", file=sys.stderr)
+            return 0
 
     def _decision_to_row(self, decision: Decision) -> List[Any]:
         """Convert Decision to ordered list of 42 values matching Sheet."""
@@ -166,6 +246,12 @@ class DecisionLogger:
                 file=sys.stdout,
                 flush=True,
             )
+            # TASK-125: aggregate for the end-of-run skip_summary batch write.
+            # Guarded — aggregation must never break the logging path.
+            try:
+                self._accumulate_skip(decision)
+            except Exception as e:
+                print(f"[DecisionLogger] skip accumulation failed: {e}", file=sys.stderr)
             return decision.decision_id  # success — NOT an error
 
         # ENTER decisions: write to sheet (rare event, only when we actually enter)

@@ -2,7 +2,7 @@
 """
 create_agent_sheets.py
 ──────────────────────
-Creates the 13 Agent Google Sheets in the current (or specified) month's
+Creates the Agent Google Sheets (see AGENT_SHEET_NAMES) in the current (or specified) month's
 Drive folder. Follows the exact same pattern as prepare_next_month.py:
   - OAuth user-owned creation (SA has 0 GB quota)
   - Service Account shared as Editor
@@ -46,6 +46,7 @@ AGENT_SHEET_NAMES = [
     "borrow_data",
     "agent_scorecard",
     "weekly_summary",
+    "skip_summary",
 ]
 
 # Headers for each sheet (see AGENT_SHEET_HEADERS below for exact column counts)
@@ -198,6 +199,13 @@ AGENT_SHEET_HEADERS = {
         # Insight + meta (3)
         "Conclusion", "SampleSizeFlag", "GeneratedAt",
     ],  # 16 columns
+
+    "skip_summary": [
+        # Run identity (2) — TASK-125: per-run aggregated SKIP counts by reason
+        "Timestamp", "RunID",
+        # Aggregation (5)
+        "SkipReason", "Count", "Tickers", "ScoreMin", "ScoreMax",
+    ],  # 7 columns
 }
 
 
@@ -226,7 +234,7 @@ def _get_month_key(month_arg: str = None, next_month: bool = False) -> str:
 
 
 def _already_done(month_key: str) -> bool:
-    """True if sheets_config.json already has all 13 agent sheets for month_key."""
+    """True if sheets_config.json already has all agent sheets for month_key."""
     config = sheets_manager._load_config()
     if month_key not in config:
         return False
@@ -244,14 +252,14 @@ def _set_headers(gc, sheet_id: str, headers: list):
 
 
 def create_agent_sheets(month_key: str, dry_run: bool = False):
-    """Create all 13 agent sheets for the given month."""
+    """Create all agent sheets (len(AGENT_SHEET_NAMES)) for the given month."""
     print(f"\n{'='*60}")
     print(f"  Agent Sheets Setup — {month_key}  {'(DRY-RUN)' if dry_run else ''}")
     print(f"{'='*60}")
 
     # Check idempotency
     if _already_done(month_key):
-        print(f"\n✅ All 13 agent sheets already exist for {month_key}")
+        print(f"\n✅ All {len(AGENT_SHEET_NAMES)} agent sheets already exist for {month_key}")
         config = sheets_manager._load_config()
         for name in AGENT_SHEET_NAMES:
             print(f"   {name}: {config[month_key][name]}")
@@ -262,7 +270,7 @@ def create_agent_sheets(month_key: str, dry_run: bool = False):
         for name in AGENT_SHEET_NAMES:
             col_count = len(AGENT_SHEET_HEADERS[name])
             print(f"   RH-{month_key}-{name} ({col_count} columns)")
-        print(f"\n[DRY-RUN] Would update sheets_config.json with 13 new IDs")
+        print(f"\n[DRY-RUN] Would update sheets_config.json with {len(AGENT_SHEET_NAMES)} new IDs")
         print(f"[DRY-RUN] No changes made.")
         return None
 
@@ -304,7 +312,7 @@ def create_agent_sheets(month_key: str, dry_run: bool = False):
         print(f"   Created new folder: {folder_id}")
 
     # Create each sheet
-    print(f"\n📄 Creating 13 Agent Sheets:")
+    print(f"\n📄 Creating {len(AGENT_SHEET_NAMES)} Agent Sheets:")
     config = sheets_manager._load_config()
     month_cfg = config.get(month_key, {})
     created_ids = {}
@@ -371,7 +379,7 @@ def create_agent_sheets(month_key: str, dry_run: bool = False):
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Create 13 Agent Google Sheets for a given month"
+        description="Create the Agent Google Sheets for a given month"
     )
     parser.add_argument(
         "--month", type=str, default=None,

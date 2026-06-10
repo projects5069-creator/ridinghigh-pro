@@ -739,6 +739,14 @@ def run() -> Dict[str, Any]:
                 logger.error("Failed signal %s: %s", ticker, e, exc_info=True)
                 continue
 
+    # TASK-125: one batched skip_summary write per run (never fails the run).
+    # Deliberately NOT counted in summary["errors"] — a quota incident would
+    # otherwise trigger the alert email every minute.
+    try:
+        summary["skip_summary_rows"] = decision_logger.flush_skip_summary()
+    except Exception as e:
+        logger.warning("skip_summary flush failed (non-fatal): %s", e)
+
     # Monitor positions
     try:
         monitor_stats = position_manager.monitor_all()

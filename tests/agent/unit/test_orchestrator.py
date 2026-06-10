@@ -162,3 +162,94 @@ class TestRunFlow:
                          "decisions", "enters", "skips", "errors",
                          "monitored", "eod_closed"}
         assert expected_keys == set(result.keys())
+
+
+# ════════════════════════════════════════════════════════════════════
+# TASK-125 — skip_summary flush wiring (full run, heavily mocked)
+# ════════════════════════════════════════════════════════════════════
+
+def _full_run_patches(decision_logger_instance):
+    """Patch every lazy import / module-level dependency of run() so a
+    single SKIP signal flows through the loop. Returns list of patchers."""
+    import sheets_manager as _sm
+
+    skip_decision = MagicMock()
+    skip_decision.action = "SKIP"
+    skip_decision.score = 12.0
+    skip_decision.skip_reason = "SCORE_TOO_LOW: 12.00 < 60"
+    skip_decision.reason = skip_decision.skip_reason
+
+    trader = MagicMock()
+    trader.evaluate.return_value = skip_decision
+
+    sentinel = MagicMock()
+    sentinel.check_system.return_value = MagicMock(is_block=False)
+    sentinel.check_signal.return_value = MagicMock(is_block=False)
+
+    account_state = {
+        "existing_positions": set(),
+        "cold_start_concurrent_used": 0,
+        "cold_start_daily_used": 0,
+        "buying_power": 10000.0,
+        "entries_today_by_ticker": {},
+    }
+
+    return [
+        patch("agent.orchestrator.is_market_hours", return_value=True),
+        patch("agent.orchestrator.check_emergency_stop", return_value=False),
+        patch("agent.orchestrator.detect_outage", return_value=None),
+        patch("agent.orchestrator.is_eod_window", return_value=False),
+        patch("agent.orchestrator.build_account_state", return_value=account_state),
+        patch("agent.orchestrator.read_latest_signals",
+              return_value=[{"ticker": "TST1"}]),
+        patch("agent.trader.trader.Trader", return_value=trader),
+        patch("agent.sentinel.data_sentinel.get_sentinel", return_value=sentinel),
+        patch("agent.news_detective.NewsDetectiveAgent", return_value=MagicMock()),
+        patch("agent.logging.decision_logger.DecisionLogger",
+              return_value=decision_logger_instance),
+        patch("agent.execution.alpaca_broker.AlpacaBroker", return_value=MagicMock()),
+        patch("agent.execution.order_manager.OrderManager", return_value=MagicMock()),
+        patch("agent.execution.position_manager.PositionManager",
+              return_value=MagicMock(monitor_all=MagicMock(return_value={}))),
+        patch("agent.analytics.postmortem_engine.PostmortemEngine",
+              return_value=MagicMock()),
+        patch("data_provider.get_data_provider", return_value=MagicMock()),
+        patch.object(_sm, "get_sheet_id", return_value="fake-id"),
+        patch.object(_sm, "get_worksheet", return_value=None),
+    ]
+
+
+class TestSkipSummaryFlush:
+    def test_run_calls_flush_skip_summary_once(self):
+        dl = MagicMock()
+        dl.log.return_value = "DEC-TEST-1"
+        dl.flush_skip_summary.return_value = 2
+        patches = _full_run_patches(dl)
+        for p in patches:
+            p.start()
+        try:
+            result = run()
+        finally:
+            for p in patches:
+                p.stop()
+        assert result["halted"] is False
+        assert dl.flush_skip_summary.call_count == 1
+        assert result.get("skip_summary_rows") == 2
+
+    def test_flush_failure_does_not_fail_run(self):
+        dl = MagicMock()
+        dl.log.return_value = "DEC-TEST-2"
+        dl.flush_skip_summary.side_effect = Exception("boom")
+        patches = _full_run_patches(dl)
+        for p in patches:
+            p.start()
+        try:
+            result = run()
+        finally:
+            for p in patches:
+                p.stop()
+        # Run completed; flush failure is non-fatal and not an "error"
+        assert result["halted"] is False
+        assert result["skips"] == 1
+        assert result["errors"] == 0
+        assert "skip_summary_rows" not in result
