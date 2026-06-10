@@ -644,13 +644,18 @@ def ensure_monthly_setup(month: str = None) -> dict:
 
 
 def trading_days_after(date_str: str, n: int = 3) -> list:
-    """Return the next n trading weekdays after date_str (YYYY-MM-DD)."""
+    """Return the next n NASDAQ trading days after date_str (YYYY-MM-DD).
+
+    TASK-130: holiday-aware via utils.is_trading_day (single holiday source,
+    §10). Degrades to weekday-only when mcal is unavailable (utils fallback).
+    """
     from datetime import timedelta
+    from utils import is_trading_day  # local import — mirrors utils→sheets_manager pattern, no module-level cycle
     d = datetime.strptime(date_str, "%Y-%m-%d")
     days = []
     while len(days) < n:
         d += timedelta(days=1)
-        if d.weekday() < 5:
+        if is_trading_day(d.date()):
             days.append(d.strftime("%Y-%m-%d"))
     return days
 

@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-06-10 11:41:51 (local)
-**Branch:** `main`
-**Latest commit:** `b6441a8` — fix(ci): rename task-122 filename 347B->51B — unblocks checkout on Linux runners
+**Generated:** 2026-06-10 17:22:31 (local)
+**Branch:** `task-125-skip-summary`
+**Latest commit:** `c394f0d` — fix(calendar): trading_days_after holiday-aware via utils.is_trading_day (TASK-130); PK 2.96
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `b6441a8 (HEAD -> main) fix(ci): rename task-122 filename 347B->51B — unblocks checkout on Linux runners`
-- `f57a343 (origin/main, origin/HEAD) docs(close): session handoff 2026-06-09 + PK v2.95; open TASK-131/132`
+- `c394f0d (HEAD -> task-125-skip-summary) fix(calendar): trading_days_after holiday-aware via utils.is_trading_day (TASK-130); PK 2.96`
+- `307c0e5 (origin/main, origin/HEAD, main) fix(ci): rename task-122 filename 347B->51B — unblocks checkout on Linux runners`
+- `f57a343 docs(close): session handoff 2026-06-09 + PK v2.95; open TASK-131/132`
 - `60fc009 feat(backfill): backfill_ohlc_v2 cross-month fill-only (TASK-123); PK v2.94`
 - `2e4b770 docs: system audit + fix plan + tasks 123-129; PK v2.93 (read-only findings, no code change)`
-- `d3659ad docs(pk): Generated->Last updated, v2.92 (TASK-119)`
 
 ---
 
@@ -32,11 +32,11 @@ _See `OPEN_ISSUES.md` for full list_
 
 | Workflow | Status | Conclusion | Started |
 |---|---|---|---|
-| Agent — Every Minute (DRY_RUN) | completed | ❌ failure | 2026-06-10 16:41 UTC |
-| RidingHigh Auto Scanner | completed | ❌ failure | 2026-06-10 16:41 UTC |
-| Agent — Every Minute (DRY_RUN) | completed | ❌ failure | 2026-06-10 16:40 UTC |
-| RidingHigh Auto Scanner | completed | ❌ failure | 2026-06-10 16:40 UTC |
-| RidingHigh Auto Scanner | completed | ❌ failure | 2026-06-10 16:39 UTC |
+| Daily Backup — post_analysis | completed | ✅ success | 2026-06-10 22:18 UTC |
+| Daily Backup — post_analysis | completed | ✅ success | 2026-06-10 22:17 UTC |
+| Agent — Daily Brief Email | completed | ✅ success | 2026-06-10 21:30 UTC |
+| RidingHigh Auto Scanner | completed | ✅ success | 2026-06-10 21:28 UTC |
+| Agent — Every Minute (DRY_RUN) | completed | ✅ success | 2026-06-10 21:27 UTC |
 
 ---
 
@@ -46,7 +46,10 @@ _gspread not installed — `pip install gspread google-auth`_
 ---
 
 ## 🩺 Health
-✅ All checks passed.
+
+- ⚠️ 17 uncommitted file(s):
+-    - 9 modified
+-    - 8 new/untracked
 
 ---
 
