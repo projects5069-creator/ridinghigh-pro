@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-06-11 13:27:00 (local)
+**Generated:** 2026-06-11 13:30:55 (local)
 **Branch:** `main`
-**Latest commit:** `023a96c` — docs(pk): TASK-134 v3.03 — 16 pre-existing unit failures fixed (6 groups, stale tests), suite green 221/0 + mark Done.
+**Latest commit:** `e534458` — chore(backlog): TASK-159 — postmortem _generate_lessons discarded (134 followup, To Do).
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `023a96c (HEAD -> main) docs(pk): TASK-134 v3.03 — 16 pre-existing unit failures fixed (6 groups, stale tests), suite green 221/0 + mark Done.`
-- `2dbf3fb (origin/main, origin/HEAD) test(agent): TASK-134 group F — test _generate_lessons rules directly (AutoLessons now Hebrew prose); suite green 221/0 (4 fixed, test-only).`
+- `e534458 (HEAD -> main) chore(backlog): TASK-159 — postmortem _generate_lessons discarded (134 followup, To Do).`
+- `6895ea1 (origin/main, origin/HEAD) docs(pk): TASK-134 v3.03 — 16 pre-existing unit failures fixed (6 groups, stale tests), suite green 221/0 + mark Done.`
+- `2dbf3fb test(agent): TASK-134 group F — test _generate_lessons rules directly (AutoLessons now Hebrew prose); suite green 221/0 (4 fixed, test-only).`
 - `2d85b6e test(agent): TASK-134 group B — assert FIELD_MAPPING subset of Decision fields invariant, not magic count 43 (test-only).`
 - `7f7c093 test(agent): TASK-134 group A — rewrite decision_id tests for timestamp-based format, drop dead counter/max tests (4->3, test-only).`
-- `53b7e1b test(agent): TASK-134 group D — update order_manager tests to 25-col paper_portfolio schema, Status idx 14->16 (2 fixed, test-only).`
 
 ---
 
@@ -32,11 +32,11 @@ _See `OPEN_ISSUES.md` for full list_
 
 | Workflow | Status | Conclusion | Started |
 |---|---|---|---|
-| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-06-11 18:26 UTC |
-| Agent — Every Minute (DRY_RUN) | completed | ✅ success | 2026-06-11 18:26 UTC |
-| Agent — Every Minute (DRY_RUN) | in_progress | ⏳ — | 2026-06-11 18:25 UTC |
-| RidingHigh Auto Scanner | completed | ✅ success | 2026-06-11 18:25 UTC |
-| Agent — Every Minute (DRY_RUN) | in_progress | ⏳ — | 2026-06-11 18:24 UTC |
+| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-06-11 18:30 UTC |
+| Agent — Every Minute (DRY_RUN) | in_progress | ⏳ — | 2026-06-11 18:30 UTC |
+| RidingHigh Auto Scanner | completed | ✅ success | 2026-06-11 18:29 UTC |
+| Agent — Every Minute (DRY_RUN) | in_progress | ⏳ — | 2026-06-11 18:29 UTC |
+| Agent — Every Minute (DRY_RUN) | in_progress | ⏳ — | 2026-06-11 18:28 UTC |
 
 ---
 
