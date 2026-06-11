@@ -45,7 +45,7 @@ Dependencies:
 """
 import pytz
 from datetime import datetime, timedelta
-from config import TP_THRESHOLD_FRAC, SL_THRESHOLD_FRAC
+from config import TP_THRESHOLD_FRAC, SL_THRESHOLD_FRAC, BORROW_SCENARIOS, SLIP
 
 
 # ═══════════════════════════════════════════════════════════════════════
@@ -436,7 +436,7 @@ def calculate_stats(scan_price, ohlc):
                            (kept for backward compat — same value as SL_Hit_D5 now)
     """
     # Use formulas.py for consistent calculations
-    from formulas import calculate_max_drop, calculate_d1_gap
+    from formulas import calculate_max_drop, calculate_d1_gap, calculate_net_pnl
     
     lows = [(i, ohlc[f"D{i}_Low"]) for i in range(1, 6) 
             if ohlc.get(f"D{i}_Low") is not None]
@@ -451,6 +451,10 @@ def calculate_stats(scan_price, ohlc):
             "D1_Gap%": None,
             "SL_Hit_D5": None,
             "IntraDay_SL": None,
+            "NetPnL_SlipOnly": None,
+            "NetPnL_Borrow50": None,
+            "NetPnL_Borrow200": None,
+            "NetPnL_Borrow500": None,
         }
     
     best_day, min_low = min(lows, key=lambda x: x[1])
@@ -468,6 +472,10 @@ def calculate_stats(scan_price, ohlc):
             sl_hit_d5 = 1
             break
     
+    # TASK-140: net-PnL per cost scenario (None for PENDING/WHIPSAW/NO_TOUCH — same SSoT walk)
+    cls, day = classify_trade(scan_price, ohlc)
+    net_borrow = [calculate_net_pnl(scan_price, cls, day, r, slip=SLIP) for r in BORROW_SCENARIOS]
+
     return {
         "MaxDrop%": max_drop,
         "BestDay": best_day,
@@ -477,6 +485,10 @@ def calculate_stats(scan_price, ohlc):
         "D1_Gap%": d1_gap,
         "SL_Hit_D5": sl_hit_d5,
         "IntraDay_SL": sl_hit_d5,  # alias kept for backward compat
+        "NetPnL_SlipOnly": calculate_net_pnl(scan_price, cls, day, 0.0, slip=SLIP),
+        "NetPnL_Borrow50": net_borrow[0],
+        "NetPnL_Borrow200": net_borrow[1],
+        "NetPnL_Borrow500": net_borrow[2],
     }
 
 
