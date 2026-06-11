@@ -497,7 +497,9 @@ def classify_trade(scan_price, ohlc):
         ohlc: dict with D1_High/D1_Low ... D5_High/D5_Low.
 
     Returns:
-        str — one of:
+        (classification, resolution_day) tuple — resolution_day = the D-day (1-5)
+        that resolved WIN/LOSS/WHIPSAW; 5 for NO_TOUCH; None for PENDING.
+        classification — one of:
           'WIN'      : a day's Low hit TP, that day's High did NOT hit SL.
           'LOSS'     : a day's High hit SL, that day's Low did NOT hit TP.
           'WHIPSAW'  : same single day hit BOTH TP and SL — unresolvable with
@@ -509,14 +511,14 @@ def classify_trade(scan_price, ohlc):
                        yet. Excluded from every statistic.
     """
     if scan_price is None or scan_price <= 0:
-        return 'PENDING'
+        return ('PENDING', None)
 
     # A trade may only be classified once all 5 days have settled.
     # Fewer than 5 days of OHLC = trade is still live ("in the air") —
     # no win/loss decision is permitted yet.
     for i in range(1, 6):
         if ohlc.get(f"D{i}_Low") is None or ohlc.get(f"D{i}_High") is None:
-            return 'PENDING'
+            return ('PENDING', None)
 
     tp_price = scan_price * (1 - TP_THRESHOLD_FRAC)
     sl_price = scan_price * (1 + SL_THRESHOLD_FRAC)
@@ -528,13 +530,13 @@ def classify_trade(scan_price, ohlc):
         tp_hit = lo <= tp_price
         sl_hit = hi >= sl_price
         if tp_hit and sl_hit:
-            return 'WHIPSAW'   # same day, both ends — unresolvable
+            return ('WHIPSAW', i)   # same day, both ends — unresolvable
         if sl_hit:
-            return 'LOSS'      # SL resolved first
+            return ('LOSS', i)      # SL resolved first
         if tp_hit:
-            return 'WIN'       # TP resolved first
+            return ('WIN', i)       # TP resolved first
 
-    return 'NO_TOUCH'          # 5 full days, never resolved
+    return ('NO_TOUCH', 5)          # 5 full days, never resolved
 
 
 def classify_trade_row(row):
@@ -558,7 +560,7 @@ def classify_trade_row(row):
     for i in range(1, 6):
         for k in ("High", "Low"):
             ohlc[f"D{i}_{k}"] = _num(row.get(f"D{i}_{k}"))
-    return classify_trade(scan_price, ohlc)
+    return classify_trade(scan_price, ohlc)[0]   # classification string only (dashboard callers unbroken)
 
 
 # ═══════════════════════════════════════════════════════════════════════
