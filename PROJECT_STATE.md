@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-06-10 23:32:57 (local)
+**Generated:** 2026-06-10 23:37:18 (local)
 **Branch:** `main`
-**Latest commit:** `34563a8` — docs: session close 2026-06-10 evening — decisions applied + handoff + work plan + PK bump
+**Latest commit:** `e9c913f` — chore(backlog): record day-open agenda 11/6 — 5 vision tasks + merge edits (task-156); PK 3.01
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `34563a8 (HEAD -> main) docs: session close 2026-06-10 evening — decisions applied + handoff + work plan + PK bump`
-- `58add8e (origin/main, origin/HEAD) chore(backlog): mark completed Done + remove debris`
+- `e9c913f (HEAD -> main) chore(backlog): record day-open agenda 11/6 — 5 vision tasks + merge edits (task-156); PK 3.01`
+- `d02d796 (origin/main, origin/HEAD) docs: session close 2026-06-10 evening — decisions applied + handoff + work plan + PK bump`
+- `58add8e chore(backlog): mark completed Done + remove debris`
 - `5b34304 docs(research): TASK-139 investigation outputs + derived task triage`
 - `75e07e8 docs: session handoff 2026-06-10 + PK 2.99 (day close — 6 commits, 40 holiday rows freed, n=123)`
-- `4d30a7a chore(sheets): add skip_summary tab to 2026-07 pre-rotation (TASK-125 follow-up)`
 
 ---
 
