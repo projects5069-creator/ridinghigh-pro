@@ -67,6 +67,7 @@ Design Principles:
 """
 
 from config import SCORE_WEIGHTS_V2, SCORE_CAPS_V2, SCORE_RSI_PARAMS, REL_VOL_CAP
+from config import TP_THRESHOLD_FRAC, SL_THRESHOLD_FRAC, SLIP
 
 
 # ═══════════════════════════════════════════════════════════════════════
@@ -320,6 +321,33 @@ def calculate_d1_gap(d1_open, scan_price):
         return float((d1_open - scan_price) / scan_price * 100)
     except (TypeError, ValueError, ZeroDivisionError):
         return 0.0
+
+
+def calculate_net_pnl(scan_price, classification, resolution_day, borrow_annual_rate, slip=SLIP):
+    """Net short-side PnL FRACTION after slippage + borrow (TASK-140, phase6 cost model).
+
+    Only WIN/LOSS are computable (classify_trade literals — utils.py:533/535);
+    WHIPSAW/NO_TOUCH/PENDING -> None (NULL cell). Table-A basis (ScanPrice + TP/SL sim).
+
+        fill  = scan * (1 - slip)                                  # short entry, adverse (lower)
+        exit  = scan * (1 - TP_FRAC) [WIN]  /  scan * (1 + SL_FRAC) [LOSS]
+        cover = exit * (1 + slip)                                  # cover, adverse (higher)
+        gross = (fill - cover) / fill
+        net   = gross - borrow_annual_rate * resolution_day / 365
+    """
+    cls = str(classification).upper()
+    if cls == "WIN":
+        exit_price = scan_price * (1 - TP_THRESHOLD_FRAC)
+    elif cls == "LOSS":
+        exit_price = scan_price * (1 + SL_THRESHOLD_FRAC)
+    else:
+        return None  # WHIPSAW / NO_TOUCH / PENDING — not computable
+
+    fill = scan_price * (1 - slip)
+    cover = exit_price * (1 + slip)
+    gross = (fill - cover) / fill
+    bcost = borrow_annual_rate * resolution_day / 365.0
+    return gross - bcost
 
 
 def calculate_pnl_pct(entry_price, exit_price, is_short=True):

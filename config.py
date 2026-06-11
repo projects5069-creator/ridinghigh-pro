@@ -135,6 +135,10 @@ MAX_HOLDING_DAYS = 5
 TP_THRESHOLD_FRAC = TP_THRESHOLD_PCT / 100.0  # 0.10
 SL_THRESHOLD_FRAC = SL_THRESHOLD_PCT / 100.0  # 0.10
 
+# TASK-140 net-PnL cost model
+SLIP = 0.01                            # slippage 1%/side, adverse (entry fill lower + cover higher)
+BORROW_SCENARIOS = [0.50, 2.00, 5.00]  # assumed annual borrow rates (fee=NULL from TASK-139 — assumptions flagged)
+
 
 # ═══════════════════════════════════════════════════════════════════════
 # Data & Timing
