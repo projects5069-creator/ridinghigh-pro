@@ -72,6 +72,25 @@ def build_updates(df, header):
     return updates
 
 
+def build_header_updates(header):
+    """Pure (no I/O): row-1 cell appends for any NetPnL column missing from the header.
+
+    Returns (updates, new_header). Idempotent (present col -> skipped). Writes target
+    ROW 1 ONLY (rowcol_to_a1(1, next_free_col)) — never a data row. new_header is the
+    post-add header used by build_updates so it can resolve the new column indices.
+    """
+    new_header = list(header or [])
+    updates = []
+    for col in NETPNL_COLS:
+        if col in new_header:
+            continue
+        idx = len(new_header) + 1                       # next free column (1-based)
+        updates.append({"range": rowcol_to_a1(1, idx),  # ROW 1 ONLY — header cell
+                        "values": [[col]]})
+        new_header.append(col)
+    return updates, new_header
+
+
 def run(months, apply):
     mode = "APPLY" if apply else "DRY-RUN"
     today = datetime.now(PERU_TZ).strftime("%Y-%m-%d")
@@ -82,17 +101,15 @@ def run(months, apply):
         if df.empty:
             print(f"  {month}: empty/unreachable — skipped")
             continue
-        missing_cols = [c for c in NETPNL_COLS if c not in (header or [])]
-        if missing_cols:
-            print(f"  ⚠️ {month}: header missing {missing_cols} — collector/save must add them first; skipped")
-            continue
-        updates = build_updates(df, header)
+        hdr_updates, new_header = build_header_updates(header)   # add missing NetPnL header cells (row 1)
+        cell_updates = build_updates(df, new_header)
+        updates = hdr_updates + cell_updates
         if updates and apply:
             sheets_manager._with_retry(ws.batch_update, updates, value_input_option="USER_ENTERED")
-            print(f"  ✅ {month}: WROTE {len(updates)} NetPnL cells")
+            print(f"  ✅ {month}: WROTE {len(hdr_updates)} header + {len(cell_updates)} NetPnL cells")
         else:
             prefix = "DRY-RUN — " if not apply else ""
-            print(f"  🔍 {month}: {prefix}would write {len(updates)} NetPnL cells")
+            print(f"  🔍 {month}: {prefix}would write {len(hdr_updates)} header + {len(cell_updates)} NetPnL cells")
         total += len(updates)
     print(f"\n══════ SUMMARY ══════  NetPnL cells {'written' if apply else 'to write (dry-run)'}: {total} | mode: {mode}")
 

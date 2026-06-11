@@ -15,7 +15,7 @@ from unittest.mock import MagicMock, patch
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import pandas as pd
-from backfill_netpnl import build_updates, run, NETPNL_COLS
+from backfill_netpnl import build_updates, build_header_updates, run, NETPNL_COLS
 
 HEADER = (["Ticker", "ScanDate", "ScanPrice"]
           + [f"D{i}_{k}" for i in range(1, 6) for k in ("Open", "High", "Low", "Close")]
@@ -94,3 +94,73 @@ def test_apply_writes_via_batch_update():
     retry.assert_called_once()
     # called as _with_retry(ws.batch_update, updates, value_input_option=...)
     assert retry.call_args.args[0] == ws.batch_update
+
+
+# ─────────────── header-add (option B): create missing NetPnL columns ───────────────
+
+import re
+
+BASE_HEADER = (["Ticker", "ScanDate", "ScanPrice"]
+               + [f"D{i}_{k}" for i in range(1, 6) for k in ("Open", "High", "Low", "Close")])
+
+
+def _win_row_no_netpnl():
+    """A WIN-on-D1 row whose DataFrame has NO NetPnL columns at all."""
+    r = {"Ticker": "AAA", "ScanDate": "2026-05-01", "ScanPrice": "100"}
+    for i in range(1, 6):
+        for k in ("Open", "High", "Low", "Close"):
+            r[f"D{i}_{k}"] = ""
+    for i, (o, h, lo, c) in enumerate(WIN_DAYS, start=1):
+        r[f"D{i}_Open"], r[f"D{i}_High"], r[f"D{i}_Low"], r[f"D{i}_Close"] = str(o), str(h), str(lo), str(c)
+    return r
+
+
+def test_header_missing_cols_yields_row1_appends():
+    """Missing NetPnL cols -> one ROW-1 cell append each, in the next free columns."""
+    updates, new_header = build_header_updates(BASE_HEADER)
+    assert len(updates) == len(NETPNL_COLS)
+    for u in updates:
+        assert re.match(r"^[A-Z]+1$", u["range"]), f"header write not row 1: {u['range']}"
+    assert [u["values"][0][0] for u in updates] == NETPNL_COLS
+    assert new_header[-len(NETPNL_COLS):] == NETPNL_COLS
+
+
+def test_header_already_present_is_idempotent():
+    """Header already has the cols -> 0 header updates, header unchanged."""
+    full = ["Ticker", "ScanPrice"] + NETPNL_COLS
+    updates, new_header = build_header_updates(full)
+    assert updates == []
+    assert new_header == full
+
+
+def test_header_add_then_build_updates_finds_cols():
+    """Integration: missing header -> build_updates=0; after header-add -> fills 4."""
+    df = pd.DataFrame([_win_row_no_netpnl()], columns=BASE_HEADER)
+    assert build_updates(df, BASE_HEADER) == []            # cols absent -> nothing
+    hdr_updates, new_header = build_header_updates(BASE_HEADER)
+    assert len(hdr_updates) == 4
+    assert len(build_updates(df, new_header)) == 4         # now found and filled
+
+
+def test_run_apply_writes_header_then_cells_when_missing():
+    """run --apply on a sheet missing the cols writes 4 row-1 headers + 4 row-2 cells."""
+    df = pd.DataFrame([_win_row_no_netpnl()], columns=BASE_HEADER)
+    ws = MagicMock()
+    with patch("backfill_netpnl._load_month", return_value=(ws, BASE_HEADER, df)), \
+         patch("backfill_netpnl.sheets_manager._with_retry") as retry:
+        run(["2026-05"], apply=True)
+    retry.assert_called_once()
+    written = retry.call_args.args[1]
+    row1 = [u for u in written if re.match(r"^[A-Z]+1$", u["range"])]
+    row2 = [u for u in written if re.match(r"^[A-Z]+2$", u["range"])]
+    assert len(row1) == 4 and len(row2) == 4 and len(written) == 8
+
+
+def test_run_dry_run_missing_header_writes_nothing():
+    """Dry-run never writes, even header cells."""
+    df = pd.DataFrame([_win_row_no_netpnl()], columns=BASE_HEADER)
+    ws = MagicMock()
+    with patch("backfill_netpnl._load_month", return_value=(ws, BASE_HEADER, df)), \
+         patch("backfill_netpnl.sheets_manager._with_retry") as retry:
+        run(["2026-05"], apply=False)
+    retry.assert_not_called()
