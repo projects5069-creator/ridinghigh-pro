@@ -23,5 +23,5 @@ Found in SYSTEM_REVIEW B.4 + TASK-130 recon (10/6). agent/orchestrator.py:104 is
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 TASK-139 RH-1.4: utils.is_day_complete is also weekday-only (past holiday counted complete) — align together with is_market_hours fix
+- [ ] #1 TASK-139-INV RH-1.4: utils.is_day_complete is also weekday-only (past holiday counted complete) — align together with is_market_hours fix
 <!-- AC:END -->

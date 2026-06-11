@@ -1,0 +1,2 @@
+# Decision 4 (2026-06-10): research data CSVs stay local-only — repo is public
+*.csv

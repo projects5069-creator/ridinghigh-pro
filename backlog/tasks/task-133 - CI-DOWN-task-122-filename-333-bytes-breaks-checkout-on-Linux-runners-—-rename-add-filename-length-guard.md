@@ -21,5 +21,5 @@ rename done (307c0e5, 10/6); REMAINING: filename-length guard (pre-commit/CI che
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 TASK-139 phase0/5: all 4 night-of-9/6 failures + warm_oauth 10/6 15:42Z = 'File name too long' on task-122 at checkout; rename landed (307c0e5), length-guard still pending
+- [ ] #1 TASK-139-INV phase0/5: all 4 night-of-9/6 failures + warm_oauth 10/6 15:42Z = 'File name too long' on task-122 at checkout; rename landed (307c0e5), length-guard still pending
 <!-- AC:END -->

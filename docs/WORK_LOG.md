@@ -121,3 +121,24 @@ Priority (first match wins):
 - task-37 (Wait.3) — Live Write Verification [P1.4 unblocked it]
 - task-33 / task-34 — Development (Devil's Advocate / Risk Sentinel) — fill 40% Development budget gap
 
+
+## 2026-06-10 (ערב) — TASK-139-INV: חקירת עומק + טריאז' + שש הכרעות
+
+### What happened
+- ריצה אוטונומית READ-ONLY (9 שלבים): 41 ממצאים, REPORT 9 פרקים + ראיות + DROPSLAB_PK_DRAFT (קומיט 5b34304).
+- טריאז': 15 משימות חדשות (139-153) + 9 הצלבות לקיימות; ערב: +154 (private migration) +155 (minute-bars).
+- שש הכרעות עמיחי יושמו: אופציה ב (shadow), D1_Open רשמי, דיווח-כפול WHIPSAW, public בלי CSVים (9 הוסרו מהמעקב), 139→[BORROW]/TASK-139-INV, ‏48 נסגרה.
+- ניקוי חוב: 124/125/130/43 → Done (58add8e); debris כבר נמחק ב-8/6 (אומת, אין מה למחוק).
+
+### Key findings (full: docs/research/INVESTIGATION_2026-06-10/REPORT.md)
+- Score kill-criterion met (r=-0.02, p=0.82, n=123); look-ahead +13.6pp (WR ריאלי ~53-55%); edge שלילי תחת borrow ריאלי/WHIPSAW-פסימי; TDIC split מזהמת; DropsLab collector מת מאז 5/6.
+
+### Budget tally for this session
+- Analysis: ~3.5h (חקירה 9 שלבים + סטטיסטיקה)
+- Maintenance: ~1h (טריאז', הכרעות, ניקוי, PK 3.00)
+- Development: 0h
+- META: ~0.5h (handoff + work plan)
+- הערה: סשן Analysis-כבד במכוון (חקירה); איזון 40/40/20 מתוקן בתוכנית שבוע 1 (139/134 = Dev).
+
+### Next session priorities
+לפי docs/WORK_PLAN_2026-06-11.md: (א) פתיחת יום + אימות skip_summary (ב) task-139 [BORROW] TDD (ג) task-134 (ד) task-143.

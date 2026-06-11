@@ -19,5 +19,5 @@ PK §4 lists Long positions as explicit Non-Goal. Opening LONG requires a formal
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 TASK-139 DL-7.4 (deprioritize): no daily directional signal on n=2,231 — P(D1 up)=.496, all 14 metric AUCs .457-.524; long-at-D1 thesis has no data support at daily resolution
+- [ ] #1 TASK-139-INV DL-7.4 (deprioritize): no daily directional signal on n=2,231 — P(D1 up)=.496, all 14 metric AUCs .457-.524; long-at-D1 thesis has no data support at daily resolution
 <!-- AC:END -->

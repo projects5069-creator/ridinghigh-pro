@@ -23,5 +23,5 @@ SYSTEM_REVIEW B.4 (10/6). auto_scanner.py:865-870 (ATR14) + 880-886 (RSI) in upd
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 TASK-139 RH-2.2 confirms: follow_up RSI = SMA-rolling vs Wilder EWM in analyze_ticker; plus typical_price_dist inline duplicate (RH-2.3) — route both through formulas
+- [ ] #1 TASK-139-INV RH-2.2 confirms: follow_up RSI = SMA-rolling vs Wilder EWM in analyze_ticker; plus typical_price_dist inline duplicate (RH-2.3) — route both through formulas
 <!-- AC:END -->

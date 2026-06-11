@@ -25,5 +25,5 @@ ordinal: 82000
 - [ ] #1 קטליזט מסווג: לא רק earnings_within_7d אלא סוג האירוע (offering/דילול, חקירה, delisting-warning). הספרות: דילולים מנבאים המשך-ירידה. מועמד למבדיל שהמדדים הרציפים פספסו
 - [ ] #2 דגל reverse-split בזמן-אמת: TASK-80 מצא 82 אנומליות (+28000% CTNT/CODX). סימון split ימנע זיהום pattern_tag מלכתחילה
 - [ ] #3 מילוי חורים: short_float_pct 22% ריק, shares_float 19% ריק — מדדי-מפתח לשורט. לוודא איסוף. pe_ratio 82% ריק = חברות בלי רווח (אינהרנטי, פחות דחוף)
-- [ ] #4 TASK-139 RH-3.1/RH-6.3: borrow_data tabs empty (verified live), tradability mocked (is_shortable=True, fee=12.5 const); edge breakeven ~388pct/yr borrow — real shortability metrics are the blocking input
+- [ ] #4 TASK-139-INV RH-3.1/RH-6.3: borrow_data tabs empty (verified live), tradability mocked (is_shortable=True, fee=12.5 const); edge breakeven ~388pct/yr borrow — real shortability metrics are the blocking input
 <!-- AC:END -->

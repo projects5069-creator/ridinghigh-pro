@@ -24,5 +24,5 @@ Live agent_minute runs hit 429 every minute (verified 10/6 in run logs, blocks B
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 TASK-139 RH-5.1 + RH-2.8: agent_market_context 14.8pct 30d fail rate from top-of-hour 429 collisions (run 27293631392); scanner real reads ~5-13/run vs counter total=1 — see phase2/phase5 evidence
+- [ ] #1 TASK-139-INV RH-5.1 + RH-2.8: agent_market_context 14.8pct 30d fail rate from top-of-hour 429 collisions (run 27293631392); scanner real reads ~5-13/run vs counter total=1 — see phase2/phase5 evidence
 <!-- AC:END -->

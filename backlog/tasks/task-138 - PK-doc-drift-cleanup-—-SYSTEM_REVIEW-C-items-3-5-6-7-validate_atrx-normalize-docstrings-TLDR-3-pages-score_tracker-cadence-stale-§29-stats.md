@@ -23,5 +23,5 @@ SYSTEM_REVIEW C (10/6) — docs-only drift, no code/trading change. (3) PK §19:
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 TASK-139 phase8 drift register D1-D10 (phase8_evidence.md) extends this: PK:19 'Active workflows: 7' vs 15 actual; ROCKET '16 losses/0 winners' stale (OOS 5/3); '150 incl WHIPSAW'=149; PK Sheets mirror stale since 16/5
+- [ ] #1 TASK-139-INV phase8 drift register D1-D10 (phase8_evidence.md) extends this: PK:19 'Active workflows: 7' vs 15 actual; ROCKET '16 losses/0 winners' stale (OOS 5/3); '150 incl WHIPSAW'=149; PK Sheets mirror stale since 16/5
 <!-- AC:END -->

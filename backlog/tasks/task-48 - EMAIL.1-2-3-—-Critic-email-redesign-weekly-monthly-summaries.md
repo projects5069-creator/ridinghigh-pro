@@ -1,10 +1,10 @@
 ---
 id: TASK-48
 title: EMAIL.1/2/3 — Critic email redesign + weekly/monthly summaries
-status: In Progress
+status: Done
 assignee: []
 created_date: '2026-05-28 15:21'
-updated_date: '2026-05-30 22:46'
+updated_date: '2026-06-11 04:26'
 labels: []
 dependencies: []
 ordinal: 48000
@@ -21,3 +21,8 @@ ordinal: 48000
 <!-- SECTION:NOTES:BEGIN -->
 code-complete 2026-05-30: daily+weekly live, monthly host live + workflow active (cron 0 6 1 * *). ממתין לאימות מייל חודשי ראשון 1/6/2026.
 <!-- SECTION:NOTES:END -->
+
+## Acceptance Criteria
+<!-- AC:BEGIN -->
+- [ ] #1 CLOSED Done 2026-06-10 (Amihay decision 6): EMAIL.1 daily live; weekly ran on schedule 5/6 (success); monthly code-complete + verified via 2/6 dispatch runs; rich Hebrew design landed v2.53. Remaining ideas already split to TASK-88/89
+<!-- AC:END -->
