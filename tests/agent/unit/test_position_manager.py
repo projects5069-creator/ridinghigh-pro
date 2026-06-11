@@ -94,6 +94,7 @@ class TestPriceUpdates:
     def test_open_position_updates_price(self, broker, mock_data_provider, updates_log):
         """Open position gets CurrentPrice updated."""
         pos = _make_open_position()
+        mock_data_provider.get_latest_bar.return_value = {"close": 140.0}
         pm = PositionManager(
             broker=broker,
             data_provider=mock_data_provider,
@@ -109,7 +110,7 @@ class TestPriceUpdates:
     def test_pnl_calculation_correct(self, broker, mock_data_provider, updates_log):
         """Short PnL: entry=150, current=140 → profit = (150-140)*7 = 70."""
         pos = _make_open_position(EntryPrice="150.0", Quantity="7")
-        mock_data_provider.get_current_price.return_value = 140.0
+        mock_data_provider.get_latest_bar.return_value = {"close": 140.0}
         pm = PositionManager(
             broker=broker,
             data_provider=mock_data_provider,
@@ -251,7 +252,8 @@ class TestGracefulFailures:
     def test_get_current_price_failure_graceful(self, broker, updates_log):
         """If data_provider fails, position still counted as updated."""
         failing_dp = MagicMock()
-        failing_dp.get_current_price.side_effect = RuntimeError("API down")
+        failing_dp.get_latest_bar.return_value = None
+        failing_dp.get_latest_quote.return_value = None
         pos = _make_open_position()
 
         pm = PositionManager(
