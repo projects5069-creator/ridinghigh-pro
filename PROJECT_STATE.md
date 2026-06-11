@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-06-11 12:42:20 (local)
-**Branch:** `main`
-**Latest commit:** `cc7bc7a` — test(agent): TASK-134 group D — update order_manager tests to 25-col paper_portfolio schema, Status idx 14->16 (2 fixed, test-only).
+**Generated:** 2026-06-11 12:48:38 (local)
+**Branch:** `fix/96-check06-robustness`
+**Latest commit:** `16b55f4` — test(agent): TASK-134 group A — rewrite decision_id tests for timestamp-based format, drop dead counter/max tests (4->3, test-only).
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `cc7bc7a (HEAD -> main) test(agent): TASK-134 group D — update order_manager tests to 25-col paper_portfolio schema, Status idx 14->16 (2 fixed, test-only).`
-- `7117bd7 (origin/main, origin/HEAD) test(agent): TASK-134 group E — mock get_latest_bar/get_latest_quote not dead get_current_price (3 fixed, test-only).`
+- `16b55f4 (HEAD -> fix/96-check06-robustness) test(agent): TASK-134 group A — rewrite decision_id tests for timestamp-based format, drop dead counter/max tests (4->3, test-only).`
+- `53b7e1b (origin/main, origin/HEAD, main) test(agent): TASK-134 group D — update order_manager tests to 25-col paper_portfolio schema, Status idx 14->16 (2 fixed, test-only).`
+- `7117bd7 test(agent): TASK-134 group E — mock get_latest_bar/get_latest_quote not dead get_current_price (3 fixed, test-only).`
 - `96bbb3b test(agent): TASK-134 group C — gate is_eod_window tests behind AGENT_FORCE_EOD_CLOSE flag (2 fixed, test-only).`
 - `36ae0a6 docs(pk): TASK-139 v3.02 borrow_data now has active writer (borrow_collector via EOD) + mark Done.`
-- `6ce4d3d test(agent): TASK-139 add orchestrator_eod borrow wiring tests (7 cases, was untracked).`
 
 ---
 
@@ -32,11 +32,11 @@ _See `OPEN_ISSUES.md` for full list_
 
 | Workflow | Status | Conclusion | Started |
 |---|---|---|---|
-| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-06-11 17:42 UTC |
-| Agent — Every Minute (DRY_RUN) | in_progress | ⏳ — | 2026-06-11 17:42 UTC |
-| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-06-11 17:41 UTC |
-| Agent — Every Minute (DRY_RUN) | in_progress | ⏳ — | 2026-06-11 17:41 UTC |
-| Agent — Every Minute (DRY_RUN) | completed | ✅ success | 2026-06-11 17:40 UTC |
+| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-06-11 17:48 UTC |
+| Agent — Every Minute (DRY_RUN) | in_progress | ⏳ — | 2026-06-11 17:48 UTC |
+| Agent — Every Minute (DRY_RUN) | in_progress | ⏳ — | 2026-06-11 17:47 UTC |
+| RidingHigh Auto Scanner | completed | ✅ success | 2026-06-11 17:47 UTC |
+| RidingHigh Auto Scanner | completed | ✅ success | 2026-06-11 17:46 UTC |
 
 ---
 

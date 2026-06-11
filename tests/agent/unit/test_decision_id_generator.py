@@ -9,64 +9,40 @@ from unittest.mock import patch, MagicMock
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))))
 
 from agent.logging.decision_id_generator import (
-    DecisionIDGenerator, ID_PATTERN, MAX_COUNTER
+    DecisionIDGenerator, ID_PATTERN
 )
 
 
-def test_id_format_matches_pattern():
-    """Generated IDs must match DEC-YYYY-MM-DD-NNNNN format."""
-    with patch.object(DecisionIDGenerator, '_initialize'), \
-         patch.object(DecisionIDGenerator, '_today_peru', return_value='2026-05-03'):
-        gen = DecisionIDGenerator(sheet_id="fake")
-        gen._current_date = "2026-05-03"
-        gen._counter = 0
+def test_id_format_matches_new_timestamp_pattern():
+    """IDs follow DEC-YYYY-MM-DD-TICKER-HHMMSS-ff (Bug #3 timestamp-based, commit 6bc930c).
 
-        id1 = gen.generate()
-        assert ID_PATTERN.match(id1), f"ID {id1} doesn't match pattern"
-        assert id1 == "DEC-2026-05-03-00001"
+    Replaces the old DEC-YYYY-MM-DD-NNNNN counter format — the running counter was
+    removed to eliminate the read-increment-write race under concurrent runs."""
+    gen = DecisionIDGenerator(sheet_id="fake")
+    id1 = gen.generate("TDIC")
+    assert ID_PATTERN.match(id1), f"ID {id1} doesn't match DEC-date-... pattern"
+    assert re.match(r"^DEC-\d{4}-\d{2}-\d{2}-TDIC-\d{6}-\d{2}$", id1), f"unexpected format: {id1}"
 
 
-def test_counter_increments():
-    """Sequential calls produce sequential IDs."""
-    with patch.object(DecisionIDGenerator, '_initialize'), \
-         patch.object(DecisionIDGenerator, '_today_peru', return_value='2026-05-03'):
-        gen = DecisionIDGenerator(sheet_id="fake")
-        gen._current_date = "2026-05-03"
-        gen._counter = 0
+def test_ticker_embedded_and_sanitised():
+    """Ticker is embedded, uppercased, non-alphanumerics stripped; empty -> 'X'.
 
-        id1 = gen.generate()
-        id2 = gen.generate()
-        id3 = gen.generate()
-
-        assert id1 == "DEC-2026-05-03-00001"
-        assert id2 == "DEC-2026-05-03-00002"
-        assert id3 == "DEC-2026-05-03-00003"
+    Replaces the removed sequential-counter test — identity is now ticker+timestamp."""
+    gen = DecisionIDGenerator(sheet_id="fake")
+    assert "-TDIC-" in gen.generate("tdic")
+    assert "-ABC1-" in gen.generate("ab.c1")
+    assert "-X-" in gen.generate("")
 
 
-def test_counter_resets_on_new_date():
-    """If date changes between calls, counter resets to 1."""
-    with patch.object(DecisionIDGenerator, '_initialize'):
-        gen = DecisionIDGenerator(sheet_id="fake")
-        gen._current_date = "2026-05-03"
-        gen._counter = 50
+def test_id_embeds_current_peru_date():
+    """The date segment is today's Peru date (date-scoped IDs).
 
-        # Patch _today_peru to simulate date change
-        with patch.object(gen, '_today_peru', return_value="2026-05-04"):
-            id_new_day = gen.generate()
-            assert id_new_day == "DEC-2026-05-04-00001"
-            assert gen._counter == 1
-
-
-def test_max_counter_raises():
-    """Counter > MAX_COUNTER raises RuntimeError."""
-    with patch.object(DecisionIDGenerator, '_initialize'), \
-         patch.object(DecisionIDGenerator, '_today_peru', return_value='2026-05-03'):
-        gen = DecisionIDGenerator(sheet_id="fake")
-        gen._current_date = "2026-05-03"
-        gen._counter = MAX_COUNTER  # at limit
-
-        with pytest.raises(RuntimeError, match="Counter exceeded"):
-            gen.generate()
+    Replaces the removed counter-reset-on-new-date test (no counter to reset)."""
+    import pytz
+    from datetime import datetime
+    today = datetime.now(pytz.timezone("America/Lima")).strftime("%Y-%m-%d")
+    gen = DecisionIDGenerator(sheet_id="fake")
+    assert gen.generate("AAPL").startswith(f"DEC-{today}-AAPL-")
 
 
 def test_fallback_timestamp_format():
