@@ -1,10 +1,10 @@
 ---
 id: TASK-140
 title: Add net-PnL cost model to post_analysis (slippage 1pct/side + borrow pro-rata)
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-06-11 04:01'
-updated_date: '2026-06-11 18:43'
+updated_date: '2026-06-11 23:38'
 labels:
   - TASK-139-INV
 dependencies: []
