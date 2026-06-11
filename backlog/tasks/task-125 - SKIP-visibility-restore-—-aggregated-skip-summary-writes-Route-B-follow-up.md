@@ -1,9 +1,10 @@
 ---
 id: TASK-125
 title: SKIP visibility restore — aggregated skip-summary writes (Route B follow-up)
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-06-10 01:03'
+updated_date: '2026-06-11 00:14'
 labels: []
 dependencies: []
 priority: high

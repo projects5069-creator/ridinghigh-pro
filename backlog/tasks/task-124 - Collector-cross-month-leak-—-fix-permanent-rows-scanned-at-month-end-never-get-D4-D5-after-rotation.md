@@ -3,9 +3,10 @@ id: TASK-124
 title: >-
   Collector cross-month leak — fix permanent: rows scanned at month-end never
   get D4/D5 after rotation
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-06-10 01:03'
+updated_date: '2026-06-11 00:14'
 labels: []
 dependencies: []
 priority: high

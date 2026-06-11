@@ -3,9 +3,10 @@ id: TASK-130
 title: >-
   trading_days_after holiday-aware — weekday-only calc strands holiday-slot rows
   (Good Friday, Memorial Day; Independence Day 2026-07-04 next)
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-06-10 01:57'
+updated_date: '2026-06-11 00:14'
 labels: []
 dependencies: []
 priority: high

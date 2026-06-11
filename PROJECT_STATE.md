@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-06-10 23:04:23 (local)
+**Generated:** 2026-06-10 23:19:54 (local)
 **Branch:** `main`
-**Latest commit:** `eb62378` — docs(research): TASK-139 investigation outputs + derived task triage
+**Latest commit:** `5ca433c` — chore(backlog): mark completed Done + remove debris
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `eb62378 (HEAD -> main) docs(research): TASK-139 investigation outputs + derived task triage`
-- `75e07e8 (origin/main, origin/HEAD) docs: session handoff 2026-06-10 + PK 2.99 (day close — 6 commits, 40 holiday rows freed, n=123)`
+- `5ca433c (HEAD -> main) chore(backlog): mark completed Done + remove debris`
+- `5b34304 (origin/main, origin/HEAD) docs(research): TASK-139 investigation outputs + derived task triage`
+- `75e07e8 docs: session handoff 2026-06-10 + PK 2.99 (day close — 6 commits, 40 holiday rows freed, n=123)`
 - `4d30a7a chore(sheets): add skip_summary tab to 2026-07 pre-rotation (TASK-125 follow-up)`
 - `01f1846 (task-125-skip-summary) chore(backlog): open TASK-135..138; add skip-parser test w/ guard (TASK-126 wip)`
-- `2e88383 feat(logging): skip_summary aggregated per-run writes (TASK-125); PK 2.98`
 
 ---
 
@@ -46,9 +46,7 @@ _gspread not installed — `pip install gspread google-auth`_
 ---
 
 ## 🩺 Health
-
-- ⚠️ 4 uncommitted file(s):
--    - 4 modified
+✅ All checks passed.
 
 ---
 

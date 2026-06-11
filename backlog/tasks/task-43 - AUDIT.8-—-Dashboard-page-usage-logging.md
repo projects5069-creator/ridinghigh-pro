@@ -1,9 +1,10 @@
 ---
 id: TASK-43
 title: AUDIT.8 — Dashboard page usage logging
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-05-24 20:59'
+updated_date: '2026-06-11 00:14'
 labels: []
 dependencies: []
 priority: low
