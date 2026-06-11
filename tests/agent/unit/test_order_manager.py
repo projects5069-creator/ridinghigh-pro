@@ -108,14 +108,14 @@ class TestEnterDecision:
         manager.execute(d)
         assert len(sheet_rows) == 1
         row = sheet_rows[0]
-        # Status is at index 14 (22-col schema)
-        assert row[14] == STATUS_DRY_RUN_OPEN
+        # Status is at index 16 (25-col schema; TPPrice/SLPrice inserted at 11/12)
+        assert row[16] == STATUS_DRY_RUN_OPEN
 
-    def test_portfolio_row_has_22_columns(self, manager, sheet_rows):
-        """Paper portfolio row must have exactly 22 columns."""
+    def test_portfolio_row_has_25_columns(self, manager, sheet_rows):
+        """Paper portfolio row must have exactly 25 columns (22->25: +TPPrice/SLPrice/DataQuality, commit 1c26a00)."""
         d = _make_enter_decision()
         manager.execute(d)
-        assert len(sheet_rows[0]) == 22
+        assert len(sheet_rows[0]) == 25
 
     def test_portfolio_row_ticker_and_side(self, manager, sheet_rows):
         """Row contains correct ticker and side='short'."""
