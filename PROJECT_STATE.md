@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-06-11 10:31:05 (local)
+**Generated:** 2026-06-11 11:01:40 (local)
 **Branch:** `main`
-**Latest commit:** `43dd784` — chore(tooling): TASK-158 mirror cc-copy-last hook into repo + install.sh wiring (clone-survivable).
+**Latest commit:** `6cf3d99` — feat(agent): TASK-139 borrow_collector layer 1 — daily Alpaca shortability snapshot, fee=NULL, batched non-fatal (12/12 unit green).
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `43dd784 (HEAD -> main) chore(tooling): TASK-158 mirror cc-copy-last hook into repo + install.sh wiring (clone-survivable).`
-- `965f3d5 (origin/main, origin/HEAD) chore(tooling): TASK-157 cc-copy-last v3 FRESH+STABLE poll fixes autocopy off-by-one (verified live 9892B fresh-stable).`
+- `6cf3d99 (HEAD -> main) feat(agent): TASK-139 borrow_collector layer 1 — daily Alpaca shortability snapshot, fee=NULL, batched non-fatal (12/12 unit green).`
+- `1e35451 (origin/main, origin/HEAD) chore(tooling): TASK-158 mirror cc-copy-last hook into repo + install.sh wiring (clone-survivable).`
+- `965f3d5 chore(tooling): TASK-157 cc-copy-last v3 FRESH+STABLE poll fixes autocopy off-by-one (verified live 9892B fresh-stable).`
 - `ef25978 chore(backlog): stamp APPROVED decision notes on TASK-141/142/147 (TASK-139-INV cluster)`
 - `c8c1a4a chore(backlog): record day-open agenda 11/6 — 5 vision tasks + merge edits (task-156); PK 3.01`
-- `d02d796 docs: session close 2026-06-10 evening — decisions applied + handoff + work plan + PK bump`
 
 ---
 
@@ -32,11 +32,11 @@ _See `OPEN_ISSUES.md` for full list_
 
 | Workflow | Status | Conclusion | Started |
 |---|---|---|---|
-| Agent — Every Minute (DRY_RUN) | queued | ⏳ — | 2026-06-11 15:31 UTC |
-| RidingHigh Auto Scanner | queued | ⏳ — | 2026-06-11 15:31 UTC |
-| Agent — Every Minute (DRY_RUN) | in_progress | ⏳ — | 2026-06-11 15:30 UTC |
-| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-06-11 15:30 UTC |
-| Agent — Every Minute (DRY_RUN) | in_progress | ⏳ — | 2026-06-11 15:29 UTC |
+| RidingHigh Auto Scanner | queued | ⏳ — | 2026-06-11 16:01 UTC |
+| Agent — Every Minute (DRY_RUN) | in_progress | ⏳ — | 2026-06-11 16:01 UTC |
+| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-06-11 16:00 UTC |
+| Agent — Every Minute (DRY_RUN) | in_progress | ⏳ — | 2026-06-11 16:00 UTC |
+| Agent — Every Minute (DRY_RUN) | in_progress | ⏳ — | 2026-06-11 15:59 UTC |
 
 ---
 
