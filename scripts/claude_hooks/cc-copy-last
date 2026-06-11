@@ -1,0 +1,109 @@
+#!/bin/bash
+# cc-copy-last — Stop hook: copy the assistant's CURRENT-turn response text to the macOS clipboard.
+# Pure bash + jq, NO python (the modern-python python3 shim exits 1 and killed the old version). TASK-157.
+#
+# Selection: take ALL text blocks of every type=="assistant" entry that comes AFTER the last
+# user PROMPT (a type=="user" entry that does NOT contain a tool_result block). Robust to:
+#   - tool_result being recorded as type=="user"  (we key off the prompt, skipping tool_results)
+#   - the last assistant entry being a non-text block (thinking / tool_use)  (we collect ALL text after prompt)
+#
+# v3 (TASK-157) — fixes the off-by-one / partial-flush race:
+#   The old poll exited on the FIRST non-empty read. At Stop time the transcript is still being
+#   flushed, so the first read returns a PARTIAL or STALE snapshot (evidence: a 906-byte copy logged
+#   at a turn whose real final block was 3965 bytes, on "try 1/15"). Fix = two guards before copying:
+#     (1) FRESH  — extracted text differs from the last text we copied (cksum stamp in $STATE),
+#                  so we never re-copy the previous turn while this turn's blocks are still landing.
+#     (2) STABLE — SETTLE consecutive identical reads 0.1s apart (~0.4s of write-quiet), i.e. the
+#                  flush has settled, so we never copy a half-written subset of the current turn.
+#   Poll up to ~2s for FRESH+STABLE; if it never both-settles, fall back to the latest FRESH read
+#   (logged as new-unstable) so we still prefer current-turn content over stale. Always exits 0.
+
+export PATH="/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:$PATH"
+LOG=/tmp/cc-copy-last.log
+STATE=/tmp/cc-copy-last.state          # cksum stamp of the last text we copied (cross-turn freshness)
+ts() { date '+%Y-%m-%d %H:%M:%S'; }
+stamp() { printf '%s' "$1" | cksum; }  # "<crc> <bytes>" — cheap, pure-C, detects any change
+
+# Extract current-turn assistant text from a transcript .jsonl ($1).
+extract() {
+  jq -s -r '
+    def isprompt:
+      .type=="user"
+      and ( ((.message.content|type)=="string")
+            or ( ((.message.content|type)=="array")
+                 and ( (.message.content|any(.type=="tool_result")) | not ) ) );
+    ( map(isprompt) | to_entries | map(select(.value)) | last | .key ) as $u
+    | if $u == null then ""
+      else ( .[$u+1:]
+             | map( select(.type=="assistant")
+                    | (.message.content // [])
+                    | if type=="array" then ( .[] | select(.type=="text") | .text ) else empty end )
+             | join("\n\n") )
+      end
+  ' "$1" 2>/dev/null
+}
+
+input="$(cat)"
+
+if ! command -v jq >/dev/null 2>&1; then
+  printf '%s  SKIP: jq not found\n' "$(ts)" >> "$LOG" 2>/dev/null
+  exit 0
+fi
+
+tp="$(printf '%s' "$input" | jq -r '.transcript_path // empty' 2>/dev/null)"
+if [ -z "$tp" ] || [ ! -f "$tp" ]; then
+  printf '%s  SKIP: no transcript_path\n' "$(ts)" >> "$LOG" 2>/dev/null
+  exit 0
+fi
+
+last_stamp="$(cat "$STATE" 2>/dev/null)"   # what we copied at the previous Stop (may be empty)
+prev=""                                    # previous poll reading, for stabilization
+stable=0                                   # consecutive identical FRESH reads so far
+text=""                                    # accepted text to copy
+mode=""                                    # how it was accepted, for the log
+try=0
+SETTLE=5                                   # require 5 consecutive equal reads = ~0.4s of write-quiet
+                                           # before accepting. Catches a final-block flush that lands
+                                           # up to ~0.4s after an earlier stable read (observed real lag
+                                           # was sub-try-1). A flush later than the window resets the
+                                           # counter and is still caught as long as it lands within 2s.
+
+# Poll up to 20 x 0.1s = 2.0s for a FRESH + STABLE current-turn read.
+for try in $(seq 1 20); do
+  cur="$(extract "$tp")"
+  if [ -n "$cur" ] && [ "$(stamp "$cur")" != "$last_stamp" ]; then   # FRESH: not the prev turn
+    if [ "$cur" = "$prev" ]; then
+      stable=$((stable + 1))                       # writes are quiet this tick
+    else
+      stable=1                                     # content changed (flush landed) — restart settle
+    fi
+    if [ "$stable" -ge "$SETTLE" ]; then           # STABLE: flush has settled
+      text="$cur"; mode="fresh-stable"; break
+    fi
+    prev="$cur"
+  else
+    stable=0                                       # empty or still-stale — not settling yet
+    prev="$cur"
+  fi
+  sleep 0.1
+done
+
+# Fallback: never settled, but we did see fresh current-turn text — prefer it over stale.
+if [ -z "$text" ] && [ -n "$prev" ]; then
+  if [ "$(stamp "$prev")" != "$last_stamp" ]; then
+    text="$prev"; mode="fresh-unstable"
+  fi
+fi
+
+if [ -n "$text" ]; then
+  printf '%s' "$text" | pbcopy
+  stamp "$text" > "$STATE" 2>/dev/null         # remember it so the next Stop knows what's stale
+  bytes="$(printf '%s' "$text" | wc -c | tr -d ' ')"
+  printf '%s  copied %s bytes (try %s/20, %s, prev-stamp=[%s])\n' \
+    "$(ts)" "$bytes" "$try" "$mode" "$last_stamp" >> "$LOG" 2>/dev/null
+else
+  # Only reachable if every read was empty OR identical to last copied (e.g. identical repeat turn).
+  printf '%s  SKIP: no fresh after-prompt text after 2s (try %s, last-stamp=[%s])\n' \
+    "$(ts)" "$try" "$last_stamp" >> "$LOG" 2>/dev/null
+fi
+exit 0
