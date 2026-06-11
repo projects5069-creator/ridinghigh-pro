@@ -3,10 +3,10 @@ id: TASK-139
 title: >-
   Activate borrow_data daily collection (sheet empty) via Alpaca
   shortability+fee [BORROW]
-status: In Progress
+status: Done
 assignee: []
 created_date: '2026-06-11 04:01'
-updated_date: '2026-06-11 16:01'
+updated_date: '2026-06-11 16:53'
 labels:
   - TASK-139-INV
 dependencies: []
