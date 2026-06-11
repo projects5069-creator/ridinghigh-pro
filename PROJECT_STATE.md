@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-06-11 14:56:44 (local)
+**Generated:** 2026-06-11 15:16:44 (local)
 **Branch:** `main`
-**Latest commit:** `07b71b5` — test(net-pnl): TASK-140 integration — chain equiv phase6 cost model on fixed fixture (3/3, exact aggregate irreproducible: data gitignored/lost).
+**Latest commit:** `e0b608a` — feat(backfill): TASK-140 backfill_netpnl.py — FILL-ONLY NetPnL backfill for post_analysis (dry-run default, 6/6).
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `07b71b5 (HEAD -> main) test(net-pnl): TASK-140 integration — chain equiv phase6 cost model on fixed fixture (3/3, exact aggregate irreproducible: data gitignored/lost).`
-- `a6e63eb (origin/main, origin/HEAD) fix(gsheets): TASK-140 add NetPnL_* to post_analysis numeric_cols (load coerces to float).`
+- `e0b608a (HEAD -> main) feat(backfill): TASK-140 backfill_netpnl.py — FILL-ONLY NetPnL backfill for post_analysis (dry-run default, 6/6).`
+- `74860b5 (origin/main, origin/HEAD) test(net-pnl): TASK-140 integration — chain equiv phase6 cost model on fixed fixture (3/3, exact aggregate irreproducible: data gitignored/lost).`
+- `a6e63eb fix(gsheets): TASK-140 add NetPnL_* to post_analysis numeric_cols (load coerces to float).`
 - `4bd5e47 feat(utils): TASK-140 fold net-PnL into calculate_stats — 4 NetPnL keys (collector+backfill SSoT, 7/7, formulas 107/107).`
 - `f12aa2c feat(utils): TASK-140 classify_trade returns (cls, resolution_day); classify_trade_row unwraps to string (dashboard unbroken, 7/7, formulas 107/107).`
-- `495f462 feat(formulas): TASK-140 calculate_net_pnl pure fn — slippage+borrow cost model (10/10, formulas 107/107).`
 
 ---
 
@@ -32,11 +32,11 @@ _See `OPEN_ISSUES.md` for full list_
 
 | Workflow | Status | Conclusion | Started |
 |---|---|---|---|
-| Agent — Every Minute (DRY_RUN) | in_progress | ⏳ — | 2026-06-11 19:56 UTC |
-| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-06-11 19:56 UTC |
-| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-06-11 19:55 UTC |
-| Agent — Every Minute (DRY_RUN) | in_progress | ⏳ — | 2026-06-11 19:55 UTC |
-| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-06-11 19:54 UTC |
+| RidingHigh Auto Scanner | completed | ✅ success | 2026-06-11 20:16 UTC |
+| Agent — Every Minute (DRY_RUN) | completed | ✅ success | 2026-06-11 20:16 UTC |
+| Agent — Every Minute (DRY_RUN) | completed | ✅ success | 2026-06-11 20:15 UTC |
+| RidingHigh Auto Scanner | completed | ✅ success | 2026-06-11 20:15 UTC |
+| RidingHigh Auto Scanner | completed | ✅ success | 2026-06-11 20:14 UTC |
 
 ---
 
