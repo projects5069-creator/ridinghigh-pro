@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-06-11 18:38:25 (local)
+**Generated:** 2026-06-11 18:54:55 (local)
 **Branch:** `main`
-**Latest commit:** `ee468c0` — docs(pk): TASK-140 v3.04 — net-PnL cost model in post_analysis (calculate_net_pnl, 4 cols, 832 cells backfilled) + mark Done.
+**Latest commit:** `533cd6f` — chore(backlog): TASK-160 — stale integration test follow-up (To Do)
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `ee468c0 (HEAD -> main) docs(pk): TASK-140 v3.04 — net-PnL cost model in post_analysis (calculate_net_pnl, 4 cols, 832 cells backfilled) + mark Done.`
-- `2a335bd (origin/main, origin/HEAD) fix(backfill): TASK-140 resize grid before writing new NetPnL columns — fixes live 'exceeds grid limits' 400 (14/14).`
+- `533cd6f (HEAD -> main) chore(backlog): TASK-160 — stale integration test follow-up (To Do)`
+- `f9bc3b9 (origin/main, origin/HEAD) docs(pk): TASK-140 v3.04 — net-PnL cost model in post_analysis (calculate_net_pnl, 4 cols, 832 cells backfilled) + mark Done.`
+- `2a335bd fix(backfill): TASK-140 resize grid before writing new NetPnL columns — fixes live 'exceeds grid limits' 400 (14/14).`
 - `45c0f8a feat(backfill): TASK-140 backfill_netpnl header-add — create missing NetPnL columns (row-1 cell, idempotent, 11/11).`
 - `d1e5fa7 feat(backfill): TASK-140 backfill_netpnl.py — FILL-ONLY NetPnL backfill for post_analysis (dry-run default, 6/6).`
-- `74860b5 test(net-pnl): TASK-140 integration — chain equiv phase6 cost model on fixed fixture (3/3, exact aggregate irreproducible: data gitignored/lost).`
 
 ---
 
