@@ -4,10 +4,10 @@ title: >-
   Unit suite: 16 pre-existing failures (decision_id_generator, decision_logic
   43-fields, EOD window, order/position_manager, postmortem) — triage vs
   baseline
-status: In Progress
+status: Done
 assignee: []
 created_date: '2026-06-10 17:40'
-updated_date: '2026-06-11 17:30'
+updated_date: '2026-06-11 18:27'
 labels: []
 dependencies: []
 priority: medium
