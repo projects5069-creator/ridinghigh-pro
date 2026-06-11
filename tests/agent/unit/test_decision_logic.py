@@ -82,11 +82,20 @@ def test_cold_start_concurrent_limit(good_signal):
     assert "COLD_START_CONCURRENT" in d.skip_reason
 
 
-def test_decision_has_43_fields():
-    """Verify the dataclass schema matches the Sheet."""
+def test_field_mapping_backed_by_decision_fields():
+    """Every decision_log column (FIELD_MAPPING) is backed by a real Decision field.
+
+    Drift-proof invariant — replaces the hardcoded `== 43`. The logger maps Decision
+    attributes to Sheet columns, so each mapped name must exist on Decision (a missing
+    one would AttributeError at log time). The dataclass legitimately has MORE fields
+    than columns (runtime-only: reentries_used_today, portfolio_written), so a raw
+    field-count was the wrong guard and broke on benign additions."""
     from dataclasses import fields
-    field_names = [f.name for f in fields(Decision)]
-    assert len(field_names) == 43, f"Expected 43 fields, got {len(field_names)}: {field_names}"
+    from agent.logging.decision_logger import FIELD_MAPPING
+    decision_field_names = {f.name for f in fields(Decision)}
+    unmapped = [src for src, _col in FIELD_MAPPING if src not in decision_field_names]
+    assert not unmapped, f"FIELD_MAPPING references non-existent Decision fields: {unmapped}"
+    assert len(FIELD_MAPPING) <= len(decision_field_names)
 
 
 # ─────────────────────────────────────────────────────────────────────────────
