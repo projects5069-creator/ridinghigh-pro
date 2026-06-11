@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-06-11 11:41:13 (local)
+**Generated:** 2026-06-11 11:42:55 (local)
 **Branch:** `main`
-**Latest commit:** `b27cf7c` — feat(agent): TASK-139 wire borrow_collector into orchestrator_eod — daily snapshot after Reconciler, dedicated read-only broker, non-fatal (7/7 wiring + 19/19 no-regression).
+**Latest commit:** `23f623b` — test(agent): TASK-139 add orchestrator_eod borrow wiring tests (7 cases, was untracked).
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `b27cf7c (HEAD -> main) feat(agent): TASK-139 wire borrow_collector into orchestrator_eod — daily snapshot after Reconciler, dedicated read-only broker, non-fatal (7/7 wiring + 19/19 no-regression).`
-- `2448cf6 (origin/main, origin/HEAD) feat(agent): TASK-139 borrow_collector layer 1 — daily Alpaca shortability snapshot, fee=NULL, batched non-fatal (12/12 unit green).`
+- `23f623b (HEAD -> main) test(agent): TASK-139 add orchestrator_eod borrow wiring tests (7 cases, was untracked).`
+- `c3cf125 (origin/main, origin/HEAD) feat(agent): TASK-139 wire borrow_collector into orchestrator_eod — daily snapshot after Reconciler, dedicated read-only broker, non-fatal (7/7 wiring + 19/19 no-regression).`
+- `2448cf6 feat(agent): TASK-139 borrow_collector layer 1 — daily Alpaca shortability snapshot, fee=NULL, batched non-fatal (12/12 unit green).`
 - `1e35451 chore(tooling): TASK-158 mirror cc-copy-last hook into repo + install.sh wiring (clone-survivable).`
 - `965f3d5 chore(tooling): TASK-157 cc-copy-last v3 FRESH+STABLE poll fixes autocopy off-by-one (verified live 9892B fresh-stable).`
-- `ef25978 chore(backlog): stamp APPROVED decision notes on TASK-141/142/147 (TASK-139-INV cluster)`
 
 ---
 
@@ -32,11 +32,11 @@ _See `OPEN_ISSUES.md` for full list_
 
 | Workflow | Status | Conclusion | Started |
 |---|---|---|---|
-| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-06-11 16:41 UTC |
+| Agent — Every Minute (DRY_RUN) | queued | ⏳ — | 2026-06-11 16:42 UTC |
+| Agent — Every Minute (DRY_RUN) | in_progress | ⏳ — | 2026-06-11 16:42 UTC |
+| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-06-11 16:42 UTC |
+| RidingHigh Auto Scanner | completed | ✅ success | 2026-06-11 16:41 UTC |
 | Agent — Every Minute (DRY_RUN) | in_progress | ⏳ — | 2026-06-11 16:41 UTC |
-| Agent — Every Minute (DRY_RUN) | completed | ✅ success | 2026-06-11 16:40 UTC |
-| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-06-11 16:40 UTC |
-| Agent — Every Minute (DRY_RUN) | completed | ✅ success | 2026-06-11 16:39 UTC |
 
 ---
 
@@ -46,9 +46,7 @@ _gspread not installed — `pip install gspread google-auth`_
 ---
 
 ## 🩺 Health
-
-- ⚠️ 1 uncommitted file(s):
--    - 1 new/untracked
+✅ All checks passed.
 
 ---
 
