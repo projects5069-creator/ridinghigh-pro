@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-06-11 15:30:36 (local)
+**Generated:** 2026-06-11 15:43:26 (local)
 **Branch:** `main`
-**Latest commit:** `e743d88` — feat(backfill): TASK-140 backfill_netpnl header-add — create missing NetPnL columns (row-1 cell, idempotent, 11/11).
+**Latest commit:** `8b8ce40` — fix(backfill): TASK-140 resize grid before writing new NetPnL columns — fixes live 'exceeds grid limits' 400 (14/14).
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `e743d88 (HEAD -> main) feat(backfill): TASK-140 backfill_netpnl header-add — create missing NetPnL columns (row-1 cell, idempotent, 11/11).`
-- `d1e5fa7 (origin/main, origin/HEAD) feat(backfill): TASK-140 backfill_netpnl.py — FILL-ONLY NetPnL backfill for post_analysis (dry-run default, 6/6).`
+- `8b8ce40 (HEAD -> main) fix(backfill): TASK-140 resize grid before writing new NetPnL columns — fixes live 'exceeds grid limits' 400 (14/14).`
+- `45c0f8a (origin/main, origin/HEAD) feat(backfill): TASK-140 backfill_netpnl header-add — create missing NetPnL columns (row-1 cell, idempotent, 11/11).`
+- `d1e5fa7 feat(backfill): TASK-140 backfill_netpnl.py — FILL-ONLY NetPnL backfill for post_analysis (dry-run default, 6/6).`
 - `74860b5 test(net-pnl): TASK-140 integration — chain equiv phase6 cost model on fixed fixture (3/3, exact aggregate irreproducible: data gitignored/lost).`
 - `a6e63eb fix(gsheets): TASK-140 add NetPnL_* to post_analysis numeric_cols (load coerces to float).`
-- `4bd5e47 feat(utils): TASK-140 fold net-PnL into calculate_stats — 4 NetPnL keys (collector+backfill SSoT, 7/7, formulas 107/107).`
 
 ---
 
@@ -32,11 +32,11 @@ _See `OPEN_ISSUES.md` for full list_
 
 | Workflow | Status | Conclusion | Started |
 |---|---|---|---|
-| Agent — Every Minute (DRY_RUN) | in_progress | ⏳ — | 2026-06-11 20:30 UTC |
-| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-06-11 20:30 UTC |
-| RidingHigh Auto Scanner | completed | ✅ success | 2026-06-11 20:29 UTC |
-| Agent — Every Minute (DRY_RUN) | completed | ✅ success | 2026-06-11 20:29 UTC |
-| Agent — Market Context (Hourly) | completed | ✅ success | 2026-06-11 20:28 UTC |
+| Agent — Every Minute (DRY_RUN) | in_progress | ⏳ — | 2026-06-11 20:43 UTC |
+| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-06-11 20:43 UTC |
+| Agent — Every Minute (DRY_RUN) | completed | ✅ success | 2026-06-11 20:42 UTC |
+| RidingHigh Auto Scanner | completed | ✅ success | 2026-06-11 20:42 UTC |
+| RidingHigh Auto Scanner | completed | ✅ success | 2026-06-11 20:41 UTC |
 
 ---
 

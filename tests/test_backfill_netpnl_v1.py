@@ -15,7 +15,7 @@ from unittest.mock import MagicMock, patch
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import pandas as pd
-from backfill_netpnl import build_updates, build_header_updates, run, NETPNL_COLS
+from backfill_netpnl import build_updates, build_header_updates, ensure_grid_width, run, NETPNL_COLS
 
 HEADER = (["Ticker", "ScanDate", "ScanPrice"]
           + [f"D{i}_{k}" for i in range(1, 6) for k in ("Open", "High", "Low", "Close")]
@@ -146,6 +146,7 @@ def test_run_apply_writes_header_then_cells_when_missing():
     """run --apply on a sheet missing the cols writes 4 row-1 headers + 4 row-2 cells."""
     df = pd.DataFrame([_win_row_no_netpnl()], columns=BASE_HEADER)
     ws = MagicMock()
+    ws.col_count = 1000   # already wide enough -> no resize, focus on the writes
     with patch("backfill_netpnl._load_month", return_value=(ws, BASE_HEADER, df)), \
          patch("backfill_netpnl.sheets_manager._with_retry") as retry:
         run(["2026-05"], apply=True)
@@ -164,3 +165,40 @@ def test_run_dry_run_missing_header_writes_nothing():
          patch("backfill_netpnl.sheets_manager._with_retry") as retry:
         run(["2026-05"], apply=False)
     retry.assert_not_called()
+
+
+# ─────────────── grid-resize before write (live-bug fix) ───────────────
+
+def test_ensure_grid_width_grows_when_narrow():
+    """col_count=105, need 109 -> resize(rows=row_count, cols=109); returns 4 added."""
+    ws = MagicMock()
+    ws.col_count = 105
+    ws.row_count = 80
+    added = ensure_grid_width(ws, 109)
+    assert added == 4
+    ws.resize.assert_called_once_with(rows=80, cols=109)
+
+
+def test_ensure_grid_width_noop_when_wide_enough():
+    """Grid already wide enough -> 0 resize (no needless mutation)."""
+    ws = MagicMock()
+    ws.col_count = 109
+    assert ensure_grid_width(ws, 109) == 0
+    ws.resize.assert_not_called()
+
+
+def test_run_apply_resizes_grid_before_batch_update():
+    """When header columns are added, the grid must be resized BEFORE batch_update (the live 400 bug)."""
+    df = pd.DataFrame([_win_row_no_netpnl()], columns=BASE_HEADER)  # 23 cols, new_header=27
+    ws = MagicMock()
+    ws.col_count = 23
+    ws.row_count = 10
+    manager = MagicMock()
+    with patch("backfill_netpnl._load_month", return_value=(ws, BASE_HEADER, df)), \
+         patch("backfill_netpnl.sheets_manager._with_retry") as retry:
+        manager.attach_mock(ws.resize, "resize")
+        manager.attach_mock(retry, "write")
+        run(["2026-05"], apply=True)
+    ws.resize.assert_called_once_with(rows=10, cols=len(BASE_HEADER) + 4)   # 23+4=27
+    names = [c[0] for c in manager.mock_calls]
+    assert names.index("resize") < names.index("write"), "resize must precede batch_update"

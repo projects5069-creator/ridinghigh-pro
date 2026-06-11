@@ -91,6 +91,20 @@ def build_header_updates(header):
     return updates, new_header
 
 
+def ensure_grid_width(ws, n_cols):
+    """Grow the worksheet grid to >= n_cols columns (mirrors enrich_data.py:221).
+
+    values_batch_update does NOT auto-expand the grid, so a write past ws.col_count
+    400s ('exceeds grid limits' — the live bug). Resize ONLY the grid dimension
+    (never cell data); no-op when already wide enough. Returns columns added.
+    """
+    current = ws.col_count
+    if n_cols <= current:
+        return 0
+    ws.resize(rows=ws.row_count, cols=n_cols)
+    return n_cols - current
+
+
 def run(months, apply):
     mode = "APPLY" if apply else "DRY-RUN"
     today = datetime.now(PERU_TZ).strftime("%Y-%m-%d")
@@ -105,6 +119,8 @@ def run(months, apply):
         cell_updates = build_updates(df, new_header)
         updates = hdr_updates + cell_updates
         if updates and apply:
+            if hdr_updates:
+                ensure_grid_width(ws, len(new_header))   # grow grid BEFORE writing new columns (live 400 fix)
             sheets_manager._with_retry(ws.batch_update, updates, value_input_option="USER_ENTERED")
             print(f"  ✅ {month}: WROTE {len(hdr_updates)} header + {len(cell_updates)} NetPnL cells")
         else:
