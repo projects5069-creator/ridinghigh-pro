@@ -95,11 +95,13 @@ class TestMarketHours:
 class TestEODWindow:
     def test_eod_window_active_at_1455(self):
         now = PERU_TZ.localize(datetime(2026, 5, 4, 14, 55))
-        assert is_eod_window(now) is True
+        with patch("config.AGENT_FORCE_EOD_CLOSE", True):
+            assert is_eod_window(now) is True
 
     def test_eod_window_active_at_1459(self):
         now = PERU_TZ.localize(datetime(2026, 5, 4, 14, 59))
-        assert is_eod_window(now) is True
+        with patch("config.AGENT_FORCE_EOD_CLOSE", True):
+            assert is_eod_window(now) is True
 
     def test_eod_window_not_active_at_1454(self):
         now = PERU_TZ.localize(datetime(2026, 5, 4, 14, 54))

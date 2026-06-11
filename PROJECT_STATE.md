@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-06-11 11:53:15 (local)
+**Generated:** 2026-06-11 12:31:55 (local)
 **Branch:** `main`
-**Latest commit:** `7cc9bbc` — docs(pk): TASK-139 v3.02 borrow_data now has active writer (borrow_collector via EOD) + mark Done.
+**Latest commit:** `70bbde0` — test(agent): TASK-134 group C — gate is_eod_window tests behind AGENT_FORCE_EOD_CLOSE flag (2 fixed, test-only).
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `7cc9bbc (HEAD -> main) docs(pk): TASK-139 v3.02 borrow_data now has active writer (borrow_collector via EOD) + mark Done.`
-- `6ce4d3d (origin/main, origin/HEAD) test(agent): TASK-139 add orchestrator_eod borrow wiring tests (7 cases, was untracked).`
+- `70bbde0 (HEAD -> main) test(agent): TASK-134 group C — gate is_eod_window tests behind AGENT_FORCE_EOD_CLOSE flag (2 fixed, test-only).`
+- `36ae0a6 (origin/main, origin/HEAD) docs(pk): TASK-139 v3.02 borrow_data now has active writer (borrow_collector via EOD) + mark Done.`
+- `6ce4d3d test(agent): TASK-139 add orchestrator_eod borrow wiring tests (7 cases, was untracked).`
 - `c3cf125 feat(agent): TASK-139 wire borrow_collector into orchestrator_eod — daily snapshot after Reconciler, dedicated read-only broker, non-fatal (7/7 wiring + 19/19 no-regression).`
 - `2448cf6 feat(agent): TASK-139 borrow_collector layer 1 — daily Alpaca shortability snapshot, fee=NULL, batched non-fatal (12/12 unit green).`
-- `1e35451 chore(tooling): TASK-158 mirror cc-copy-last hook into repo + install.sh wiring (clone-survivable).`
 
 ---
 
@@ -32,11 +32,11 @@ _See `OPEN_ISSUES.md` for full list_
 
 | Workflow | Status | Conclusion | Started |
 |---|---|---|---|
-| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-06-11 16:53 UTC |
-| Agent — Every Minute (DRY_RUN) | in_progress | ⏳ — | 2026-06-11 16:53 UTC |
-| Agent — Every Minute (DRY_RUN) | in_progress | ⏳ — | 2026-06-11 16:52 UTC |
-| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-06-11 16:52 UTC |
-| Agent — Every Minute (DRY_RUN) | in_progress | ⏳ — | 2026-06-11 16:51 UTC |
+| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-06-11 17:31 UTC |
+| Agent — Every Minute (DRY_RUN) | in_progress | ⏳ — | 2026-06-11 17:31 UTC |
+| Agent — Every Minute (DRY_RUN) | in_progress | ⏳ — | 2026-06-11 17:30 UTC |
+| RidingHigh Auto Scanner | in_progress | ⏳ — | 2026-06-11 17:30 UTC |
+| Agent — Every Minute (DRY_RUN) | in_progress | ⏳ — | 2026-06-11 17:29 UTC |
 
 ---
 
