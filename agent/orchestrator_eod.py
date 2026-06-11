@@ -28,6 +28,41 @@ logging.basicConfig(
 logger = logging.getLogger("agent.orchestrator_eod")
 
 
+def collect_borrow_snapshot(summary: Dict[str, Any]) -> None:
+    """TASK-139: best-effort daily borrow / shortability snapshot.
+
+    Ticker source is build_account_state()["existing_positions"] — the SSoT
+    union of paper_portfolio OPEN positions + today's decision_log ENTERs
+    (already deduped). Uses a DEDICATED read-only AlpacaBroker(dry_run=False)
+    so real shortability is read even under AGENT_DRY_RUN; only get_asset_info
+    is touched (no trade calls). Non-fatal like _system_events_alert: any
+    failure logs a warning and NEVER increments summary["errors"].
+    """
+    try:
+        from agent.orchestrator import build_account_state
+        tickers = sorted(build_account_state().get("existing_positions", set()))
+        if not tickers:
+            logger.info("Borrow snapshot: no open positions / today ENTERs — skipping")
+            return
+    except Exception as e:
+        logger.warning("Borrow snapshot: ticker collection failed (non-fatal): %s", e)
+        return
+
+    try:
+        from agent.execution.alpaca_broker import AlpacaBroker
+        broker = AlpacaBroker(dry_run=False)   # real read-only asset info, even under DRY_RUN
+    except Exception as e:
+        logger.warning("Borrow snapshot: broker init failed (non-fatal): %s", e)
+        return
+
+    try:
+        from agent.perception import borrow_collector
+        n = borrow_collector.collect_borrow_data(tickers, broker)
+        logger.info("Borrow snapshot: %s row(s) for %d ticker(s)", n, len(tickers))
+    except Exception as e:
+        logger.warning("Borrow snapshot: collect failed (non-fatal): %s", e)
+
+
 def run() -> Dict[str, Any]:
     """Run end-of-day tasks. Returns summary dict."""
     summary = {
@@ -88,6 +123,10 @@ def run() -> Dict[str, Any]:
     except Exception as e:
         summary["errors"] += 1
         logger.error("Reconciler failed: %s", e, exc_info=True)
+
+    # 1b. Borrow snapshot (TASK-139) — daily Alpaca shortability, after Reconciler.
+    #     Best-effort: never raises, never counts as an EOD error.
+    collect_borrow_snapshot(summary)
 
     # 2. Daily analytics
     try:
