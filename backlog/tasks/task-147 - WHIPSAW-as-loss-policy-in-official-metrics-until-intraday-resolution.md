@@ -4,7 +4,7 @@ title: WHIPSAW-as-loss policy in official metrics until intraday resolution
 status: To Do
 assignee: []
 created_date: '2026-06-11 04:02'
-updated_date: '2026-06-11 04:27'
+updated_date: '2026-06-11 13:22'
 labels:
   - TASK-139-INV
 dependencies: []
@@ -22,3 +22,9 @@ TASK-139-INV RH-6.3 sensitivity: 26 WHIPSAW rows excluded from n=123; if resolve
 <!-- AC:BEGIN -->
 - [ ] #1 DECISION 2026-06-10 (Amihay, approved): permanent DUAL REPORTING — every official WR/expectancy shows the headline metric PLUS the pessimistic WHIPSAW-as-SL bound next to it (today: +1.06pct vs -1.28pct at borrow 50). The 26 rows themselves stay open until intraday resolution (TASK-26 + minute-bars fetcher)
 <!-- AC:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+APPROVED 2026-06-11. Dual-bound reporting (optimistic n=123 + pessimistic WHIPSAW-as-LOSS). 26 rows stay open until minute-bars (TASK-26).
+<!-- SECTION:NOTES:END -->

@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-06-10 23:37:18 (local)
+**Generated:** 2026-06-11 08:32:58 (local)
 **Branch:** `main`
-**Latest commit:** `e9c913f` — chore(backlog): record day-open agenda 11/6 — 5 vision tasks + merge edits (task-156); PK 3.01
+**Latest commit:** `1775687` — chore(backlog): stamp APPROVED decision notes on TASK-141/142/147 (TASK-139-INV cluster)
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `e9c913f (HEAD -> main) chore(backlog): record day-open agenda 11/6 — 5 vision tasks + merge edits (task-156); PK 3.01`
-- `d02d796 (origin/main, origin/HEAD) docs: session close 2026-06-10 evening — decisions applied + handoff + work plan + PK bump`
+- `1775687 (HEAD -> main) chore(backlog): stamp APPROVED decision notes on TASK-141/142/147 (TASK-139-INV cluster)`
+- `c8c1a4a (origin/main, origin/HEAD) chore(backlog): record day-open agenda 11/6 — 5 vision tasks + merge edits (task-156); PK 3.01`
+- `d02d796 docs: session close 2026-06-10 evening — decisions applied + handoff + work plan + PK bump`
 - `58add8e chore(backlog): mark completed Done + remove debris`
 - `5b34304 docs(research): TASK-139 investigation outputs + derived task triage`
-- `75e07e8 docs: session handoff 2026-06-10 + PK 2.99 (day close — 6 commits, 40 holiday rows freed, n=123)`
 
 ---
 
@@ -32,11 +32,11 @@ _See `OPEN_ISSUES.md` for full list_
 
 | Workflow | Status | Conclusion | Started |
 |---|---|---|---|
-| Agent — Critic (daily) | completed | ✅ success | 2026-06-10 23:17 UTC |
-| Daily Backup — post_analysis | completed | ✅ success | 2026-06-10 23:09 UTC |
-| Agent — Daily Brief Email | completed | ✅ success | 2026-06-10 23:08 UTC |
-| Post Analysis Collector | completed | ✅ success | 2026-06-10 22:54 UTC |
-| Agent — End of Day | completed | ✅ success | 2026-06-10 22:44 UTC |
+| RidingHigh Auto Scanner | completed | ✅ success | 2026-06-11 13:32 UTC |
+| Agent — Every Minute (DRY_RUN) | in_progress | ⏳ — | 2026-06-11 13:32 UTC |
+| RidingHigh Auto Scanner | completed | ✅ success | 2026-06-11 13:31 UTC |
+| Agent — Every Minute (DRY_RUN) | completed | ✅ success | 2026-06-11 13:31 UTC |
+| Agent — Every Minute (DRY_RUN) | completed | ✅ success | 2026-06-11 13:30 UTC |
 
 ---
 
