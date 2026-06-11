@@ -4,9 +4,10 @@ title: 'הכרעת מדיניות: פתיחת כיוון LONG — עדכון PK 
 status: To Do
 assignee: []
 created_date: '2026-06-10 02:04'
+updated_date: '2026-06-11 04:01'
 labels: []
 dependencies: []
-priority: medium
+priority: low
 ordinal: 134000
 ---
 
@@ -15,3 +16,8 @@ ordinal: 134000
 <!-- SECTION:DESCRIPTION:BEGIN -->
 PK §4 lists Long positions as explicit Non-Goal. Opening LONG requires a formal policy decision by Amihay (ping-pong per RUN_MODE tree branch 1) + PK §4 update + scope definition (universe, sizing, gates). HONEST CONTEXT from 9/6 DropsLab research: bottom-reversal LONG at daily resolution showed NO entry-time-detectable edge (long sim at D1-open LOSES: mean -0.83% at TP10; reversal predictors = volatility not direction); only unexplored path = intraday confirmed-bounce trigger after reversal candle (bd_candle AUC .598 marginal). Decision should weigh that evidence; if approved, start research-only (no live).
 <!-- SECTION:DESCRIPTION:END -->
+
+## Acceptance Criteria
+<!-- AC:BEGIN -->
+- [ ] #1 TASK-139 DL-7.4 (deprioritize): no daily directional signal on n=2,231 — P(D1 up)=.496, all 14 metric AUCs .457-.524; long-at-D1 thesis has no data support at daily resolution
+<!-- AC:END -->

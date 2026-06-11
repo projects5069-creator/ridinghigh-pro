@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-06-10 18:59:30 (local)
+**Generated:** 2026-06-10 23:04:23 (local)
 **Branch:** `main`
-**Latest commit:** `6f10ac1` — docs: session handoff 2026-06-10 + PK 2.99 (day close — 6 commits, 40 holiday rows freed, n=123)
+**Latest commit:** `eb62378` — docs(research): TASK-139 investigation outputs + derived task triage
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `6f10ac1 (HEAD -> main) docs: session handoff 2026-06-10 + PK 2.99 (day close — 6 commits, 40 holiday rows freed, n=123)`
-- `4d30a7a (origin/main, origin/HEAD) chore(sheets): add skip_summary tab to 2026-07 pre-rotation (TASK-125 follow-up)`
+- `eb62378 (HEAD -> main) docs(research): TASK-139 investigation outputs + derived task triage`
+- `75e07e8 (origin/main, origin/HEAD) docs: session handoff 2026-06-10 + PK 2.99 (day close — 6 commits, 40 holiday rows freed, n=123)`
+- `4d30a7a chore(sheets): add skip_summary tab to 2026-07 pre-rotation (TASK-125 follow-up)`
 - `01f1846 (task-125-skip-summary) chore(backlog): open TASK-135..138; add skip-parser test w/ guard (TASK-126 wip)`
 - `2e88383 feat(logging): skip_summary aggregated per-run writes (TASK-125); PK 2.98`
-- `cf33833 fix(pipeline): post_analysis backfill v1->v2 --recent 2 (TASK-124); PK 2.97`
 
 ---
 
@@ -46,7 +46,9 @@ _gspread not installed — `pip install gspread google-auth`_
 ---
 
 ## 🩺 Health
-✅ All checks passed.
+
+- ⚠️ 4 uncommitted file(s):
+-    - 4 modified
 
 ---
 
