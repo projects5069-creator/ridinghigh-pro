@@ -557,17 +557,17 @@ def classify_trade(scan_price, ohlc, entry_price=None):
     return ('NO_TOUCH', 5)          # 5 full days, never resolved
 
 
-def classify_trade_row(row, entry_basis="ScanPrice"):
-    """DataFrame-row adapter for classify_trade().
+def classify_trade_row_full(row, entry_basis="ScanPrice"):
+    """DataFrame-row adapter for classify_trade — returns the FULL (cls, day) tuple.
 
-    Pulls ScanPrice and D1-D5 OHLC from a post_analysis row (pandas Series
-    or dict) and returns the WIN/LOSS/WHIPSAW/NO_TOUCH/PENDING classification.
+    Pulls ScanPrice and D1-D5 OHLC from a post_analysis row (pandas Series or dict)
+    and returns (classification, resolution_day) — WIN/LOSS/WHIPSAW/NO_TOUCH/PENDING.
 
-    entry_basis="ScanPrice" (default, Table-A diagnostic) classifies on the
-    scan-time price. entry_basis="D1_Open" (TASK-142 official/executable) uses
-    next-day open; if D1_Open is missing/invalid the row is PENDING — it never
-    silently falls back to ScanPrice.
-    Single source of truth — every caller goes through classify_trade().
+    entry_basis="ScanPrice" (default, Table-A diagnostic) classifies on the scan-time
+    price. entry_basis="D1_Open" (TASK-142 official/executable) uses next-day open; if
+    D1_Open is missing/invalid the row is ('PENDING', None) — never a silent fallback
+    to ScanPrice. The (cls, day) shape is needed by the expectancy surface (TASK-162);
+    classify_trade_row below unwraps [0] for the dashboard's string callers.
     """
     import pandas as _pd
     def _num(v):
@@ -586,9 +586,15 @@ def classify_trade_row(row, entry_basis="ScanPrice"):
     if entry_basis == "D1_Open":
         d1_open = _num(row.get("D1_Open"))
         if d1_open is None or d1_open <= 0:
-            return "PENDING"        # executable basis requested but no valid D1_Open
-        return classify_trade(scan_price, ohlc, entry_price=d1_open)[0]
-    return classify_trade(scan_price, ohlc)[0]   # ScanPrice basis (dashboard callers unbroken)
+            return ("PENDING", None)   # executable basis requested but no valid D1_Open
+        return classify_trade(scan_price, ohlc, entry_price=d1_open)
+    return classify_trade(scan_price, ohlc)   # ScanPrice basis
+
+
+def classify_trade_row(row, entry_basis="ScanPrice"):
+    """String-only adapter (dashboard callers unbroken) — delegates to
+    classify_trade_row_full and returns the classification string."""
+    return classify_trade_row_full(row, entry_basis)[0]
 
 
 def resolve_whipsaw(entry_price, minute_bars_df,
