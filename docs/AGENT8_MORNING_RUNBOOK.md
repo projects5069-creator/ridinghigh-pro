@@ -113,7 +113,28 @@ The unified §3.3 morning report in Hebrew.
 בדיקה → (אם תקין) `action:update` ל-prompt המלא → `action:run` FULL. ניקוי: `enabled:false`
 + מחיקת branches זרוקים. **אף `/fire` ללא אישור.**
 
-> 🏖️ הערת sandbox: כל פעולת-רשת (RemoteTrigger / git push / gh) חוסמת תחת ה-sandbox של Bash
-> (`SSL_ERROR_SYSCALL`) — דורשת `dangerouslyDisableSandbox`. נצפה חי לאורך TASK-94.
+> 🏖️ הערת sandbox: כל פעולת-רשת יוצאת חוסמת תחת ה-sandbox — תועד כהתנהגות-קבע ב-§8 (TASK-118).
+
+---
+
+## 8. Sandbox egress — התנהגות-קבע (TASK-118)
+
+**תצפית (מאז 2026-06-08, עקבי לאורך TASK-93/94):** כל פעולת-רשת *יוצאת* מכלי ה-Bash
+נחסמת תחת ה-sandbox עם `SSL_ERROR_SYSCALL`.
+
+**היקף נצפה:** `git push`, `git fetch`/`pull` מול origin, `gh` (PR / issue / api),
+RemoteTrigger וקריאות-API, וכל clone / קריאת-רשת יוצאת. פעולות מקומיות (git commit,
+קריאת/כתיבת קבצים, `pytest`) אינן מושפעות.
+
+**עוקף (workaround נוכחי):** הוספת `dangerouslyDisableSandbox: true` לאותה קריאת-Bash
+ספציפית. נדרש פר-קריאה — אין מתג גלובלי. זהו ה-mode התקני בריפו לכל push / gh / fetch.
+
+**משמעות למסילת-הבוקר של Agent #8 בענן:** גם ה-clone הראשוני וגם מסירת-הוורדיקט
+(comment / PR) הן egress → המסילה האוטונומית בענן לא תרוץ ללא השבתת-sandbox או הסדרת-egress
+מסודרת. כל עוד זה לא מוסדר — נדרשת התערבות/אישור ידני (RULE #6 ממילא חוסם `/fire`).
+
+**סטטוס (TASK-118):** תיעוד-בלבד; ההתנהגות מתועדת כקבע. **לא נחקר:** הסדרה מסודרת
+(allowlist egress / הגדרת permissions ל-sandbox) שתאפשר ריצת-ענן ללא התערבות — נשאר
+פתוח כ-follow-up אם רוצים אוטונומיה מלאה ל-Agent #8.
 
 *— END —*
