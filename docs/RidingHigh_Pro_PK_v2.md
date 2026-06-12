@@ -20,6 +20,7 @@
 
 ### Document Changelog
 ```
+v3.07 (2026-06-12): TASK-142+147(WR-half) — ה-WR הרשמי עבר ל-**D1_Open (executable)** במקום ScanPrice (run_eod peak-Score hindsight, +13.6pp look-ahead; executable ~53-55% מול ~58% הישן). `classify_trade(scan,ohlc,entry_price=None)` + `classify_trade_row(row,entry_basis="D1_Open")` — ליבת WIN/LOSS/WHIPSAW **לא נגעה**, רק עוגן TP/SL זז; D1_Open חסר→PENDING (אין נפילה שקטה ל-ScanPrice). 2 משטחי headline (Post Analysis + Home) → D1_Open + **חסם WHIPSAW-as-loss פסימי** לצד ה-headline (`metrics_bounds.wr_bounds`, policy-layer בלבד; הליבה ממשיכה להחזיר WHIPSAW). §20 Table A→דיאגנוסטי / Table B→רשמי. `calculate_net_pnl`: **אין** entry_price — ה-PnL fraction scale-invariant (entry מצטמצם; ה-basis נישא ע"י (cls,day) מ-classify_trade), נעול ב-test_netpnl_entry_basis_v1. משטח expectancy חי → TASK-162. אתרי Score-research "Win Rate" (TP10_Hit window-touch, ScanPrice) → "**TP10 Hit-Rate**" לדיסאמביגואציה. §15 schema ללא שינוי. TDD: 142(7)+netpnl-lock(3)+wr_bounds(5)=15 חדשים; classify/phase6-equiv/utils 38/38/formulas 107/107 ירוקים. אפס שינוי ENTER/SKIP/sizing. Sentinel=shadow, DRY_RUN.
 v3.06 (2026-06-11): TASK-150 — §15 Data Schema: תועד drift סדר/מספר-עמודות חוצה-חודשים ב-post_analysis (docs-only, ממקור-ריבו `phase4_evidence.md`, אפס קריאת-Sheets): אפריל 122 עמ' (17 legacy-only: Volume/MarketCap/Score_B..I/EntryScore...) מול מאי-יוני 105; מאי↔יוני אותה קבוצה בסדר שונה מ-idx 60 (`score_version` הוזז לפני IntraHigh) → קוראים positional נשברים חוצה-חודשים; להשתמש בקריאה header-aware (`cross_month_loaders.py` כבר מיישר לפי שם). דגל (לא בוצע — נדרש scope קוד): enforcement מלא של כל הקוראים להיות header-aware (חלק ה-"audit/enforce" של 150). חלק מ-batch 2c-1 (supervised auto-mode). אפס שינוי לוגיקת מסחר. DRY_RUN, Sentinel=shadow.
 v3.05 (2026-06-11): TASK-138 — ניקוי drift תיעודי ב-PK (docs-only, אפס שינוי קוד, מאומת מול הקוד החי): §19 inventory — validate_atrx bool→float (מחזיר atrx/0 על bad-data), normalize_mxv/atrx 0-1→0-100 + סומנו unused (אפס call-sites, רק import ב-dashboard); §1 + §A טבלת-תשתית — Active workflows 7→16 (ספירה חיה `.github/workflows/*.yml` כולל filename_guard); §2 TL;DR — Dashboard "3 pages"→12 (לפי `_PAGE_NAMES` sidebar nav); §29 כותרת "(current)"→"(as of 2026-05-02 snapshot)". נדחו מ-138 ודווחו לעמיחי (לא נגעתי, דורש אימות/scope אחר): ROCKET 16/0 OOS (נתון OOS לא-מאומת), §29 numbers→276/172 (דורש קריאת Sheet חיה), score_tracker §20 (כבר מתועד ב-§A6 שורה 1341), Sheets-mirror (TASK-152), "3 pages" ב-2 דיאגרמות ASCII + ADR-008 (שמירת alignment/היסטוריה). אפס שינוי לוגיקת מסחר. DRY_RUN, Sentinel=shadow.
 v3.04 (2026-06-11): TASK-140 — net-PnL cost model ב-post_analysis (slippage 1%/side + borrow pro-rata). formulas.calculate_net_pnl (מודל phase6: fill/cover adverse, net=gross−rate×days/365; WIN/LOSS בלבד, אחרת NULL); config SLIP=0.01 + BORROW_SCENARIOS=[0.50,2.00,5.00]; classify_trade→(cls,resolution_day) [classify_trade_row עוטף [0], dashboard ללא שינוי]; מקופל ל-calculate_stats (SSoT collector+backfill) → 4 עמודות post_analysis NetPnL_SlipOnly/Borrow50/200/500 (+numeric_cols). backfill חד-פעמי backfill_netpnl.py (FILL-ONLY + header-add + grid-resize): 832 תאים נכתבו חי 04/05/06 (04→126 עמ', 05/06→109), idempotent אומת, גיבוי ב-backups/. integration שקילות-phase6 על fixture (aggregate +1.21% לא-נתון לשחזור — דאטה gitignored/אבוד). לקח: grid-resize נדרש לפני הוספת עמודות חי — values_batch_update לא מרחיב grid אוטומטית (נחשף בריצה חיה 400, תוקן 2a335bd). TDD: net_pnl 10 + stats 7 + classify 7 + equiv 3 + backfill 14 = 41 חדשים; formulas 107/107. אפס שינוי ENTER/SKIP/sizing. DRY_RUN, Sentinel=shadow.
@@ -1748,11 +1749,34 @@ win-rate. On 58 fully-settled trades the true win-rate is ~58%
 
 | Table | Entry price | Reasoning |
 |-------|-------------|-----------|
-| **Table A** | `ScanPrice` (EOD of scan day) | Theoretical: enter at signal time |
-| **Table B** | `D1_Open` (next-day open) | Realistic: gap risk included |
+| **Table B** | `D1_Open` (next-day open) | ✅ **OFFICIAL** (executable, gap risk included) — TASK-142 |
+| **Table A** | `ScanPrice` (EOD of scan day) | ⚠️ **DIAGNOSTIC** (theoretical peak-Score hindsight — inflates WR) |
 
 Historical performance gap: Table A vs Table B — see ADR-003. (NOTE: earlier ~80%/~60% figures used the inflated TP10-as-win metric; recompute with classify_trade — true Table-A win-rate ~58%.)
 The difference is itself useful data (shows magnitude of overnight gap risk).
+
+### Official WR basis & WHIPSAW dual reporting (TASK-142 + TASK-147, 2026-06-12)
+
+The official "real Win Rate" headline (Post Analysis + Home pages) now classifies on the
+**executable `D1_Open` entry**, not `ScanPrice`. The ~58% figure above and the Table-A
+narrative were on the inflated ScanPrice basis (run_eod peak-Score, +13.6pp look-ahead);
+executable WR is ~53–55%. Implementation: `classify_trade(scan_price, ohlc, entry_price)`
++ `classify_trade_row(row, entry_basis="D1_Open")` — the core WIN/LOSS/WHIPSAW mapping is
+**unchanged**, only the TP/SL anchor moves to the entry; a missing `D1_Open` → PENDING (never
+a silent ScanPrice fallback). Table A is demoted to diagnostic; Table B is official.
+
+**WHIPSAW dual reporting (TASK-147):** every official WR shows the headline (WHIPSAW
+excluded, optimistic) PLUS a pessimistic bound counting WHIPSAW as losses in the denominator
+(`metrics_bounds.wr_bounds`, policy-layer only — `classify_trade` still returns WHIPSAW).
+The expectancy half (live expectancy surface + ScanPrice-NetPnL demotion) is **TASK-162**.
+
+`calculate_net_pnl` is deliberately **not** parametrized by entry: the PnL fraction is
+scale-invariant (the entry cancels), so the D1_Open expectancy is carried by the
+`(cls, resolution_day)` from `classify_trade` — locked by `tests/test_netpnl_entry_basis_v1.py`.
+
+The Score-research "Win Rate" surfaces (the `TP10_Hit` window-touch metric off ScanPrice, in
+the Score Comparison page) were renamed **"TP10 Hit-Rate"** to disambiguate from the official
+D1_Open WR. `§15` data schema is unchanged (no new columns).
 
 ### Status colors (in dashboard)
 
