@@ -1,10 +1,10 @@
 ---
 id: TASK-147
 title: WHIPSAW-as-loss policy in official metrics until intraday resolution
-status: In Progress
+status: Done
 assignee: []
 created_date: '2026-06-11 04:02'
-updated_date: '2026-06-12 14:22'
+updated_date: '2026-06-12 18:27'
 labels:
   - TASK-139-INV
 dependencies: []
@@ -28,5 +28,5 @@ TASK-139-INV RH-6.3 sensitivity: 26 WHIPSAW rows excluded from n=123; if resolve
 ## Implementation Notes
 
 <!-- SECTION:NOTES:BEGIN -->
-APPROVED 2026-06-11. Split 2026-06-12: WR-half shipped via 142-merge (D1_Open headline + WHIPSAW-as-loss pessimistic bound, policy-layer only — core classify_trade mapping untouched). Expectancy-half -> TASK-162 (calculate_net_pnl entry_price plumbing already laid in formulas.py). 26 WHIPSAW rows stay open until minute-bars (TASK-26). 147 = In Progress until TASK-162 done.
+DONE 2026-06-12. Permanent dual reporting complete: WR dual-bound (optimistic + WHIPSAW-as-SL) on D1_Open shipped via TASK-142; expectancy dual-bound on D1_Open shipped via TASK-162. Per AC #1, dual (headline + pessimistic WHIPSAW-as-SL) closes 147 — the resolved third-bound (from TASK-155 intraday verdicts) is a NEW enhancement beyond 147's scope -> TASK-164. Finding surfaced: executable D1_Open expectancy is negative under realistic borrow (RH-6.3 confirmed).
 <!-- SECTION:NOTES:END -->

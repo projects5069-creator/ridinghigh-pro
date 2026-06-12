@@ -66,3 +66,16 @@ Sentinel=shadow, DRY_RUN, zero change to ENTER/SKIP/sizing logic.
 - Provenance note for future readers: v2 filter on the CSV snapshot yields n=128 (not the report's 149) but WHIPSAW=26 matches exactly on v2/D1_Open — bookkeeping, not a contradiction. Same-ticker rows (AEHL/AIIO/CODX/MASK ×2) are distinct scans, not dups.
 
 **TASK-155 → Done. Branches awaiting review/merge: `task-155-minute-bars`.**
+
+---
+
+## Addendum — same session: TASK-162 expectancy surface + TASK-147 Done
+
+**Done on branch `task-162-expectancy` (NOT merged — review first). PK v3.10.**
+
+- **New:** `metrics_bounds.expectancy_bounds` (pure dual-bound, mirrors `wr_bounds`) + `utils.classify_trade_row_full` (returns `(cls, day)`; `classify_trade_row` now delegates, string contract preserved) + a **live executable-D1_Open expectancy surface** in Post Analysis (on-the-fly, optimistic vs WHIPSAW-as-SL, borrow 50/200/500). TDD: expectancy_bounds 6 + classify_trade_row_full 4.
+- **Design:** on-the-fly D1_Open (mirrors the WR headline) — **no new columns, no backfill, no schema change**. Superseded the stale 162 AC #2/#3 (no `calculate_net_pnl` entry_price param — it is scale-invariant and locked).
+- **⚠️ Major finding (research, not just a surface):** the **executable D1_Open expectancy is NEGATIVE even optimistically** — −1.47pct opt / −3.74pct pess @ borrow 50. With slip the breakeven WR ≈ 60.8%, and the D1_Open WR ~53.5% < that → negative expectancy. **Confirms RH-6.3** (the edge turns negative under realistic borrow). The AC's +1.06/−1.28 anchor was **ScanPrice/investigation-era** (inflated — the same look-ahead TASK-142 fixed; NetPnL didn't even exist in the 6/10 snapshot). The mismatch is a feature, not a bug — we did NOT force the number.
+- **TASK-147 → Done** (permanent dual reporting complete: WR via 142, expectancy via 162). The resolved third-bound (from TASK-155's intraday verdicts) → **TASK-164** (needs verdict persistence; deferred).
+
+**TASK-162 → Done. Branch awaiting review/merge: `task-162-expectancy`.**
