@@ -591,6 +591,48 @@ def classify_trade_row(row, entry_basis="ScanPrice"):
     return classify_trade(scan_price, ohlc)[0]   # ScanPrice basis (dashboard callers unbroken)
 
 
+def resolve_whipsaw(entry_price, minute_bars_df,
+                    tp_frac=TP_THRESHOLD_FRAC, sl_frac=SL_THRESHOLD_FRAC):
+    """TASK-155 — resolve a daily-bar WHIPSAW using intraday (minute) bars.
+
+    classify_trade marks WHIPSAW when one DAILY bar shows both the TP (price drops
+    tp_frac) and the SL (price rises sl_frac) — daily granularity can't say which
+    came first. Given that day's minute bars (DataFrame with 'low'/'high', indexed
+    by timestamp), walk them in time order and return the first decisive touch:
+
+      'WIN'        — a bar's low <= TP with that same bar's high < SL (TP first)
+      'LOSS'       — a bar's high >= SL with that same bar's low > TP (SL first)
+      'UNRESOLVED' — a single bar touches BOTH (sub-minute, IEX floor), or neither
+                     side is ever touched in the minute bars, or no/invalid input.
+
+    Same SSoT thresholds as classify_trade; entry_price is the official D1_Open
+    basis (TASK-142). This is analysis only — it does NOT feed official metrics.
+    """
+    if entry_price is None or entry_price <= 0:
+        return "UNRESOLVED"
+    if minute_bars_df is None or minute_bars_df.empty:
+        return "UNRESOLVED"
+
+    tp_price = entry_price * (1 - tp_frac)
+    sl_price = entry_price * (1 + sl_frac)
+
+    df = minute_bars_df.sort_index()
+    for _, bar in df.iterrows():
+        lo = bar.get("low")
+        hi = bar.get("high")
+        if lo is None or hi is None:
+            continue
+        tp_hit = lo <= tp_price
+        sl_hit = hi >= sl_price
+        if tp_hit and sl_hit:
+            return "UNRESOLVED"   # same minute, both ends — still unresolvable
+        if sl_hit:
+            return "LOSS"
+        if tp_hit:
+            return "WIN"
+    return "UNRESOLVED"           # neither end touched on the minute bars
+
+
 # ═══════════════════════════════════════════════════════════════════════
 # Module self-test
 # ═══════════════════════════════════════════════════════════════════════
