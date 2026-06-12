@@ -41,3 +41,36 @@
 - **TASK-159/160** פתוחות — follow-ups של 134, לא חוסמות את 142.
 - working tree נקי; main ahead 1 (task-160) — נדחף עם ה-handoff בסיום הסגירה.
 - המשך מלא: `docs/WORK_PLAN_2026-06-11.md` — סדר יום, תוכנית שבועות 1-4, מוקפאות.
+
+---
+
+## נספח — סשן ביצוע נוסף (post-18:55, צ'אט נפרד)
+
+*נכתב כנספח אדיטיבי. הסגירה למעלה (18:55, PK 3.04) נשארת כפי שהיא. אחריה רץ סשן ביצוע נוסף בצ'אט הזה — מה שלמטה משלים אותו, ולא מחליף.*
+
+### ⭐ ההחלטה המשמעותית (הפלט החשוב ביותר לסשנים הבאים)
+**מסילת-הלילה הלא-מפוקחת בענן — דה-סקופ (TASK-121, AC4-5).** AC1-3 נמסרו והוכחו (מבחן בפיקוח + auto-mode + Run Log/stop-counters; ה-skip-valve ירה נכון, **n=2**). AC4-5 (routine לא-מפוקח + cron-בוקר + ריצה עיוורה) **לא נרדפות**: הפלח ה-clean-auto זעיר מדי (מתוך 25 AUTO: 5 done / 13 מודרים-ע"י-הגדרות / 7 לא-מוערכים) מכדי להצדיק complexity + failure-surface של בנייה לא-מפוקחת על מערכת-מסחר חיה.
+**מודל ההפעלה מכאן ואילך:** **batches בפיקוח** לפלח ה-clean-auto · **human-at-the-gate** (בעזרת CC) לכל מה שנוגע ב-Sheets / scanner / judgment. מתועד גם ב-`docs/RUN_MODE_DECISION.md` (callout בראש) + הערת-החלטה ב-TASK-121.
+
+### הושלם ונדחף ל-main (PRs #16–#21, כולם merged)
+| Task | מה | PR |
+|---|---|---|
+| **TASK-133** | filename-length guard — SSoT byte-check + CI workflow (`filename_guard.yml`) + refactor pre-commit; סוגר את חסם ה-checkout של 333B | #16 |
+| **TASK-138** | PK drift cleanup v3.04→**3.05** (workflows 7→16, validate_atrx bool→float, normalize 0-1→0-100, dashboard 3→12 pages, §29 label) | #17 |
+| **TASK-160** | תיקון regex stale ב-integration test (פורמט decision_id החדש) | #18 |
+| **TASK-118** | תיעוד sandbox egress כהתנהגות-קבע (RUNBOOK §8) | #19 |
+| **TASK-161** | **(נוצר היום)** untrack `PROJECT_STATE.md` + תיקון post-commit hook — **חיסל את דפוס ה-merge-conflict** שעצר batches | #20 |
+| **TASK-150** | PK §15 — תיעוד drift עמודות חוצה-חודשים (3.05→**3.06**); ריצת 2c-1 | #21 |
+| **TASK-121** | החלטת דה-סקופ (לעיל) + סימון Done + pointer ב-RUN_MODE_DECISION | (ישיר ל-main) |
+
+### To Do עם skip-notes (ה-skip-valve סירב נכון — לא לכפות)
+- **TASK-122** — טענת "plan §5" לא נמצאה; PK כבר מסייג n=1; שארית = judgment (HUMAN).
+- **TASK-151** — `SCORE_RSI_PARAMS` **חי** (`formulas.py:420`), לא dead; שאר הקבועים בעלי refs; RSI חופף TASK-129. כתיבת "dead" = drift חדש.
+- **TASK-46** — dedup ישנה מטריקה מוצגת (whipsaw-as-loss→canonical) = החלטה סמנטית/HUMAN, לא מכני.
+
+### artifacts
+- **PK**: 3.04 → **3.06** (138 §19/§1/§2/§29; 150 §15). 133/160/118/161/121 לא נוגעים ב-PK (נכון).
+- **triage**: 71 משימות סווגו AUTO/SENSITIVE/HUMAN (plan file) → בסיס ל-attended-batches.
+- **Run Log**: `docs/NIGHT_RUN_2026-06-11.md` (ריצת 2c-1, stop-counters, n→2).
+- **infra**: TASK-161 — commits נקיים בלי PROJECT_STATE; batches עתידיים לא ייתקעו על conflict.
+- backlog: כל הסטטוסים סומנו חי (אין reconciliation נדרש).
