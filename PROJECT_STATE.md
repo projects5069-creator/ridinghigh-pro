@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-06-11 18:57:42 (local)
-**Branch:** `main`
-**Latest commit:** `cb9d663` — docs(handoff): session 2026-06-11 — TASK-139/134/140 done, 142 next, clipboard fixed.
+**Generated:** 2026-06-11 19:44:53 (local)
+**Branch:** `night/TASK-133`
+**Latest commit:** `1f67e54` — feat(ci): TASK-133 filename-length guard — SSoT byte-check + CI workflow + pre-commit refactor
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `cb9d663 (HEAD -> main) docs(handoff): session 2026-06-11 — TASK-139/134/140 done, 142 next, clipboard fixed.`
+- `1f67e54 (HEAD -> night/TASK-133) feat(ci): TASK-133 filename-length guard — SSoT byte-check + CI workflow + pre-commit refactor`
+- `7c3d7cb (origin/main, origin/HEAD, main) docs(handoff): session 2026-06-11 — TASK-139/134/140 done, 142 next, clipboard fixed.`
 - `c168c5a chore(backlog): TASK-160 — stale integration test follow-up (To Do)`
-- `f9bc3b9 (origin/main, origin/HEAD) docs(pk): TASK-140 v3.04 — net-PnL cost model in post_analysis (calculate_net_pnl, 4 cols, 832 cells backfilled) + mark Done.`
+- `f9bc3b9 docs(pk): TASK-140 v3.04 — net-PnL cost model in post_analysis (calculate_net_pnl, 4 cols, 832 cells backfilled) + mark Done.`
 - `2a335bd fix(backfill): TASK-140 resize grid before writing new NetPnL columns — fixes live 'exceeds grid limits' 400 (14/14).`
-- `45c0f8a feat(backfill): TASK-140 backfill_netpnl header-add — create missing NetPnL columns (row-1 cell, idempotent, 11/11).`
 
 ---
 
