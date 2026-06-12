@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-06-11 19:44:53 (local)
-**Branch:** `night/TASK-133`
-**Latest commit:** `1f67e54` — feat(ci): TASK-133 filename-length guard — SSoT byte-check + CI workflow + pre-commit refactor
+**Generated:** 2026-06-11 20:00:17 (local)
+**Branch:** `main`
+**Latest commit:** `28a9356` — chore(backlog): TASK-133 — filename-length guard merged (#16), mark Done
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `1f67e54 (HEAD -> night/TASK-133) feat(ci): TASK-133 filename-length guard — SSoT byte-check + CI workflow + pre-commit refactor`
-- `7c3d7cb (origin/main, origin/HEAD, main) docs(handoff): session 2026-06-11 — TASK-139/134/140 done, 142 next, clipboard fixed.`
+- `28a9356 (HEAD -> main) chore(backlog): TASK-133 — filename-length guard merged (#16), mark Done`
+- `8fe4bbe (origin/main, origin/HEAD) feat(ci): TASK-133 filename-length guard — SSoT byte-check + CI workflow + pre-commit refactor (#16)`
+- `7c3d7cb docs(handoff): session 2026-06-11 — TASK-139/134/140 done, 142 next, clipboard fixed.`
 - `c168c5a chore(backlog): TASK-160 — stale integration test follow-up (To Do)`
 - `f9bc3b9 docs(pk): TASK-140 v3.04 — net-PnL cost model in post_analysis (calculate_net_pnl, 4 cols, 832 cells backfilled) + mark Done.`
-- `2a335bd fix(backfill): TASK-140 resize grid before writing new NetPnL columns — fixes live 'exceeds grid limits' 400 (14/14).`
 
 ---
 
@@ -32,11 +32,11 @@ _See `OPEN_ISSUES.md` for full list_
 
 | Workflow | Status | Conclusion | Started |
 |---|---|---|---|
+| filename-length guard | completed | ✅ success | 2026-06-12 00:58 UTC |
+| filename-length guard | completed | ✅ success | 2026-06-12 00:45 UTC |
+| filename-length guard | completed | ✅ success | 2026-06-12 00:45 UTC |
 | Agent — Critic (daily) | completed | ✅ success | 2026-06-11 23:12 UTC |
 | Daily Backup — post_analysis | completed | ✅ success | 2026-06-11 23:07 UTC |
-| Agent — Daily Brief Email | completed | ✅ success | 2026-06-11 23:06 UTC |
-| Post Analysis Collector | completed | ✅ success | 2026-06-11 22:53 UTC |
-| Agent — End of Day | completed | ✅ success | 2026-06-11 22:43 UTC |
 
 ---
 
