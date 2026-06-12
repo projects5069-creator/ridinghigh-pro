@@ -1,10 +1,10 @@
 ---
 id: TASK-150
 title: Enforce header-aware cross-month reads; June column-order drift
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-06-11 04:02'
-updated_date: '2026-06-11 04:27'
+updated_date: '2026-06-12 03:15'
 labels:
   - TASK-139-INV
 dependencies: []
