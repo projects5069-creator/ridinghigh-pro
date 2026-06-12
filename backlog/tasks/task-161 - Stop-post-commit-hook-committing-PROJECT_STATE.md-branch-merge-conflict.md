@@ -1,10 +1,10 @@
 ---
 id: TASK-161
 title: Stop post-commit hook committing PROJECT_STATE.md (branch merge-conflict)
-status: In Progress
+status: Done
 assignee: []
 created_date: '2026-06-12 01:40'
-updated_date: '2026-06-12 01:51'
+updated_date: '2026-06-12 01:57'
 labels: []
 dependencies: []
 priority: high
