@@ -2291,6 +2291,41 @@ def portfolio_tracker_page():
         _render_short_table(table_a, "table_a")
 
 
+def _load_whipsaw_verdicts():
+    """TASK-164: load the committed WHIPSAW intraday verdict snapshot
+    (whipsaw_verdicts.json, deploy-visible). Returns (lookup_dict, snapshot_date),
+    or (None, None) if the file is absent/unreadable — the resolved bound is then
+    simply omitted (optimistic/pessimistic still render; never a crash)."""
+    import json
+    import os
+    try:
+        path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "whipsaw_verdicts.json")
+        with open(path) as f:
+            d = json.load(f)
+        return d.get("verdicts", {}), d.get("snapshot_date", "?")
+    except Exception:
+        return None, None
+
+
+def _resolved_wr_pct(df, outcomes, n_win, n_loss, vlookup):
+    """TASK-164 resolved WR: fold the TASK-155 intraday verdicts into the WHIPSAW
+    rows. Returns (pct, r_win, r_loss). UNRESOLVED is excluded; a WHIPSAW row absent
+    from the snapshot falls back to pessimistic (LOSS) so the bound never over-states
+    the edge as the dataset grows."""
+    from metrics_bounds import resolved_class
+    r_win = r_loss = 0
+    for (_, r), cls in zip(df.iterrows(), outcomes):
+        if cls != "WHIPSAW":
+            continue
+        eff = resolved_class(vlookup.get(f"{r.get('Ticker')}|{str(r.get('ScanDate'))[:10]}"))
+        if eff == "WIN":
+            r_win += 1
+        elif eff == "LOSS":
+            r_loss += 1
+    denom = n_win + n_loss + r_win + r_loss
+    return ((n_win + r_win) / denom * 100 if denom else 0.0), r_win, r_loss
+
+
 def post_analysis_page():
     st.title("🔬 Post Analysis")
     st.caption("מניות עם Score 60+ — מה קרה ב-5 ימים אחרי הסריקה")
@@ -2345,35 +2380,52 @@ def post_analysis_page():
     c2.metric("⚠️ חסם פסימי (WHIPSAW=SL)", f"{_wr['pessimistic']:.1f}%", f"+{n_whip} whipsaw כהפסד")
     c3.metric("✅ TP / ❌ SL", f"{n_win} / {n_loss}")
 
-    # ── Expectancy (executable D1_Open) — TASK-162 / TASK-147 dual bound ──────────
+    # ── Resolved third bound (TASK-164) — TASK-155 intraday verdict snapshot, guarded ──
+    _vlookup, _vsnap = _load_whipsaw_verdicts()
+    if _vlookup is not None:
+        _wr_res, _r_win, _r_loss = _resolved_wr_pct(df, _outcomes, n_win, n_loss, _vlookup)
+        st.metric(f"🎯 Resolved WR — as-of {_vsnap} snapshot", f"{_wr_res:.1f}%",
+                  f"WHIPSAW מ-155: +{_r_win}W / +{_r_loss}L (UNRESOLVED מוחרג; WHIPSAW ללא-verdict=פסימי)")
+
+    # ── Expectancy (executable D1_Open) — TASK-162/147 dual + TASK-164 resolved ──────
     from formulas import calculate_net_pnl
     from config import BORROW_SCENARIOS, SLIP
-    from metrics_bounds import expectancy_bounds
+    from metrics_bounds import expectancy_bounds, resolved_class
     from utils import classify_trade_row_full
 
     _clsday = df.apply(lambda r: classify_trade_row_full(r, entry_basis="D1_Open"), axis=1)
-    _rows_cd = [(c, d, pd.to_numeric(r.get("ScanPrice"), errors="coerce"))
-                for (c, d), (_, r) in zip(_clsday, df.iterrows())]
+    _rows_cd = []
+    for (c, d), (_, r) in zip(_clsday, df.iterrows()):
+        sp = pd.to_numeric(r.get("ScanPrice"), errors="coerce")
+        eff = None
+        if c == "WHIPSAW" and _vlookup is not None:
+            eff = resolved_class(_vlookup.get(f"{r.get('Ticker')}|{str(r.get('ScanDate'))[:10]}"))
+        _rows_cd.append((c, d, sp, eff))
+
     _exp_rows = []
     for _b in BORROW_SCENARIOS:
-        _dec = [calculate_net_pnl(sp, c, d, _b, slip=SLIP) for (c, d, sp) in _rows_cd if c in ("WIN", "LOSS")]
-        _whip = [calculate_net_pnl(sp, "LOSS", d, _b, slip=SLIP) for (c, d, sp) in _rows_cd if c == "WHIPSAW"]
+        _dec = [calculate_net_pnl(sp, c, d, _b, slip=SLIP) for (c, d, sp, eff) in _rows_cd if c in ("WIN", "LOSS")]
+        _whip = [calculate_net_pnl(sp, "LOSS", d, _b, slip=SLIP) for (c, d, sp, eff) in _rows_cd if c == "WHIPSAW"]
         _e = expectancy_bounds(_dec, _whip)
-        _exp_rows.append({
+        _row = {
             "Borrow (annual)": f"{_b * 100:.0f}%",
             "Optimistic (WHIPSAW מוחרג)": f"{_e['optimistic'] * 100:+.2f}%",
             "⚠️ Pessimistic (WHIPSAW=SL)": f"{_e['pessimistic'] * 100:+.2f}%",
-        })
+        }
+        if _vlookup is not None:
+            _res_nets = _dec + [calculate_net_pnl(sp, eff, d, _b, slip=SLIP)
+                                for (c, d, sp, eff) in _rows_cd if c == "WHIPSAW" and eff is not None]
+            _row[f"🎯 Resolved ({_vsnap})"] = f"{expectancy_bounds(_res_nets, [])['optimistic'] * 100:+.2f}%"
+        _exp_rows.append(_row)
 
     st.divider()
     st.subheader("💰 Expectancy אמיתי — executable D1_Open (pct/trade)")
     st.caption(
-        "תוחלת PnL לעסקה על בסיס **D1_Open** (executable, TASK-142/147) — אופטימי (WHIPSAW מוחרג) "
-        "מול פסימי (WHIPSAW=SL), תחת borrow 50/200/500. ⚠️ ה-expectancy **שלילי גם אופטימית**: עם "
-        "slip ה-breakeven WR ≈ 60.8%, וה-WR בפועל ~53.5% → תוחלת שלילית. זה **ממצא** (RH-6.3 — "
-        "ה-edge ה-executable שלילי תחת borrow ריאלי), לא באג בתצוגה. העוגן הישן +1.06/−1.28 היה "
-        "ScanPrice (חקירה-era, אותו look-ahead ש-142 תיקן). העמודות NetPnL_* המתמשכות הן "
-        "ScanPrice / Table-A **diagnostic**, לא משטח זה."
+        "תוחלת PnL לעסקה על בסיס **D1_Open** (executable, TASK-142/147) — אופטימי (WHIPSAW מוחרג) מול "
+        "פסימי (WHIPSAW=SL), תחת borrow 50/200/500. ⚠️ ה-expectancy **שלילי גם אופטימית**: עם slip "
+        "ה-breakeven WR ≈ 60.8%, וה-WR בפועל ~53.5% → תוחלת שלילית (ממצא RH-6.3, לא באג). **Resolved** = "
+        "verdicts אינטראדיי מ-TASK-155 (as-of " + (_vsnap or "?") + "; UNRESOLVED מוחרג; WHIPSAW ללא-verdict=פסימי). "
+        "העוגן הישן +1.06/−1.28 היה ScanPrice (חקירה-era). NetPnL_* המתמשכות = ScanPrice/Table-A diagnostic."
     )
     st.dataframe(pd.DataFrame(_exp_rows), use_container_width=True, hide_index=True)
 
@@ -5158,6 +5210,10 @@ def dashboard_home_page():
         _n_decided    = _n_win + _n_loss
         _wrh          = wr_bounds(_n_win, _n_loss, _n_whip_home)
         win_rate_hist = f"{_wrh['optimistic']:.0f}%" if _n_decided > 0 else "—"
+        _vlookup_h, _vsnap_h = _load_whipsaw_verdicts()   # TASK-164 resolved bound (guarded)
+        _wr_res_h = (_resolved_wr_pct(df, _outcomes_home, _n_win, _n_loss, _vlookup_h)[0]
+                     if _vlookup_h is not None else None)
+        _res_h    = f" · resolved {_wr_res_h:.0f}%" if _wr_res_h is not None else ""
         winners       = df[_outcomes_home == "WIN"]
         has_outcome   = df[_outcomes_home.isin(["WIN", "LOSS"])]  # for delta count
         avg_drop      = winners["MaxDrop%"].mean() if not winners.empty and "MaxDrop%" in winners.columns else None
@@ -5167,7 +5223,7 @@ def dashboard_home_page():
         n_days        = df["ScanDate"].nunique() if "ScanDate" in df.columns else "?"
 
         m1, m2, m3, m4 = st.columns(4)
-        m1.metric("🎯 Win Rate",           win_rate_hist, delta=f"פסימי {_wrh['pessimistic']:.0f}% · {_n_decided}/{len(df)} הוכרעו")
+        m1.metric("🎯 Win Rate",           win_rate_hist, delta=f"פסימי {_wrh['pessimistic']:.0f}%{_res_h} · {_n_decided}/{len(df)} הוכרעו")
         m2.metric("📋 מניות",              total_stocks,  delta=f"{n_days} ימים")
         m3.metric("📉 Avg Drop (winners)", avg_drop_str)
         m4.metric("🏆 Best Score",         best_score_str)
