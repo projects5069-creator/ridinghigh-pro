@@ -1,9 +1,10 @@
 ---
 id: TASK-42
 title: AUDIT.7 — SPY benchmark integration in paper_portfolio
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-05-24 20:59'
+updated_date: '2026-06-12 22:56'
 labels: []
 dependencies: []
 priority: medium
@@ -19,5 +20,5 @@ Add SPY/IWM benchmark prices to each paper_portfolio row for context comparison.
 ## Implementation Notes
 
 <!-- SECTION:NOTES:BEGIN -->
-Market Context agent already collects spy_close/spy_open. Just need integration at entry+exit.
+MERGED into TASK-170 (market-regime cluster, TASK-156 agenda). SPY benchmark is part of the regime cluster, NOT standalone — scope moves there.
 <!-- SECTION:NOTES:END -->
