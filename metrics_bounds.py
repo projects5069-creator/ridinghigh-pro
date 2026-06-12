@@ -22,3 +22,21 @@ def wr_bounds(n_win, n_loss, n_whip):
     denom_p = decided + n_whip
     pess = (n_win / denom_p * 100) if denom_p else 0.0
     return {"optimistic": opt, "pessimistic": pess}
+
+
+def expectancy_bounds(decided_nets, whipsaw_as_loss_nets):
+    """Return {'optimistic', 'pessimistic'} mean net-PnL FRACTION per trade (TASK-162).
+
+    optimistic  = mean(decided_nets)                          # WIN/LOSS only, WHIPSAW excluded
+    pessimistic = mean(decided_nets + whipsaw_as_loss_nets)   # WHIPSAW folded in as losses
+
+    Inputs are lists of per-trade net fractions (from formulas.calculate_net_pnl);
+    None entries are filtered. Empty -> 0.0. pessimistic <= optimistic (the WHIPSAW
+    rows valued as losses pull the mean down). Policy-layer aggregation only — the
+    core classify_trade / calculate_net_pnl logic is untouched.
+    """
+    dec = [x for x in decided_nets if x is not None]
+    opt = (sum(dec) / len(dec)) if dec else 0.0
+    alln = dec + [x for x in whipsaw_as_loss_nets if x is not None]
+    pess = (sum(alln) / len(alln)) if alln else 0.0
+    return {"optimistic": opt, "pessimistic": pess}

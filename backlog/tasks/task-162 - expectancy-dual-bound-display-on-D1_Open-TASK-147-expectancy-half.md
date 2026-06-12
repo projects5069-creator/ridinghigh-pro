@@ -1,10 +1,10 @@
 ---
 id: TASK-162
 title: expectancy dual-bound display on D1_Open (TASK-147 expectancy half)
-status: To Do
+status: In Progress
 assignee: []
 created_date: '2026-06-12 14:21'
-updated_date: '2026-06-12 17:51'
+updated_date: '2026-06-12 18:11'
 labels:
   - TASK-139-INV
 dependencies: []
