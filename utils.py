@@ -492,7 +492,7 @@ def calculate_stats(scan_price, ohlc):
     }
 
 
-def classify_trade(scan_price, ohlc):
+def classify_trade(scan_price, ohlc, entry_price=None):
     """
     Classify a simulated short trade outcome, day-by-day (D1->D5).
 
@@ -505,8 +505,11 @@ def classify_trade(scan_price, ohlc):
     Short position: TP = price drops TP_THRESHOLD; SL = price rises SL_THRESHOLD.
 
     Args:
-        scan_price: entry price.
+        scan_price: scan-time price (default entry basis = ScanPrice / Table-A diagnostic).
         ohlc: dict with D1_High/D1_Low ... D5_High/D5_Low.
+        entry_price: TASK-142 — explicit entry basis (e.g. D1_Open executable). When
+            None, falls back to scan_price. The WIN/LOSS/WHIPSAW mapping below is
+            UNCHANGED — only the TP/SL anchor moves to this entry.
 
     Returns:
         (classification, resolution_day) tuple — resolution_day = the D-day (1-5)
@@ -522,7 +525,10 @@ def classify_trade(scan_price, ohlc):
           'PENDING'  : fewer than 5 days of OHLC available — trade not mature
                        yet. Excluded from every statistic.
     """
-    if scan_price is None or scan_price <= 0:
+    # TASK-142: entry basis defaults to scan_price (ScanPrice = Table-A diagnostic).
+    # Callers wanting the executable WR pass entry_price=D1_Open. Mapping below unchanged.
+    entry = entry_price if entry_price is not None else scan_price
+    if entry is None or entry <= 0:
         return ('PENDING', None)
 
     # A trade may only be classified once all 5 days have settled.
@@ -532,8 +538,8 @@ def classify_trade(scan_price, ohlc):
         if ohlc.get(f"D{i}_Low") is None or ohlc.get(f"D{i}_High") is None:
             return ('PENDING', None)
 
-    tp_price = scan_price * (1 - TP_THRESHOLD_FRAC)
-    sl_price = scan_price * (1 + SL_THRESHOLD_FRAC)
+    tp_price = entry * (1 - TP_THRESHOLD_FRAC)
+    sl_price = entry * (1 + SL_THRESHOLD_FRAC)
 
     # Walk D1->D5 in order; the first day that resolves the trade decides it.
     for i in range(1, 6):
