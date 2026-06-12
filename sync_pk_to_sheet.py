@@ -1,5 +1,10 @@
 #!/usr/bin/env python3
 """
+⚠️ DEPRECATED 2026-06-12 (TASK-152): the PK Google-Sheets mirror is RETIRED.
+The PK source-of-truth is git (versioned). The Sheet mirror went stale (last
+synced 2026-05-16, showed v2.0 vs the live PK) and is redundant. Kept here only
+per the §12 versioned-filenames convention; do not run it to "resync" the mirror.
+
 sync_pk_to_sheet.py — Create the Google Sheets master backup of
 the Project Knowledge document (RidingHigh_Pro_PK_v2.md).
 

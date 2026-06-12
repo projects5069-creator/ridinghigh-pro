@@ -4933,9 +4933,9 @@ SL ALWAYS overrides TP אם שניהם נפגעו באותו bar (שמרני).
             st.markdown("[`projects5069-creator/ridinghigh-pro`](https://github.com/projects5069-creator/ridinghigh-pro)")
             st.caption("Source of truth · Git history קבועה")
         with bk2:
-            st.markdown("**☁️ Google Sheet Master**")
-            st.markdown("[System Reference Sheet](https://docs.google.com/spreadsheets/d/1SuHj0joCfT7kAoSEvrqepJJcUG8uBU5J4zmxkx9e3J0)")
-            st.caption("PK v2.0 mirror · sync via `sync_pk_to_sheet.py`")
+            st.markdown("**☁️ Google Sheet Master — retired**")
+            st.caption("Retired 2026-06-12 (TASK-152): PK source-of-truth is **git** (versioned). "
+                       "The Sheet mirror was stale (showed v2.0 vs live PK) and redundant — no longer synced.")
         with bk3:
             st.markdown("**💼 CSV Backups**")
             st.markdown("GitHub Actions artifacts (90-day retention)")
@@ -4996,7 +4996,6 @@ SL ALWAYS overrides TP אם שניהם נפגעו באותו bar (שמרני).
 - ✓ לעדכן את הסעיפים עם המציאות החדשה
 - ✓ להגדיל גרסה (v2.0 → v2.0.1 patch · → v2.1 minor)
 - ✓ להוסיף שורת changelog ב-§1
-- ✓ להריץ `python3 sync_pk_to_sheet.py` לעדכון Sheet master
 - ✓ להודיע לעמיחי ("עדכנתי PK §X לשקף Y")
         """)
 
