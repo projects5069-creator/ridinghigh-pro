@@ -2276,17 +2276,19 @@ def portfolio_tracker_page():
     table_a = table_a[table_a["Status"].isin(sel_status)]
     table_b = table_b[table_b["Status"].isin(sel_status)]
 
-    # ── Tabs ─────────────────────────────────────────────────────────────────
-    tab_a, tab_b = st.tabs([
-        "📌 Table A — Entry at ScanPrice (EOD)",
-        "📌 Table B — Entry at D1_Open (next day)",
+    # ── Tabs (TASK-142: B=official executable first; A=ScanPrice diagnostic) ──
+    tab_b, tab_a = st.tabs([
+        "✅ Table B — Entry at D1_Open (official, executable)",
+        "⚠️ Table A — Entry at ScanPrice (diagnostic, theoretical)",
     ])
-
-    with tab_a:
-        _render_short_table(table_a, "table_a")
 
     with tab_b:
         _render_short_table(table_b, "table_b")
+
+    with tab_a:
+        st.caption("⚠️ דיאגנוסטי בלבד — כניסה ב-ScanPrice (peak-Score hindsight) מנפחת WR. "
+                   "ה-WR הרשמי הוא Table B / D1_Open (TASK-142).")
+        _render_short_table(table_a, "table_a")
 
 
 def post_analysis_page():
@@ -4666,8 +4668,8 @@ SL ALWAYS overrides TP אם שניהם נפגעו באותו bar (שמרני).
         glossary = [
             ("D0", "יום הסריקה (היום שהסיגנל קרה)"),
             ("D1, D2, ... D5", "1-5 ימי מסחר אחרי D0 (מדלגים על סופי שבוע וחגים)"),
-            ("Table A", "סימולציה עם entry ב-ScanPrice (EOD של D0) — תאורטית"),
-            ("Table B", "סימולציה עם entry ב-D1_Open — מציאותית, כוללת gap risk"),
+            ("Table B", "✅ רשמי — entry ב-D1_Open (executable, כולל gap risk)"),
+            ("Table A", "⚠️ דיאגנוסטי — entry ב-ScanPrice (EOD של D0, תאורטי, מנפח WR)"),
             ("TP / TP10", "Take Profit ב-−10% מהentry (short win)"),
             ("SL", "Stop Loss ב-+10% מהentry (short loss)"),
             ("MxV", "Market cap minus dollar volume — מודד illiquidity"),
