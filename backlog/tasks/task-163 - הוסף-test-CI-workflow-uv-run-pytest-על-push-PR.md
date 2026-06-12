@@ -1,10 +1,10 @@
 ---
 id: TASK-163
 title: הוסף test-CI workflow (uv run pytest על push/PR)
-status: In Progress
+status: Done
 assignee: []
 created_date: '2026-06-12 15:08'
-updated_date: '2026-06-12 15:22'
+updated_date: '2026-06-12 15:30'
 labels: []
 dependencies: []
 priority: medium
@@ -23,3 +23,9 @@ ordinal: 166000
 - [ ] #2 מתעלם מ-project_sync_20260418/ ומקבצי הסקריפט הלא-pytest (test_formulas.py/test_utils.py רצים בנפרד)
 - [ ] #3 טסטי tests/agent/integration (live Sheets) מסומנים ומדולגים ב-CI ללא creds — לא נספרים ככשל
 <!-- AC:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+DONE 2026-06-12. Added .github/workflows/tests.yml (pytest on push/PR) + pytest.ini (testpaths=tests) + tests/conftest.py (auto-mark tests/agent/integration as 'integration'). First real test-CI run on branch: 301 passed, 2 skipped, 3 deselected (integration), formulas 107/107, utils 38/38 — conclusion success on clean runner. Closes the 'no pytest CI' gap surfaced in TASK-142.
+<!-- SECTION:NOTES:END -->
