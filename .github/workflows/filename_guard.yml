@@ -1,0 +1,23 @@
+name: filename-length guard
+
+# Why (TASK-133): a 333-byte backlog basename broke actions/checkout on the Linux
+# runner (ext4 caps a filename component at 255 bytes), taking CI down ~16h. This
+# guard runs the SSoT byte-check over the whole tracked tree on every push / PR and
+# fails if any basename is >= 250 bytes — a 5-byte margin under the 255 hard cap,
+# above the existing grandfathered 204-219 B files, so it blocks anything that would
+# actually break checkout without going red on what is already in the repo.
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  guard:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Check tracked filename byte-lengths (>= 250 fails)
+        run: FILENAME_BYTE_LIMIT=250 bash scripts/check_filename_length.sh
