@@ -1,0 +1,44 @@
+# Session Handoff — 2026-06-12
+
+## TL;DR
+Implemented **TASK-142** (rebase official WR onto executable D1_Open entry; demote ScanPrice Table A to diagnostic) **+ the WR-half of TASK-147** (WHIPSAW-as-loss pessimistic dual bound). Work is on branch **`task-142-147-wr-d1open`** (9 commits) — **pushed, NOT merged to main** (awaiting approval). PK bumped to **v3.07**.
+
+## What shipped (branch `task-142-147-wr-d1open`)
+
+| # | Commit | What |
+|---|--------|------|
+| 1 | d134b21 | split WR/expectancy — open TASK-162, 147→In Progress |
+| 2 | 7695514 | `classify_trade(scan, ohlc, entry_price=None)` — core WIN/LOSS/WHIPSAW mapping frozen, only TP/SL anchor moves |
+| 3 | 589005a | `classify_trade_row(row, entry_basis="ScanPrice")` — `"D1_Open"` executable; missing D1_Open → PENDING (no silent fallback) |
+| 4 | 159b136 | lock `calculate_net_pnl` entry-scale-invariance (NO param — PnL fraction is scale-free; basis carried by `(cls, day)`) |
+| 5 | 00b922f | pure `metrics_bounds.wr_bounds` (optimistic vs WHIPSAW-as-loss) |
+| 6 | a15be4b | headline WR (Post Analysis + Home) on D1_Open + pessimistic WHIPSAW bound |
+| 7 | 2d41e5d | demote Table A (ScanPrice) → diagnostic; Table B (D1_Open) → official |
+| 8 | dc9e7fa | rename ScanPrice `TP10_Hit` "Win Rate" → "TP10 Hit-Rate" (disambiguate from official D1_Open WR) |
+| 9 | 2aeb2dc | Anti-Drift PK v3.07 (§20 Table A/B + new WR-basis section) |
+
+## Key design decisions (vs the original plan)
+- **`calculate_net_pnl` got NO `entry_price` param.** The plan called for one; empirical+analytical proof showed it's a numerical no-op — the PnL fraction `1 − (1∓frac)(1+slip)/(1−slip)` is scale-invariant (entry cancels). The D1_Open expectancy is carried entirely by the `(classification, resolution_day)` from `classify_trade`. Locked by `tests/test_netpnl_entry_basis_v1.py`. No WR-D1_Open / PnL-ScanPrice drift.
+- **WHIPSAW-as-loss is policy-layer only** (`wr_bounds` + dashboard). Core `classify_trade` still returns WHIPSAW.
+- **Persisted `TP10_Hit` columns stay ScanPrice** (window-touch diagnostic) — renamed "TP10 Hit-Rate" so they're not confused with the official D1_Open WR. No schema change (§15 unchanged).
+
+## Verification (local — see "No test-CI" below)
+- **`pytest tests/` → 311 passed**, with only **2 failures**: `tests/agent/integration/test_decision_logger_writes.py` + `test_scanner_agent_match.py` — both write/read **live Google Sheets** (`googleapis.com`), fail on missing creds in the sandbox, are flaky, and **do not reference any code changed here**. Environmental, pre-existing, unrelated.
+- New + regression: 56 passed (142 suite 7, netpnl-lock 3, wr_bounds 5, classify_trade_day, net_pnl×3, backfill_netpnl). Legacy scripts: `test_formulas.py` 107/107, `test_utils.py` 38/38. `dashboard.py` ast.parse OK.
+
+## ⚠️ No test-CI in the repo (truth gap → TASK-163)
+We assumed "CI confirms 221/0" through the whole task. **There is no workflow that runs pytest** — only `filename_guard.yml` runs on push (it passed ✅). The documented "221/0" runner (PK v3.03) is **local only**: `uv run --with-requirements requirements.txt pytest`. Opened **TASK-163** (priority MEDIUM) to add a real test-CI workflow.
+- Two traps for TASK-163: (1) `project_sync_20260418/` (gitignored snapshot) pollutes local collection via duplicate `test_formulas.py`/`config.py` — exclude it; (2) `tests/agent/integration/` needs Sheets creds — mark + skip in CI.
+
+## Task status
+- **TASK-142 → Done** (implemented; not merged).
+- **TASK-147 → In Progress** — WR-half shipped here; **expectancy-half = TASK-162** (live expectancy dual-bound surface on D1_Open + ScanPrice-NetPnL demotion; consumes the locked `calculate_net_pnl`).
+- **TASK-162** (open) — expectancy half.
+- **TASK-163** (open) — test-CI workflow.
+
+## Next steps
+1. Review branch `task-142-147-wr-d1open` → merge to main (NOT done yet — needs approval).
+2. TASK-163: add test-CI.
+3. TASK-162: build the expectancy dual-bound surface.
+
+Sentinel=shadow, DRY_RUN, zero change to ENTER/SKIP/sizing logic.

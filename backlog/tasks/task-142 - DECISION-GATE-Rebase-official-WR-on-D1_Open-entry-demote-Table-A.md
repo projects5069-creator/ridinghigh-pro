@@ -1,10 +1,10 @@
 ---
 id: TASK-142
 title: '[DECISION GATE] Rebase official WR on D1_Open entry; demote Table A'
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-06-11 04:01'
-updated_date: '2026-06-11 13:22'
+updated_date: '2026-06-12 15:08'
 labels:
   - TASK-139-INV
 dependencies: []
@@ -21,5 +21,5 @@ TASK-139-INV RH-6.2 + RH-2.6: run_eod books portfolio entries at hindsight peak-
 ## Implementation Notes
 
 <!-- SECTION:NOTES:BEGIN -->
-APPROVED 2026-06-11. Official WR rebased to D1_Open; ScanPrice table demoted to diagnostic. Impl pending.
+APPROVED 2026-06-11; IMPLEMENTED 2026-06-12 on branch task-142-147-wr-d1open (9 commits, NOT merged to main — awaiting approval). Official WR rebased to D1_Open via classify_trade(entry_price)/classify_trade_row(entry_basis) — core WIN/LOSS/WHIPSAW mapping untouched. 2 headline surfaces (Post Analysis+Home) on D1_Open + WHIPSAW-as-loss pessimistic bound (metrics_bounds.wr_bounds, TASK-147 WR-half). Table A demoted to diagnostic, Table B official. Score-research TP10_Hit 'Win Rate'→'TP10 Hit-Rate'. calculate_net_pnl scale-invariant (no entry param; locked). PK v3.07 §20. VERIFIED LOCALLY: 56 new+regression pass, formulas 107/107, utils 38/38, pytest tests/ 311 passed (only 2 live-Sheets integration env-failures, unrelated). No test-CI exists in repo (new task opened). 147 expectancy-half → TASK-162.
 <!-- SECTION:NOTES:END -->
