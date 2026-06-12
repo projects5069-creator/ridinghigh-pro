@@ -52,3 +52,17 @@ Sentinel=shadow, DRY_RUN, zero change to ENTER/SKIP/sizing logic.
 - Net: the "no pytest CI" gap that TASK-142 surfaced is closed — every push/PR now runs the suite.
 
 **Still open:** TASK-162 (TASK-147 expectancy half) · TASK-147 In Progress until 162 lands.
+
+---
+
+## Addendum — same session: TASK-155 minute-bars cache + WHIPSAW resolution
+
+**Done on branch `task-155-minute-bars` (NOT merged — branch review first). PK v3.09.**
+
+- **New modules:** `intraday_cache.py` (`get_intraday_bars_cached` — settled-day disk cache under `data/intraday_cache/`, atomic, dependency-free; wraps the existing `get_intraday_bars`) + `utils.resolve_whipsaw` (intraday WHIPSAW resolver — WIN/LOSS only if BOTH sides appear in separate minute bars, earlier decides; one-side/same-bar/neither → UNRESOLVED, never a guessed verdict; `classify_trade` untouched). TDD: cache 4 + resolver 9.
+- **Phase-0 spike was a feasibility GATE.** Critical data-quality fix: the first run enumerated 44 WHIPSAW from the raw CSV snapshot (March + v1); aligning to the official population (v2 filter + dedup + entry=D1_Open) gives **exactly 26**, and IEX coverage jumps from 62%→**96% RESOLVABLE**. Population matters.
+- **Finding (offline, `docs/research/WHIPSAW_RESOLUTION_2026-06-12/`, gitignored):** the 26 WHIPSAW resolve to **8 WIN / 17 LOSS / 1 UNRESOLVED** (XNDU — only one extreme printed on IEX). Executable WR (D1_Open): optimistic **53.5%** / **RESOLVED 49.2%** / pessimistic **42.4%**. WHIPSAW skew strongly negative (68% of resolved = LOSS) — confirms RH-6.3.
+- **Fed into:** TASK-162 (use resolved verdicts for the expectancy surface) + TASK-26 (WHIPSAW analysis). Offline only — **no change to official WR/dashboard/dataset** (that wiring is 162).
+- Provenance note for future readers: v2 filter on the CSV snapshot yields n=128 (not the report's 149) but WHIPSAW=26 matches exactly on v2/D1_Open — bookkeeping, not a contradiction. Same-ticker rows (AEHL/AIIO/CODX/MASK ×2) are distinct scans, not dups.
+
+**TASK-155 → Done. Branches awaiting review/merge: `task-155-minute-bars`.**

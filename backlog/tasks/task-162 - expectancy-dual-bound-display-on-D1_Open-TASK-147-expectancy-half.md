@@ -4,6 +4,7 @@ title: expectancy dual-bound display on D1_Open (TASK-147 expectancy half)
 status: To Do
 assignee: []
 created_date: '2026-06-12 14:21'
+updated_date: '2026-06-12 17:51'
 labels:
   - TASK-139-INV
 dependencies: []
@@ -24,4 +25,5 @@ Split from TASK-147. The WR half shipped via the 142-merged branch (headline WR 
 - [ ] #3 New D1_Open NetPnL official columns + backfill of the settled rows
 - [ ] #4 Existing ScanPrice NetPnL_* columns relabeled diagnostic (no silent removal)
 - [ ] #5 No drift: official WR (D1_Open) and official expectancy (D1_Open) share the same entry basis
+- [ ] #6 INPUT from TASK-155 (2026-06-12): intraday resolution of the 26 WHIPSAW = 8 WIN / 17 LOSS / 1 UNRESOLVED; executable WR D1_Open RESOLVED=49.2% (vs optimistic 53.5% / pessimistic 42.4%). Use the resolved verdicts (not the pessimistic-all-SL bound) for the expectancy surface where available; XNDU stays UNRESOLVED.
 <!-- AC:END -->
