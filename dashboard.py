@@ -3285,7 +3285,7 @@ def live_trades_page():
     c1.metric("⏳ Pending",   g_pending)
     c2.metric("✅ TP10 Hits", g_tp)
     c3.metric("❌ SL Hits",   g_sl)
-    c4.metric("🎯 Win Rate",  f"{g_wr:.0f}%" if g_closed > 0 else "—")
+    c4.metric("🎯 TP10 Hit-Rate",  f"{g_wr:.0f}%" if g_closed > 0 else "—")
     c5.metric("💰 Total PnL", f"${g_pnl:+.0f}")
 
     st.divider()
@@ -3317,7 +3317,7 @@ def live_trades_page():
 
         expander_label = (
             f"**{score_type}** · {desc} · "
-            f"WR: {wr_label} · PnL: ${pnl:+.0f}"
+            f"TP10 Hit-Rate: {wr_label} · PnL: ${pnl:+.0f}"
         )
 
         with st.expander(expander_label, expanded=(score_type == "Score")):
@@ -3329,7 +3329,7 @@ def live_trades_page():
             m1.metric("⏳ Pending",   n_pending)
             m2.metric("✅ TP",        n_tp)
             m3.metric("❌ SL",        n_sl)
-            m4.metric("🎯 Win Rate",  wr_label)
+            m4.metric("🎯 TP10 Hit-Rate",  wr_label)
             m5.metric("💰 PnL",       f"${pnl:+.0f}")
 
             sub["_sort"] = sub["Status"].map(STATUS_ORDER).fillna(9)
@@ -3438,7 +3438,7 @@ def score_comparison_page():
         subset = has_outcome[has_outcome[sc] >= MIN_SCORE_DISPLAY]
         n = len(subset)
         if n == 0:
-            perf_rows.append({"Score": sc, "n (≥60)": 0, "Win Rate": None,
+            perf_rows.append({"Score": sc, "n (≥60)": 0, "TP10 Hit-Rate": None,
                                "Avg MaxDrop% (winners)": None, "Best Bucket": "—"})
             continue
         win_rate = subset["TP10_Hit"].mean()
@@ -3461,13 +3461,13 @@ def score_comparison_page():
         perf_rows.append({
             "Score":                    sc,
             "n (≥60)":                  n,
-            "Win Rate":                 round(win_rate * 100, 1),
+            "TP10 Hit-Rate":            round(win_rate * 100, 1),
             "Avg MaxDrop% (winners)":   round(avg_drop, 1) if avg_drop is not None else None,
             "Best Bucket":              best_label,
         })
 
-    perf_df = pd.DataFrame(perf_rows).dropna(subset=["Win Rate"]).sort_values("Win Rate", ascending=False)
-    _perf_fmt = {"Win Rate": "{:.1f}", "Avg MaxDrop% (winners)": "{:.1f}", "n (≥60)": "{:.0f}"}
+    perf_df = pd.DataFrame(perf_rows).dropna(subset=["TP10 Hit-Rate"]).sort_values("TP10 Hit-Rate", ascending=False)
+    _perf_fmt = {"TP10 Hit-Rate": "{:.1f}", "Avg MaxDrop% (winners)": "{:.1f}", "n (≥60)": "{:.0f}"}
     st.dataframe(
         perf_df.reset_index(drop=True).style.format(_perf_fmt, na_rep="-"),
         use_container_width=True
@@ -3475,8 +3475,8 @@ def score_comparison_page():
 
     st.divider()
 
-    # ── Section 2: Win Rate by bucket (line chart) ────────────────────────────
-    st.subheader("📈 סקשן 2 — Win Rate לפי Score Bucket")
+    # ── Section 2: TP10 Hit-Rate by bucket (line chart) ───────────────────────
+    st.subheader("📈 סקשן 2 — TP10 Hit-Rate לפי Score Bucket")
 
     bucket_data = {}
     for sc in SCORE_COLS:
@@ -3549,7 +3549,7 @@ def score_comparison_page():
     st.subheader("📋 סקשן 3א — כל המניות עם ציונים")
     st.markdown(
         f"**סה\"כ {n_total} מניות** | ✅ {n_tp10} TP10 | ❌ {n_sl} SL | "
-        f"⏳ {n_pending} Pending | **Win Rate: {win_rate}%**"
+        f"⏳ {n_pending} Pending | **TP10 Hit-Rate: {win_rate}%**"
     )
 
     tbl3a = (sc3_all[base_disp_cols]
@@ -3578,13 +3578,13 @@ def score_comparison_page():
 
     # ── Section 3b: Closed stocks — performance by score ──────────────────────
     st.subheader("🎯 סקשן 3ב — השוואת ביצועים לפי ציון")
-    st.caption("רק מניות סגורות (TP10_Hit ידוע) — ממוין לפי Win Rate")
+    st.caption("רק מניות סגורות (TP10_Hit ידוע) — ממוין לפי TP10 Hit-Rate")
 
     closed = sc3_all[sc3_all["Status"] != "⏳ Pending"].copy()
     if closed.empty:
         st.info("אין מניות סגורות עדיין.")
     else:
-        # Per-score Win Rate table
+        # Per-score TP10 Hit-Rate table
         wr_rows = []
         for sc in SCORE_COLS:
             if sc not in closed.columns: continue
@@ -3594,12 +3594,12 @@ def score_comparison_page():
             wr_rows.append({
                 "ציון":          sc,
                 "n (≥60)":       len(sub),
-                "Win Rate %":    round(wr * 100, 1),
+                "TP10 Hit-Rate %":    round(wr * 100, 1),
                 "TP10":          int((sub["TP10_Hit"] == 1).sum()),
                 "SL":            int((sub["TP10_Hit"] == 0).sum()),
             })
         if wr_rows:
-            wr_df = pd.DataFrame(wr_rows).sort_values("Win Rate %", ascending=False).reset_index(drop=True)
+            wr_df = pd.DataFrame(wr_rows).sort_values("TP10 Hit-Rate %", ascending=False).reset_index(drop=True)
             def _wr_color(val):
                 try: v = float(val)
                 except: return ""
@@ -3607,7 +3607,7 @@ def score_comparison_page():
                 if v >= 50: return "background-color: #3a3a10; color: #ffff80"
                 return "background-color: #4a1a1a; color: #ff8080"
             st.dataframe(
-                wr_df.style.map(_wr_color, subset=["Win Rate %"]),
+                wr_df.style.map(_wr_color, subset=["TP10 Hit-Rate %"]),
                 use_container_width=True
             )
 
