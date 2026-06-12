@@ -54,7 +54,7 @@
 מהקבצים בלבד (דינמי — בלי תאריכים קשיחים):
 1. PK head — version + changelog (head -80 על docs/RidingHigh_Pro_PK_v2.md)
 2. ה-SESSION_HANDOFF העדכני ביותר — ls -1t docs/SESSION_HANDOFF_*.md | head -1 ואז cat עליו. לעולם לא תאריך קשיח.
-3. PROJECT_STATE.md (בשורש)
+3. PROJECT_STATE.md (בשורש) — מקומי-בלבד, gitignored (TASK-161). אם חסר (clone טרי / ריצת-ענן) — לחדש עם `uv run python3 generate_project_state.py`, לא לתהות למה הוא חסר.
 4. git log --oneline -10
 5. MASTER_TASK_LIST מלא + backlog task list --plain מלא
 6. בדיקות חיות: decision_log היום, ENTERs, Filter 9, reconciliation, agent_minute

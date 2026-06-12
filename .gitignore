@@ -81,3 +81,7 @@ research/
 # brainstorming/plan artifacts — kept locally, not tracked (TASK-108 closeout)
 docs/superpowers/
 .rh_chat_out.txt
+# Auto-generated local snapshot — regenerable with `uv run python3 generate_project_state.py`.
+# Untracked (TASK-161): committing it per-branch (timestamp/branch/commit/Sheets stats)
+# caused PROJECT_STATE.md merge-conflicts that stalled server-side squash-merges.
+PROJECT_STATE.md

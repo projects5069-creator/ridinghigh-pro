@@ -12,7 +12,7 @@ For specific topics:
 - **Open issues:** [`OPEN_ISSUES.md`](OPEN_ISSUES.md)
 - **Health audit system:** [`README_health_audit.md`](README_health_audit.md)
 - **Code conventions:** [`CLAUDE.md`](CLAUDE.md)
-- **Auto-generated state:** [`PROJECT_STATE.md`](PROJECT_STATE.md)
+- **Auto-generated state:** `PROJECT_STATE.md` — local-only, **not in the repo** (gitignored). Regenerate it after a fresh clone / cloud run with `uv run python3 generate_project_state.py` (TASK-161).
 
 ## 🔧 Quick Links
 
