@@ -34,3 +34,30 @@ def test_entry_price_none_equals_scanprice():
 def test_invalid_entry_price_is_pending():
     assert classify_trade(10.0, GAP_OHLC, entry_price=0) == ("PENDING", None)
     assert classify_trade(10.0, GAP_OHLC, entry_price=-1) == ("PENDING", None)
+
+
+# ───────────────── classify_trade_row entry_basis selector (Task 2) ─────────────────
+def _row(**over):
+    base = {
+        "ScanPrice": 10.0, "D1_Open": 8.5,
+        "D1_High": 9.5, "D1_Low": 8.9,
+        "D2_High": 9.0, "D2_Low": 8.0, "D3_High": 9.0, "D3_Low": 8.0,
+        "D4_High": 9.0, "D4_Low": 8.0, "D5_High": 9.0, "D5_Low": 8.0,
+    }
+    base.update(over)
+    return base
+
+
+def test_row_default_basis_is_scanprice():
+    assert classify_trade_row(_row()) == "WIN"           # ScanPrice basis, unchanged
+
+
+def test_row_d1open_basis_flips():
+    assert classify_trade_row(_row(), entry_basis="D1_Open") == "LOSS"   # executable entry
+
+
+def test_row_d1open_missing_is_pending():
+    # executable basis requested but no valid D1_Open -> PENDING (never silently
+    # falls back to ScanPrice)
+    assert classify_trade_row(_row(D1_Open=None), entry_basis="D1_Open") == "PENDING"
+    assert classify_trade_row(_row(D1_Open=0), entry_basis="D1_Open") == "PENDING"

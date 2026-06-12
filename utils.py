@@ -557,11 +557,16 @@ def classify_trade(scan_price, ohlc, entry_price=None):
     return ('NO_TOUCH', 5)          # 5 full days, never resolved
 
 
-def classify_trade_row(row):
+def classify_trade_row(row, entry_basis="ScanPrice"):
     """DataFrame-row adapter for classify_trade().
 
     Pulls ScanPrice and D1-D5 OHLC from a post_analysis row (pandas Series
     or dict) and returns the WIN/LOSS/WHIPSAW/NO_TOUCH/PENDING classification.
+
+    entry_basis="ScanPrice" (default, Table-A diagnostic) classifies on the
+    scan-time price. entry_basis="D1_Open" (TASK-142 official/executable) uses
+    next-day open; if D1_Open is missing/invalid the row is PENDING — it never
+    silently falls back to ScanPrice.
     Single source of truth — every caller goes through classify_trade().
     """
     import pandas as _pd
@@ -578,7 +583,12 @@ def classify_trade_row(row):
     for i in range(1, 6):
         for k in ("High", "Low"):
             ohlc[f"D{i}_{k}"] = _num(row.get(f"D{i}_{k}"))
-    return classify_trade(scan_price, ohlc)[0]   # classification string only (dashboard callers unbroken)
+    if entry_basis == "D1_Open":
+        d1_open = _num(row.get("D1_Open"))
+        if d1_open is None or d1_open <= 0:
+            return "PENDING"        # executable basis requested but no valid D1_Open
+        return classify_trade(scan_price, ohlc, entry_price=d1_open)[0]
+    return classify_trade(scan_price, ohlc)[0]   # ScanPrice basis (dashboard callers unbroken)
 
 
 # ═══════════════════════════════════════════════════════════════════════
