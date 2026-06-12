@@ -1,9 +1,10 @@
 ---
 id: TASK-163
 title: הוסף test-CI workflow (uv run pytest על push/PR)
-status: To Do
+status: In Progress
 assignee: []
 created_date: '2026-06-12 15:08'
+updated_date: '2026-06-12 15:22'
 labels: []
 dependencies: []
 priority: medium

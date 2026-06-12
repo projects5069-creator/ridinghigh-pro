@@ -1,0 +1,35 @@
+name: tests
+
+# TASK-163: the repo previously had NO workflow running pytest — only
+# filename_guard ran on push, so "CI is green" never actually proved the test
+# suite. This runs the unit suite on every push / PR.
+#
+# - Integration tests (live Google Sheets, marked `integration` by path in
+#   tests/conftest.py) are skipped via `-m "not integration"` — the runner has
+#   no Sheets credentials.
+# - Script-style test_formulas.py / test_utils.py are NOT pytest-collectible
+#   (pytest.ini scopes collection to tests/) and run as plain scripts below.
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  pytest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+
+      - name: Unit suite (integration skipped)
+        run: uv run --with-requirements requirements.txt --with pytest pytest -m "not integration" -q
+
+      - name: Script-style tests (formulas 107/107 + utils)
+        run: |
+          uv run --with-requirements requirements.txt python3 test_formulas.py
+          uv run --with-requirements requirements.txt python3 test_utils.py
