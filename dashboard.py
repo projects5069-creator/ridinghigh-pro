@@ -2322,23 +2322,26 @@ def post_analysis_page():
         return
 
     # ── Realistic outcome classification (day-by-day, see utils.classify_trade) ──
+    # TASK-142: entry_basis=D1_Open (executable entry), not ScanPrice (peak-Score hindsight).
     from utils import classify_trade_row
-    _outcomes = df.apply(classify_trade_row, axis=1)
+    _outcomes = df.apply(lambda r: classify_trade_row(r, entry_basis="D1_Open"), axis=1)
     n_win   = int((_outcomes == "WIN").sum())
     n_loss  = int((_outcomes == "LOSS").sum())
     n_whip  = int((_outcomes == "WHIPSAW").sum())
     n_notch = int((_outcomes == "NO_TOUCH").sum())
     n_pend  = int((_outcomes == "PENDING").sum())
     n_decided = n_win + n_loss
-    win_rate = (n_win / n_decided * 100) if n_decided else 0
+    from metrics_bounds import wr_bounds
+    _wr = wr_bounds(n_win, n_loss, n_whip)
 
-    st.subheader("🎯 Win Rate אמיתי — עסקאות שהוכרעו")
-    st.caption("רק עסקאות שעברו 5 ימי מסחר מלאים ונגעו בקצה אחד בלבד. "
-               "סיווג יום-אחר-יום (utils.classify_trade) — מי נגע ראשון, TP או SL.")
+    st.subheader("🎯 Win Rate אמיתי — כניסה ב-D1_Open (executable)")
+    st.caption("כניסה ב-D1_Open (TASK-142), לא ScanPrice. ה-Headline מחריג WHIPSAW; "
+               "החסם הפסימי סופר WHIPSAW כהפסד (TASK-147). רק עסקאות שעברו 5 ימי מסחר "
+               "מלאים — סיווג יום-אחר-יום (utils.classify_trade), מי נגע ראשון TP או SL.")
     c1, c2, c3 = st.columns(3)
-    c1.metric("Win Rate", f"{win_rate:.1f}%", f"{n_decided} עסקאות שהוכרעו")
-    c2.metric("✅ רווח (TP)", n_win)
-    c3.metric("❌ הפסד (SL)", n_loss)
+    c1.metric("Win Rate (headline)", f"{_wr['optimistic']:.1f}%", f"{n_decided} עסקאות שהוכרעו")
+    c2.metric("⚠️ חסם פסימי (WHIPSAW=SL)", f"{_wr['pessimistic']:.1f}%", f"+{n_whip} whipsaw כהפסד")
+    c3.metric("✅ TP / ❌ SL", f"{n_win} / {n_loss}")
 
     st.divider()
     st.subheader("🔍 קטגוריות לחקירה — לא נספרות ב-Win Rate")
@@ -5110,13 +5113,17 @@ def dashboard_home_page():
                 df[col] = pd.to_numeric(df[col], errors="coerce")
         total_stocks  = len(df)
         # Use classify_trade_row (PK v2.16) — same source-of-truth as Post Analysis page.
-        # Old metric (TP10_Hit.mean()) counted whipsaws as wins, inflating WR.
+        # TASK-142: entry_basis=D1_Open (executable), not ScanPrice. Old TP10_Hit.mean()
+        # counted whipsaws as wins on the inflated ScanPrice basis.
         from utils import classify_trade_row
-        _outcomes_home = df.apply(classify_trade_row, axis=1)
+        from metrics_bounds import wr_bounds
+        _outcomes_home = df.apply(lambda r: classify_trade_row(r, entry_basis="D1_Open"), axis=1)
         _n_win        = int((_outcomes_home == "WIN").sum())
         _n_loss       = int((_outcomes_home == "LOSS").sum())
+        _n_whip_home  = int((_outcomes_home == "WHIPSAW").sum())
         _n_decided    = _n_win + _n_loss
-        win_rate_hist = f"{_n_win / _n_decided * 100:.0f}%" if _n_decided > 0 else "—"
+        _wrh          = wr_bounds(_n_win, _n_loss, _n_whip_home)
+        win_rate_hist = f"{_wrh['optimistic']:.0f}%" if _n_decided > 0 else "—"
         winners       = df[_outcomes_home == "WIN"]
         has_outcome   = df[_outcomes_home.isin(["WIN", "LOSS"])]  # for delta count
         avg_drop      = winners["MaxDrop%"].mean() if not winners.empty and "MaxDrop%" in winners.columns else None
@@ -5126,7 +5133,7 @@ def dashboard_home_page():
         n_days        = df["ScanDate"].nunique() if "ScanDate" in df.columns else "?"
 
         m1, m2, m3, m4 = st.columns(4)
-        m1.metric("🎯 Win Rate",           win_rate_hist, delta=f"{_n_decided}/{len(df)} הוכרעו")
+        m1.metric("🎯 Win Rate",           win_rate_hist, delta=f"פסימי {_wrh['pessimistic']:.0f}% · {_n_decided}/{len(df)} הוכרעו")
         m2.metric("📋 מניות",              total_stocks,  delta=f"{n_days} ימים")
         m3.metric("📉 Avg Drop (winners)", avg_drop_str)
         m4.metric("🏆 Best Score",         best_score_str)
