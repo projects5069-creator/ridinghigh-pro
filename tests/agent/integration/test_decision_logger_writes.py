@@ -123,7 +123,8 @@ def test_write_real_decision_to_sheet():
 
 
 def test_decision_id_format_in_sheet():
-    """Verify the ID returned matches DEC-YYYY-MM-DD-NNNNN format."""
+    """Verify the ID matches DEC-YYYY-MM-DD-TICKER-HHMMSS-ff (current timestamp
+    format, Bug#3 fix) — or the T-fallback / legacy 5-digit forms."""
     sheet_id = _get_decision_log_sheet_id()
 
     decision = Decision(
@@ -137,5 +138,5 @@ def test_decision_id_format_in_sheet():
     decision_id = logger.log(decision)
 
     assert decision_id is not None
-    pattern = r"^DEC-\d{4}-\d{2}-\d{2}-(\d{5}|T\d{6})$"
+    pattern = r"^DEC-\d{4}-\d{2}-\d{2}-(?:[A-Z0-9]+-\d{6}-\d{2}|T\d{6}|\d{5})$"
     assert re.match(pattern, decision_id), f"ID format wrong: {decision_id}"

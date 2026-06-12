@@ -1,19 +1,19 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-06-11 20:00:17 (local)
-**Branch:** `main`
-**Latest commit:** `28a9356` — chore(backlog): TASK-133 — filename-length guard merged (#16), mark Done
+**Generated:** 2026-06-11 20:23:00 (local)
+**Branch:** `night/TASK-160`
+**Latest commit:** `ace4da5` — test(agent): TASK-160 — fix stale decision_id regex in integration test
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `28a9356 (HEAD -> main) chore(backlog): TASK-133 — filename-length guard merged (#16), mark Done`
-- `8fe4bbe (origin/main, origin/HEAD) feat(ci): TASK-133 filename-length guard — SSoT byte-check + CI workflow + pre-commit refactor (#16)`
+- `ace4da5 (HEAD -> night/TASK-160) test(agent): TASK-160 — fix stale decision_id regex in integration test`
+- `e1167b7 (origin/main, origin/HEAD, main) chore(backlog): TASK-133 — filename-length guard merged (#16), mark Done`
+- `8fe4bbe feat(ci): TASK-133 filename-length guard — SSoT byte-check + CI workflow + pre-commit refactor (#16)`
 - `7c3d7cb docs(handoff): session 2026-06-11 — TASK-139/134/140 done, 142 next, clipboard fixed.`
 - `c168c5a chore(backlog): TASK-160 — stale integration test follow-up (To Do)`
-- `f9bc3b9 docs(pk): TASK-140 v3.04 — net-PnL cost model in post_analysis (calculate_net_pnl, 4 cols, 832 cells backfilled) + mark Done.`
 
 ---
 
@@ -32,11 +32,11 @@ _See `OPEN_ISSUES.md` for full list_
 
 | Workflow | Status | Conclusion | Started |
 |---|---|---|---|
+| filename-length guard | completed | ✅ success | 2026-06-12 01:20 UTC |
+| filename-length guard | completed | ✅ success | 2026-06-12 01:19 UTC |
+| filename-length guard | completed | ✅ success | 2026-06-12 01:00 UTC |
 | filename-length guard | completed | ✅ success | 2026-06-12 00:58 UTC |
 | filename-length guard | completed | ✅ success | 2026-06-12 00:45 UTC |
-| filename-length guard | completed | ✅ success | 2026-06-12 00:45 UTC |
-| Agent — Critic (daily) | completed | ✅ success | 2026-06-11 23:12 UTC |
-| Daily Backup — post_analysis | completed | ✅ success | 2026-06-11 23:07 UTC |
 
 ---
 
