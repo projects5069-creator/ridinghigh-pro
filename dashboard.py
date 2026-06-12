@@ -2345,6 +2345,38 @@ def post_analysis_page():
     c2.metric("⚠️ חסם פסימי (WHIPSAW=SL)", f"{_wr['pessimistic']:.1f}%", f"+{n_whip} whipsaw כהפסד")
     c3.metric("✅ TP / ❌ SL", f"{n_win} / {n_loss}")
 
+    # ── Expectancy (executable D1_Open) — TASK-162 / TASK-147 dual bound ──────────
+    from formulas import calculate_net_pnl
+    from config import BORROW_SCENARIOS, SLIP
+    from metrics_bounds import expectancy_bounds
+    from utils import classify_trade_row_full
+
+    _clsday = df.apply(lambda r: classify_trade_row_full(r, entry_basis="D1_Open"), axis=1)
+    _rows_cd = [(c, d, pd.to_numeric(r.get("ScanPrice"), errors="coerce"))
+                for (c, d), (_, r) in zip(_clsday, df.iterrows())]
+    _exp_rows = []
+    for _b in BORROW_SCENARIOS:
+        _dec = [calculate_net_pnl(sp, c, d, _b, slip=SLIP) for (c, d, sp) in _rows_cd if c in ("WIN", "LOSS")]
+        _whip = [calculate_net_pnl(sp, "LOSS", d, _b, slip=SLIP) for (c, d, sp) in _rows_cd if c == "WHIPSAW"]
+        _e = expectancy_bounds(_dec, _whip)
+        _exp_rows.append({
+            "Borrow (annual)": f"{_b * 100:.0f}%",
+            "Optimistic (WHIPSAW מוחרג)": f"{_e['optimistic'] * 100:+.2f}%",
+            "⚠️ Pessimistic (WHIPSAW=SL)": f"{_e['pessimistic'] * 100:+.2f}%",
+        })
+
+    st.divider()
+    st.subheader("💰 Expectancy אמיתי — executable D1_Open (pct/trade)")
+    st.caption(
+        "תוחלת PnL לעסקה על בסיס **D1_Open** (executable, TASK-142/147) — אופטימי (WHIPSAW מוחרג) "
+        "מול פסימי (WHIPSAW=SL), תחת borrow 50/200/500. ⚠️ ה-expectancy **שלילי גם אופטימית**: עם "
+        "slip ה-breakeven WR ≈ 60.8%, וה-WR בפועל ~53.5% → תוחלת שלילית. זה **ממצא** (RH-6.3 — "
+        "ה-edge ה-executable שלילי תחת borrow ריאלי), לא באג בתצוגה. העוגן הישן +1.06/−1.28 היה "
+        "ScanPrice (חקירה-era, אותו look-ahead ש-142 תיקן). העמודות NetPnL_* המתמשכות הן "
+        "ScanPrice / Table-A **diagnostic**, לא משטח זה."
+    )
+    st.dataframe(pd.DataFrame(_exp_rows), use_container_width=True, hide_index=True)
+
     st.divider()
     st.subheader("🔍 קטגוריות לחקירה — לא נספרות ב-Win Rate")
     st.caption("עסקאות שלא הוכרעו באופן נקי. כל קטגוריה היא שאלת מחקר בפני עצמה.")

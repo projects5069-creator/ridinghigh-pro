@@ -473,6 +473,10 @@ def calculate_stats(scan_price, ohlc):
             break
     
     # TASK-140: net-PnL per cost scenario (None for PENDING/WHIPSAW/NO_TOUCH — same SSoT walk)
+    # TASK-162: these persisted NetPnL_* are ScanPrice / Table-A DIAGNOSTIC (classify_trade
+    # defaults to scan_price here). The official EXECUTABLE expectancy is computed on-the-fly
+    # on D1_Open in the dashboard (classify_trade_row_full + metrics_bounds.expectancy_bounds);
+    # it is NOT persisted. Do not treat these columns as the official expectancy.
     cls, day = classify_trade(scan_price, ohlc)
     net_borrow = [calculate_net_pnl(scan_price, cls, day, r, slip=SLIP) for r in BORROW_SCENARIOS]
 
