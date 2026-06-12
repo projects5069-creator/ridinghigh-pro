@@ -1,9 +1,10 @@
 ---
 id: TASK-118
 title: תיעוד/הסדרת sandbox egress — כל push/gh/RemoteTrigger דורש השבתת sandbox
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-06-08 17:53'
+updated_date: '2026-06-12 01:34'
 labels:
   - infra
   - sandbox

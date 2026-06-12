@@ -3,10 +3,10 @@ id: TASK-138
 title: >-
   PK doc drift cleanup — SYSTEM_REVIEW C items 3/5/6/7 (validate_atrx/normalize
   docstrings, TL;DR 3-pages, score_tracker cadence, stale §29 stats)
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-06-10 19:18'
-updated_date: '2026-06-11 04:01'
+updated_date: '2026-06-12 01:34'
 labels:
   - docs
   - drift
