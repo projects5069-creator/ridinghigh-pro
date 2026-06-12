@@ -40,3 +40,26 @@ def expectancy_bounds(decided_nets, whipsaw_as_loss_nets):
     alln = dec + [x for x in whipsaw_as_loss_nets if x is not None]
     pess = (sum(alln) / len(alln)) if alln else 0.0
     return {"optimistic": opt, "pessimistic": pess}
+
+
+def resolved_class(verdict, fallback="LOSS"):
+    """Map a TASK-155 intraday WHIPSAW verdict to an effective class for the
+    RESOLVED third bound (TASK-164):
+
+      'WIN'        -> 'WIN'      (TP touched first intraday)
+      'LOSS'       -> 'LOSS'     (SL touched first intraday)
+      'UNRESOLVED' -> None       (excluded — could not be ordered on minutes)
+      anything else (missing/None/unknown) -> fallback (default 'LOSS')
+
+    The fallback is **pessimistic** by design: a WHIPSAW row absent from the
+    (as-of) snapshot is counted as a loss, so the resolved bound never *over*-states
+    the edge as the dataset grows past the snapshot. 'UNRESOLVED' is always excluded,
+    even if fallback is overridden.
+    """
+    if verdict == "WIN":
+        return "WIN"
+    if verdict == "LOSS":
+        return "LOSS"
+    if verdict == "UNRESOLVED":
+        return None
+    return fallback

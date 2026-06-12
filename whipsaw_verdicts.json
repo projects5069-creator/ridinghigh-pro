@@ -1,0 +1,32 @@
+{
+  "snapshot_date": "2026-06-12",
+  "source": "TASK-155 docs/research/WHIPSAW_RESOLUTION_2026-06-12/whipsaw_resolution.csv",
+  "verdicts": {
+    "MNTS|2026-04-13": "WIN",
+    "RMSG|2026-04-13": "WIN",
+    "XNDU|2026-04-15": "UNRESOLVED",
+    "MAAS|2026-04-17": "LOSS",
+    "TRT|2026-04-23": "WIN",
+    "RDAC|2026-04-29": "LOSS",
+    "AKAN|2026-04-30": "LOSS",
+    "SKK|2026-05-04": "LOSS",
+    "PHOE|2026-05-05": "LOSS",
+    "WOK|2026-05-11": "WIN",
+    "AEHL|2026-05-12": "WIN",
+    "BWEN|2026-05-12": "LOSS",
+    "AEHL|2026-05-13": "LOSS",
+    "AIIO|2026-05-13": "LOSS",
+    "AIIO|2026-05-14": "LOSS",
+    "WNW|2026-05-19": "LOSS",
+    "HCWB|2026-05-20": "WIN",
+    "PCLA|2026-05-21": "LOSS",
+    "AIMD|2026-05-26": "WIN",
+    "CODX|2026-05-26": "LOSS",
+    "ASTC|2026-05-27": "LOSS",
+    "QTEX|2026-05-27": "LOSS",
+    "CODX|2026-05-28": "LOSS",
+    "MASK|2026-05-28": "LOSS",
+    "SPCE|2026-05-29": "LOSS",
+    "VCIG|2026-05-29": "WIN"
+  }
+}

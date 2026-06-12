@@ -13,6 +13,8 @@ data/
 *.csv
 *.json
 !sheets_config.json
+# TASK-164 — committed WHIPSAW intraday verdict snapshot (deploy-visible)
+!whipsaw_verdicts.json
 
 # Streamlit
 .streamlit/secrets.toml

@@ -1,9 +1,10 @@
 ---
 id: TASK-164
 title: Resolved expectancy/WR third-bound from intraday verdicts (TASK-155)
-status: To Do
+status: In Progress
 assignee: []
 created_date: '2026-06-12 18:27'
+updated_date: '2026-06-12 20:19'
 labels:
   - TASK-139-INV
 dependencies: []
