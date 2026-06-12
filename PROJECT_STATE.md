@@ -1,15 +1,15 @@
 # RidingHigh Pro — Project State
 *Auto-generated. Do not edit manually.*
 
-**Generated:** 2026-06-11 20:26:07 (local)
-**Branch:** `night/TASK-118`
-**Latest commit:** `f6fb46a` — docs(infra): TASK-118 — document sandbox egress as standing behavior (§8)
+**Generated:** 2026-06-11 20:19:27 (local)
+**Branch:** `night/pk-doc-drift`
+**Latest commit:** `cb5cf39` — docs(pk): TASK-138 v3.05 — PK doc drift cleanup (workflows 7→16, validate_atrx/normalize return types, dashboard 3→12 pages, §29 label)
 
 ---
 
 ## 📜 Recent commits (last 5)
 
-- `f6fb46a (HEAD -> night/TASK-118) docs(infra): TASK-118 — document sandbox egress as standing behavior (§8)`
+- `cb5cf39 (HEAD -> night/pk-doc-drift) docs(pk): TASK-138 v3.05 — PK doc drift cleanup (workflows 7→16, validate_atrx/normalize return types, dashboard 3→12 pages, §29 label)`
 - `e1167b7 (origin/main, origin/HEAD, main) chore(backlog): TASK-133 — filename-length guard merged (#16), mark Done`
 - `8fe4bbe feat(ci): TASK-133 filename-length guard — SSoT byte-check + CI workflow + pre-commit refactor (#16)`
 - `7c3d7cb docs(handoff): session 2026-06-11 — TASK-139/134/140 done, 142 next, clipboard fixed.`
@@ -32,11 +32,11 @@ _See `OPEN_ISSUES.md` for full list_
 
 | Workflow | Status | Conclusion | Started |
 |---|---|---|---|
-| filename-length guard | completed | ✅ success | 2026-06-12 01:23 UTC |
-| filename-length guard | completed | ✅ success | 2026-06-12 01:23 UTC |
-| filename-length guard | completed | ✅ success | 2026-06-12 01:20 UTC |
-| filename-length guard | completed | ✅ success | 2026-06-12 01:19 UTC |
 | filename-length guard | completed | ✅ success | 2026-06-12 01:00 UTC |
+| filename-length guard | completed | ✅ success | 2026-06-12 00:58 UTC |
+| filename-length guard | completed | ✅ success | 2026-06-12 00:45 UTC |
+| filename-length guard | completed | ✅ success | 2026-06-12 00:45 UTC |
+| Agent — Critic (daily) | completed | ✅ success | 2026-06-11 23:12 UTC |
 
 ---
 
