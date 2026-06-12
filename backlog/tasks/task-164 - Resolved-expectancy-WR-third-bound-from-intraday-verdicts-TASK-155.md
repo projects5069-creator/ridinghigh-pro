@@ -1,10 +1,10 @@
 ---
 id: TASK-164
 title: Resolved expectancy/WR third-bound from intraday verdicts (TASK-155)
-status: In Progress
+status: Done
 assignee: []
 created_date: '2026-06-12 18:27'
-updated_date: '2026-06-12 20:19'
+updated_date: '2026-06-12 20:34'
 labels:
   - TASK-139-INV
 dependencies: []
@@ -24,3 +24,9 @@ Deferred from TASK-162 (AC #6). TASK-155 resolved the 26 WHIPSAW on minute bars 
 - [ ] #2 Add a RESOLVED third bound to the headline WR and the expectancy surface (between optimistic and pessimistic)
 - [ ] #3 UNRESOLVED rows (e.g. XNDU) stay excluded from the resolved bound
 <!-- AC:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+DONE 2026-06-12 on branch task-164-resolved-bound (not merged — review first). Resolved third bound on WR (Post Analysis + Home) + expectancy surface, reading committed whipsaw_verdicts.json (deploy-visible via .gitignore exception, mirrors sheets_config.json). metrics_bounds.resolved_class (fallback=pessimistic). Resolved WR=49.2% (base 53W/46L + intraday 8W/17L from TASK-155; XNDU UNRESOLVED excluded) — between optimistic 53.5% and pessimistic 42.4%. Guarded: file-absent -> resolved omitted, never crash. AC #1/#2/#3 satisfied. Snapshot is static (as-of 2026-06-12); fallback=pessimistic keeps it conservative as data grows. No schema/persisted change. Refinement over the negative-edge finding (PK v3.10), not a new finding.
+<!-- SECTION:NOTES:END -->

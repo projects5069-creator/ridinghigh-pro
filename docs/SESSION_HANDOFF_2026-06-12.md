@@ -79,3 +79,17 @@ Sentinel=shadow, DRY_RUN, zero change to ENTER/SKIP/sizing logic.
 - **TASK-147 → Done** (permanent dual reporting complete: WR via 142, expectancy via 162). The resolved third-bound (from TASK-155's intraday verdicts) → **TASK-164** (needs verdict persistence; deferred).
 
 **TASK-162 → Done. Branch awaiting review/merge: `task-162-expectancy`.**
+
+---
+
+## Addendum — same session: TASK-164 resolved (third) bound
+
+**Done on branch `task-164-resolved-bound` (NOT merged — review first). PK v3.11.**
+
+- **New:** `whipsaw_verdicts.json` (committed snapshot of the 26 TASK-155 verdicts; deploy-visible via a `.gitignore` exception `!whipsaw_verdicts.json` — mirrors `!sheets_config.json`) + `metrics_bounds.resolved_class` (fallback=pessimistic) + a **resolved third bound** on the headline WR (Post Analysis + Home) and the expectancy surface, guarded (file-absent → resolved omitted, never crash).
+- **Resolved WR = 49.2%** (base 53W/46L + intraday 8W/17L; XNDU UNRESOLVED excluded) — between optimistic 53.5% and pessimistic 42.4%, matching TASK-155 exactly (sanity anchor held — not forced).
+- **Fallback = pessimistic (LOSS)** for WHIPSAW absent from the static snapshot, so the bound never over-states the edge as the dataset grows. UI labels it "as-of 2026-06-12 snapshot".
+- This is a **refinement** over the negative-edge finding (PK v3.10), not a new finding. No schema/persisted/official-WR-metric change.
+- Gotcha caught: inline comments in `.gitignore` break negation patterns — the exception comment must be on its own line.
+
+**TASK-164 → Done. Branch awaiting review/merge: `task-164-resolved-bound`.**
