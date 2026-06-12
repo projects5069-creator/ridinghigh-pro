@@ -327,7 +327,15 @@ def calculate_net_pnl(scan_price, classification, resolution_day, borrow_annual_
     """Net short-side PnL FRACTION after slippage + borrow (TASK-140, phase6 cost model).
 
     Only WIN/LOSS are computable (classify_trade literals — utils.py:533/535);
-    WHIPSAW/NO_TOUCH/PENDING -> None (NULL cell). Table-A basis (ScanPrice + TP/SL sim).
+    WHIPSAW/NO_TOUCH/PENDING -> None (NULL cell).
+
+    ENTRY BASIS (TASK-142/147): this FRACTION is scale-invariant to the entry —
+    gross = 1 - (1∓frac)(1+slip)/(1-slip), the entry cancels (TP/SL are fractions of
+    it). So there is deliberately NO entry_price param here: the D1_Open-vs-ScanPrice
+    expectancy difference is carried ENTIRELY by the (classification, resolution_day)
+    fed in — produced by classify_trade(entry_price=...). For official D1_Open
+    expectancy (TASK-162), pass D1_Open-based cls/day into this unchanged function.
+    Locked by tests/test_netpnl_entry_basis_v1.py.
 
         fill  = scan * (1 - slip)                                  # short entry, adverse (lower)
         exit  = scan * (1 - TP_FRAC) [WIN]  /  scan * (1 + SL_FRAC) [LOSS]
