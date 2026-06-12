@@ -42,3 +42,13 @@ We assumed "CI confirms 221/0" through the whole task. **There is no workflow th
 3. TASK-162: build the expectancy dual-bound surface.
 
 Sentinel=shadow, DRY_RUN, zero change to ENTER/SKIP/sizing logic.
+
+---
+
+## Addendum — same session: TASK-142 merged + TASK-163 (test-CI) done
+
+- **TASK-142 + WR-half of TASK-147 merged to main** (ff-only). HEAD after that: `f68f119`.
+- **TASK-163 — Done & merged** (`649c2bb`): added the repo's **first real test-CI**. `.github/workflows/tests.yml` runs `pytest -m "not integration"` + the script-style tests on push/PR; `pytest.ini` (`testpaths=tests`) + `tests/conftest.py` (auto-mark `tests/agent/integration` as `integration`). **Verified running green on a clean runner — on both the branch AND main**: 301 passed / 2 skipped / 3 deselected (integration), formulas 107/107, utils 38/38, conclusion=success. PK → v3.08 (workflow count 16→17).
+- Net: the "no pytest CI" gap that TASK-142 surfaced is closed — every push/PR now runs the suite.
+
+**Still open:** TASK-162 (TASK-147 expectancy half) · TASK-147 In Progress until 162 lands.

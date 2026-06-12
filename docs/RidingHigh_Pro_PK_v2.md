@@ -16,10 +16,11 @@
 | **Latest commit referenced** | `e4d3c84` — refactor(p4.6): AST-based check_02 + hidden bug fix |
 | **Active month at generation** | 2026-04 (with 2026-05 active, 2026-06 pre-created) |
 | **Codebase size** | ~13,000 lines Python across 60+ active files |
-| **Active workflows** | 16 GitHub Actions workflows |
+| **Active workflows** | 17 GitHub Actions workflows (incl. `tests.yml` test-CI — TASK-163) |
 
 ### Document Changelog
 ```
+v3.08 (2026-06-12): TASK-163 — נוסף **test-CI אמיתי**. עד כה הריפו לא הריץ pytest ב-CI כלל (רק filename_guard) — הפער התגלה ב-TASK-142 (הנחנו "CI ירוק 221/0" שלא קיים; ה-221/0 המתועד הוא הרצה מקומית). נוסף `.github/workflows/tests.yml` (`uv run --with-requirements requirements.txt --with pytest pytest -m "not integration"` על push+PR; + `test_formulas`/`test_utils` כסקריפטים), `pytest.ini` (`testpaths=tests` — מוציא קבצי-סקריפט root + snapshot `project_sync_20260418` מ-collection), `tests/conftest.py` (auto-mark לפי path של `tests/agent/integration` כ-`integration` → מדולגים ב-CI ללא Sheets creds). ריצה ראשונה על main: **301 passed / 2 skipped / 3 deselected** (integration) + formulas 107/107 + utils 38/38 = success על runner נקי. Active workflows 16→17. אפס שינוי לוגיקת מסחר. Sentinel=shadow, DRY_RUN.
 v3.07 (2026-06-12): TASK-142+147(WR-half) — ה-WR הרשמי עבר ל-**D1_Open (executable)** במקום ScanPrice (run_eod peak-Score hindsight, +13.6pp look-ahead; executable ~53-55% מול ~58% הישן). `classify_trade(scan,ohlc,entry_price=None)` + `classify_trade_row(row,entry_basis="D1_Open")` — ליבת WIN/LOSS/WHIPSAW **לא נגעה**, רק עוגן TP/SL זז; D1_Open חסר→PENDING (אין נפילה שקטה ל-ScanPrice). 2 משטחי headline (Post Analysis + Home) → D1_Open + **חסם WHIPSAW-as-loss פסימי** לצד ה-headline (`metrics_bounds.wr_bounds`, policy-layer בלבד; הליבה ממשיכה להחזיר WHIPSAW). §20 Table A→דיאגנוסטי / Table B→רשמי. `calculate_net_pnl`: **אין** entry_price — ה-PnL fraction scale-invariant (entry מצטמצם; ה-basis נישא ע"י (cls,day) מ-classify_trade), נעול ב-test_netpnl_entry_basis_v1. משטח expectancy חי → TASK-162. אתרי Score-research "Win Rate" (TP10_Hit window-touch, ScanPrice) → "**TP10 Hit-Rate**" לדיסאמביגואציה. §15 schema ללא שינוי. TDD: 142(7)+netpnl-lock(3)+wr_bounds(5)=15 חדשים; classify/phase6-equiv/utils 38/38/formulas 107/107 ירוקים. אפס שינוי ENTER/SKIP/sizing. Sentinel=shadow, DRY_RUN.
 v3.06 (2026-06-11): TASK-150 — §15 Data Schema: תועד drift סדר/מספר-עמודות חוצה-חודשים ב-post_analysis (docs-only, ממקור-ריבו `phase4_evidence.md`, אפס קריאת-Sheets): אפריל 122 עמ' (17 legacy-only: Volume/MarketCap/Score_B..I/EntryScore...) מול מאי-יוני 105; מאי↔יוני אותה קבוצה בסדר שונה מ-idx 60 (`score_version` הוזז לפני IntraHigh) → קוראים positional נשברים חוצה-חודשים; להשתמש בקריאה header-aware (`cross_month_loaders.py` כבר מיישר לפי שם). דגל (לא בוצע — נדרש scope קוד): enforcement מלא של כל הקוראים להיות header-aware (חלק ה-"audit/enforce" של 150). חלק מ-batch 2c-1 (supervised auto-mode). אפס שינוי לוגיקת מסחר. DRY_RUN, Sentinel=shadow.
 v3.05 (2026-06-11): TASK-138 — ניקוי drift תיעודי ב-PK (docs-only, אפס שינוי קוד, מאומת מול הקוד החי): §19 inventory — validate_atrx bool→float (מחזיר atrx/0 על bad-data), normalize_mxv/atrx 0-1→0-100 + סומנו unused (אפס call-sites, רק import ב-dashboard); §1 + §A טבלת-תשתית — Active workflows 7→16 (ספירה חיה `.github/workflows/*.yml` כולל filename_guard); §2 TL;DR — Dashboard "3 pages"→12 (לפי `_PAGE_NAMES` sidebar nav); §29 כותרת "(current)"→"(as of 2026-05-02 snapshot)". נדחו מ-138 ודווחו לעמיחי (לא נגעתי, דורש אימות/scope אחר): ROCKET 16/0 OOS (נתון OOS לא-מאומת), §29 numbers→276/172 (דורש קריאת Sheet חיה), score_tracker §20 (כבר מתועד ב-§A6 שורה 1341), Sheets-mirror (TASK-152), "3 pages" ב-2 דיאגרמות ASCII + ADR-008 (שמירת alignment/היסטוריה). אפס שינוי לוגיקת מסחר. DRY_RUN, Sentinel=shadow.
@@ -1248,7 +1249,7 @@ Legend:
 | Component | Provider | Tier | Purpose |
 |-----------|----------|------|---------|
 | Code hosting | GitHub | Free | Repo, Actions, Secrets |
-| Automation | GitHub Actions | Free (~3000 min/mo) | 16 workflows |
+| Automation | GitHub Actions | Free (~3000 min/mo) | 17 workflows |
 | Minute-level cron | cron-job.org | Free | Triggers `auto_scan.yml` |
 | Data storage | Google Sheets | Free | All operational data |
 | Long-term backup | Google Drive | Free (15 GB) | CSV archives |
