@@ -46,14 +46,14 @@ uv run python3 "$SCRIPT" || {
     exit 0
 }
 
-# Amend commit ONLY if PROJECT_STATE.md actually changed
-if git diff --quiet PROJECT_STATE.md 2>/dev/null; then
-    echo "[post-commit] no changes to PROJECT_STATE.md"
-else
-    echo "[post-commit] amending commit with updated PROJECT_STATE.md"
-    git add PROJECT_STATE.md
-    git commit --amend --no-edit --no-verify
-fi
+# PROJECT_STATE.md is gitignored (TASK-161) — regenerated locally for viewing
+# only, NEVER committed. Committing a freshly-generated copy (timestamp + branch
+# + commit SHA + live-Sheets stats) into every commit made every branch diverge
+# on it, so once main moved the next branch hit a PROJECT_STATE.md merge-conflict
+# that GitHub's server-side squash-merge could not auto-resolve. Do NOT re-add a
+# `git add PROJECT_STATE.md` / `git commit --amend` here. To view: open the file
+# (refreshed above) or run `uv run python3 generate_project_state.py`.
+echo "[post-commit] PROJECT_STATE.md refreshed locally (gitignored — not committed)"
 
 echo "[post-commit] ✅ done"
 
