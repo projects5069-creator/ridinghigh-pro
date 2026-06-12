@@ -93,3 +93,15 @@ Sentinel=shadow, DRY_RUN, zero change to ENTER/SKIP/sizing logic.
 - Gotcha caught: inline comments in `.gitignore` break negation patterns — the exception comment must be on its own line.
 
 **TASK-164 → Done. Branch awaiting review/merge: `task-164-resolved-bound`.**
+
+---
+
+## Addendum — same session: TASK-26 WHIPSAW + NO_TOUCH analysis (Done)
+
+**Done on branch `task-26-whipsaw-analysis` (NOT merged — review first). PK v3.12. Offline study, zero code/trading change.**
+
+- **WHIPSAW** half: resolved by TASK-155 (8W/17L/1U). **NO_TOUCH** half: n=3 only (SBLX/ARKR/OSS) — qualitative, all low-Score near the 60 threshold (weak-signal hypothesis; Score is the signal).
+- **Characterization** (`docs/research/TASK26_WHIPSAW_CHARACTERIZATION_2026-06-12/`, gitignored): WHIPSAW vs decided WIN/LOSS entry-metric medians — WHIPSAW *relatively* more extended (RunUp +82% / Gap +45% / ATRX +19% vs decided). **⚠️ EXPLORATORY n=26 LOW — a hypothesis, NOT a validated filter.** Δ are relative-vs-decided (high RunUp/Gap characterize the whole pump universe = the thesis; the finding is WHIPSAW is *more* extended than cleanly-resolved trades, not absolute). Any whipsaw-prone filter needs a re-run on n>50 + separation test = a **future task**, not a reopen of 26.
+- Data blocker (n>91) lifted (n=128). The whole TASK-139-INV chain (142/163/155/147/162/164/26) is now Done & merged (26 pending merge).
+
+**TASK-26 → Done. Branch awaiting review/merge: `task-26-whipsaw-analysis`.**
