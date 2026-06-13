@@ -135,6 +135,29 @@ MAX_HOLDING_DAYS = 5
 TP_THRESHOLD_FRAC = TP_THRESHOLD_PCT / 100.0  # 0.10
 SL_THRESHOLD_FRAC = SL_THRESHOLD_PCT / 100.0  # 0.10
 
+# TASK-177 — post_analysis outcome windows (SSoT for the two distinct horizons)
+# CLASSIFY_DAYS: the OFFICIAL outcome window that feeds calculate_stats / classify_trade.
+#   FROZEN at 5 — changing it would alter the official WR/classification. Do NOT widen.
+CLASSIFY_DAYS = 5
+# NOTE — three representations of the "5-day classification window" coexist intentionally:
+#   1. `range(1, 6)` in utils.py (calculate_stats/classify_trade) — the REAL classifier, FROZEN.
+#   2. `MAX_HOLDING_DAYS` (above) — legacy DISPLAY-ONLY constant (print only; not in any logic).
+#   3. `CLASSIFY_DAYS` (here) — the collection boundary used by post_analysis_collector to split
+#      full-OHLC (D1..CLASSIFY_DAYS) from Close+Low (D6..COLLECT_DAYS_FORWARD).
+# CLASSIFY_DAYS is DELIBERATELY NOT wired into utils.range(1,6): the classifier stays literal-frozen
+# so a window change here can never silently alter the official WR. Do NOT "DRY" this by feeding
+# CLASSIFY_DAYS into range(1,6) without a full TDD pass on the classification — that decoupling is
+# a feature (TASK-177), not an oversight.
+# COLLECT_DAYS_FORWARD: how many forward trading days post_analysis collects OHLC for.
+#   D1-D5 = full OHLC (classification); D6..COLLECT_DAYS_FORWARD = Close+Low only — data for
+#   the HYP-001 crossover-short hold-window, re-anchored to the drop-event downstream (179).
+COLLECT_DAYS_FORWARD = 25
+# COLLECT_DAYS_FORWARD_FROM: forward-only cutoff (TASK-177; ties HYPOTHESES.md §A.6 + §D).
+#   Rows scanned BEFORE this date are legacy — complete at CLASSIFY_DAYS (D1-D5) and NEVER
+#   re-touched for D6-D25 (the discovery / pre-178 sample stays locked; no mass re-write).
+#   Rows scanned ON/AFTER it collect the full D1..COLLECT_DAYS_FORWARD horizon.
+COLLECT_DAYS_FORWARD_FROM = "2026-06-13"
+
 # TASK-140 net-PnL cost model
 SLIP = 0.01                            # slippage 1%/side, adverse (entry fill lower + cover higher)
 BORROW_SCENARIOS = [0.50, 2.00, 5.00]  # assumed annual borrow rates (fee=NULL from TASK-139 — assumptions flagged)

@@ -50,7 +50,8 @@ CATALYST_CATEGORIES = [
 ]
 
 MIN_SCORE   = MIN_SCORE_DISPLAY
-DAYS_FORWARD = 5
+from config import COLLECT_DAYS_FORWARD
+DAYS_FORWARD = COLLECT_DAYS_FORWARD   # TASK-177: forward collection horizon (25), config SSoT
 
 # ─────────────────────────────────────────────────────────────
 # Score algorithm version tag (written to every new row)
@@ -133,8 +134,19 @@ def analyze_catalyst(ticker: str, scan_date: str) -> dict:
 
 
 def is_complete(existing_row: pd.Series, trading_days: list) -> bool:
-    """Row is complete when every past trading day has a non-null D{i}_Close."""
-    for i, day in enumerate(trading_days, 1):
+    """Row is complete when every SETTLED trading day in its horizon has a non-null D{i}_Close.
+
+    TASK-177 forward-only cutoff: a row scanned BEFORE COLLECT_DAYS_FORWARD_FROM only needs the
+    frozen classification window (D1..CLASSIFY_DAYS) — its absent D6-D25 must NOT trigger a
+    re-fetch (legacy row stays locked/untouched). A row scanned ON/AFTER the cutoff requires the
+    full D1..COLLECT_DAYS_FORWARD horizon, so it keeps collecting D6-D25 as those days settle.
+    The break-on-unsettled-day below means a new row with only N<25 days settled is "complete"
+    for now and re-checked (not re-fetched infinitely) once the next day settles.
+    """
+    from config import CLASSIFY_DAYS, COLLECT_DAYS_FORWARD_FROM
+    scan_date = str(existing_row.get("ScanDate", "")).strip()
+    horizon = len(trading_days) if scan_date >= COLLECT_DAYS_FORWARD_FROM else CLASSIFY_DAYS
+    for i, day in enumerate(trading_days[:horizon], 1):
         if not is_day_complete(day):
             break   # this day and beyond are not yet settled
         val = existing_row.get(f"D{i}_Close", None)
@@ -144,14 +156,24 @@ def is_complete(existing_row: pd.Series, trading_days: list) -> bool:
 
 
 def fetch_ohlc_for_days(ticker: str, trading_days: list) -> dict:
-    """Fetch D1-D5 OHLC via data_provider (Issue #9 Phase 2 — was yfinance)."""
+    """Fetch OHLC for trading_days (TASK-177).
+
+    D1..CLASSIFY_DAYS → full OHLC (feeds the frozen classification).
+    D(CLASSIFY_DAYS+1)..COLLECT_DAYS_FORWARD → Close+Low ONLY — data-only window
+    for the HYP-001 crossover-short hold, re-anchored to the drop-event downstream.
+    D1-D5 emission order (Open,High,Low,Close) is preserved; the union writer keeps
+    existing columns in place and appends the new D6+ ones.
+    """
+    from config import CLASSIFY_DAYS, COLLECT_DAYS_FORWARD
     provider = get_data_provider()
     for attempt in range(1, 6):
         try:
             # Fetch enough daily bars to cover the trading_days range.
             end_dt = datetime.strptime(trading_days[-1], "%Y-%m-%d") + timedelta(days=3)
-            # 15 daily bars buffer covers 5 trading days + weekends
-            bars = provider.get_daily_bars(ticker, days=15, end_date=end_dt)
+            # Buffer scales with the collection horizon (TASK-177): COLLECT_DAYS_FORWARD
+            # trading days + weekend/holiday margin (was a fixed 15 sized for 5 days).
+            n_bars = COLLECT_DAYS_FORWARD + 15
+            bars = provider.get_daily_bars(ticker, days=n_bars, end_date=end_dt)
             if bars.empty:
                 time.sleep(2); continue
             # Provider returns DatetimeIndex; convert to YYYY-MM-DD strings
@@ -159,15 +181,20 @@ def fetch_ohlc_for_days(ticker: str, trading_days: list) -> dict:
             bars.index = pd.to_datetime(bars.index).strftime("%Y-%m-%d")
             result = {}
             for i, day in enumerate(trading_days, 1):
+                full = i <= CLASSIFY_DAYS
                 if day in bars.index:
                     row = bars.loc[day]
-                    result[f"D{i}_Open"]  = round(float(row["open"]),  4)
-                    result[f"D{i}_High"]  = round(float(row["high"]),  4)
+                    if full:
+                        result[f"D{i}_Open"] = round(float(row["open"]), 4)
+                        result[f"D{i}_High"] = round(float(row["high"]), 4)
                     result[f"D{i}_Low"]   = round(float(row["low"]),   4)
                     result[f"D{i}_Close"] = round(float(row["close"]), 4)
                 else:
-                    for suffix in ["Open","High","Low","Close"]:
-                        result[f"D{i}_{suffix}"] = None
+                    if full:
+                        result[f"D{i}_Open"] = None
+                        result[f"D{i}_High"] = None
+                    result[f"D{i}_Low"] = None
+                    result[f"D{i}_Close"] = None
             return result
         except Exception as e:
             print(f"[Collector] {ticker} attempt {attempt} error: {e}")
