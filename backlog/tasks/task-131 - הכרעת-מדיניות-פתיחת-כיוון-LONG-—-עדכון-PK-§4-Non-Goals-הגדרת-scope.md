@@ -1,7 +1,7 @@
 ---
 id: TASK-131
 title: 'הכרעת מדיניות: פתיחת כיוון LONG — עדכון PK §4 Non-Goals + הגדרת scope'
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-06-10 02:04'
 updated_date: '2026-06-13 01:27'
@@ -26,4 +26,6 @@ PK §4 lists Long positions as explicit Non-Goal. Opening LONG requires a formal
 
 <!-- SECTION:NOTES:BEGIN -->
 READY-TO-CLOSE per TASK-171 (2026-06-12): LONG thesis dead at HIGH power — DropsLab tradeable long d1c->d5c = -1.64% [-2.50,-0.77] n=2,103 (after slip -3.64%); the '75% recovery' was hindsight peak-touch. Closure executes via TASK-175 (PK §4 Non-Goals update). Evidence: docs/research/INVESTIGATION_2026-06-12_II/ phase 7.
+
+CLOSED 2026-06-13 via TASK-175 (PK v3.17): §4 Non-Goal "Long positions" rationale upgraded to evidence-confirmed + #N25 "active longs" contradiction fixed. Decision = LONG stays a closed non-goal (no open).
 <!-- SECTION:NOTES:END -->

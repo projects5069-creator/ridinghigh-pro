@@ -1,7 +1,7 @@
 ---
 id: TASK-175
 title: Close LONG direction — update PK §4 Non-Goals from evidence
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-06-13 01:26'
 labels:
@@ -19,6 +19,6 @@ ordinal: 178000
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 PK §4 Non-Goals updated: LONG closed (evidence: INVESTIGATION_2026-06-12_II phase 7, n=2103)
-- [ ] #2 TASK-131 closed referencing this
+- [x] #1 PK §4 Non-Goals updated: LONG closed (evidence: INVESTIGATION_2026-06-12_II phase 7, n=2103)
+- [x] #2 TASK-131 closed referencing this
 <!-- AC:END -->
