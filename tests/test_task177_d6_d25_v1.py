@@ -113,3 +113,38 @@ def test_classification_frozen_against_tempting_d6_d25():
 
     assert stats_after == stats_before, "calculate_stats moved → D6-D25 leaked into classification"
     assert cls_after == cls_before, "classify_trade moved → D6-D25 leaked into classification"
+
+
+# ── Task 5: ensure_grid_width — grows / never shrinks / no-op when wide enough ─
+class _FakeWS2:
+    def __init__(self, cols):
+        self.col_count = cols
+        self.row_count = 100
+        self.resized = None
+
+    def resize(self, rows, cols):
+        self.row_count, self.col_count = rows, cols
+        self.resized = (rows, cols)
+
+
+def test_ensure_grid_width_grows_when_needed():
+    from gsheets_sync import ensure_grid_width
+    ws = _FakeWS2(cols=30)
+    ensure_grid_width(ws, 80)
+    assert ws.col_count == 80 and ws.resized == (100, 80)
+
+
+def test_ensure_grid_width_never_shrinks():
+    """col_count=120, need 80 → must STAY 120 (never truncate existing columns)."""
+    from gsheets_sync import ensure_grid_width
+    ws = _FakeWS2(cols=120)
+    ensure_grid_width(ws, 80)
+    assert ws.col_count == 120 and ws.resized is None
+
+
+def test_ensure_grid_width_noop_when_equal():
+    """col_count == n_cols → no redundant resize API call."""
+    from gsheets_sync import ensure_grid_width
+    ws = _FakeWS2(cols=80)
+    ensure_grid_width(ws, 80)
+    assert ws.resized is None

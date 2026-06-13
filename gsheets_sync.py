@@ -96,6 +96,17 @@ def get_or_create_sheet(spreadsheet, tab_name):
     return _get_or_create_sheet(spreadsheet, tab_name)
 
 
+def ensure_grid_width(ws, n_cols):
+    """Grow the worksheet grid to >= n_cols columns before a wider write (TASK-177/123).
+
+    ws.update() past the current col_count raises the Sheets 'exceeds grid limits' 400.
+    Resize ONLY the column dimension, and only GROW — never shrink (would truncate
+    existing columns) and skip the API call entirely when already wide enough.
+    """
+    if ws.col_count < n_cols:
+        ws.resize(rows=ws.row_count, cols=n_cols)
+
+
 def _df_to_sheet(ws, df, include_index=False):
     """
     Write a DataFrame to a worksheet (full overwrite).
@@ -107,6 +118,8 @@ def _df_to_sheet(ws, df, include_index=False):
     # Replace inf with empty string (preserves "no value" semantics for numeric cols)
     df = df.replace([float('inf'), float('-inf')], '').fillna('')
     data = [df.columns.tolist()] + df.astype(str).values.tolist()
+    # TASK-177/123: grow the grid before a wider write (ws.update past col_count → 400).
+    ensure_grid_width(ws, len(df.columns))
     # Write data starting from A1 (overwrites existing content)
     ws.update("A1", data)
     # Trim stale rows below the new data (handles shrinking datasets)
