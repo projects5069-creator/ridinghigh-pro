@@ -4,7 +4,7 @@ title: הכרעת ניתוק Score מההחלטה — Filter 1 review
 status: To Do
 assignee: []
 created_date: '2026-06-10 01:03'
-updated_date: '2026-06-11 04:01'
+updated_date: '2026-06-13 01:27'
 labels: []
 dependencies: []
 priority: medium
@@ -21,3 +21,9 @@ Verified: Score gates entry (decision_logic.py:276-278, AGENT_MIN_SCORE=50) whil
 <!-- AC:BEGIN -->
 - [ ] #1 TASK-139-INV kill-criterion MET (RH-6.1): random-in-filter WR .659 vs top-Score-half .629 (p=.56); r(Score,WIN)=-0.02 p=.82 on n=123. Report recommends Option B explicit gate — see REPORT.md ch.6 + phase6_evidence.md
 <!-- AC:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+TASK-171 input (2026-06-12): Score confirmed dead as ranking signal (AUC 0.531; no hidden component — all 7 <= 0.552). Score-decoupling decision folds into TASK-174 (decision gate). Do not retune weights on current n.
+<!-- SECTION:NOTES:END -->

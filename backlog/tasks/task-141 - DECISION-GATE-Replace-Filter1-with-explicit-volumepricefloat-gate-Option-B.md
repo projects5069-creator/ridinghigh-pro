@@ -6,7 +6,7 @@ title: >-
 status: To Do
 assignee: []
 created_date: '2026-06-11 04:01'
-updated_date: '2026-06-11 13:22'
+updated_date: '2026-06-13 01:27'
 labels:
   - TASK-139-INV
 dependencies: []
@@ -23,5 +23,5 @@ TASK-139-INV RH-6.1: kill-criterion MET — random-in-filter WR .659 vs top-Scor
 ## Implementation Notes
 
 <!-- SECTION:NOTES:BEGIN -->
-APPROVED 2026-06-11 (Option B). Decision locked; impl pending — shadow gate via TASK-128. Scheduled week-2 (after week-1 truth layer).
+TASK-171 input (2026-06-12): Score confirmed dead as ranking (AUC 0.531, all 7 components dead, 0 survive BH k=21, n=140). Filter1 replacement decision should fold into TASK-174 (Score decision gate).
 <!-- SECTION:NOTES:END -->
