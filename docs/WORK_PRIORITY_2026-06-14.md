@@ -5,10 +5,12 @@
 Before any crossover / edge-research / decision-gate work: the data feeding it must be clean and stable. A polluted input poisons every downstream conclusion. Verify before trusting any report number (mirrors the borrow / PK-live-verify discipline).
 
 ## PHASE 0 — DATA INTEGRITY (must clear before anything research-facing)
-1. **[NEW task-parent] split/halt detector** — unifies TASK-90 + TASK-148 + TASK-173. One detector cleans BOTH DropsLab and RH. Highest ROI: fixes every aggregate/email/dashboard/research in one move. Symptoms: DropsLab d1 mean +124% vs median 0; CTNT +28567%, RDGT +22400%, PCLA +150%/day; 5.6% DropsLab + ~3% RH rows >100% inter-day.
-2. **TASK-150** — schema contract / header-aware reads. Apr 122 cols vs May/Jun 105, score_version shifted at idx 60 → positional readers break SILENTLY cross-month. Also gates D6-D25 materialization for crossover.
-3. **TASK-105** — paper_portfolio entry-write swallows 429 → ENTER logged but no position row (silent live-data loss, false POSITION_SYNC drift).
-4. **TASK-144** — revive DropsLab collector (dead 6/5, drops_post frozen 27/5, 1766 raw rows unprocessed). Stale = no new crossover events; also a hard blocker for the whole crossover chain.
+> **CORRECTION 2026-06-14 (post-investigation):** of the four items originally listed here, **TASK-150 and TASK-105 are already `Done` in backlog** — they are NOT open blockers. The genuine open PHASE-0 work is **TASK-180 + TASK-144** only. Items 2–3 are retained below marked DONE for traceability.
+
+1. **TASK-180 [open, high] split/halt detector** — unifies TASK-90 + TASK-148 + TASK-173 (merge these three into 180). One detector cleans BOTH DropsLab and RH. Highest ROI: fixes every aggregate/email/dashboard/research in one move. Symptoms: DropsLab d1 mean +124% vs median 0; CTNT +28567%, RDGT +22400%, PCLA +150%/day; 5.6% DropsLab + ~3% RH rows >100% inter-day. **RH half is unblocked now; DropsLab half waits on TASK-144 (+ TASK-153 DropsLab-PK home). Data model decided: non-destructive boolean flag (no value mutation); detector threshold definition still OPEN.**
+2. ~~**TASK-150** — schema contract / header-aware reads.~~ **DONE** (commit `a7897a5`, PK v3.06): audit-check + §15 schema doc shipped; `cross_month_loaders.py` already aligns by name. (Note: a broader "enforce *all* readers header-aware" remains a separate un-scoped flag, not part of 150's AC — track separately if needed.)
+3. ~~**TASK-105** — paper_portfolio entry-write swallows 429.~~ **DONE** (PR #4 / `dc3ddbf`, PK v2.66): write status surfaced, failed write counted as error, `_APPEND_RETRY_MAX=4`.
+4. **TASK-144 [open, high]** — revive DropsLab collector (dead 6/5, drops_post frozen 27/5, 1766 raw rows unprocessed). Stale = no new crossover events; also a hard blocker for the whole crossover chain and for TASK-180's DropsLab half.
 
 ## PHASE 1 — SURVIVORSHIP / COUNTING CORRECTNESS
 5. TASK-149 (19 NO_DATA delisting = lost short-wins) + TASK-168 (delisting auto-detector).
