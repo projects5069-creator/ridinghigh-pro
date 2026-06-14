@@ -119,6 +119,34 @@ def build_borrow_row(ticker, asset_info, check_dt):
     ]
 
 
+def collect_borrow_coverage(universe, check_dt=None):
+    """TASK-172: compute + write ONE borrow_coverage row for `universe`.
+
+    Reads today's borrow_data rows, computes coverage (two separate pcts over
+    the universe denominator), appends one row to borrow_coverage (dedup on
+    CheckDate -> one row/day). Non-fatal: logs to stderr and returns None on
+    any failure; never raises. Returns the coverage dict on success.
+    """
+    if check_dt is None:
+        check_dt = utils.get_peru_time()
+    today = check_dt.strftime("%Y-%m-%d")
+    try:
+        data_ws = sheets_manager.get_worksheet("borrow_data")
+        cov_ws = sheets_manager.get_worksheet("borrow_coverage")
+        if data_ws is None or cov_ws is None:
+            print("[borrow_collector] coverage: worksheet unavailable", file=sys.stderr)
+            return None
+        all_rows = data_ws.get_all_values()[1:]
+        today_rows = [r for r in all_rows if len(r) >= 2 and r[1] == today]
+        cov = compute_coverage(universe, today_rows)
+        row = build_coverage_row(cov, check_dt)
+        sheets_manager.safe_append_rows(cov_ws, [row], dedup_col=0, dedup_vals={today})
+        return cov
+    except Exception as e:
+        print(f"[borrow_collector] coverage failed (non-fatal): {e}", file=sys.stderr)
+        return None
+
+
 def collect_borrow_data(tickers, broker, check_dt=None):
     """Collect borrow data for `tickers` and write ONE batched append.
 

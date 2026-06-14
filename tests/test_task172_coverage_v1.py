@@ -94,3 +94,53 @@ def test_build_coverage_row_matches_header_length():
     cov = bc.compute_coverage(set(), [])
     row = bc.build_coverage_row(cov, datetime.datetime(2026, 6, 14, 9, 30, 0))
     assert len(row) == len(AGENT_SHEET_HEADERS["borrow_coverage"]) == 8
+
+
+
+# ── Task 5: collect_borrow_coverage — read today borrow_data, write 1 coverage row ──
+class _FakeWS:
+    def __init__(self, values):
+        self._values = values
+        self.appended = []
+    def get_all_values(self):
+        return self._values
+
+def test_collect_borrow_coverage_writes_one_row(monkeypatch):
+    import datetime
+    import agent.perception.borrow_collector as m
+    universe = {"AAA", "BBB", "CCC", "DDD"}
+    dt = datetime.datetime(2026, 6, 14, 9, 30, 0)
+    header = ["Ticker", "CheckDate", "CheckTime", "IsShortable", "IsETB", "IsHTB", "BorrowFeePct", "SharesAvailable", "Source"]
+    borrow_ws = _FakeWS([
+        header,
+        ["AAA", "2026-06-14", "09:00:00", "True", "False", "True", "", "", "ALPACA"],
+        ["BBB", "2026-06-14", "09:00:00", "True", "True", "False", "", "", "ALPACA"],
+        ["CCC", "2026-06-14", "09:00:00", "False", "False", "False", "", "", "ALPACA"],
+        ["OLD", "2026-06-13", "09:00:00", "True", "False", "True", "", "", "ALPACA"],  # different day, ignored
+    ])
+    cov_ws = _FakeWS([])
+    def fake_get_ws(tab, *a, **k):
+        return {"borrow_data": borrow_ws, "borrow_coverage": cov_ws}.get(tab)
+    captured = {}
+    def fake_append(ws, rows, **k):
+        captured["ws"] = ws; captured["rows"] = rows; captured["kwargs"] = k
+    monkeypatch.setattr(m.sheets_manager, "get_worksheet", fake_get_ws)
+    monkeypatch.setattr(m.sheets_manager, "safe_append_rows", fake_append)
+    cov = m.collect_borrow_coverage(universe, check_dt=dt)
+    assert cov["ScannedUniverse"] == 4
+    assert cov["WithBorrowData"] == 3
+    assert cov["ShortableCount"] == 2
+    assert cov["PctWithBorrowData"] == 75.0
+    assert cov["PctShortable"] == 50.0
+    assert captured["ws"] is cov_ws
+    assert len(captured["rows"]) == 1
+    assert captured["rows"][0] == ["2026-06-14", "09:30:00", 4, 3, 75.0, 2, 50.0, "ALPACA"]
+    assert captured["kwargs"].get("dedup_col") == 0
+    assert captured["kwargs"].get("dedup_vals") == {"2026-06-14"}
+
+def test_collect_borrow_coverage_nonfatal_on_missing_ws(monkeypatch):
+    import datetime
+    import agent.perception.borrow_collector as m
+    monkeypatch.setattr(m.sheets_manager, "get_worksheet", lambda *a, **k: None)
+    cov = m.collect_borrow_coverage({"AAA"}, check_dt=datetime.datetime(2026,6,14,9,30,0))
+    assert cov is None  # graceful: no worksheet -> None, never raises
