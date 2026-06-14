@@ -32,6 +32,7 @@ from formulas import (
     calculate_typical_price_dist,
     calculate_rel_vol,
     calculate_score,
+    flag_interday_artifact_chain,
 )
 from utils import (
     is_trading_day,
@@ -551,6 +552,10 @@ def run(target_date: str = None):
             avg_volume=raw_inputs.get("AvgVolume_raw"),
         )
 
+        # TASK-180: non-destructive split/halt artifact flag over the D0->D5 close chain
+        interday_closes = [d0_fund.get("D0_Close")] + [ohlc.get(f"D{i}_Close") for i in range(1, 6)]
+        interday_is_artifact, interday_artifact_pair = flag_interday_artifact_chain(interday_closes)
+
         new_row = {
             "Ticker":      ticker,
             "ScanDate":    scan_date,
@@ -565,6 +570,8 @@ def run(target_date: str = None):
             **d0_fund,
             **tl_stats,
             "audit_flag": audit_flag,
+            "InterdayArtifact": interday_is_artifact,
+            "InterdayArtifactPair": interday_artifact_pair,
             "score_version": SCORE_VERSION,
         }
         new_rows.append(new_row)

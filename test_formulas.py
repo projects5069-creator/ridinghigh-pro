@@ -28,6 +28,7 @@ from formulas import (
     calculate_max_drop,
     calculate_d1_gap,
     is_interday_artifact,
+    flag_interday_artifact_chain,
     calculate_pnl_pct,
     # Constants
     ATRX_VALIDATION_THRESHOLD,
@@ -262,6 +263,31 @@ def test_interday_artifact(t):
     t.assert_equal(is_interday_artifact(2.34, 22.82, threshold_pct=1000.0), False, "artifact_high_thresh_not_flagged")
 
 
+def test_interday_artifact_chain(t):
+    print("\n🧪 Testing flag_interday_artifact_chain() [NEW TASK-180]...")
+    # TDIC real split trips on first pair (D0->D1, 2.34 -> 22.82)
+    t.assert_equal(flag_interday_artifact_chain([2.34, 22.82, 23.0, 22.5, 23.1, 22.9]),
+                   (True, "D0->D1"), "chain_tdic_d0_d1")
+    # split in the middle (12 -> 30 = +150%) trips on D2->D3
+    t.assert_equal(flag_interday_artifact_chain([10, 11, 12, 30, 31, 32]),
+                   (True, "D2->D3"), "chain_split_mid_d2_d3")
+    # clean chain — nothing trips
+    t.assert_equal(flag_interday_artifact_chain([10, 11, 12, 13, 12, 11]),
+                   (False, ""), "chain_clean")
+    # None mid-chain is skipped, no false trip
+    t.assert_equal(flag_interday_artifact_chain([10, 11, None, 13, 14, 15]),
+                   (False, ""), "chain_none_skipped")
+    # None hides one split but another real pair (12 -> 40 = +233%) still caught
+    t.assert_equal(flag_interday_artifact_chain([10, None, 12, 40, 41, 42]),
+                   (True, "D2->D3"), "chain_none_other_pair_caught")
+    # guards
+    t.assert_equal(flag_interday_artifact_chain([]),   (False, ""), "chain_empty")
+    t.assert_equal(flag_interday_artifact_chain(None), (False, ""), "chain_none_arg")
+    # custom threshold override: 10 -> 16 = +60% > 50 trips on D0->D1
+    t.assert_equal(flag_interday_artifact_chain([10, 16, 17, 18, 19, 20], threshold_pct=50.0),
+                   (True, "D0->D1"), "chain_custom_thresh_50")
+
+
 def test_pnl_pct(t):
     print("\n🧪 Testing calculate_pnl_pct() [NEW v2.0]...")
     # Short positions
@@ -343,6 +369,7 @@ def main():
     test_max_drop(t)
     test_d1_gap(t)
     test_interday_artifact(t)
+    test_interday_artifact_chain(t)
     test_pnl_pct(t)
     
     # Integration

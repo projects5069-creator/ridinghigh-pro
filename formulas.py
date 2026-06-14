@@ -350,6 +350,32 @@ def is_interday_artifact(prev_close, next_close, threshold_pct=None):
         return False
 
 
+def flag_interday_artifact_chain(closes, threshold_pct=None):
+    """Scan a close-to-close chain for the first split/halt artifact pair (TASK-180).
+
+    closes: ordered list of consecutive closes, e.g. [D0_Close, D1_Close, ..., D5_Close].
+    Runs is_interday_artifact() on each consecutive pair (i, i+1); a pair whose
+    prev/next is None/0 is skipped (not an artifact). ANY-pair semantics: returns
+    on the FIRST pair that trips.
+
+    Returns (is_artifact, tripped_pair):
+      (True,  "D{i}->D{i+1}")  for the first tripping pair, or
+      (False, "")              if no pair trips / chain empty / None.
+
+    Threshold delegates to is_interday_artifact (config default 100.0) — the
+    threshold logic is NOT duplicated here.
+    """
+    try:
+        if not closes:
+            return (False, "")
+        for i in range(len(closes) - 1):
+            if is_interday_artifact(closes[i], closes[i + 1], threshold_pct):
+                return (True, f"D{i}->D{i + 1}")
+        return (False, "")
+    except (TypeError, ValueError):
+        return (False, "")
+
+
 def calculate_net_pnl(scan_price, classification, resolution_day, borrow_annual_rate, slip=SLIP):
     """Net short-side PnL FRACTION after slippage + borrow (TASK-140, phase6 cost model).
 
