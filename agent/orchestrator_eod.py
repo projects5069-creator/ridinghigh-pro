@@ -29,24 +29,51 @@ logger = logging.getLogger("agent.orchestrator_eod")
 
 
 def collect_borrow_snapshot(summary: Dict[str, Any]) -> None:
-    """TASK-139: best-effort daily borrow / shortability snapshot.
+    """TASK-139 + TASK-172: best-effort daily borrow / shortability snapshot.
 
-    Ticker source is build_account_state()["existing_positions"] — the SSoT
-    union of paper_portfolio OPEN positions + today's decision_log ENTERs
-    (already deduped). Uses a DEDICATED read-only AlpacaBroker(dry_run=False)
-    so real shortability is read even under AGENT_DRY_RUN; only get_asset_info
-    is touched (no trade calls). Non-fatal like _system_events_alert: any
+    Ticker universe = union of:
+      - the scanned universe (daily_snapshots, Score >= MIN_SCORE_DISPLAY today)
+      - build_account_state()["existing_positions"] (OPEN + today ENTERs)
+    Uses a DEDICATED read-only AlpacaBroker(dry_run=False) so real shortability
+    is read even under AGENT_DRY_RUN (only get_asset_info is touched). After
+    collection, writes one borrow_coverage row (TASK-172). Non-fatal: any
     failure logs a warning and NEVER increments summary["errors"].
     """
     try:
         from agent.orchestrator import build_account_state
-        tickers = sorted(build_account_state().get("existing_positions", set()))
-        if not tickers:
-            logger.info("Borrow snapshot: no open positions / today ENTERs — skipping")
-            return
+        existing = set(build_account_state().get("existing_positions", set()))
     except Exception as e:
-        logger.warning("Borrow snapshot: ticker collection failed (non-fatal): %s", e)
+        logger.warning("Borrow snapshot: existing-positions collection failed (non-fatal): %s", e)
+        existing = set()
+
+    # Scanned universe (TASK-172): daily_snapshots Score>=MIN_SCORE_DISPLAY for today.
+    # Isolated try/except — a snapshots read failure falls back to existing only.
+    scanned = set()
+    try:
+        import pandas as pd
+        import sheets_manager
+        import utils
+        from config import MIN_SCORE_DISPLAY
+        from agent.perception import borrow_collector
+        ws = sheets_manager.get_worksheet("daily_snapshots")
+        if ws is not None:
+            vals = ws.get_all_values()
+            if vals and len(vals) > 1:
+                df = pd.DataFrame(vals[1:], columns=vals[0])
+                today = utils.get_peru_time().strftime("%Y-%m-%d")
+                if "Date" in df.columns:
+                    df = df[df["Date"] == today]
+                scanned = borrow_collector.get_scanned_universe(df, MIN_SCORE_DISPLAY)
+    except Exception as e:
+        logger.warning("Borrow snapshot: scanned-universe read failed (non-fatal, fallback to positions): %s", e)
+        scanned = set()
+
+    universe = scanned | existing
+    if not universe:
+        logger.info("Borrow snapshot: empty universe (no snapshots / positions) — skipping")
         return
+
+    tickers = sorted(universe)
 
     try:
         from agent.execution.alpaca_broker import AlpacaBroker
@@ -58,9 +85,22 @@ def collect_borrow_snapshot(summary: Dict[str, Any]) -> None:
     try:
         from agent.perception import borrow_collector
         n = borrow_collector.collect_borrow_data(tickers, broker)
-        logger.info("Borrow snapshot: %s row(s) for %d ticker(s)", n, len(tickers))
+        logger.info("Borrow snapshot: %s row(s) for %d ticker(s) (scanned=%d, positions=%d)",
+                    n, len(tickers), len(scanned), len(existing))
     except Exception as e:
         logger.warning("Borrow snapshot: collect failed (non-fatal): %s", e)
+        return
+
+    # TASK-172: write one borrow_coverage row (coverage of the scanned universe).
+    try:
+        from agent.perception import borrow_collector
+        cov = borrow_collector.collect_borrow_coverage(universe)
+        if cov is not None:
+            logger.info("Borrow coverage: universe=%d with_borrow=%d (%.1f%%) shortable=%d (%.1f%%)",
+                        cov["ScannedUniverse"], cov["WithBorrowData"], cov["PctWithBorrowData"],
+                        cov["ShortableCount"], cov["PctShortable"])
+    except Exception as e:
+        logger.warning("Borrow snapshot: coverage failed (non-fatal): %s", e)
 
 
 def run() -> Dict[str, Any]:

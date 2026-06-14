@@ -144,3 +144,58 @@ def test_collect_borrow_coverage_nonfatal_on_missing_ws(monkeypatch):
     monkeypatch.setattr(m.sheets_manager, "get_worksheet", lambda *a, **k: None)
     cov = m.collect_borrow_coverage({"AAA"}, check_dt=datetime.datetime(2026,6,14,9,30,0))
     assert cov is None  # graceful: no worksheet -> None, never raises
+
+
+# ── Task 6: wiring — collect_borrow_snapshot uses union(scanned>=60, existing) + coverage ──
+def test_collect_borrow_snapshot_union_and_coverage(monkeypatch):
+    import agent.orchestrator_eod as eod
+    import agent.perception.borrow_collector as bc
+
+    # existing positions = {EXIST}; scanned snapshots = AAA(75), BBB(60), CCC(59-excluded)
+    import agent.orchestrator as _orch
+    monkeypatch.setattr(_orch, "build_account_state", lambda *a, **k: {"existing_positions": {"EXIST"}})
+
+    class _WS:
+        def get_all_values(self):
+            return [
+                ["Date", "Ticker", "Score"],
+                ["2026-06-14", "AAA", "75"],
+                ["2026-06-14", "BBB", "60"],
+                ["2026-06-14", "CCC", "59"],
+                ["2026-06-13", "OLD", "99"],  # different day -> excluded
+            ]
+    import sheets_manager
+    monkeypatch.setattr(sheets_manager, "get_worksheet", lambda tab, *a, **k: _WS() if tab == "daily_snapshots" else None)
+
+    class _Broker:
+        def __init__(self, *a, **k): pass
+    monkeypatch.setattr("agent.execution.alpaca_broker.AlpacaBroker", _Broker, raising=False)
+
+    captured = {}
+    monkeypatch.setattr(bc, "collect_borrow_data", lambda tickers, broker, **k: captured.__setitem__("tickers", set(tickers)) or len(tickers))
+    monkeypatch.setattr(bc, "collect_borrow_coverage", lambda universe, **k: captured.__setitem__("cov_universe", set(universe)))
+
+    eod.collect_borrow_snapshot({"errors": 0})
+
+    expected = {"EXIST", "AAA", "BBB"}  # CCC<60 and OLD(wrong day) excluded
+    assert captured["tickers"] == expected
+    assert captured["cov_universe"] == expected
+
+
+def test_collect_borrow_snapshot_snapshot_read_failure_falls_back(monkeypatch):
+    import agent.orchestrator_eod as eod
+    import agent.perception.borrow_collector as bc
+    import agent.orchestrator as _orch
+    monkeypatch.setattr(_orch, "build_account_state", lambda *a, **k: {"existing_positions": {"EXIST"}})
+    import sheets_manager
+    def _boom(tab, *a, **k):
+        raise RuntimeError("snapshots read boom")
+    monkeypatch.setattr(sheets_manager, "get_worksheet", _boom)
+    class _Broker:
+        def __init__(self, *a, **k): pass
+    monkeypatch.setattr("agent.execution.alpaca_broker.AlpacaBroker", _Broker, raising=False)
+    captured = {}
+    monkeypatch.setattr(bc, "collect_borrow_data", lambda tickers, broker, **k: captured.__setitem__("tickers", set(tickers)) or len(tickers))
+    monkeypatch.setattr(bc, "collect_borrow_coverage", lambda universe, **k: captured.__setitem__("cov_universe", set(universe)))
+    eod.collect_borrow_snapshot({"errors": 0})  # must not raise
+    assert captured["tickers"] == {"EXIST"}  # fell back to existing only
