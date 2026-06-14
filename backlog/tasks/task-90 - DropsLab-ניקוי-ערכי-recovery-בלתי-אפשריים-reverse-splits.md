@@ -4,7 +4,7 @@ title: 'DropsLab: ניקוי ערכי recovery בלתי-אפשריים (reverse-
 status: To Do
 assignee: []
 created_date: '2026-06-01 01:22'
-updated_date: '2026-06-11 04:01'
+updated_date: '2026-06-14 22:56'
 labels:
   - dropslab
   - data-quality
@@ -23,3 +23,9 @@ ordinal: 90000
 <!-- AC:BEGIN -->
 - [ ] #1 TASK-139-INV evidence (RH-4.2 + DL-7.2, docs/research/INVESTIGATION_2026-06-10/REPORT.md): TDIC 2026-05-12 split sits CLEAN inside n=123 as fake LOSS; DropsLab d1_pct mean +124pct vs median 0 — same unflagged-split disease both systems
 <!-- AC:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+Tracked under parent TASK-180 (split/halt detector). RH-half done in code; DropsLab recovery/pattern_tag recompute pending TASK-144. Stays open.
+<!-- SECTION:NOTES:END -->
