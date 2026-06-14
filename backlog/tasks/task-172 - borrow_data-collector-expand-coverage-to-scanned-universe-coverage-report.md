@@ -1,9 +1,12 @@
 ---
 id: TASK-172
-title: borrow_data collector — expand coverage to scanned universe + coverage report (collecting verified 6/11)
+title: >-
+  borrow_data collector — expand coverage to scanned universe + coverage report
+  (collecting verified 6/11)
 status: To Do
 assignee: []
 created_date: '2026-06-13 01:26'
+updated_date: '2026-06-14 15:53'
 labels:
   - TASK-171
 dependencies: []
@@ -19,6 +22,13 @@ ordinal: 175000
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 borrow_data receives rows daily for existing_positions (verified live 6/11: ADIL/EDHL) — EXPAND ticker source to the full scanned universe so every crossover candidate gets a shortability verdict
-- [ ] #2 Coverage report: % of signals / crossover-candidates with borrow data
+- [x] #1 borrow_data receives rows daily for existing_positions (verified live 6/11: ADIL/EDHL) — EXPAND ticker source to the full scanned universe so every crossover candidate gets a shortability verdict
+- [x] #2 Coverage report: % of signals / crossover-candidates with borrow data
+- [ ] #3 #3 LIVE-VERIFY (RULE #6, deferred — needs real collector run + OAuth tab creation): create borrow_coverage tab via create_agent_sheets and confirm one real coverage row writes with both pcts. Blocked on market-day EOD run (like TASK-177 AC#3).
 <!-- AC:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+2026-06-14: code+TDD complete (6 commits 76d39b2..137f658). AC#1+#2 satisfied in code: get_scanned_universe + union wiring (scanned Score>=60 union existing_positions) + borrow_coverage tab schema + collect_borrow_coverage writer (two separate pcts over universe denom). 12 new tests, suite 361 passed. AC#3 live-verify pending (deferred RULE #6). Status stays To Do until live row confirmed — mirrors TASK-177.
+<!-- SECTION:NOTES:END -->
