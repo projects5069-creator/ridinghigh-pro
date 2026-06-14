@@ -27,6 +27,7 @@ from formulas import (
     calculate_drop_from_high,
     calculate_max_drop,
     calculate_d1_gap,
+    is_interday_artifact,
     calculate_pnl_pct,
     # Constants
     ATRX_VALIDATION_THRESHOLD,
@@ -239,6 +240,28 @@ def test_d1_gap(t):
     t.assert_equal(calculate_d1_gap(9.5, 0), 0.0, "d1_gap_zero_scan")
 
 
+def test_interday_artifact(t):
+    print("\n🧪 Testing is_interday_artifact() [NEW TASK-180]...")
+    # real reverse-split artifact (TDIC 2026-05-12, 2.34 -> 22.82 = +877%)
+    t.assert_equal(is_interday_artifact(2.34, 22.82), True,  "artifact_tdic_split_up")
+    # large but sub-threshold drop — NOT an artifact under /prev (-75%, floored > -100%)
+    t.assert_equal(is_interday_artifact(20.0, 5.0),   False, "artifact_drop_75pct_below_thresh")
+    # normal pump move below threshold (+50%)
+    t.assert_equal(is_interday_artifact(10.0, 15.0),  False, "artifact_normal_50pct")
+    # exactly on the threshold — strict '>' means 100% is NOT flagged
+    t.assert_equal(is_interday_artifact(10.0, 20.0),  False, "artifact_exactly_100pct_boundary")
+    # just over the threshold
+    t.assert_equal(is_interday_artifact(10.0, 20.01), True,  "artifact_just_over_100pct")
+    # guards (mirror calculate_d1_gap)
+    t.assert_equal(is_interday_artifact(None, 5.0),   False, "artifact_none_prev")
+    t.assert_equal(is_interday_artifact(0, 5.0),      False, "artifact_zero_prev")
+    t.assert_equal(is_interday_artifact(10.0, None),  False, "artifact_none_next")
+    # custom threshold override (50%): 10 -> 16 = +60% > 50 -> True
+    t.assert_equal(is_interday_artifact(10.0, 16.0, threshold_pct=50.0), True, "artifact_custom_thresh_50")
+    # sanity: a genuine large UP artifact below a HIGH custom threshold is not flagged
+    t.assert_equal(is_interday_artifact(2.34, 22.82, threshold_pct=1000.0), False, "artifact_high_thresh_not_flagged")
+
+
 def test_pnl_pct(t):
     print("\n🧪 Testing calculate_pnl_pct() [NEW v2.0]...")
     # Short positions
@@ -319,6 +342,7 @@ def main():
     test_drop_from_high(t)
     test_max_drop(t)
     test_d1_gap(t)
+    test_interday_artifact(t)
     test_pnl_pct(t)
     
     # Integration

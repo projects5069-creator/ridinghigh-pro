@@ -66,7 +66,7 @@ Design Principles:
 5. Validated caps where applicable (e.g., REL_VOL max 100)
 """
 
-from config import SCORE_WEIGHTS_V2, SCORE_CAPS_V2, SCORE_RSI_PARAMS, REL_VOL_CAP
+from config import SCORE_WEIGHTS_V2, SCORE_CAPS_V2, SCORE_RSI_PARAMS, REL_VOL_CAP, INTERDAY_ARTIFACT_THRESHOLD_PCT
 from config import TP_THRESHOLD_FRAC, SL_THRESHOLD_FRAC, SLIP
 
 
@@ -321,6 +321,33 @@ def calculate_d1_gap(d1_open, scan_price):
         return float((d1_open - scan_price) / scan_price * 100)
     except (TypeError, ValueError, ZeroDivisionError):
         return 0.0
+
+
+def is_interday_artifact(prev_close, next_close, threshold_pct=None):
+    """Flag a suspected split/halt artifact from a close-to-close inter-day move (TASK-180).
+
+    Returns True iff |(next_close - prev_close) / prev_close * 100| > threshold.
+    Non-destructive detector: a boolean flag only, never mutates the value.
+
+    threshold_pct defaults to config.INTERDAY_ARTIFACT_THRESHOLD_PCT (100.0).
+    Guards mirror calculate_d1_gap: prev_close None/0 -> False; next_close None -> False.
+
+    NOTE (close-to-close, normalized by prev_close): a downward move is floored
+    at -100% (price -> 0), so this triggers ONLY on upward artifacts (reverse-split
+    unadjusted jumps) — exactly what the RH/DropsLab data shows. Down artifacts
+    (halt/delisting) are out of scope here; see TASK-149/168.
+    """
+    try:
+        if prev_close is None or prev_close == 0:
+            return False
+        if next_close is None:
+            return False
+        if threshold_pct is None:
+            threshold_pct = INTERDAY_ARTIFACT_THRESHOLD_PCT
+        move_pct = (next_close - prev_close) / prev_close * 100.0
+        return abs(move_pct) > threshold_pct
+    except (TypeError, ValueError, ZeroDivisionError):
+        return False
 
 
 def calculate_net_pnl(scan_price, classification, resolution_day, borrow_annual_rate, slip=SLIP):

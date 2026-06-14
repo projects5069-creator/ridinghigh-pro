@@ -80,6 +80,15 @@ REL_VOL_CAP = 100.0
    Values above this (e.g., 26794x seen in past data) are clipped to 100.
    Applied in formulas.calculate_rel_vol() before any downstream use."""
 
+INTERDAY_ARTIFACT_THRESHOLD_PCT = 100.0
+"""Data-integrity threshold (TASK-180): flag a close-to-close inter-day move
+   whose magnitude exceeds this % as a suspected split/halt artifact.
+   Calibrated from RH post_analysis distribution — median 9.8%, p95 49%,
+   p99≈96% — so >100% cleanly isolates the artifact tail (TDIC +877%,
+   UGRO +417%, PCLA +179%) from real pump moves. Non-destructive: the
+   detector only flags rows, never mutates values. Used by
+   formulas.is_interday_artifact()."""
+
 
 # ═══════════════════════════════════════════════════════════════════════
 # Display Thresholds
