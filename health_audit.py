@@ -57,6 +57,7 @@ from datetime import datetime, timedelta
 from pathlib import Path
 
 from utils import is_trading_day
+from cross_month_loaders import load_post_analysis_all_months, exclude_interday_artifacts
 
 # ============================================================================
 # CONFIG
@@ -1118,6 +1119,44 @@ def check_21_gap_outliers(gc):
                            WARNING, f"Could not check: {e}")
 
 
+def _interday_artifact_result(df):
+    """Build a CheckResult flagging inter-day split/halt artifacts in post_analysis.
+
+    Pure + testable (takes a DataFrame, no gc). Reuses exclude_interday_artifacts so
+    the count matches EXACTLY what the research loaders exclude (TASK-180 AC#3).
+    Advisory WARNING — never blocks.
+    """
+    if df is None or len(df) == 0:
+        return CheckResult("29", "Inter-day Artifacts", "Data quality",
+                           PASSED, "No post_analysis rows to scan")
+    clean, pct, n = exclude_interday_artifacts(df)
+    if n == 0:
+        return CheckResult("29", "Inter-day Artifacts", "Data quality",
+                           PASSED, "No inter-day artifacts detected")
+    details = ""
+    if "Ticker" in df.columns:
+        flagged_idx = df.index.difference(clean.index)          # removed rows = flagged
+        names = df.loc[flagged_idx, "Ticker"].astype(str).tolist()[:10]
+        details = "Flagged (split/halt unadjusted price): " + ", ".join(names)
+    return CheckResult("29", "Inter-day Artifacts", "Data quality",
+                       WARNING,
+                       f"{n} inter-day split/halt artifact rows ({pct}% contamination)",
+                       details=details)
+
+
+def check_29_interday_artifacts(gc):
+    """Q: Daily advisory check for inter-day split/halt artifacts in post_analysis (TASK-180 AC#3)."""
+    if gc is None:
+        return CheckResult("29", "Inter-day Artifacts", "Data quality",
+                           INFO, "Skipped (no Sheets access)")
+    try:
+        df = load_post_analysis_all_months()
+    except Exception as e:
+        return CheckResult("29", "Inter-day Artifacts", "Data quality",
+                           INFO, f"Could not load post_analysis: {e}")
+    return _interday_artifact_result(df)
+
+
 def check_17_fundamentals_provider():
     """P1: Verify fundamentals provider returns valid data for a known ticker.
 
@@ -1770,6 +1809,7 @@ def main():
     results.append(check_16_rel_vol_stuck(gc))
     results.append(check_20_float_pct_stuck(gc))
     results.append(check_21_gap_outliers(gc))
+    results.append(check_29_interday_artifacts(gc))
     results.append(check_23_nan_scantime(gc))
     results.append(check_24_sentinel_health(gc))
     results.append(check_25_critic_agent(gc))
