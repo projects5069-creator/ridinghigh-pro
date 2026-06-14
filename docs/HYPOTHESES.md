@@ -161,7 +161,7 @@ Power target: >=150 new events (~450 RH rows, ~4-5 months at current rate).
 superset (full OHLC D1-5; Close+Low D6-25, data-only; forward-only from 2026-06-13)
 that CONTAINS the hold window; the window definition/anchor is TASK-178, not 177.
 
-**Status: DRAFT** — not locked until TASK-178, after 172 + 177.
+**Status: DRAFT** — not locked until TASK-178, after 172 (177 ✅).
 
 ---
 
