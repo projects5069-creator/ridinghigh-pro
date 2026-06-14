@@ -4,6 +4,7 @@ title: Extend outcome window D6-D15 in post_analysis
 status: To Do
 assignee: []
 created_date: '2026-06-13 01:26'
+updated_date: '2026-06-14 19:07'
 labels:
   - TASK-171
 dependencies: []
@@ -27,5 +28,5 @@ ordinal: 180000
 ## Implementation Notes
 
 <!-- SECTION:NOTES:BEGIN -->
-Code + TDD complete (commits 5a252a9 config+collector+frozen-guard · 03d4cb9 grid-resize · a7bbbee §15/§D anti-drift). 9 TDD tests green incl. a regression-guard proving D6-D25 @ -90% does NOT move the frozen D1-D5 classification; suite 347 / formulas 107 / utils 38. **status stays To Do — LIVE-VERIFY (AC#3) pending: the new columns appear only after a real collector run (RULE #6).** Implemented as D6-D25 (the superset containing the D6-D15 hold window); the window definition/anchor is TASK-178, not 177.
+auto-grow gap: D6-D25 cols absent from live post_analysis header (109 cols, 0 D6+, forward-only from 6/13, not yet settled). Before relying on hold-window data — verify sheets_manager grows columns on unknown keys OR pre-define in create_agent_sheets, else values fall silently. Part of AC#3 live-verify.
 <!-- SECTION:NOTES:END -->
