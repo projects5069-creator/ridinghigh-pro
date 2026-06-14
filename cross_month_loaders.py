@@ -122,6 +122,43 @@ def _coerce_numeric(df: pd.DataFrame, cols: list) -> pd.DataFrame:
     return df
 
 
+def _coerce_bool(series):
+    """Coerce a gspread string column to real bool.
+
+    Handles the bool('False')==True gotcha: every non-empty string is truthy, so
+    a naive astype(bool) is WRONG. True iff trimmed-lowercased in {'true','1','yes'}.
+    """
+    return series.astype(str).str.strip().str.lower().isin(["true", "1", "yes"])
+
+
+def exclude_interday_artifacts(df, flag_col="InterdayArtifact"):
+    """Drop rows flagged as inter-day split/halt artifacts (TASK-180 / 173 AC#2).
+
+    Returns (clean_df, contamination_pct, n_excluded):
+      clean_df          -- df without flagged rows (a copy)
+      contamination_pct -- round(n_excluded / total * 100, 2)  [row-based]
+      n_excluded        -- number of rows dropped
+
+    Backward-compatible: if df is None/empty or lacks flag_col (older sheets
+    written before the detector), returns (df, 0.0, 0) unchanged -- never raises.
+
+    Research usage::
+
+        from cross_month_loaders import load_post_analysis_all_months, exclude_interday_artifacts
+        df = load_post_analysis_all_months()
+        clean, contamination_pct, n = exclude_interday_artifacts(df)
+        print(f"excluded {n} artifact rows ({contamination_pct}% contamination); {len(clean)} clean rows")
+    """
+    if df is None or df.empty or flag_col not in df.columns:
+        return (df, 0.0, 0)
+    is_artifact = _coerce_bool(df[flag_col])
+    n_excluded  = int(is_artifact.sum())
+    total       = len(df)
+    contamination_pct = round(n_excluded / total * 100, 2) if total > 0 else 0.0
+    clean_df = df[~is_artifact].copy()
+    return (clean_df, contamination_pct, n_excluded)
+
+
 def _dedup_last_wins(df: pd.DataFrame, keys: list) -> pd.DataFrame:
     """
     Drop duplicates by `keys`, keeping the LAST occurrence.
