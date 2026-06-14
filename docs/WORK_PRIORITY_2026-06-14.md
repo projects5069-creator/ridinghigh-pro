@@ -21,7 +21,7 @@ Before any crossover / edge-research / decision-gate work: the data feeding it m
 - TASK-143 — duplicate RH-2026-07-post_analysis before 7/1 rotation. HARD.
 
 ## PHASE 3 — CROSSOVER CHAIN (only after PHASE 0+1 clean)
-- TASK-144 done (Phase 0) -> TASK-177 (fix status drift To-Do vs §D-DONE; materialize/verify D6-D25 auto-grow; overlaps TASK-83) -> TASK-172 live-verify -> **TASK-178 LOCK** (strategy already decided 6/14: entry d1_close of drop-event, exit <=5 trading days or +/-10%, 5d hold from economic reasoning, NO peeking, forward-only hold-out) -> TASK-179 validate (n>=150, worst-case borrow+slip).
+- TASK-144 done (Phase 0) -> TASK-177 (close AC#3 live-verify: materialize/verify D6-D25 auto-grow via a real collector run; overlaps TASK-83) -> TASK-172 live-verify -> **TASK-178 LOCK** (strategy already decided 6/14: entry d1_close of drop-event, exit <=5 trading days or +/-10%, 5d hold from economic reasoning, NO peeking, forward-only hold-out) -> TASK-179 validate (n>=150, worst-case borrow+slip).
 
 ## PHASE 4 — DECISION GATES (Fable-5 investigation; need clean data first)
 - TASK-141 (Filter1 -> Option B), TASK-174 (Score demotion), TASK-127, TASK-128.
@@ -30,7 +30,7 @@ Before any crossover / edge-research / decision-gate work: the data feeding it m
 Per the full 63-task priority table (chat 6/14). Edge research (71/72/75/80...) only on verified-clean data.
 
 ## KEY DRIFTS TO FIX WHEN TOUCHING THESE
-- TASK-177 backlog=To Do but HYPOTHESES.md §D says DONE 3x.
+- TASK-177: code+TDD done, AC#3 live-verify pending (status To Do BY DESIGN, like TASK-172) — NOT a status conflict. §D's "DONE" = the D6-D25 data-collection layer; the task stays open until a real collector run materializes the cols (RULE #6). See TASK-177 notes (auto-grow gap).
 - Titles stale: 177 says "D6-D15" but built D6-D25; 178 says "pre-register" but TASK-165 already did the framework.
 - TASK-83 overlaps TASK-177 (same hold-window) — resolve duplication.
 
