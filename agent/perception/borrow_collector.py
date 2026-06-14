@@ -21,10 +21,24 @@ import os
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
+import pandas as pd
+
 import sheets_manager
 import utils
 
 SOURCE = "ALPACA"
+
+
+def get_scanned_universe(snapshots_df, min_score):
+    """Set of tickers in snapshots_df with Score >= min_score (the scanned
+    universe). Pure, no I/O. Empty set on empty df or missing Ticker/Score cols."""
+    if snapshots_df is None or snapshots_df.empty:
+        return set()
+    if "Ticker" not in snapshots_df.columns or "Score" not in snapshots_df.columns:
+        return set()
+    score = pd.to_numeric(snapshots_df["Score"], errors="coerce")
+    sel = snapshots_df["Ticker"][score >= min_score]
+    return {str(t).strip() for t in sel if str(t).strip()}
 
 
 def build_borrow_row(ticker, asset_info, check_dt):
