@@ -41,6 +41,63 @@ def get_scanned_universe(snapshots_df, min_score):
     return {str(t).strip() for t in sel if str(t).strip()}
 
 
+def _is_true(v):
+    """Coerce a borrow_data IsShortable cell (bool or \"True\"/\"False\" string) to bool."""
+    if isinstance(v, bool):
+        return v
+    return str(v).strip().lower() == "true"
+
+
+def compute_coverage(universe, borrow_rows):
+    """Coverage of the scanned universe by borrow data. Pure (no I/O).
+
+    universe: set of scanned tickers (the denominator for BOTH pcts).
+    borrow_rows: borrow_data sheet rows (idx0=Ticker, idx3=IsShortable).
+    Only rows whose ticker is in `universe` are counted. Returns a dict of
+    5 fields; both pcts are over the universe size (pct=0.0 when universe empty).
+    """
+    n = len(universe)
+    seen = set()
+    shortable = 0
+    for row in borrow_rows:
+        if not row:
+            continue
+        t = str(row[0]).strip()
+        if t not in universe or t in seen:
+            continue
+        seen.add(t)
+        if len(row) > 3 and _is_true(row[3]):
+            shortable += 1
+    with_borrow = len(seen)
+    pct_borrow = round(100.0 * with_borrow / n, 2) if n else 0.0
+    pct_short = round(100.0 * shortable / n, 2) if n else 0.0
+    return {
+        "ScannedUniverse": n,
+        "WithBorrowData": with_borrow,
+        "ShortableCount": shortable,
+        "PctWithBorrowData": pct_borrow,
+        "PctShortable": pct_short,
+    }
+
+
+def build_coverage_row(cov, check_dt):
+    """Build one borrow_coverage row: 8 values in schema order. Pure (no I/O).
+
+    Schema: CheckDate, CheckTime, ScannedUniverse, WithBorrowData,
+    PctWithBorrowData, ShortableCount, PctShortable, Source.
+    """
+    return [
+        check_dt.strftime("%Y-%m-%d"),   # CheckDate (Peru)
+        check_dt.strftime("%H:%M:%S"),   # CheckTime (Peru)
+        cov["ScannedUniverse"],
+        cov["WithBorrowData"],
+        cov["PctWithBorrowData"],
+        cov["ShortableCount"],
+        cov["PctShortable"],
+        SOURCE,
+    ]
+
+
 def build_borrow_row(ticker, asset_info, check_dt):
     """Build one borrow_data row: 9 values in schema order. Pure (no I/O).
 
