@@ -172,6 +172,12 @@ AGENT_SHEET_HEADERS = {
         "Source",
     ],  # 9 columns
 
+    "borrow_coverage": [
+        # All (8) — TASK-172 daily borrow coverage of the scanned universe
+        "CheckDate", "CheckTime", "ScannedUniverse", "WithBorrowData",
+        "PctWithBorrowData", "ShortableCount", "PctShortable", "Source",
+    ],  # 8 columns
+
     "agent_scorecard": [
         # All (7)
         "Date", "Agent", "Facts", "Anomaly_Count", "Anomaly_High",
