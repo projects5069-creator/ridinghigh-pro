@@ -6,7 +6,7 @@ title: >-
 status: To Do
 assignee: []
 created_date: '2026-06-14 19:07'
-updated_date: '2026-06-14 22:56'
+updated_date: '2026-06-15 13:19'
 labels:
   - data-integrity
 dependencies: []
@@ -31,4 +31,6 @@ reverse-split/halt artifacts poison every aggregate (DropsLab d1 mean +124% vs m
 
 <!-- SECTION:NOTES:BEGIN -->
 RH-half: AC#1-3 implemented in code (commits 843e4d1 detector / e74b64a collector / 019d8d2 loader-exclude / 61a52b3 health_audit). Remaining: live-verify collector+check_29 (RULE #6); recompute clean aggregates (49.5->47.2); DropsLab-half blocked on TASK-144. Stays open.
+
+live-verify 2026-06-15: AC#3 wiring LIVE-VERIFIED (check_29 runs on live Sheets via health_audit --local, no crash, advisory PASSED). AC#2 recompute(49.5->47.2) + AC#3 detection BLOCKED: 187 live rows are legacy (no InterdayArtifact col); exclude_interday_artifacts is column-based by design -> backfill required first. Backfill opened as TASK-182.
 <!-- SECTION:NOTES:END -->
