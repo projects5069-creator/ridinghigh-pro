@@ -1,9 +1,10 @@
 ---
 id: TASK-181
 title: Cleanup stale .bak backup files
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-06-14 23:29'
+updated_date: '2026-06-16 01:20'
 labels:
   - hygiene
   - cleanup

@@ -4,11 +4,11 @@ title: Investigate agent_critic_monthly 21.9pct failure rate
 status: To Do
 assignee: []
 created_date: '2026-06-11 04:02'
-updated_date: '2026-06-11 04:27'
+updated_date: '2026-06-16 01:18'
 labels:
   - TASK-139-INV
 dependencies: []
-priority: high
+priority: low
 ordinal: 148000
 ---
 
