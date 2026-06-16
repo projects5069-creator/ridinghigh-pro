@@ -570,7 +570,9 @@ def run(target_date: str = None):
             **d0_fund,
             **tl_stats,
             "audit_flag": audit_flag,
-            "InterdayArtifact": interday_is_artifact,
+            # TASK-182 §0 writer-hardening: str() keeps the column object-dtype so it
+            # never up-casts to float on union with legacy NaN rows (-> '1.0'/'0.0').
+            "InterdayArtifact": str(interday_is_artifact),
             "InterdayArtifactPair": interday_artifact_pair,
             "score_version": SCORE_VERSION,
         }
