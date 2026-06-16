@@ -4,7 +4,7 @@ title: 'DropsLab: ניקוי ערכי recovery בלתי-אפשריים (reverse-
 status: To Do
 assignee: []
 created_date: '2026-06-01 01:22'
-updated_date: '2026-06-16 01:29'
+updated_date: '2026-06-16 16:16'
 labels:
   - dropslab
   - data-quality
@@ -27,7 +27,5 @@ ordinal: 90000
 ## Implementation Notes
 
 <!-- SECTION:NOTES:BEGIN -->
-Tracked under parent TASK-180 (split/halt detector). RH-half done in code; DropsLab recovery/pattern_tag recompute pending TASK-144. Stays open.
-
-PARENT: TASK-180 (DropsLab-half of the split/halt detector; tracked under 180-AC#1 detector-both-systems / AC#2 recompute-clean). RH-half done; DropsLab-half unblocked by TASK-144. Close together when DropsLab-half lands.
+Read-only recompute proof (2026-06-16, from RH via formulas import, ZERO code dup, ZERO writes): DropsLab drops_post n=3627 settled. Full-Recovery 46.6% -> 44.3% after excluding interday artifacts = -2.3pp (matches historic 49.5->47.2 delta; absolute level shifted down because n grew ~1900->3627 post TASK-144 drain). 152 artifacts flagged (4.2%, matches documented 82/4.3%). Mechanism confirmed: penny scan_close (CTNT 0.03->max_rec 28566%, RDGT 0.02->22400%) triggers split-like chain jumps. REMAINING (not done): permanent port to DropsLab repo (pure fn + flag col + dashboard exclude) — pending SSoT decision (dup-vs-shared) + write-back post-market. Proof did NOT touch live dashboard.
 <!-- SECTION:NOTES:END -->
