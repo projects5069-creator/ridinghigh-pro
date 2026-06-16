@@ -523,6 +523,27 @@ def calculate_score(metrics):
     return round(score, 2)
 
 
+def wilson_ci(successes, n, z=1.96):
+    """Wilson score 95% confidence interval for a binomial proportion (TASK-169).
+
+    Returns (low, high) as fractions in [0, 1], rounded to 4 dp. Stays valid at
+    small n (unlike the normal approximation), so a rate like WR n=26 is shown
+    with honest uncertainty. z=1.96 ≈ 95% (no scipy dependency; sqrt via **0.5).
+    n<=0 → (0.0, 1.0) = full uncertainty (no data). Pure scalar — belongs in
+    formulas.py (pandas-free).
+    """
+    if n is None or n <= 0:
+        return (0.0, 1.0)
+    p = successes / n
+    z2 = z * z
+    denom = 1.0 + z2 / n
+    center = (p + z2 / (2 * n)) / denom
+    margin = (z / denom) * ((p * (1 - p) / n + z2 / (4 * n * n)) ** 0.5)
+    low = max(0.0, center - margin)
+    high = min(1.0, center + margin)
+    return (round(low, 4), round(high, 4))
+
+
 # Module self-test when run directly
 # ═══════════════════════════════════════════════════════════════════════
 
