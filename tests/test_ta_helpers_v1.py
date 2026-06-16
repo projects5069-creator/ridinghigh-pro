@@ -94,6 +94,17 @@ def test_followup_atr_routed_through_wilder_helper():
     assert "ta_helpers.atr14_wilder" in body, "follow-up ATR not routed through Wilder helper"
 
 
+# ── TASK-137 pt2: typical_price_dist must route through the canonical formulas
+# function (same as D0:227), not the inline (price-typical)/typical duplicate.
+# Value-preserving (see test_formulas.test_vwap_dist); this guards the DRY/§10 wiring.
+def test_followup_typical_price_dist_routed_through_formula():
+    body = _followup_src()
+    assert "calculate_typical_price_dist(price, high_today, low_today)" in body, \
+        "follow-up typical_price_dist not routed through canonical formula"
+    assert "(price - typical_price) / typical_price * 100" not in body, \
+        "inline typical_price_dist duplicate still present in follow-up"
+
+
 # ── 4. short history -> fallback (mirrors D0 len>=14 guard) ──
 def test_rsi_short_history_returns_fallback():
     assert ta_helpers.rsi14_wilder([10, 11, 12], fallback=50.0) == 50.0

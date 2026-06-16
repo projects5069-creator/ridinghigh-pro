@@ -896,8 +896,10 @@ def update_ticker_follow_up(gc, now_peru):
                 price_to_high = calculate_price_to_high(price, high_today)
                 price_to_52w_high = calculate_price_to_52w_high(price, week52_high)
                 change = calculate_scan_change(price, prev_close)
-                typical_price = (high_today + low_today + price) / 3
-                typical_price_dist = ((price - typical_price) / typical_price * 100) if typical_price > 0 else 0
+                typical_price = (high_today + low_today + price) / 3  # kept for the TypicalPrice column
+                # TASK-137 pt2: route through the canonical (same as D0:227) — DRY/§10,
+                # mathematically identical to the old inline ((price/typical-1)*100).
+                typical_price_dist = calculate_typical_price_dist(price, high_today, low_today)
 
                 metrics = {
                     'mxv': mxv, 'run_up': run_up, 'atrx': atrx, 'rsi': rsi,
