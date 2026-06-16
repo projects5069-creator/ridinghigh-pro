@@ -18,7 +18,7 @@ and the sheet-write boundary is a stub. No real Sheets, no network.
 Run: python3 test_order_manager_write_surfaced_v1.py
 """
 import sys, os
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))  # repo root (relocated to tests/)
 
 from agent.execution.alpaca_broker import SimulatedOrder
 from agent.execution.order_manager import OrderManager

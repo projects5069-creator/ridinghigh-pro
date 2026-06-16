@@ -18,7 +18,7 @@ import sys, os
 from datetime import datetime
 import pytz
 
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))  # repo root (relocated to tests/)
 
 import sheets_manager
 from agent.orchestrator import build_account_state

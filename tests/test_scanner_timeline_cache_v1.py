@@ -13,7 +13,7 @@ order: read@341 -> write+invalidate@421 -> read@522 -> read@744.
 Run: python3 test_scanner_timeline_cache_v1.py
 """
 import sys, os
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))  # repo root (relocated to tests/)
 
 import sheets_manager
 from auto_scanner import _read_timeline_live  # RED until implemented

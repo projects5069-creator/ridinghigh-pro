@@ -3,8 +3,11 @@ Unit tests for health_audit._interday_artifact_result (pure, no Sheets).
     uv run --with-requirements requirements.txt python3 test_health_audit_interday_v1.py
 Exit 0 if all pass, 1 otherwise.
 """
+import os
 import sys
 import pandas as pd
+
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))  # repo root (relocated to tests/)
 
 from health_audit import _interday_artifact_result, WARNING, PASSED
 
