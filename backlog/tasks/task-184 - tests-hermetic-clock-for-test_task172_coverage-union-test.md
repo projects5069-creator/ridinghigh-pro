@@ -1,9 +1,10 @@
 ---
 id: TASK-184
 title: 'tests: hermetic clock for test_task172_coverage union test'
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-06-16 14:06'
+updated_date: '2026-06-16 15:23'
 labels: []
 dependencies: []
 priority: high
