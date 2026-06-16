@@ -4,7 +4,7 @@ title: 'PK batch drift fix: workflows 19to15, RSI dead constants, dead config ke
 status: To Do
 assignee: []
 created_date: '2026-06-11 04:02'
-updated_date: '2026-06-12 22:56'
+updated_date: '2026-06-16 20:23'
 labels:
   - TASK-139-INV
 dependencies: []
@@ -21,5 +21,5 @@ TASK-139-INV D1+RH-1.1+RH-1.2: PK line 19 says 'Active workflows: 7' vs 15 actua
 ## Implementation Notes
 
 <!-- SECTION:NOTES:BEGIN -->
-TASK-156 merge: absorbs TASK-129 (RSI dead-config cleanup: SCORE_RSI_PARAMS unused, hardcoded tiers, PK §18 wrong). Fold into this PK-batch-drift cleanup.
+PARTIAL 2026-06-16: workflow-count drift was already fixed (PK line 19 = 17 = ground-truth, via TASK-138 7->16 + TASK-163 16->17) — task premise ('says 7') was stale. Fixed the real remaining doc-drift: SCORE_CAPS_V2 RSI_LOW 50->60 to match config.py:57 + removed false '(alias)' (PK v3.30). STILL OPEN: RSI-semantics claims ('bell curve 50-70 false', SCORE_RSI_PARAMS dead — config HAS it at :64 with CENTER_LOW=50) need code-investigation of the actual score-RSI path (out of docs-only scope); 9 dead config constants (MIN_PRICE etc) = separate code cleanup. Extends 129+138.
 <!-- SECTION:NOTES:END -->
