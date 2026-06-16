@@ -1,6 +1,11 @@
 """TDD for TASK-182 backfill — backfill_interday_flags fills BLANK InterdayArtifact
 from D0-D5 closes (non-destructive). RED: backfill_interday_v1 does not exist yet."""
+import os
+import sys
 import pandas as pd
+
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))  # repo root (relocated to tests/)
+
 from backfill_interday_v1 import backfill_interday_flags
 
 

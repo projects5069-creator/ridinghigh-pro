@@ -6,8 +6,11 @@ cross_month_loaders.py. Pandas-based, standalone (no pytest required):
 
 Exit 0 if all pass, 1 otherwise.
 """
+import os
 import sys
 import pandas as pd
+
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))  # repo root (relocated to tests/)
 
 from cross_month_loaders import _coerce_bool, exclude_interday_artifacts
 
