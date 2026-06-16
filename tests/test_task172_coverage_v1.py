@@ -151,6 +151,15 @@ def test_collect_borrow_snapshot_union_and_coverage(monkeypatch):
     import agent.orchestrator_eod as eod
     import agent.perception.borrow_collector as bc
 
+    # Hermetic clock: prod filters daily_snapshots by utils.get_peru_time();
+    # fixture rows are dated 2026-06-14, so freeze "today" to match (else the
+    # date filter empties the scanned universe on any other calendar day).
+    import datetime as _dt, pytz as _tz, utils
+    monkeypatch.setattr(
+        utils, "get_peru_time",
+        lambda: _tz.timezone("America/Lima").localize(_dt.datetime(2026, 6, 14, 12, 0, 0)),
+    )
+
     # existing positions = {EXIST}; scanned snapshots = AAA(75), BBB(60), CCC(59-excluded)
     import agent.orchestrator as _orch
     monkeypatch.setattr(_orch, "build_account_state", lambda *a, **k: {"existing_positions": {"EXIST"}})
