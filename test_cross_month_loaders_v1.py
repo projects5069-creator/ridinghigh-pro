@@ -23,6 +23,20 @@ def test_coerce_bool_falsy_gotcha():
     assert _coerce_bool(s).tolist() == [False] * 6
 
 
+def test_coerce_bool_numeric_float_strings():
+    # TASK-182 §0: gspread returns '1.0'/'0.0' when a bool col was up-cast to float
+    import numpy as np
+    s = pd.Series(["1.0", "0.0", "2.0", " 1.0 ", "0", "", "-1.0", np.nan])
+    assert _coerce_bool(s).tolist() == [True, False, True, True, False, False, True, False]
+
+
+def test_coerce_bool_real_floats():
+    # actual float dtype (not strings) — incl. real NaN (the 128-NaN majority in live data)
+    import numpy as np
+    s = pd.Series([1.0, 0.0, 1.0, np.nan])
+    assert _coerce_bool(s).tolist() == [True, False, True, False]
+
+
 def test_exclude_two_of_ten():
     df = pd.DataFrame({"Ticker": list("ABCDEFGHIJ"),
                        "InterdayArtifact": ["True", "False", "False", "True", "False",

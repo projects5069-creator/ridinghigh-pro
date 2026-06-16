@@ -123,12 +123,18 @@ def _coerce_numeric(df: pd.DataFrame, cols: list) -> pd.DataFrame:
 
 
 def _coerce_bool(series):
-    """Coerce a gspread string column to real bool.
+    """Coerce a gspread string/number column to real bool.
 
-    Handles the bool('False')==True gotcha: every non-empty string is truthy, so
-    a naive astype(bool) is WRONG. True iff trimmed-lowercased in {'true','1','yes'}.
+    Handles the bool('False')==True gotcha AND numeric truthy: a bool flag column
+    that pandas up-cast to float on a NaN-mix is written to Sheets as '1.0'/'0.0'
+    (TASK-182 §0 bug — '1.0' was read as False, leaking inter-day artifacts). True
+    iff the trimmed-lowercased value is in {'true','1','yes'} OR parses to a
+    non-zero number ('1.0','2.0','-1.0' -> True; '0.0','','nan',NaN -> False).
     """
-    return series.astype(str).str.strip().str.lower().isin(["true", "1", "yes"])
+    s = series.astype(str).str.strip().str.lower()
+    str_true = s.isin(["true", "1", "yes"])
+    num_true = pd.to_numeric(s, errors="coerce").fillna(0) != 0
+    return str_true | num_true
 
 
 def exclude_interday_artifacts(df, flag_col="InterdayArtifact"):
