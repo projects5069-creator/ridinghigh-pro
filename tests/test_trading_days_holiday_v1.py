@@ -71,3 +71,26 @@ def test_fallback_weekday_only_keeps_weekend_skip():
     with patch("utils.is_trading_day", side_effect=_weekday_only_is_trading_day):
         days = sheets_manager.trading_days_after("2026-06-05", 2)
     assert days == ["2026-06-08", "2026-06-09"]
+
+
+# ── TASK-135: orchestrator.is_market_hours + utils.is_day_complete must use the
+# same holiday source (utils.is_trading_day), not weekday-only. ──
+def test_is_market_hours_skips_weekday_holiday():
+    from datetime import datetime
+    from agent.orchestrator import is_market_hours, PERU_TZ
+    with patch("utils.is_trading_day", side_effect=_fake_is_trading_day):
+        # Fri 2026-07-03 (Independence Day observed): weekday & in-hours but a holiday
+        holiday = PERU_TZ.localize(datetime(2026, 7, 3, 10, 30))
+        assert is_market_hours(holiday) is False
+        # control: Mon 2026-07-06 in-hours -> True (normal trading day)
+        normal = PERU_TZ.localize(datetime(2026, 7, 6, 10, 30))
+        assert is_market_hours(normal) is True
+
+
+def test_is_day_complete_skips_past_holiday():
+    import utils
+    with patch("utils.is_trading_day", side_effect=_fake_is_trading_day):
+        # Memorial Day Mon 2026-05-25 (past weekday holiday) -> never complete
+        assert utils.is_day_complete("2026-05-25") is False
+        # control: Tue 2026-05-26 (past trading day) -> complete
+        assert utils.is_day_complete("2026-05-26") is True

@@ -182,11 +182,12 @@ def is_day_complete(date_str):
     today = now_peru.date()
     day = datetime.strptime(date_str, "%Y-%m-%d").date()
     
-    # Weekend - never complete
-    if day.weekday() >= 5:
+    # Non-trading day (weekend or exchange holiday) - never complete (TASK-135:
+    # holiday-aware via is_trading_day, same SSoT as TASK-130; was weekday-only)
+    if not is_trading_day(day):
         return False
-    
-    # Past weekdays - always complete
+
+    # Past trading days - always complete
     if day < today:
         return True
     

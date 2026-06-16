@@ -102,10 +102,13 @@ def _signal_from_timeline_row(row: Dict[str, Any]) -> Dict[str, Any]:
 # ════════════════════════════════════════════════════════════════════
 
 def is_market_hours(now: Optional[datetime] = None) -> bool:
-    """True if current time is within 08:30-15:00 Peru, Mon-Fri."""
+    """True if within 08:30-15:00 Peru on a NASDAQ trading day — weekends AND
+    exchange holidays excluded (TASK-135; holiday source = utils.is_trading_day,
+    the same SSoT TASK-130 uses)."""
+    from utils import is_trading_day  # local import — mirrors parse_hhmm usage, avoids cycle
     if now is None:
         now = datetime.now(PERU_TZ)
-    if now.weekday() >= 5:  # Sat/Sun
+    if not is_trading_day(now):  # weekend or exchange holiday
         return False
     minutes = now.hour * 60 + now.minute
     return 8 * 60 + 30 <= minutes < 15 * 60
