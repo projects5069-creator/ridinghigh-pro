@@ -108,6 +108,7 @@ def save_mc_cache():
 from finvizfinance.screener.overview import Overview
 from ta.momentum import RSIIndicator
 from ta.volatility import AverageTrueRange
+import ta_helpers  # TASK-137: canonical Wilder RSI/ATR (shared with D0 method)
 from data_provider import get_data_provider, get_fundamentals_provider
 
 _shares_cache = {}
@@ -859,33 +860,25 @@ def update_ticker_follow_up(gc, now_peru):
                 high_today = float(intraday["high"].max())
                 low_today  = float(intraday["low"].min())
 
-                # ATR14 from last 30 days (lowercase columns)
-                hist_long = hist_full.tail(30)
-                if len(hist_long) >= 14:
-                    tr = pd.concat([
-                        hist_long["high"] - hist_long["low"],
-                        (hist_long["high"] - hist_long["close"].shift()).abs(),
-                        (hist_long["low"]  - hist_long["close"].shift()).abs(),
-                    ], axis=1).max(axis=1)
-                    atr14 = float(tr.rolling(14).mean().iloc[-1])
-                else:
-                    atr14 = 0.0
+                # TASK-137: ATR14 via canonical Wilder helper — SAME method as the
+                # D0 scan path (auto_scanner:190) over the FULL history (not SMA,
+                # not tail(30)), so D1-D3 ATR is comparable to D0. hist_full is the
+                # ~252-day daily history (see week52_high below), so the <14
+                # fallback is effectively unreachable for a real ticker.
+                hist_long = hist_full.tail(30)  # still used for prev_close below
+                atr14 = ta_helpers.atr14_wilder(
+                    hist_full["high"], hist_full["low"], hist_full["close"], fallback=0.0
+                )
 
                 prev_close = float(hist_long["close"].iloc[-2]) if len(hist_long) >= 2 else price
 
                 # 52w high — from full 252-day history
                 week52_high = float(hist_full["high"].max())
 
-                # RSI from last 30 days
-                if len(hist_long) >= 15:
-                    closes = hist_long["close"]
-                    delta = closes.diff()
-                    gain = delta.where(delta > 0, 0).rolling(14).mean()
-                    loss_s = (-delta.where(delta < 0, 0)).rolling(14).mean()
-                    rs_val = gain.iloc[-1] / loss_s.iloc[-1] if loss_s.iloc[-1] != 0 else 0
-                    rsi = float(100 - 100 / (1 + rs_val))
-                else:
-                    rsi = 50.0
+                # TASK-137: RSI14 via canonical Wilder helper — SAME method as the
+                # D0 scan path (auto_scanner:183) over the FULL history (not SMA,
+                # not tail(30)), so D1-D3 RSI is comparable to D0.
+                rsi = ta_helpers.rsi14_wilder(hist_full["close"], fallback=50.0)
 
                 # Fundamentals from fund_provider (replaces info.get fields)
                 market_cap         = int(fund.get("market_cap")         or 0)
