@@ -4,7 +4,7 @@ title: 'DropsLab: ניקוי ערכי recovery בלתי-אפשריים (reverse-
 status: To Do
 assignee: []
 created_date: '2026-06-01 01:22'
-updated_date: '2026-06-14 22:56'
+updated_date: '2026-06-16 01:29'
 labels:
   - dropslab
   - data-quality
@@ -28,4 +28,6 @@ ordinal: 90000
 
 <!-- SECTION:NOTES:BEGIN -->
 Tracked under parent TASK-180 (split/halt detector). RH-half done in code; DropsLab recovery/pattern_tag recompute pending TASK-144. Stays open.
+
+PARENT: TASK-180 (DropsLab-half of the split/halt detector; tracked under 180-AC#1 detector-both-systems / AC#2 recompute-clean). RH-half done; DropsLab-half unblocked by TASK-144. Close together when DropsLab-half lands.
 <!-- SECTION:NOTES:END -->

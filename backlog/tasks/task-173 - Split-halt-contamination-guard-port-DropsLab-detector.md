@@ -4,7 +4,7 @@ title: Split/halt contamination guard (port DropsLab detector)
 status: To Do
 assignee: []
 created_date: '2026-06-13 01:26'
-updated_date: '2026-06-14 22:56'
+updated_date: '2026-06-16 01:29'
 labels:
   - TASK-171
 dependencies: []
@@ -28,4 +28,6 @@ ordinal: 176000
 
 <!-- SECTION:NOTES:BEGIN -->
 Tracked under parent TASK-180. RH-half done (AC#2 loader exclude + contamination% in code, 019d8d2); DropsLab flagging pending TASK-144.
+
+PARENT: TASK-180 (DropsLab-half of the split/halt detector; tracked under 180-AC#1 detector-both-systems / AC#2 recompute-clean). RH-half done; DropsLab-half unblocked by TASK-144. Close together when DropsLab-half lands.
 <!-- SECTION:NOTES:END -->
