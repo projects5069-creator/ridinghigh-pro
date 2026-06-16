@@ -3,10 +3,10 @@ id: TASK-135
 title: >-
   orchestrator is_market_hours holiday-blind — agent runs on exchange holidays
   (Independence Day 3/7); align to utils.is_trading_day
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-06-10 18:13'
-updated_date: '2026-06-11 04:01'
+updated_date: '2026-06-16 18:03'
 labels:
   - bug
   - agent
@@ -25,3 +25,9 @@ Found in SYSTEM_REVIEW B.4 + TASK-130 recon (10/6). agent/orchestrator.py:104 is
 <!-- AC:BEGIN -->
 - [ ] #1 TASK-139-INV RH-1.4: utils.is_day_complete is also weekday-only (past holiday counted complete) — align together with is_market_hours fix
 <!-- AC:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+DONE (c508879, 2026-06-16, CI green): bug1 orchestrator.is_market_hours + bug2 utils.is_day_complete both routed through utils.is_trading_day (SSoT reuse of TASK-130, zero dup). bug1 reachable (agent ran on weekday holidays e.g. Independence Day Fri 7/3); bug2 defensive (callers feed holiday-free trading_days from get_trading_days_after). +2 hermetic holiday tests in test_trading_days_holiday_v1.py (CI-collected). suite 369 passed; zero ENTER/sizing/Score/D0 change. AC#1 (is_market_hours + is_day_complete) satisfied. Deadline 3-4/7 cleared early.
+<!-- SECTION:NOTES:END -->
