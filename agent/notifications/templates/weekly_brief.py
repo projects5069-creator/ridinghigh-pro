@@ -12,6 +12,8 @@ from datetime import datetime
 
 import pytz
 
+from formulas import fmt_rate_ci
+
 PERU_TZ = pytz.timezone("America/Lima")
 
 _WIN_COLOR = "#10b981"
@@ -77,7 +79,7 @@ margin:0 auto;color:#111827;">
 
   <div style="margin:16px 0;">
     {_kpi("עסקאות", trades)}
-    {_kpi("WinRate", _fmt(win_rate, "%"))}
+    {_kpi("WinRate", f'<span dir="ltr" style="unicode-bidi:isolate">{fmt_rate_ci(wins, trades)}</span>')}
     {_kpi("נצחונות", wins, _WIN_COLOR)}
     {_kpi("הפסדים", losses, _LOSS_COLOR)}
     {_kpi("P&L נטו", f"${total_pnl}", pnl_color)}

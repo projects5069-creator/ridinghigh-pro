@@ -4,6 +4,8 @@ from datetime import datetime
 from typing import Dict, Any, List
 import pytz
 
+from formulas import fmt_rate_ci
+
 PERU_TZ = pytz.timezone("America/Lima")
 
 
@@ -122,9 +124,7 @@ def render_daily_email(stats: Dict[str, Any]) -> tuple:
     eod_count = stats.get("eod_closes", 0)
     closed_total = win_count + loss_count + eod_count
 
-    win_rate_str = "—"
-    if closed_total > 0:
-        win_rate_str = f"{win_count / closed_total * 100:.1f}%"
+    win_rate_str = fmt_rate_ci(win_count, closed_total)
 
     subject = f"📊 RidingHigh Agent — Daily Brief {date_str} ({pnl_sign}${pnl:.2f})"
 

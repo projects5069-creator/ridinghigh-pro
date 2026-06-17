@@ -12,6 +12,8 @@ from datetime import datetime
 
 import pytz
 
+from formulas import fmt_rate_ci
+
 PERU_TZ = pytz.timezone("America/Lima")
 
 _WIN_COLOR = "#10b981"
@@ -78,7 +80,7 @@ def _key_numbers(row):
     except (TypeError, ValueError):
         wpct = 0.0
     bar = (f'<div style="max-width:420px;margin:6px auto 0;">'
-           f'<div style="font-size:12px;color:{_NEUTRAL};margin-bottom:3px;">אחוז הצלחה: {_fmt(wr, "%")}</div>'
+           f'<div style="font-size:12px;color:{_NEUTRAL};margin-bottom:3px;">אחוז הצלחה: <span dir="ltr" style="unicode-bidi:isolate">{fmt_rate_ci(row.get("Wins", 0), row.get("Trades", 0))}</span></div>'
            f'<div style="background:{_LOSS_COLOR};border-radius:6px;overflow:hidden;height:20px;">'
            f'<div style="background:{_WIN_COLOR};height:20px;width:{wpct}%;"></div></div></div>')
     return f'<div style="text-align:center;margin:16px 0;">{cards}</div>{bar}'
