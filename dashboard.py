@@ -58,6 +58,7 @@ from formulas import (
     calculate_float_pct,
     normalize_mxv,
     normalize_atrx,
+    fmt_rate_ci,
 )
 from auto_scanner import calculate_score
 from utils import (
@@ -2176,8 +2177,9 @@ def _render_short_table(df: pd.DataFrame, download_key: str):
     c2.metric("✅ Wins (TP10)", wins)
     c3.metric("❌ Losses (SL)", losses)
     c4.metric("🟡 Alive",       alive_cnt)
-    c5.metric("Win rate",       f"{win_rate:.1f}%")
+    c5.metric("Win rate",       fmt_rate_ci(wins, total))
     c6.metric("Total PnL",      f"${total_pnl:+.2f}")
+    st.caption("שיעור הצלחה: הסוגריים = Wilson 95% CI (אי-ודאות דגימה, קריטי ב-n קטן).")
 
     # ── Row color coding ─────────────────────────────────────────────────────
     def row_style(row):
@@ -2562,12 +2564,13 @@ def post_analysis_page():
         tier_rows.append({
             "טווח ציון": label,
             "מניות": len(t),
-            "הגיע ל-10%": f"{tp10_t}/{len(t)} ({tp10_t/len(t)*100:.0f}%)",
-            "הגיע ל-15%": f"{tp15_t}/{len(t)} ({tp15_t/len(t)*100:.0f}%)",
+            "הגיע ל-10%": f"{tp10_t}/{len(t)} ({fmt_rate_ci(tp10_t, len(t), decimals=0)})",
+            "הגיע ל-15%": f"{tp15_t}/{len(t)} ({fmt_rate_ci(tp15_t, len(t), decimals=0)})",
             "ירידה ממוצעת": f"{avg_drop_t:.1f}%"
         })
     if tier_rows:
         st.dataframe(pd.DataFrame(tier_rows), use_container_width=True, hide_index=True)
+        st.caption("הסוגריים ליד כל שיעור = Wilson 95% CI.")
 
     st.divider()
 
@@ -3369,8 +3372,9 @@ def live_trades_page():
     c1.metric("⏳ Pending",   g_pending)
     c2.metric("✅ TP10 Hits", g_tp)
     c3.metric("❌ SL Hits",   g_sl)
-    c4.metric("🎯 TP10 Hit-Rate",  f"{g_wr:.0f}%" if g_closed > 0 else "—")
+    c4.metric("🎯 TP10 Hit-Rate",  fmt_rate_ci(g_tp, g_closed, decimals=0))
     c5.metric("💰 Total PnL", f"${g_pnl:+.0f}")
+    st.caption("TP10 Hit-Rate: הסוגריים = Wilson 95% CI (כולל הטבלאות לפי ScoreType).")
 
     st.divider()
 
@@ -3395,9 +3399,8 @@ def live_trades_page():
         n_tp      = int((sub["Status"] == "TP10").sum())
         n_sl      = int((sub["Status"] == "SL").sum())
         n_closed  = n_tp + n_sl
-        wr        = n_tp / n_closed * 100 if n_closed > 0 else 0
         pnl       = sub["PnL_$"].sum() if not sub.empty else 0.0
-        wr_label  = f"{wr:.0f}%" if n_closed > 0 else "—"
+        wr_label  = fmt_rate_ci(n_tp, n_closed, decimals=0)
 
         expander_label = (
             f"**{score_type}** · {desc} · "
@@ -3514,6 +3517,7 @@ def score_comparison_page():
 
     # ── Section 1: Performance table ──────────────────────────────────────────
     st.subheader("📋 סקשן 1 — טבלת ביצועים")
+    st.caption("עמודת 95% CI = Wilson confidence interval (אי-ודאות דגימה; חל גם על סקשנים 3ב/4).")
 
     perf_rows = []
     for sc in SCORE_COLS:
@@ -3523,6 +3527,7 @@ def score_comparison_page():
         n = len(subset)
         if n == 0:
             perf_rows.append({"Score": sc, "n (≥60)": 0, "TP10 Hit-Rate": None,
+                               "95% CI": "—",
                                "Avg MaxDrop% (winners)": None, "Best Bucket": "—"})
             continue
         win_rate = subset["TP10_Hit"].mean()
@@ -3538,7 +3543,7 @@ def score_comparison_page():
         bkt = bkt[bkt["n_bkt"] >= 3]
         if not bkt.empty:
             best = bkt.loc[bkt["wr_bkt"].idxmax()]
-            best_label = f"{int(best['_bucket'])}-{int(best['_bucket'])+10} ({best['wr_bkt']*100:.0f}%, n={int(best['n_bkt'])})"
+            best_label = f"{int(best['_bucket'])}-{int(best['_bucket'])+10} ({fmt_rate_ci(int(round(best['wr_bkt']*best['n_bkt'])), int(best['n_bkt']), decimals=0)}, n={int(best['n_bkt'])})"
         else:
             best_label = "—"
 
@@ -3546,6 +3551,7 @@ def score_comparison_page():
             "Score":                    sc,
             "n (≥60)":                  n,
             "TP10 Hit-Rate":            round(win_rate * 100, 1),
+            "95% CI":                   fmt_rate_ci(int(subset["TP10_Hit"].sum()), n, decimals=0),
             "Avg MaxDrop% (winners)":   round(avg_drop, 1) if avg_drop is not None else None,
             "Best Bucket":              best_label,
         })
@@ -3633,7 +3639,7 @@ def score_comparison_page():
     st.subheader("📋 סקשן 3א — כל המניות עם ציונים")
     st.markdown(
         f"**סה\"כ {n_total} מניות** | ✅ {n_tp10} TP10 | ❌ {n_sl} SL | "
-        f"⏳ {n_pending} Pending | **TP10 Hit-Rate: {win_rate}%**"
+        f"⏳ {n_pending} Pending | **TP10 Hit-Rate: {fmt_rate_ci(n_tp10, n_closed, decimals=0)}**"
     )
 
     tbl3a = (sc3_all[base_disp_cols]
@@ -3679,6 +3685,7 @@ def score_comparison_page():
                 "ציון":          sc,
                 "n (≥60)":       len(sub),
                 "TP10 Hit-Rate %":    round(wr * 100, 1),
+                "95% CI":        fmt_rate_ci(int((sub["TP10_Hit"] == 1).sum()), len(sub), decimals=0),
                 "TP10":          int((sub["TP10_Hit"] == 1).sum()),
                 "SL":            int((sub["TP10_Hit"] == 0).sum()),
             })
@@ -3739,6 +3746,9 @@ def score_comparison_page():
         rank_df["Win% when highest"] = (
             rank_df.get("Wins (TP10=1)", 0) / rank_df["Total"] * 100
         ).round(1)
+        rank_df["95% CI"] = rank_df.apply(
+            lambda r: fmt_rate_ci(int(r.get("Wins (TP10=1)", 0)), int(r["Total"]), decimals=0), axis=1
+        )
         rank_df = rank_df.sort_values("Wins (TP10=1)", ascending=False)
         rank_df.index.name = "Score"
         st.dataframe(
@@ -3794,6 +3804,8 @@ def system_overview_page():
     v2_records = 0
     v2_days = 0
     v2_winrate = None
+    v2_wins = 0
+    v2_n = 0
     if not pa_df.empty:
         for col in ["TP10_Hit", "MaxDrop%", "Score"]:
             if col in pa_df.columns:
@@ -3805,6 +3817,8 @@ def system_overview_page():
                 v2_days = v2_df["ScanDate"].nunique()
             v2_with_outcome = v2_df[v2_df["TP10_Hit"].notna()] if "TP10_Hit" in v2_df.columns else pd.DataFrame()
             v2_winrate = v2_with_outcome["TP10_Hit"].mean() * 100 if not v2_with_outcome.empty else None
+            v2_wins = int(v2_with_outcome["TP10_Hit"].sum()) if not v2_with_outcome.empty else 0
+            v2_n = len(v2_with_outcome)
 
     # Phase 1 progress
     target_records = 100
@@ -3815,7 +3829,8 @@ def system_overview_page():
     p1, p2, p3 = st.columns(3)
     p1.metric("📊 רשומות v2", f"{v2_records}/{target_records}", delta=f"{progress_records*100:.0f}%")
     p2.metric("📆 ימי מסחר v2", f"{v2_days}/{target_days}", delta=f"{progress_days*100:.0f}%")
-    p3.metric("🎯 TP10 v2", f"{v2_winrate:.1f}%" if v2_winrate else "—")
+    p3.metric("🎯 TP10 v2", fmt_rate_ci(v2_wins, v2_n, decimals=1))
+    st.caption("🎯 TP10 v2: הסוגריים = Wilson 95% CI.")
 
     st.caption(
         "🎯 **קריטריוני יציאה לשלב 2:** ≥100 רשומות v2 · ≥30 ימי מסחר · "

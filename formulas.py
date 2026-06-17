@@ -544,6 +544,24 @@ def wilson_ci(successes, n, z=1.96):
     return (round(low, 4), round(high, 4))
 
 
+def fmt_rate_ci(successes, n, decimals=1):
+    """Render a proportion rate with its Wilson 95% CI as a display string (TASK-169 AC#2).
+
+    e.g. fmt_rate_ci(14, 26) -> "53.8% [35–71%]". Point estimate at `decimals`
+    precision, CI bounds as whole percents, a single '%' closing the range, and
+    an en-dash separator. The "95% CI" meaning is conveyed once per surface
+    (legend/caption) — not repeated in every string. n<=0 -> "—" (no rate for an
+    empty sample). Delegates the interval to wilson_ci (never recomputes it);
+    Wilson bounds are already in [0, 1] so the rendered range stays within
+    [0, 100%]. Pure scalar — belongs in formulas.py (pandas-free).
+    """
+    if n is None or n <= 0:
+        return "—"
+    rate = successes / n * 100
+    low, high = wilson_ci(successes, n)
+    return f"{rate:.{decimals}f}% [{low * 100:.0f}–{high * 100:.0f}%]"
+
+
 # Module self-test when run directly
 # ═══════════════════════════════════════════════════════════════════════
 
