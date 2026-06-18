@@ -1,9 +1,10 @@
 ---
 id: TASK-169
 title: Wilson 95% CI next to every percentage (dashboard + emails)
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-06-12 22:55'
+updated_date: '2026-06-18 14:05'
 labels:
   - vision
 dependencies: []
