@@ -118,7 +118,8 @@ class PostmortemEngine:
             "Ticker": ticker,
             "EntryDate": position.get("EntryDate", ""),
             "EntryPrice": self._safe_float(position.get("EntryPrice"), 0.0),
-            "ScoreAtEntry": decision_context.get("Score", 0.0),
+            "ScoreAtEntry": ("" if decision_context.get("Score") is None
+                             else round(decision_context.get("Score"), 2)),
             "MetricsAtEntry": json.dumps(decision_context.get("metrics", {})),
             "ExitDate": position.get("ExitDate", ""),
             "ExitPrice": self._safe_float(position.get("ExitPrice"), 0.0),
@@ -164,15 +165,15 @@ class PostmortemEngine:
     def _get_decision_context(self, position_id: str) -> Dict[str, Any]:
         """Look up decision_log row by PositionID = DecisionID."""
         if not self._decision_reader or not position_id:
-            return {"Score": 0.0, "metrics": {}}
+            return {"Score": None, "metrics": {}}
 
         try:
             decision = self._decision_reader(position_id)
             if not decision:
-                return {"Score": 0.0, "metrics": {}}
+                return {"Score": None, "metrics": {}}
 
             return {
-                "Score": self._safe_float(decision.get("Score"), 0.0),
+                "Score": self._safe_float(decision.get("Score"), None),
                 "metrics": {
                     "MxV": self._safe_float(decision.get("MxV"), 0.0),
                     "RunUp": self._safe_float(decision.get("RunUp"), 0.0),
@@ -185,7 +186,7 @@ class PostmortemEngine:
             }
         except Exception as e:
             logger.warning("Failed to get decision context for %s: %s", position_id, e)
-            return {"Score": 0.0, "metrics": {}}
+            return {"Score": None, "metrics": {}}
 
     # ════════════════════════════════════════════════════════════════════
     # MFE / MAE (Max Favorable / Adverse Excursion)
@@ -372,7 +373,10 @@ class PostmortemEngine:
             try: return float(v)
             except (TypeError, ValueError): return default
         
-        score = f(decision_ctx.get("Score", 0))
+        # Stage 0 (TASK-127.1): absence-safe — None means "no Score" (scoreless era),
+        # never 0. Guarded everywhere below so None never enters a numeric compare.
+        _raw_score = decision_ctx.get("Score")
+        score = None if _raw_score is None else f(_raw_score, None)
         metrics = decision_ctx.get("metrics", {})
         rsi = f(metrics.get("RSI", 0))
         mxv = f(metrics.get("MxV", 0))
@@ -399,12 +403,13 @@ class PostmortemEngine:
         lines.append("")
         
         lines.append("📊 מה הכניס לעסקה:")
-        if score < 60:
-            lines.append(f"• Score={score:.2f} — נמוך, בקושי מעל הסף (50). הציון לבדו לא תמך בכניסה")
-        elif score < 80:
-            lines.append(f"• Score={score:.2f} — בינוני")
-        else:
-            lines.append(f"• Score={score:.2f} — גבוה")
+        if score is not None:
+            if score < 60:
+                lines.append(f"• Score={score:.2f} — נמוך, בקושי מעל הסף (50). הציון לבדו לא תמך בכניסה")
+            elif score < 80:
+                lines.append(f"• Score={score:.2f} — בינוני")
+            else:
+                lines.append(f"• Score={score:.2f} — גבוה")
         
         triggers = []
         if scan_change > 60:
@@ -441,7 +446,7 @@ class PostmortemEngine:
         lines.append("")
         
         close_calls = []
-        if 50 <= score <= 55:
+        if score is not None and 50 <= score <= 55:
             close_calls.append(f"Score={score:.2f} — 3 נק' פחות = SKIP")
         if 85 <= rsi <= 88:
             close_calls.append(f"RSI={rsi:.2f} — קרוב לסף L3 (88)")

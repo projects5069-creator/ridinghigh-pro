@@ -140,7 +140,14 @@ class DecisionLogger:
             getattr(decision, "skip_reason", "") or getattr(decision, "reason", "") or "UNKNOWN"
         )
         key = reason_raw.split(":")[0].strip() or "UNKNOWN"
-        score = float(getattr(decision, "score", 0.0) or 0.0)
+        # Stage 0 (TASK-127.1): absence-safe — no Score => None, never accumulated as 0.
+        _raw = getattr(decision, "score", None)
+        score = None
+        if _raw is not None and str(_raw).strip() != "":
+            try:
+                score = float(_raw)
+            except (TypeError, ValueError):
+                score = None
         ticker = getattr(decision, "ticker", "?") or "?"
         entry = self._skip_acc.get(key)
         if entry is None:
@@ -153,8 +160,9 @@ class DecisionLogger:
         else:
             entry["count"] += 1
             entry["tickers"].append(ticker)
-            entry["score_min"] = min(entry["score_min"], score)
-            entry["score_max"] = max(entry["score_max"], score)
+            if score is not None:
+                entry["score_min"] = score if entry["score_min"] is None else min(entry["score_min"], score)
+                entry["score_max"] = score if entry["score_max"] is None else max(entry["score_max"], score)
 
     def flush_skip_summary(self) -> int:
         """Write the aggregated SKIP counts to the skip_summary tab.
@@ -185,8 +193,8 @@ class DecisionLogger:
                     key,
                     entry["count"],
                     tickers_cell,
-                    round(entry["score_min"], 2),
-                    round(entry["score_max"], 2),
+                    "" if entry["score_min"] is None else round(entry["score_min"], 2),
+                    "" if entry["score_max"] is None else round(entry["score_max"], 2),
                 ])
             sheets_manager.safe_append_rows(
                 ws, rows, dedup_col=1, dedup_vals={self.run_id}

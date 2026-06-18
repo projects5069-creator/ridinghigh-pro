@@ -132,12 +132,12 @@ class TestDecisionContext:
         assert "ATRX" in metrics
         assert metrics["ATRX"] == 2.5
 
-    def test_no_decision_reader_returns_zero_score(self):
-        """Without decision_reader, Score=0 and metrics={}."""
+    def test_no_decision_reader_returns_empty_score(self):
+        """Without decision_reader, ScoreAtEntry='' (scoreless era — absence is empty, not 0)."""
         engine = PostmortemEngine(decision_reader=None, sheet_writer=lambda r: None)
         pos = _closed_position()
         pm = engine.generate(pos)
-        assert pm["ScoreAtEntry"] == 0.0
+        assert pm["ScoreAtEntry"] == ""
 
 
 class TestAutoLessons:

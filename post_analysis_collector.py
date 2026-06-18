@@ -60,6 +60,20 @@ DAYS_FORWARD = COLLECT_DAYS_FORWARD   # TASK-177: forward collection horizon (25
 SCORE_VERSION = "v2"
 
 
+def score_cell_and_version(raw_score):
+    """Stage 0 (TASK-127.1): resolve a raw Score value into the (cell, score_version)
+    pair for a post_analysis row. Forward-only freeze: a present numeric Score keeps
+    the current behaviour (round(float,2), SCORE_VERSION); an absent/blank Score
+    becomes ("", "v3_scoreless"). The new tag is the queryable anchor separating the
+    Score era from the scoreless era — never write a 0 that masquerades as a Score."""
+    if str(raw_score).strip().lower() in ("", "none", "nan"):
+        return "", "v3_scoreless"
+    try:
+        return round(float(raw_score), 2), SCORE_VERSION
+    except (TypeError, ValueError):
+        return "", "v3_scoreless"
+
+
 # ── Catalyst analysis (unchanged from v4) ────────────────────────────────────
 def fetch_finviz_news(ticker: str, scan_date: str) -> list:
     import urllib.request, re
@@ -433,7 +447,7 @@ def run(target_date: str = None):
     for _, row in candidates.iterrows():
         ticker     = str(row.get("Ticker", "")).strip()
         scan_date  = str(row.get("Date", "")).strip()
-        score      = float(row.get("Score", 0))
+        _score_cell, _score_ver = score_cell_and_version(row.get("Score", ""))
         scan_price = pd.to_numeric(row.get("Price", 0), errors="coerce") or 0
 
         if not ticker or not scan_date: continue
@@ -559,7 +573,7 @@ def run(target_date: str = None):
         new_row = {
             "Ticker":      ticker,
             "ScanDate":    scan_date,
-            "Score":       round(float(score), 2),
+            "Score":       _score_cell,
             "ScanPrice":   round(float(scan_price), 2),
             "ScanChange%": round(pd.to_numeric(row.get("Change", 0), errors="coerce"), 2),
             **metrics,
@@ -574,7 +588,7 @@ def run(target_date: str = None):
             # never up-casts to float on union with legacy NaN rows (-> '1.0'/'0.0').
             "InterdayArtifact": str(interday_is_artifact),
             "InterdayArtifactPair": interday_artifact_pair,
-            "score_version": SCORE_VERSION,
+            "score_version": _score_ver,
         }
         new_rows.append(new_row)
         time.sleep(0.3)
