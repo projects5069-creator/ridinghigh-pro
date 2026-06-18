@@ -344,6 +344,7 @@ AGENT_ROCKET_GUARD_PTH   = -10   # %, PriceToHigh at/above this = still near pea
 
 # Modes
 AGENT_DRY_RUN = True               # Start in DRY_RUN; switch to False at M10
+SCORE_WRITE_FROZEN = True          # Stage 1 (ADR-009, TASK-127.2): freeze Score sheet-writes (-> ""); flip False to roll back. forward-only scoreless-data era.
 AGENT_LIVE_PAPER = False           # Becomes True after M10 approval
 
 # Postmortem schema versioning — bump when score formula changes

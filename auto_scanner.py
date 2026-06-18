@@ -42,7 +42,26 @@ from config import (
     SL_THRESHOLD_FRAC,
     TRADE_ENTRY_MIN_SCORE,
     MIN_SCORE_DISPLAY,
+    SCORE_WRITE_FROZEN,
 )
+
+
+def score_write_value(v):
+    """Stage 1 (TASK-127.2, ADR-009): freeze Score sheet-writes. Returns "" when
+    SCORE_WRITE_FROZEN (scoreless-data era), else the computed value (no-op). Score
+    is still computed in-memory for selection — only the WRITE to the sheet is frozen."""
+    return "" if SCORE_WRITE_FROZEN else v
+
+
+def apply_snapshot_score_freeze(df):
+    """Stage 1: blank the Score COLUMN on a daily_snapshots frame when frozen.
+    Operates on a copy so the in-memory results_df used for >=70/idxmax/sort
+    selection is never mutated."""
+    if SCORE_WRITE_FROZEN and df is not None and "Score" in getattr(df, "columns", []):
+        df = df.copy()
+        df["Score"] = ""
+    return df
+
 
 SCOPES = [
     "https://spreadsheets.google.com/feeds",
@@ -454,6 +473,7 @@ def run_scan():
         if is_snapshot_time():
             ws_snap = sheets_manager.get_worksheet("daily_snapshots", gc=gc)
             snap_df = results_df.copy()
+            snap_df = apply_snapshot_score_freeze(snap_df)
             snap_df.insert(0, 'Date', today)
             existing_snap = ws_snap.get_all_values()
             if len(existing_snap) <= 1:
@@ -481,7 +501,7 @@ def run_scan():
                     if key not in existing_keys:
                         new_positions.append({
                             'PositionKey': key, 'Date': today, 'Ticker': row['Ticker'],
-                            'Score': round(float(row['Score']), 2),
+                            'Score': score_write_value(round(float(row['Score']), 2)),
                             'BuyPrice': round(float(row['Price']), 2), 'Status': 'Open'
                         })
                 if new_positions:
@@ -560,7 +580,7 @@ def _save_daily_summary(gc, today: str, ws_timeline):
             summary_rows.append({
                 "Date":          today,
                 "Ticker":        ticker,
-                "Score":         round(float(grp["Score"].max()), 2),
+                "Score":         score_write_value(round(float(grp["Score"].max()), 2)),
                 "Price":         round(float(peak_row.get("Price", 0) or 0), 2),
                 "MxV":           round(float(peak_row.get("MxV", 0) or 0), 2),
                 "RunUp":         round(float(peak_row.get("RunUp", 0) or 0), 2),
@@ -917,7 +937,7 @@ def update_ticker_follow_up(gc, now_peru):
                     "Price":            round(price, 2),
                     "Volume":           volume,
                     "MarketCap":        market_cap,
-                    "Score":            round(score, 2),
+                    "Score":            score_write_value(round(score, 2)),
                     "MxV":              round(mxv, 2),
                     "RunUp":            round(run_up, 2),
                     "REL_VOL":          round(rel_vol, 2),
@@ -1086,7 +1106,7 @@ def update_live_trades(gc, now_peru, results=None):
                     "EntryPrice":   price,
                     "IntraHigh":    intra_high,
                     "ScoreType":    "Score",
-                    "Score":        round(score_val, 2),
+                    "Score":        score_write_value(round(score_val, 2)),
                     "TP10_Price":   tp10_price,
                     "SL_Price":     sl_price,
                     "CurrentPrice": price,
@@ -1224,7 +1244,7 @@ def sync_score_tracker(gc, now_peru):
                     "Date": today, "ScanTime": scan_time,
                     "Ticker": ticker, "ScanDate": scan_date,
                     "Price":     price,
-                    "Score":     round(score,     2),
+                    "Score":     score_write_value(round(score,     2)),
                     "MxV":       round(mxv,        2),
                     "RunUp":     round(run_up,     2),
                     "REL_VOL":   round(rel_vol,    2),
@@ -1333,7 +1353,7 @@ def run_eod():
                     "PositionKey": key,
                     "Date":        today,
                     "Ticker":      row["Ticker"],
-                    "Score":       round(float(row["Score"]), 2),
+                    "Score":       score_write_value(round(float(row["Score"]), 2)),
                     "BuyPrice":    round(float(row.get("Price", 0) or 0), 2),
                     "Status":      "Open",
                 })
