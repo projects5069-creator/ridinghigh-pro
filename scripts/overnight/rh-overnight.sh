@@ -8,7 +8,8 @@
 
 REPO="${RH_REPO:-/Users/adilevy/RidingHighPro}"
 TASKS_DIR="$REPO/backlog/tasks"
-RAW_DIR="$REPO/docs/overnight/raw"
+RAW_BASE="$REPO/docs/overnight/raw"
+RAW_DIR="$RAW_BASE"                      # reassigned per-night inside main()
 NIGHT_SETTINGS="$REPO/.claude/settings.night.json"
 MAX_TASKS="${MAX_TASKS:-3}"
 MAX_TURNS="${MAX_TURNS:-40}"
@@ -21,6 +22,7 @@ KEYCHAIN_SERVICE="${KEYCHAIN_SERVICE:-rh-overnight-oauth}"
 
 now_lima() { TZ="America/Lima" date +%H:%M; }
 today()    { TZ="America/Lima" date +%Y-%m-%d; }
+night_raw_dir() { echo "$RAW_BASE/$1"; }   # per-night subdir → no stale rows in a fresh report
 
 # --- Guards (unit-tested) -------------------------------------------------------
 guard_no_api_key() {            # pass (0) only if no API key/token in env
@@ -74,8 +76,9 @@ check_auth() {
 # --- Orchestration (runs only when executed, not sourced) -----------------------
 main() {
   set -euo pipefail
-  mkdir -p "$RAW_DIR"
   local stamp; stamp="$(today)"
+  RAW_DIR="$(night_raw_dir "$stamp")"      # isolate this night's per-task JSON from prior nights
+  mkdir -p "$RAW_DIR"
   local log="$RAW_DIR/run_${stamp}.log"
   exec > >(tee -a "$log") 2>&1
   echo "== RH overnight $stamp $(now_lima) Lima =="

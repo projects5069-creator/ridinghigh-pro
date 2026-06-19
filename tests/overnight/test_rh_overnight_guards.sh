@@ -45,5 +45,10 @@ if [ -z "${SMTP_HOST:-}" ] && [ -z "${ALPACA_SECRET_KEY:-}" ] && [ -z "${GOOGLE_
 if [ "${CLAUDE_CODE_OAUTH_TOKEN:-}" = "sk-ant-oat-keep" ] && [ "${GH_TOKEN:-}" = "gho-keep" ] \
    && [ "${GITHUB_TOKEN:-}" = "ghp-keep" ]; then echo "  ✓ oauth + gh tokens preserved"; else echo "  ✗ needed token lost"; fail=1; fi
 
+# night_raw_dir: per-night subdir so a prior night's *.json can't leak into a fresh report
+RAW_BASE=/tmp/rawbase
+[ "$(night_raw_dir 2026-06-19)" = "/tmp/rawbase/2026-06-19" ] && echo "  ✓ per-night raw dir" || { echo "  ✗ per-night raw dir"; fail=1; }
+[ "$(night_raw_dir 2026-06-19)" != "$(night_raw_dir 2026-06-18)" ] && echo "  ✓ nights isolated" || { echo "  ✗ nights not isolated"; fail=1; }
+
 [ "$fail" -eq 0 ] && echo "ALL PASS" || echo "FAILURES"
 exit $fail
