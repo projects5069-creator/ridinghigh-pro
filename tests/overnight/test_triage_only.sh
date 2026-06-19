@@ -21,6 +21,9 @@ MAX_CANDIDATES=25; cap_reached 25 && echo "  ✓ cap_reached at limit" || { echo
 cap_reached 10 && { echo "  ✗ should not cap below limit"; fail=1; } || echo "  ✓ not capped below limit"
 grep -q 'cap_reached' "$WRAP" && echo "  ✓ triage loop references cap_reached" || { echo "  ✗ loop doesn't use cap_reached"; fail=1; }
 
+# runner python scripts must use a shim-proof interpreter (bare python3 is hijacked by the modern-python PATH shim)
+grep -q 'python3 "\$REPO/scripts/overnight' "$WRAP" && { echo "  ✗ bare python3 for runner scripts (shim-prone)"; fail=1; } || echo "  ✓ runner python scripts use shim-proof interpreter"
+
 # structural ordering: the triage-only early-return precedes EVERY execute/PR/publish action
 guard_ln=$(grep -n 'if is_triage_only' "$WRAP" | head -1 | cut -d: -f1)
 task_wt_ln=$(grep -n 'b "rh-night/\$tid"' "$WRAP" | head -1 | cut -d: -f1)

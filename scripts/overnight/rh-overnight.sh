@@ -21,6 +21,7 @@ EXEC_MODEL="${EXEC_MODEL:-sonnet}"
 CLASSIFY_MODEL="${CLASSIFY_MODEL:-sonnet}"
 KEYCHAIN_SERVICE="${KEYCHAIN_SERVICE:-rh-overnight-oauth}"
 BASE_BRANCH="${RH_BASE_BRANCH:-main}"   # branch tasks/reports base off; override for isolated §11 runs
+PYBIN="${RH_PYBIN:-/usr/bin/python3}"   # stdlib-only runner scripts; bypasses the modern-python PATH shim
 
 now_lima() { TZ="America/Lima" date +%H:%M; }
 today()    { TZ="America/Lima" date +%Y-%m-%d; }
@@ -127,7 +128,7 @@ main() {
   sed "s#\${REPO}#$REPO#g" "$NIGHT_SETTINGS" > "$resolved_settings"
 
   # 2. Triage: layer-1 (deterministic) → layer-2 (classifier in a clean scan worktree).
-  local candidates; candidates="$(python3 "$REPO/scripts/overnight/triage_filter.py" "$TASKS_DIR")"
+  local candidates; candidates="$("$PYBIN" "$REPO/scripts/overnight/triage_filter.py" "$TASKS_DIR")"
   local wt_scan="$REPO/../rh-night-scan-$stamp"
   git worktree add --detach --force "$wt_scan" "$BASE_BRANCH" >/dev/null 2>&1 || true
   local queue=() n_needs=0 classified=0
@@ -203,7 +204,7 @@ main() {
   # clean (else next run's guard_base_ready would abort). It is published to the
   # overnight-reports branch (committed there as docs/overnight/REPORT_*.md) below.
   local report="$RAW_DIR/REPORT_${stamp}.md"
-  python3 "$REPO/scripts/overnight/build_report.py" "$RAW_DIR" "$stamp" "$base_sha" "$report"
+  "$PYBIN" "$REPO/scripts/overnight/build_report.py" "$RAW_DIR" "$stamp" "$base_sha" "$report"
 
   # 5. Publish report via a DEDICATED worktree — never stash/checkout main's working tree
   #    (so the user's uncommitted files are untouched). main is never pushed.
