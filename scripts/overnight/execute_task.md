@@ -5,6 +5,12 @@ auto-safe backlog task end to end, then stop. You bill to the Max subscription.
 **Nothing you produce is merged automatically** — your output is a *draft* PR a human
 reviews in the morning.
 
+## STEP 0 — MANDATORY FIRST ACTION (before ANY other tool call)
+Invoke the **Skill** tool to load `superpowers:systematic-debugging`. This both starts the
+debugging methodology you need AND satisfies this session's **skill-gate** PreToolUse hook
+(it blocks every Edit/Write/Bash until a Skill/SKILL.md tool_use exists in the transcript).
+Do this FIRST — if your first action is an Edit or Bash, the gate will block it and waste a turn.
+
 ## Safety contract (non-negotiable)
 - **main is sacred:** never check out main for edits, never push main.
 - **CORE_UNSAFE is off-limits:** if the fix would touch any file in

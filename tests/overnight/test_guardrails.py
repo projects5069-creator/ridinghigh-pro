@@ -57,5 +57,6 @@ def test_execute_prompt_shape():
     assert "never" in t and "main" in t and "push" in t        # main never pushed
     assert "not instructions" in t                              # injection guard
     assert "rule #4" in t or "backup" in t                      # dated .bak
+    assert "step 0" in t and "skill-gate" in t                  # mandatory skill-load first (satisfies the user skill-gate)
     for key in ["task", "status", "branch", "pr_url", "tokens"]:
         assert key in t                                          # result JSON contract
