@@ -1,0 +1,46 @@
+name: Overnight Report Email
+
+# Decoupled email: the LOCAL runner pushes the report to the `overnight-reports`
+# branch; this workflow emails it using the SMTP_* secrets that already live in
+# GitHub (rhpro-live §3 — no SMTP creds ever on disk). No model call here, so it
+# needs no ANTHROPIC credential.
+
+on:
+  push:
+    branches: [overnight-reports]
+    paths: ['docs/overnight/**']
+
+permissions:
+  contents: read
+
+jobs:
+  email:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: overnight-reports
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install -r requirements.txt
+      - name: Send latest overnight report
+        env:
+          SMTP_HOST: ${{ secrets.SMTP_HOST }}
+          SMTP_PORT: ${{ secrets.SMTP_PORT }}
+          SMTP_USER: ${{ secrets.SMTP_USER }}
+          SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+          EMAIL_TO: ${{ secrets.EMAIL_TO }}
+        run: |
+          python - <<'PY'
+          import glob, os
+          from agent.notifications.email_sender import send_email
+          reports = sorted(glob.glob('docs/overnight/REPORT_*.md'))
+          if not reports:
+              print('no report found; nothing to email'); raise SystemExit(0)
+          latest = reports[-1]
+          body = open(latest, encoding='utf-8').read()
+          html = '<pre>' + body.replace('&', '&amp;').replace('<', '&lt;') + '</pre>'
+          ok = send_email(f'RH Overnight — {os.path.basename(latest)}', html)
+          print('sent' if ok else 'send_email returned False')
+          PY
