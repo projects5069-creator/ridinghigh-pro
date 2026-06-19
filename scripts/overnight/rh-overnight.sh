@@ -186,7 +186,10 @@ main() {
         --argjson tok "$spent" --argjson ceil "$TOKEN_CEILING" \
         '{tasks_run:$run,max_tasks:$maxt,tokens:$tok,token_ceiling:$ceil,ceiling_hit:($tok>=$ceil),per_task:{}}' \
         > "$RAW_DIR/_budget.json"
-  local report="$REPO/docs/overnight/REPORT_${stamp}.md"
+  # Write the report into the gitignored per-night RAW_DIR so the runner's own tree stays
+  # clean (else next run's guard_base_ready would abort). It is published to the
+  # overnight-reports branch (committed there as docs/overnight/REPORT_*.md) below.
+  local report="$RAW_DIR/REPORT_${stamp}.md"
   python3 "$REPO/scripts/overnight/build_report.py" "$RAW_DIR" "$stamp" "$base_sha" "$report"
 
   # 5. Publish report via a DEDICATED worktree — never stash/checkout main's working tree
