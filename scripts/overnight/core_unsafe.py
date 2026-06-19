@@ -24,10 +24,11 @@ def load_patterns(path=CORE_UNSAFE_FILE):
 
 def is_unsafe_path(rel_path, patterns=None):
     """True if rel_path matches any unsafe pattern. fnmatch '*' spans '/', so
-    'agent/**' matches 'agent/notifications/email_sender.py'."""
+    'agent/**' matches 'agent/notifications/email_sender.py'. Case-insensitive,
+    because APFS is: FORMULAS.PY writes the real formulas.py."""
     patterns = load_patterns() if patterns is None else patterns
-    p = rel_path.lstrip("./")
-    return any(fnmatch.fnmatch(p, pat) for pat in patterns)
+    p = rel_path.lstrip("./").lower()
+    return any(fnmatch.fnmatch(p, pat.lower()) for pat in patterns)
 
 
 def is_unsafe_anchored(path, patterns=None):
@@ -44,14 +45,24 @@ def is_unsafe_anchored(path, patterns=None):
     return False
 
 
-if __name__ == "__main__":  # `python3 core_unsafe.py [--anchored] <path> [path...]`
+if __name__ == "__main__":
+    # `core_unsafe.py [--anchored] <path>...`   — classify path(s)
+    # `core_unsafe.py --scan "<bash command>"`  — flag if any token is a CORE_UNSAFE path
+    import re as _re
     import sys
 
     args = sys.argv[1:]
-    anchored = bool(args) and args[0] == "--anchored"
-    if anchored:
+    mode = args[0] if args and args[0].startswith("--") else None
+    if mode:
         args = args[1:]
     pats = load_patterns()
-    check = is_unsafe_anchored if anchored else is_unsafe_path
-    for arg in args:
-        print(f"{'UNSAFE' if check(arg, pats) else 'safe'}\t{arg}")
+
+    if mode == "--scan":
+        cmd = " ".join(args)
+        tokens = [t for t in _re.split(r"[\s>|;&()=\"'<]+", cmd) if t]
+        hit = next((t for t in tokens if is_unsafe_anchored(t, pats)), None)
+        print(f"{'UNSAFE' if hit else 'safe'}\t{hit or ''}")
+    else:
+        check = is_unsafe_anchored if mode == "--anchored" else is_unsafe_path
+        for arg in args:
+            print(f"{'UNSAFE' if check(arg, pats) else 'safe'}\t{arg}")

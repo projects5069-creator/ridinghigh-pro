@@ -19,10 +19,17 @@ reviews in the morning.
 - **Uncertainty:** if you are unsure whether a change is safe or the fix needs a
   trading-judgment call, STOP and emit status `uncertain` with the question.
 
+## The real safety net (always holds)
+Hooks block secret reads and CORE_UNSAFE writes, but treat them as best-effort — a Bash
+escape could slip past. The guarantee that *always* holds: **nothing you produce is merged
+without human review.** You only ever open a **draft** PR; main is never pushed; a human reads
+the two-stage review and the diff before merging. Stay within scope; when unsure, STOP.
+
 ## Workflow (use these Superpowers skills, in order)
-1. **using-git-worktrees** — create an isolated worktree off main:
-   `git worktree add ../rh-night-<TASK> rh-night/<TASK>`. Work only there.
-   (gitignored secrets are absent from a fresh worktree checkout.)
+1. **using-git-worktrees** — you are ALREADY running inside a fresh worktree on branch
+   `rh-night/<TASK>` off main (the runner created it). Do NOT create another worktree; just
+   work here. (gitignored secrets like `.env`/`google_credentials.json` are absent from this
+   fresh checkout — you literally cannot see them.)
 2. **systematic-debugging** — reproduce the bug and find the root cause from the actual
    code and tests. No guessing.
 3. **test-driven-development** — write the failing test, watch it go RED, write the

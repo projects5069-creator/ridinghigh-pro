@@ -72,6 +72,15 @@ def test_anchored_matches_absolute_and_worktree_paths():
     assert core_unsafe.is_unsafe_anchored("config.py", pats)            # plain relative still works
 
 
+def test_matcher_is_case_insensitive():
+    # APFS is case-insensitive: FORMULAS.PY writes the real formulas.py, so the
+    # matcher must flag it regardless of case (else Edit("FORMULAS.PY") slips through).
+    pats = core_unsafe.load_patterns()
+    assert core_unsafe.is_unsafe_path("FORMULAS.PY", pats)
+    assert core_unsafe.is_unsafe_anchored("/x/Config.PY", pats)
+    assert core_unsafe.is_unsafe_anchored("/wt/AGENT/x.py", pats)
+
+
 def test_anchored_safe_paths_not_flagged():
     pats = core_unsafe.load_patterns()
     assert not core_unsafe.is_unsafe_anchored("/Users/adilevy/RidingHighPro/tests/test_x.py", pats)

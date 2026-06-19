@@ -26,5 +26,12 @@ check_allow '{"tool_name":"Edit","tool_input":{"file_path":"scripts/overnight/bu
 check_allow '{"tool_name":"Write","tool_input":{"file_path":"tests/test_new.py"}}'                   "Write a test file"
 check_allow '{"tool_name":"Read","tool_input":{"file_path":"formulas.py"}}'                          "Read core file (not Edit/Write) passes"
 
+# Bash write-target scan (best-effort; backstop = two-stage review + human merge)
+check_deny  '{"tool_name":"Bash","tool_input":{"command":"echo x >> formulas.py"}}'                  "Bash echo >> formulas.py"
+check_deny  '{"tool_name":"Bash","tool_input":{"command":"sed -i.bak s/a/b/ config.py"}}'            "Bash sed -i config.py"
+check_deny  '{"tool_name":"Bash","tool_input":{"command":"cp /tmp/x agent/foo.py"}}'                 "Bash cp into agent/"
+check_allow '{"tool_name":"Bash","tool_input":{"command":"uv run pytest tests/test_x.py"}}'          "Bash run tests (references nothing core)"
+check_allow '{"tool_name":"Bash","tool_input":{"command":"git status"}}'                             "Bash git status"
+
 [ "$fail" -eq 0 ] && echo "ALL PASS" || echo "FAILURES"
 exit $fail

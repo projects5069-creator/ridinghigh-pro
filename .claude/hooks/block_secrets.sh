@@ -32,8 +32,18 @@ if [ "$target" = "__ERR__" ]; then
   deny "secret-guard: unparseable tool input (fail-closed)"
 fi
 
-# Secret patterns: .env (as a token), credential/oauth json, *_sheet_id, secrets.toml.
-secret_re='(^|[^[:alnum:]])\.env([^[:alnum:]]|$)|google_credentials|oauth_credentials|oauth_client|oauth_token|_sheet_id|secrets\.toml|\.credentials\.json'
+# Env-dump via Bash would expose any secret living in an env var (the file regex can't
+# see env). Deny bare `env`/`set`/`export -p`/`printenv` dumps. `env VAR=x cmd` is allowed.
+if [ "$tool" = "Bash" ]; then
+  envdump_re='(^|[;&|[:space:]])(printenv([[:space:]]|$)|env[[:space:]]*$|set[[:space:]]*$|export[[:space:]]+-p)'
+  if printf '%s' "$target" | grep -Eq "$envdump_re"; then
+    deny "secret-guard: environment dump blocked"
+  fi
+fi
+
+# Secret file patterns: .env (as a token), credential/oauth json, *_sheet_id, secrets.toml,
+# plus common third-party credential stores (aws/ssh/gcloud/netrc/keys).
+secret_re='(^|[^[:alnum:]])\.env([^[:alnum:]]|$)|google_credentials|oauth_credentials|oauth_client|oauth_token|_sheet_id|secrets\.toml|\.credentials\.json|\.aws/|\.ssh/|id_rsa|id_ed25519|\.netrc|gcloud|credentials\.db|kubeconfig|\.pem([^[:alnum:]]|$)|\.p12([^[:alnum:]]|$)'
 
 if printf '%s' "$target" | grep -Eq "$secret_re"; then
   deny "secret file access blocked by overnight runner"

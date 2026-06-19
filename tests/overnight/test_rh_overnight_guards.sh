@@ -22,19 +22,28 @@ ok guard_night_window "00:30"
 no guard_night_window "05:00"
 no guard_night_window "06:30"
 no guard_night_window "23:45"
+# fail-closed on garbage / malformed / broken clock (never run by day on a degraded clock)
+no guard_night_window "garbage"
+no guard_night_window "2:5"
+if ( now_lima(){ echo ""; }; guard_night_window ); then echo "  ✗ broken clock should fail-closed"; fail=1; else echo "  ✓ broken clock fails closed"; fi
 
 # over_ceiling: spent >= ceiling
 ok over_ceiling 650000 600000
 ok over_ceiling 600000 600000
 no over_ceiling 100000 600000
 
-# guard_clean_secret_env: scrub secret-family env vars; keep the OAuth token
+# guard_clean_secret_env: scrub secret-family env vars (RH + third-party); keep what we need
 export SMTP_HOST="smtp.example.com" ALPACA_SECRET_KEY="sk-secret" GOOGLE_CREDENTIALS_JSON="{}" \
-       RH_SUMMARIES_SHEET_ID="abc" CLAUDE_CODE_OAUTH_TOKEN="sk-ant-oat-keep"
+       RH_SUMMARIES_SHEET_ID="abc" AWS_SECRET_ACCESS_KEY="aws" TWILIO_AUTH_TOKEN="tw" \
+       SLACK_WEBHOOK="sl" DB_PASSWORD="db" STRIPE_KEY="st" \
+       CLAUDE_CODE_OAUTH_TOKEN="sk-ant-oat-keep" GH_TOKEN="gho-keep" GITHUB_TOKEN="ghp-keep"
 guard_clean_secret_env || true
 if [ -z "${SMTP_HOST:-}" ] && [ -z "${ALPACA_SECRET_KEY:-}" ] && [ -z "${GOOGLE_CREDENTIALS_JSON:-}" ] \
-   && [ -z "${RH_SUMMARIES_SHEET_ID:-}" ]; then echo "  ✓ secret env scrubbed"; else echo "  ✗ secret env remained"; fail=1; fi
-if [ "${CLAUDE_CODE_OAUTH_TOKEN:-}" = "sk-ant-oat-keep" ]; then echo "  ✓ oauth token preserved"; else echo "  ✗ oauth token lost"; fail=1; fi
+   && [ -z "${RH_SUMMARIES_SHEET_ID:-}" ] && [ -z "${AWS_SECRET_ACCESS_KEY:-}" ] \
+   && [ -z "${TWILIO_AUTH_TOKEN:-}" ] && [ -z "${SLACK_WEBHOOK:-}" ] && [ -z "${DB_PASSWORD:-}" ] \
+   && [ -z "${STRIPE_KEY:-}" ]; then echo "  ✓ secret env scrubbed (RH + third-party)"; else echo "  ✗ secret env remained"; fail=1; fi
+if [ "${CLAUDE_CODE_OAUTH_TOKEN:-}" = "sk-ant-oat-keep" ] && [ "${GH_TOKEN:-}" = "gho-keep" ] \
+   && [ "${GITHUB_TOKEN:-}" = "ghp-keep" ]; then echo "  ✓ oauth + gh tokens preserved"; else echo "  ✗ needed token lost"; fail=1; fi
 
 [ "$fail" -eq 0 ] && echo "ALL PASS" || echo "FAILURES"
 exit $fail

@@ -22,9 +22,15 @@ check_deny  '{"tool_name":"Grep","tool_input":{"pattern":"x","path":".rh_summari
 check_deny  '{"tool_name":"Bash","tool_input":{"command":"cat .streamlit/secrets.toml"}}'    "Bash secrets.toml"
 check_deny  'not json at all'                                                                "fail-closed on bad input"
 
+check_deny  '{"tool_name":"Bash","tool_input":{"command":"printenv ALPACA_SECRET_KEY"}}'     "Bash printenv secret"
+check_deny  '{"tool_name":"Bash","tool_input":{"command":"env"}}'                            "Bash bare env dump"
+check_deny  '{"tool_name":"Read","tool_input":{"file_path":"/Users/x/.aws/credentials"}}'    "Read aws credentials"
+check_deny  '{"tool_name":"Read","tool_input":{"file_path":"/Users/x/.ssh/id_rsa"}}'         "Read ssh key"
+
 check_allow '{"tool_name":"Read","tool_input":{"file_path":"utils.py"}}'                     "Read utils.py"
 check_allow '{"tool_name":"Read","tool_input":{"file_path":"tests/test_x.py"}}'              "Read test file"
 check_allow '{"tool_name":"Bash","tool_input":{"command":"git status"}}'                     "Bash git status"
+check_allow '{"tool_name":"Bash","tool_input":{"command":"env PYTHONPATH=. pytest"}}'        "Bash env VAR=x (not a dump)"
 check_allow '{"tool_name":"WebFetch","tool_input":{"url":"http://x"}}'                       "non-file tool passes"
 
 [ "$fail" -eq 0 ] && echo "ALL PASS" || echo "FAILURES"
