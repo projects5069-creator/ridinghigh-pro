@@ -3,9 +3,10 @@ id: TASK-127.2
 title: >-
   Stage 1: freeze Score sheet-writes via SCORE_WRITE_FROZEN (daily_snapshots + 6
   outputs -> ''); timeline_live kept
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-06-18 20:12'
+updated_date: '2026-06-19 11:54'
 labels:
   - data-integrity
 dependencies: []

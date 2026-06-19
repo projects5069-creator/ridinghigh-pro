@@ -3,9 +3,10 @@ id: TASK-127.1
 title: >-
   Stage 0: absence-safe Score writers (empty + v3_scoreless tag) before
   forward-only freeze
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-06-18 17:40'
+updated_date: '2026-06-19 11:54'
 labels:
   - data-integrity
 dependencies: []
