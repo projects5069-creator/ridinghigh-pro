@@ -19,6 +19,7 @@ NIGHT_END_HOUR="${NIGHT_END_HOUR:-5}"   # abort if Lima hour >= 5 (deferred-run 
 EXEC_MODEL="${EXEC_MODEL:-sonnet}"
 CLASSIFY_MODEL="${CLASSIFY_MODEL:-sonnet}"
 KEYCHAIN_SERVICE="${KEYCHAIN_SERVICE:-rh-overnight-oauth}"
+BASE_BRANCH="${RH_BASE_BRANCH:-main}"   # branch tasks/reports base off; override for isolated §11 runs
 
 now_lima() { TZ="America/Lima" date +%H:%M; }
 today()    { TZ="America/Lima" date +%Y-%m-%d; }
@@ -41,6 +42,11 @@ guard_night_window() {          # pass (0) only if a VALID Lima clock reads hour
 
 over_ceiling() {                # true (0) if spent >= ceiling
   [ "${1:-0}" -ge "${2:-0}" ]
+}
+
+guard_base_ready() {            # replaces "cwd==main": pass only if tree is clean AND BASE_BRANCH is a real ref
+  git diff --quiet && git diff --cached --quiet || { echo "ABORT: working tree not clean"; return 1; }
+  git rev-parse --verify "$BASE_BRANCH" >/dev/null 2>&1 || { echo "ABORT: base branch '$BASE_BRANCH' not found"; return 1; }
 }
 
 read_oauth_token() {            # subscription token from macOS Keychain (never on disk)
@@ -98,13 +104,14 @@ main() {
   claude -p --output-format json "ok" >/dev/null 2>&1 \
     || { echo "ABORT: subscription auth smoke check failed"; exit 2; }
 
-  # 1. Pre-flight: on main, clean tree, base tests green.
+  # 1. Pre-flight: clean tree + BASE_BRANCH resolves (so the runner can execute from an
+  #    isolated worktree while basing tasks/reports/SHA on BASE_BRANCH = main).
   cd "$REPO"
-  [ "$(git branch --show-current)" = "main" ] || { echo "ABORT: not on main"; exit 2; }
+  guard_base_ready || exit 2
   git fetch --quiet origin || true
-  git tag -f "rh-night-base-$stamp" >/dev/null
-  local base_sha; base_sha="$(git rev-parse --short HEAD)"
-  echo "base $base_sha"
+  git tag -f "rh-night-base-$stamp" "$BASE_BRANCH" >/dev/null
+  local base_sha; base_sha="$(git rev-parse --short "$BASE_BRANCH")"   # BASE_BRANCH tip, not cwd HEAD
+  echo "base $base_sha ($BASE_BRANCH)"
   if ! uv run --with pytest python3 -m pytest -m "not integration" -q >/dev/null 2>&1; then
     echo "ABORT: base test suite is RED — refusing to build on a broken base"; exit 0
   fi
@@ -118,7 +125,7 @@ main() {
   # 2. Triage: layer-1 (deterministic) → layer-2 (classifier in a clean scan worktree).
   local candidates; candidates="$(python3 "$REPO/scripts/overnight/triage_filter.py" "$TASKS_DIR")"
   local wt_scan="$REPO/../rh-night-scan-$stamp"
-  git worktree add --detach --force "$wt_scan" main >/dev/null 2>&1 || true
+  git worktree add --detach --force "$wt_scan" "$BASE_BRANCH" >/dev/null 2>&1 || true
   local queue=() n_needs=0
   while read -r tid; do
     [ -n "$tid" ] || continue
@@ -152,7 +159,7 @@ main() {
     [ "$elapsed_min" -ge "$WALL_CLOCK_MIN" ] && { echo "wall-clock cap hit — stop"; break; }
 
     local wt="$REPO/../rh-night-${tid}"
-    git worktree add --force "$wt" -b "rh-night/$tid" main >/dev/null 2>&1 \
+    git worktree add --force "$wt" -b "rh-night/$tid" "$BASE_BRANCH" >/dev/null 2>&1 \
       || git worktree add --force "$wt" "rh-night/$tid" >/dev/null 2>&1 || { echo "  worktree add failed for $tid"; continue; }
 
     local out="$RAW_DIR/${tid}.json"
@@ -188,7 +195,7 @@ main() {
   git fetch --quiet origin overnight-reports 2>/dev/null || true
   git worktree add --force "$wt_rep" -b overnight-reports >/dev/null 2>&1 \
     || git worktree add --force "$wt_rep" overnight-reports >/dev/null 2>&1 \
-    || git worktree add --force --detach "$wt_rep" main >/dev/null 2>&1
+    || git worktree add --force --detach "$wt_rep" "$BASE_BRANCH" >/dev/null 2>&1
   mkdir -p "$wt_rep/docs/overnight"
   cp "$report" "$wt_rep/docs/overnight/"
   ( cd "$wt_rep" && git add "docs/overnight/$(basename "$report")" \
