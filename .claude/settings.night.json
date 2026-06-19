@@ -11,7 +11,11 @@
       "Read(**/oauth_client.json)",
       "Read(**/oauth_token.json)",
       "Read(**/*_sheet_id)",
-      "Read(**/secrets.toml)"
+      "Read(**/secrets.toml)",
+      "Bash(uv run python3 -c *)",
+      "Bash(uv run python -c *)",
+      "Bash(uv run python3 -c*)",
+      "Bash(uv run python -c*)"
     ],
     "allow": [
       "Read",

@@ -46,6 +46,14 @@ def test_settings_allow_is_minimal():
     assert any(a.startswith("Bash(gh pr") for a in allow)
 
 
+def test_settings_denies_uv_run_interpreter():
+    # `uv run *` is allowed for tests, but `uv run python -c` could read the whitelisted
+    # OAuth/GH token into memory — deny it explicitly (deny wins over allow).
+    deny = _load_settings()["permissions"]["deny"]
+    assert any("uv run python3 -c" in d for d in deny)
+    assert any("uv run python -c" in d for d in deny)
+
+
 def test_execute_prompt_shape():
     with open(os.path.join(REPO, "scripts/overnight/execute_task.md"), encoding="utf-8") as fh:
         t = fh.read().lower()
