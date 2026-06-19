@@ -114,7 +114,7 @@ main() {
   git tag -f "rh-night-base-$stamp" "$BASE_BRANCH" >/dev/null
   local base_sha; base_sha="$(git rev-parse --short "$BASE_BRANCH")"   # BASE_BRANCH tip, not cwd HEAD
   echo "base $base_sha ($BASE_BRANCH)"
-  if ! uv run --with pytest python3 -m pytest -m "not integration" -q >/dev/null 2>&1; then
+  if ! uv run --with-requirements requirements.txt --with pytest python3 -m pytest -m "not integration" -q >/dev/null 2>&1; then
     echo "ABORT: base test suite is RED — refusing to build on a broken base"; exit 0
   fi
 

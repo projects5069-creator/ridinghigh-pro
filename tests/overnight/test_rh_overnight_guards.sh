@@ -50,5 +50,10 @@ RAW_BASE=/tmp/rawbase
 [ "$(night_raw_dir 2026-06-19)" = "/tmp/rawbase/2026-06-19" ] && echo "  ✓ per-night raw dir" || { echo "  ✗ per-night raw dir"; fail=1; }
 [ "$(night_raw_dir 2026-06-19)" != "$(night_raw_dir 2026-06-18)" ] && echo "  ✓ nights isolated" || { echo "  ✗ nights not isolated"; fail=1; }
 
+# pre-flight base pytest must match CI (--with-requirements) or it false-aborts on missing deps
+grep -qE 'with-requirements requirements.txt --with pytest' "$WRAP" \
+  && echo "  ✓ pre-flight pytest uses --with-requirements (matches CI)" \
+  || { echo "  ✗ pre-flight pytest missing --with-requirements → would false-abort"; fail=1; }
+
 [ "$fail" -eq 0 ] && echo "ALL PASS" || echo "FAILURES"
 exit $fail
