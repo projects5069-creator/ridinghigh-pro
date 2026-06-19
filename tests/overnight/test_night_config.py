@@ -36,6 +36,18 @@ def test_plist_valid_and_scheduled():
     assert "<false/>" in body                              # RunAtLoad false
 
 
+def test_checkauth_plist_valid():
+    # gate 6: a one-shot LaunchAgent that runs --check-auth so we verify the Keychain read
+    # from the REAL restricted launchd session (not the convenient shell) BEFORE arming the schedule.
+    path = os.path.join(REPO, "scripts/overnight/com.rh.overnight.checkauth.plist")
+    r = subprocess.run(["plutil", "-lint", path], capture_output=True, text=True)
+    assert r.returncode == 0, r.stdout + r.stderr
+    body = _read("scripts/overnight/com.rh.overnight.checkauth.plist")
+    assert "--check-auth" in body
+    assert "com.rh.overnight.checkauth" in body
+    assert "<false/>" in body                                 # RunAtLoad false → kickstart only, never scheduled
+
+
 def test_email_workflow_shape():
     y = _read(".github/workflows/overnight_report_email.yml")
     assert "overnight-reports" in y                        # branch trigger
