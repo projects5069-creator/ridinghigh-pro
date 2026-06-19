@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!-- GATE 6 (auth) — ONE-SHOT LaunchAgent that runs rh-overnight.sh in check-auth mode, in the REAL
+     restricted launchd session, so we prove the LaunchAgent can read the Keychain token BEFORE
+     arming the recurring schedule. RunAtLoad=false → it only fires on an explicit `launchctl
+     kickstart`, never on a timer. No model call, no git. Set the script path below to wherever
+     the runner lives at install (the §11 worktree, or main once the runner is merged). -->
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.rh.overnight.checkauth</string>
+
+    <key>ProgramArguments</key>
+    <array>
+        <string>/bin/bash</string>
+        <string>/Users/adilevy/rh-overnight-s11/scripts/overnight/rh-overnight.sh</string>
+        <string>--check-auth</string>
+    </array>
+
+    <key>RunAtLoad</key>
+    <false/>
+
+    <key>StandardOutPath</key>
+    <string>/Users/adilevy/rh-overnight-s11/docs/overnight/raw/checkauth.out.log</string>
+    <key>StandardErrorPath</key>
+    <string>/Users/adilevy/rh-overnight-s11/docs/overnight/raw/checkauth.err.log</string>
+</dict>
+</plist>

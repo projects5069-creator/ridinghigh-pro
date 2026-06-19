@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!-- TEMPLATE — installed manually to ~/Library/LaunchAgents/ during the supervised
+     §11 setup, NOT auto-loaded. launchd runs the wrapper UNDER caffeinate -i -s so an
+     idle Mac (lid open, on AC) stays awake for the run. Schedule = 02:00 LOCAL (set the
+     Mac TZ to America/Lima). Pair with: sudo pmset repeat wake MTWThFSaSu 01:55:00. -->
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.rh.overnight</string>
+
+    <key>ProgramArguments</key>
+    <array>
+        <string>/usr/bin/caffeinate</string>
+        <string>-i</string>
+        <string>-s</string>
+        <string>/Users/adilevy/RidingHighPro/scripts/overnight/rh-overnight.sh</string>
+    </array>
+
+    <key>StartCalendarInterval</key>
+    <dict>
+        <key>Hour</key>
+        <integer>2</integer>
+        <key>Minute</key>
+        <integer>0</integer>
+    </dict>
+
+    <key>RunAtLoad</key>
+    <false/>
+
+    <key>StandardOutPath</key>
+    <string>/Users/adilevy/RidingHighPro/docs/overnight/raw/launchd.out.log</string>
+    <key>StandardErrorPath</key>
+    <string>/Users/adilevy/RidingHighPro/docs/overnight/raw/launchd.err.log</string>
+</dict>
+</plist>

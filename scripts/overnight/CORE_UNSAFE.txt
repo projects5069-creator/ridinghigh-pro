@@ -1,0 +1,32 @@
+# CORE_UNSAFE — single source for the overnight runner's auto-unsafe file set.
+# One pattern per line. Blank lines and #-comments ignored. fnmatch globs ('*' spans '/').
+# Reconciled 2026-06-18 with עמיחי. A task touching ANY match -> NEEDS-HUMAN (never auto-run).
+#
+# ── Confirmed core (verified to exist) ──
+formulas.py
+config.py
+sheets_manager.py
+gsheets_sync.py
+auto_scanner.py
+post_analysis_collector.py
+cross_month_loaders.py
+health_audit.py
+dashboard.py
+backup_manager.py
+utils.py
+data_provider.py
+#
+# ── RAW-data / score / Sheets writers (recon) ──
+backfill_*.py
+score_backtest.py
+score_distribution.py
+sync_pk_to_sheet.py
+setup_health_audit_sheet.py
+setup_summaries_sheet.py
+#
+# ── Blanket directory rules ──
+providers/**
+agent/**
+#
+# NOTE: score variants B-I live inside formulas.py/config.py -> already covered above.
+# NOTE: orchestrator.py intentionally NOT listed -> it does not exist in the repo.
