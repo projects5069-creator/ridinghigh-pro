@@ -24,6 +24,12 @@ check_deny  'not json at all'                                                   
 
 check_deny  '{"tool_name":"Bash","tool_input":{"command":"printenv ALPACA_SECRET_KEY"}}'     "Bash printenv secret"
 check_deny  '{"tool_name":"Bash","tool_input":{"command":"env"}}'                            "Bash bare env dump"
+check_deny  '{"tool_name":"Bash","tool_input":{"command":"env | grep KEY"}}'                 "Bash env|grep dump"
+check_deny  '{"tool_name":"Bash","tool_input":{"command":"declare -p"}}'                     "Bash declare -p dump"
+check_deny  '{"tool_name":"Bash","tool_input":{"command":"compgen -e"}}'                     "Bash compgen -e dump"
+check_deny  '{"tool_name":"Bash","tool_input":{"command":"python3 -c print(os.environ)"}}'   "Bash os.environ dump"
+check_deny  '{"tool_name":"Bash","tool_input":{"command":"echo $CLAUDE_CODE_OAUTH_TOKEN > leak"}}' "Bash exfil oauth token"
+check_deny  '{"tool_name":"Bash","tool_input":{"command":"git commit -m $GH_TOKEN"}}'        "Bash exfil gh token"
 check_deny  '{"tool_name":"Read","tool_input":{"file_path":"/Users/x/.aws/credentials"}}'    "Read aws credentials"
 check_deny  '{"tool_name":"Read","tool_input":{"file_path":"/Users/x/.ssh/id_rsa"}}'         "Read ssh key"
 
