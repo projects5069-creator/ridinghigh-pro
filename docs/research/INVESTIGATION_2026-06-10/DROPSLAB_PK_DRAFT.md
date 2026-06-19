@@ -14,7 +14,7 @@
 | רכיב | קובץ | תפקיד |
 |---|---|---|
 | Scanner | `~/DropsLab/drops_scanner.py` (517 שורות) | FINVIZ "Down 10%" → 38 מדדים/מניה → drops_raw |
-| Collector | `~/DropsLab/drops_collector.py` (427) | לכל שורת raw: D1-D5 closes מ-yfinance → drops_post |
+| Collector | `~/DropsLab/drops_collector.py` (~620) | לכל שורת raw: D1-D5 closes מ-yfinance → drops_post; + מוניטור freshness (TASK-185) |
 | Dashboard | `~/DropsLab/dashboard.py` (480) | Streamlit |
 | Sheets I/O | `~/DropsLab/gsheets_sync.py` (132) | gspread helpers |
 | Migration | `~/DropsLab/migrate_dropslab.py` (131) | חד-פעמי; מכיל OLD_SHEET_ID היסטורי |
@@ -68,6 +68,9 @@ D1-D5 (15): d{i}_date, d{i}_close, d{i}_pct. סיכום (3): max_recovery_5d_pct
 - P1: collector timeout death-spiral (ראו §3) — דורש עיבוד-באצ'ים/checkpoint או הגדלת timeout + ריצת השלמה.
 - P2: אין דגל ארטיפקט-split ב-post (מזהם את כל מדדי ה-D).
 - P3: docstring "22 columns" מול 25 בפועל; 2+1 כפילויות מפתח.
+
+### עדכון 2026-06-19 — מוניטור freshness (TASK-185, DropsLab `1ed640b`)
+ה-collector מקבל שער-freshness מודע-D5: `report_stale_freshness`/`freshness_exit_code` ב-`drops_collector.py` מתריעים (`log.warning` + `sys.exit(1)`) רק כש-scan_date שבָּשֵׁל-D5 ב-drops_raw (5 ימי-מסחר + grace של `ALERT_GRACE_TRADING_DAYS=1`, כלומר >1 ריצת-collector) נעדר מ-drops_post — מבדיל stall אמיתי מ-lag מבני של ~5 ימי-מסחר (מחליף את הרעיון הנאיבי >2d שגרם ל-TASK-183 false-alarm). reuse של `trading_days_after` (SSoT לוח-שנה). השער רץ אחרי כל העבודה הרגילה, על כל נתיב חי (כולל "nothing new"), עם post-state = pre-run keys ∪ כתיבות-הריצה. 11 טסטים ב-`test_freshness_alert_v1.py`.
 
 ## 8. Anti-Drift
 
