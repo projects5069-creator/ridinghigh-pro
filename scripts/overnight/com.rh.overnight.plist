@@ -17,6 +17,14 @@
         <string>/Users/adilevy/RidingHighPro/scripts/overnight/rh-overnight.sh</string>
     </array>
 
+    <!-- CRITICAL: TASK-126 (the sole auto-safe backlog task) was in the unclassified tail;
+         the default cap (25) would never reach it. 70 lets triage classify all ~62 candidates. -->
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>MAX_CANDIDATES</key>
+        <string>70</string>
+    </dict>
+
     <key>StartCalendarInterval</key>
     <dict>
         <key>Hour</key>

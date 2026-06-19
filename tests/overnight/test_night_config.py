@@ -34,6 +34,7 @@ def test_plist_valid_and_scheduled():
     assert "<integer>2</integer>" in body                 # 02:00
     assert "caffeinate" in body and "rh-overnight.sh" in body
     assert "<false/>" in body                              # RunAtLoad false
+    assert "MAX_CANDIDATES" in body and "<string>70</string>" in body   # reach TASK-126 in the tail
 
 
 def test_checkauth_plist_valid():
