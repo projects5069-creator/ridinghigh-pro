@@ -28,5 +28,13 @@ ok over_ceiling 650000 600000
 ok over_ceiling 600000 600000
 no over_ceiling 100000 600000
 
+# guard_clean_secret_env: scrub secret-family env vars; keep the OAuth token
+export SMTP_HOST="smtp.example.com" ALPACA_SECRET_KEY="sk-secret" GOOGLE_CREDENTIALS_JSON="{}" \
+       RH_SUMMARIES_SHEET_ID="abc" CLAUDE_CODE_OAUTH_TOKEN="sk-ant-oat-keep"
+guard_clean_secret_env || true
+if [ -z "${SMTP_HOST:-}" ] && [ -z "${ALPACA_SECRET_KEY:-}" ] && [ -z "${GOOGLE_CREDENTIALS_JSON:-}" ] \
+   && [ -z "${RH_SUMMARIES_SHEET_ID:-}" ]; then echo "  ✓ secret env scrubbed"; else echo "  ✗ secret env remained"; fail=1; fi
+if [ "${CLAUDE_CODE_OAUTH_TOKEN:-}" = "sk-ant-oat-keep" ]; then echo "  ✓ oauth token preserved"; else echo "  ✗ oauth token lost"; fail=1; fi
+
 [ "$fail" -eq 0 ] && echo "ALL PASS" || echo "FAILURES"
 exit $fail

@@ -42,6 +42,32 @@ read_oauth_token() {            # subscription token from macOS Keychain (never 
   security find-generic-password -s "$KEYCHAIN_SERVICE" -w 2>/dev/null
 }
 
+# Secret-env families (denylist). The file-focused hooks cannot stop the model from
+# reading a secret sitting in an ENV var, so scrub them before launching claude.
+SECRET_ENV_RE='^(ALPACA_|FINNHUB_|GOOGLE_|GMAIL_|SMTP_|RH_SUMMARIES_|[A-Z0-9_]*_SHEET_ID$|[A-Z0-9_]*_API_KEY$|[A-Z0-9_]*_SECRET$|[A-Z0-9_]*_PASSWORD$|[A-Z0-9_]*CREDENTIALS)'
+
+guard_clean_secret_env() {      # unset secret-family env vars; whitelist what we need; assert clean
+  local name
+  for name in $(env | cut -d= -f1 | grep -E "$SECRET_ENV_RE" 2>/dev/null || true); do
+    case "$name" in
+      CLAUDE_CODE_OAUTH_TOKEN|GITHUB_TOKEN) continue ;;
+    esac
+    unset "$name" 2>/dev/null || true
+  done
+  ! env | cut -d= -f1 | grep -Eq "$SECRET_ENV_RE"   # 0 (clean) only if none remain
+}
+
+# --check-auth: prove the Keychain read + clean env from the ACTUAL launchd context
+# (launchd Keychain access differs from an interactive shell). No model call.
+check_auth() {
+  unset ANTHROPIC_API_KEY ANTHROPIC_AUTH_TOKEN 2>/dev/null || true
+  guard_clean_secret_env || { echo "FAIL: secret env present after scrub"; return 1; }
+  guard_no_api_key        || { echo "FAIL: an API key is set (would bill API)"; return 1; }
+  local t; t="$(read_oauth_token)"
+  [ -n "$t" ] || { echo "FAIL: no subscription OAuth token in Keychain ($KEYCHAIN_SERVICE)"; return 1; }
+  echo "OK: subscription token present, no API key, secret env clean"; return 0
+}
+
 # --- Orchestration (runs only when executed, not sourced) -----------------------
 main() {
   set -euo pipefail
@@ -51,10 +77,12 @@ main() {
   exec > >(tee -a "$log") 2>&1
   echo "== RH overnight $stamp $(now_lima) Lima =="
 
-  # 0. Auth + time guards (FAIL HARD — protect against #37686 silent API billing).
+  # 0. Auth + time + env guards (FAIL HARD — protect against #37686 silent API billing
+  #    and against secrets leaking via env vars the file-hooks can't see).
   unset ANTHROPIC_API_KEY ANTHROPIC_AUTH_TOKEN || true
-  guard_no_api_key   || { echo "ABORT: an API key is set in env — refusing (would bill API)"; exit 2; }
-  guard_night_window || { echo "ABORT: outside night window ($(now_lima) Lima) — deferred run suppressed"; exit 0; }
+  guard_no_api_key       || { echo "ABORT: an API key is set in env — refusing (would bill API)"; exit 2; }
+  guard_clean_secret_env || { echo "ABORT: secret env vars present after scrub"; exit 2; }
+  guard_night_window     || { echo "ABORT: outside night window ($(now_lima) Lima) — deferred run suppressed"; exit 0; }
 
   local token; token="$(read_oauth_token)"
   [ -n "$token" ] || { echo "ABORT: no subscription OAuth token in Keychain ($KEYCHAIN_SERVICE)"; exit 2; }
@@ -138,5 +166,8 @@ main() {
 
 # Run only when executed directly (sourcing exposes guards to tests).
 if [ "${BASH_SOURCE[0]}" = "${0}" ]; then
-  main "$@"
+  case "${1:-}" in
+    --check-auth) check_auth ;;          # §11 gate #3: invoke via launchd to verify Keychain context
+    *)            main "$@" ;;
+  esac
 fi
