@@ -554,8 +554,73 @@ def check_05_post_analysis_completeness(gc):
                            CRITICAL, f"Failed: {e}")
 
 
+GHA_SAMPLE_MIN = 10   # TASK-96: below this many completed runs a single failure swings the rate — downgrade would-be CRITICAL -> WARNING
+
+
+def _failing_workflows_recovered(recent_runs):
+    """TASK-96 RECOVERING gate. True if EVERY workflow that had a completed
+    failure has since recovered — its most recent completed run (by
+    run_started_at) is a success. Pure: relative ordering only, no clock.
+    Returns False when nothing failed (the gate simply does not apply)."""
+    completed = [r for r in recent_runs if r.get("status") == "completed"]
+    failing = {r.get("name") for r in completed if r.get("conclusion") == "failure"}
+    if not failing:
+        return False
+    for wf in failing:
+        wf_runs = [r for r in completed if r.get("name") == wf]
+        latest = max(wf_runs, key=lambda r: r.get("run_started_at", ""))
+        if latest.get("conclusion") != "success":
+            return False
+    return True
+
+
+def _github_actions_result(recent_runs):
+    """Pure severity decision for check_06 (TASK-96). `recent_runs` is already
+    filtered to the last 24h. Bands: >=95 PASSED / >=80 WARNING / else would-be
+    CRITICAL, downgraded to WARNING ONLY when the failure is transient —
+    SAMPLE-SIZE (completed < GHA_SAMPLE_MIN) or RECOVERING (every failing
+    workflow's latest run is green). A PERSISTENT failure stays CRITICAL
+    (no-masking — the hard task constraint)."""
+    if not recent_runs:
+        return CheckResult("D3", "GitHub Actions health", "Data freshness",
+                           WARNING, "No workflow runs in last 24h")
+
+    completed = [r for r in recent_runs if r.get("status") == "completed"]
+    successes = [r for r in completed if r.get("conclusion") == "success"]
+    failures = [r for r in completed if r.get("conclusion") == "failure"]
+
+    if not completed:
+        return CheckResult("D3", "GitHub Actions health", "Data freshness",
+                           INFO, f"{len(recent_runs)} runs, none completed yet")
+
+    success_rate = len(successes) / len(completed) * 100
+
+    if success_rate >= 95:
+        return CheckResult("D3", "GitHub Actions health", "Data freshness",
+                           PASSED, f"{success_rate:.0f}% success ({len(successes)}/{len(completed)})")
+    if success_rate >= 80:
+        return CheckResult("D3", "GitHub Actions health", "Data freshness",
+                           WARNING, f"{success_rate:.0f}% success — {len(failures)} failed")
+
+    # would-be CRITICAL — apply TASK-96 transient-failure gates (no-masking)
+    if len(completed) < GHA_SAMPLE_MIN:
+        return CheckResult("D3", "GitHub Actions health", "Data freshness",
+                           WARNING,
+                           f"{success_rate:.0f}% success but only {len(completed)} runs (small sample)")
+    if _failing_workflows_recovered(recent_runs):
+        return CheckResult("D3", "GitHub Actions health", "Data freshness",
+                           WARNING,
+                           f"{success_rate:.0f}% success but all failing workflows recovered (latest run green)")
+
+    failed_names = [r.get("name", "?") for r in failures[:5]]
+    return CheckResult("D3", "GitHub Actions health", "Data freshness",
+                       CRITICAL, f"Only {success_rate:.0f}% success",
+                       f"Failed: {failed_names}")
+
+
 def check_06_github_actions_health():
-    """D3: GitHub Actions success rate in last 24h."""
+    """D3: GitHub Actions success rate in last 24h.
+    Severity decision delegated to _github_actions_result (TASK-96)."""
     repo = os.environ.get("GITHUB_REPO", "projects5069-creator/ridinghigh-pro")
     token = os.environ.get("GITHUB_TOKEN", "")
 
@@ -578,31 +643,7 @@ def check_06_github_actions_health():
             except Exception:
                 continue
 
-        if not recent_runs:
-            return CheckResult("D3", "GitHub Actions health", "Data freshness",
-                               WARNING, "No workflow runs in last 24h")
-
-        completed = [r for r in recent_runs if r.get("status") == "completed"]
-        successes = [r for r in completed if r.get("conclusion") == "success"]
-        failures = [r for r in completed if r.get("conclusion") == "failure"]
-
-        if not completed:
-            return CheckResult("D3", "GitHub Actions health", "Data freshness",
-                               INFO, f"{len(recent_runs)} runs, none completed yet")
-
-        success_rate = len(successes) / len(completed) * 100
-
-        if success_rate >= 95:
-            return CheckResult("D3", "GitHub Actions health", "Data freshness",
-                               PASSED, f"{success_rate:.0f}% success ({len(successes)}/{len(completed)})")
-        elif success_rate >= 80:
-            return CheckResult("D3", "GitHub Actions health", "Data freshness",
-                               WARNING, f"{success_rate:.0f}% success — {len(failures)} failed")
-        else:
-            failed_names = [r.get("name", "?") for r in failures[:5]]
-            return CheckResult("D3", "GitHub Actions health", "Data freshness",
-                               CRITICAL, f"Only {success_rate:.0f}% success",
-                               f"Failed: {failed_names}")
+        return _github_actions_result(recent_runs)
     except Exception as e:
         return CheckResult("D3", "GitHub Actions health", "Data freshness",
                            WARNING, f"API query failed: {e}")
