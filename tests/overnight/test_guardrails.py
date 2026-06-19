@@ -20,13 +20,22 @@ def test_settings_deny_secrets():
         assert rule in deny, rule
 
 
-def test_settings_registers_secret_hook_not_skillgate():
+def _hook_cmds():
     cfg = _load_settings()
-    cmds = " ".join(
+    return " ".join(
         h["command"] for grp in cfg["hooks"]["PreToolUse"] for h in grp["hooks"]
     )
+
+
+def test_settings_registers_secret_hook_not_skillgate():
+    cmds = _hook_cmds()
     assert "block_secrets.sh" in cmds
     assert "pretooluse_skill_gate" not in cmds          # interactive gate disabled at night
+
+
+def test_settings_registers_core_unsafe_write_hook():
+    # symmetric protection: writes to CORE_UNSAFE files are hard-blocked too
+    assert "block_core_unsafe.sh" in _hook_cmds()
 
 
 def test_settings_allow_is_minimal():

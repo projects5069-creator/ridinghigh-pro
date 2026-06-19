@@ -30,10 +30,28 @@ def is_unsafe_path(rel_path, patterns=None):
     return any(fnmatch.fnmatch(p, pat) for pat in patterns)
 
 
-if __name__ == "__main__":  # tiny CLI: `python3 core_unsafe.py <path> [path...]`
+def is_unsafe_anchored(path, patterns=None):
+    """Like is_unsafe_path, but anchors on every '/'-suffix so absolute and
+    worktree-relative paths still match repo-relative patterns. Edit/Write tools
+    pass absolute/worktree paths, so '/…/agent/x.py' and '../rh-night-T/agent/x.py'
+    must both match 'agent/**'. Over-matching is the SAFE direction (deny → needs_human)."""
+    patterns = load_patterns() if patterns is None else patterns
+    p = path.replace("\\", "/").lstrip("./")
+    parts = [seg for seg in p.split("/") if seg not in ("", ".", "..")]
+    for i in range(len(parts)):
+        if is_unsafe_path("/".join(parts[i:]), patterns):
+            return True
+    return False
+
+
+if __name__ == "__main__":  # `python3 core_unsafe.py [--anchored] <path> [path...]`
     import sys
 
+    args = sys.argv[1:]
+    anchored = bool(args) and args[0] == "--anchored"
+    if anchored:
+        args = args[1:]
     pats = load_patterns()
-    for arg in sys.argv[1:]:
-        verdict = "UNSAFE" if is_unsafe_path(arg, pats) else "safe"
-        print(f"{verdict}\t{arg}")
+    check = is_unsafe_anchored if anchored else is_unsafe_path
+    for arg in args:
+        print(f"{'UNSAFE' if check(arg, pats) else 'safe'}\t{arg}")
