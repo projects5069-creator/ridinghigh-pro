@@ -15,6 +15,8 @@ data/
 !sheets_config.json
 # TASK-164 — committed WHIPSAW intraday verdict snapshot (deploy-visible)
 !whipsaw_verdicts.json
+# Overnight runner — night settings must be tracked (test_guardrails + CI read it)
+!.claude/settings.night.json
 
 # Streamlit
 .streamlit/secrets.toml

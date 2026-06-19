@@ -1,0 +1,37 @@
+{
+  "_comment": "Night-only settings for the overnight runner. Passed via `claude -p --settings`. Locks down tools, denies secret reads, registers the fail-closed secret hook, and does NOT load the interactive skill-gate hook (which would stall a headless run). ${REPO} is substituted by rh-overnight.sh at runtime.",
+  "permissions": {
+    "defaultMode": "dontAsk",
+    "deny": [
+      "Read(./.env)",
+      "Read(**/.env)",
+      "Read(**/.env.*)",
+      "Read(**/google_credentials.json)",
+      "Read(**/oauth_credentials.json)",
+      "Read(**/oauth_client.json)",
+      "Read(**/oauth_token.json)",
+      "Read(**/*_sheet_id)",
+      "Read(**/secrets.toml)"
+    ],
+    "allow": [
+      "Read",
+      "Edit",
+      "Write(tests/**)",
+      "Bash(git *)",
+      "Bash(pytest *)",
+      "Bash(python3 -m py_compile *)",
+      "Bash(uv run *)",
+      "Bash(gh pr *)"
+    ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Read|Grep|Glob|Bash|Edit|Write",
+        "hooks": [
+          { "type": "command", "command": "${REPO}/.claude/hooks/block_secrets.sh" }
+        ]
+      }
+    ]
+  }
+}
