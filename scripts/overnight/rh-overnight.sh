@@ -49,6 +49,8 @@ guard_base_ready() {            # replaces "cwd==main": pass only if tree is cle
   git rev-parse --verify "$BASE_BRANCH" >/dev/null 2>&1 || { echo "ABORT: base branch '$BASE_BRANCH' not found"; return 1; }
 }
 
+is_triage_only() { [ "${TRIAGE_ONLY:-0}" = "1" ]; }   # --triage-only: stop after triage; no execute/PR/publish
+
 read_oauth_token() {            # subscription token from macOS Keychain (never on disk)
   security find-generic-password -s "$KEYCHAIN_SERVICE" -w 2>/dev/null
 }
@@ -149,6 +151,12 @@ main() {
   git worktree remove --force "$wt_scan" 2>/dev/null || true
   echo "queue: ${queue[*]:-none} | needs_human: $n_needs"
 
+  # Gate-5 dry-run: stop here. No per-task worktrees, no model execution, no PRs, no publish.
+  if is_triage_only; then
+    echo "TRIAGE-ONLY: pre-flight + triage complete; queue + needs_human JSON emitted in $RAW_DIR. Stopping (no execute, no PRs)."
+    return 0
+  fi
+
   # 3. Execute loop — each task in its OWN fresh worktree (KEYSTONE isolation); circuit
   #    breaker between tasks (tokens incl. cache / count / wall-clock).
   local spent=0 ran=0 start_epoch; start_epoch="$(date +%s)"
@@ -211,7 +219,8 @@ main() {
 # Run only when executed directly (sourcing exposes guards to tests).
 if [ "${BASH_SOURCE[0]}" = "${0}" ]; then
   case "${1:-}" in
-    --check-auth) check_auth ;;          # §11 gate #3: invoke via launchd to verify Keychain context
-    *)            main "$@" ;;
+    --check-auth)  check_auth ;;          # §11 gate #3: invoke via launchd to verify Keychain context
+    --triage-only) TRIAGE_ONLY=1 main "$@" ;;   # §11 gate-5 dry-run: pre-flight + triage, no execute/PR
+    *)             main "$@" ;;
   esac
 fi
