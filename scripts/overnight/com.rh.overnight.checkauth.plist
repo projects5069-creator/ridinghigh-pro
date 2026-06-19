@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-<!-- GATE 6 (auth) — ONE-SHOT LaunchAgent that runs `rh-overnight.sh --check-auth` in the REAL
+<!-- GATE 6 (auth) — ONE-SHOT LaunchAgent that runs rh-overnight.sh in check-auth mode, in the REAL
      restricted launchd session, so we prove the LaunchAgent can read the Keychain token BEFORE
      arming the recurring schedule. RunAtLoad=false → it only fires on an explicit `launchctl
      kickstart`, never on a timer. No model call, no git. Set the script path below to wherever

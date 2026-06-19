@@ -5,7 +5,7 @@ overnight_report_email.yml (decoupled email). The guardrail files
 tested separately and held for explicit approval.
 """
 import os
-import subprocess
+import plistlib
 
 REPO = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -27,8 +27,8 @@ def test_classify_prompt_shape():
 
 def test_plist_valid_and_scheduled():
     path = os.path.join(REPO, "scripts/overnight/com.rh.overnight.plist")
-    r = subprocess.run(["plutil", "-lint", path], capture_output=True, text=True)
-    assert r.returncode == 0, r.stdout + r.stderr
+    with open(path, "rb") as fh:
+        plistlib.load(fh)   # cross-platform validity (replaces macOS-only `plutil`; works on ubuntu CI)
     body = _read("scripts/overnight/com.rh.overnight.plist")
     assert "StartCalendarInterval" in body
     assert "<integer>2</integer>" in body                 # 02:00
@@ -40,8 +40,8 @@ def test_checkauth_plist_valid():
     # gate 6: a one-shot LaunchAgent that runs --check-auth so we verify the Keychain read
     # from the REAL restricted launchd session (not the convenient shell) BEFORE arming the schedule.
     path = os.path.join(REPO, "scripts/overnight/com.rh.overnight.checkauth.plist")
-    r = subprocess.run(["plutil", "-lint", path], capture_output=True, text=True)
-    assert r.returncode == 0, r.stdout + r.stderr
+    with open(path, "rb") as fh:
+        plistlib.load(fh)   # cross-platform validity (replaces macOS-only `plutil`)
     body = _read("scripts/overnight/com.rh.overnight.checkauth.plist")
     assert "--check-auth" in body
     assert "com.rh.overnight.checkauth" in body
