@@ -12,6 +12,7 @@ RAW_BASE="$REPO/docs/overnight/raw"
 RAW_DIR="$RAW_BASE"                      # reassigned per-night inside main()
 NIGHT_SETTINGS="$REPO/.claude/settings.night.json"
 MAX_TASKS="${MAX_TASKS:-3}"
+MAX_CANDIDATES="${MAX_CANDIDATES:-25}"   # hard cap on classifier calls/night (bounds token spend; samples the distribution)
 MAX_TURNS="${MAX_TURNS:-40}"
 TOKEN_CEILING="${TOKEN_CEILING:-600000}"
 WALL_CLOCK_MIN="${WALL_CLOCK_MIN:-180}"
@@ -50,6 +51,7 @@ guard_base_ready() {            # replaces "cwd==main": pass only if tree is cle
 }
 
 is_triage_only() { [ "${TRIAGE_ONLY:-0}" = "1" ]; }   # --triage-only: stop after triage; no execute/PR/publish
+cap_reached()    { [ "${1:-0}" -ge "$MAX_CANDIDATES" ]; }   # true once we've classified MAX_CANDIDATES tasks
 
 read_oauth_token() {            # subscription token from macOS Keychain (never on disk)
   security find-generic-password -s "$KEYCHAIN_SERVICE" -w 2>/dev/null
@@ -128,10 +130,13 @@ main() {
   local candidates; candidates="$(python3 "$REPO/scripts/overnight/triage_filter.py" "$TASKS_DIR")"
   local wt_scan="$REPO/../rh-night-scan-$stamp"
   git worktree add --detach --force "$wt_scan" "$BASE_BRANCH" >/dev/null 2>&1 || true
-  local queue=() n_needs=0
+  local queue=() n_needs=0 classified=0
   while read -r tid; do
     [ -n "$tid" ] || continue
-    [ "${#queue[@]}" -ge "$MAX_TASKS" ] && break
+    cap_reached "$classified" && { echo "candidate cap ($MAX_CANDIDATES) reached — stop classifying"; break; }
+    # production stops once the queue is full; the dry-run keeps sampling to MAX_CANDIDATES to show the distribution
+    if ! is_triage_only && [ "${#queue[@]}" -ge "$MAX_TASKS" ]; then break; fi
+    classified=$((classified + 1))
     local body; body="$(cat "$TASKS_DIR/task-${tid#TASK-} "*.md 2>/dev/null || true)"
     local verdict; verdict="$(printf '%s' "$body" | ( cd "$wt_scan" && claude -p --model "$CLASSIFY_MODEL" \
         --settings "$resolved_settings" --permission-mode dontAsk \

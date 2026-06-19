@@ -15,6 +15,12 @@ TRIAGE_ONLY=1 is_triage_only && echo "  ✓ is_triage_only true when TRIAGE_ONLY
 # dispatch present
 grep -q -- '--triage-only)' "$WRAP" && echo "  ✓ --triage-only dispatch present" || { echo "  ✗ no dispatch"; fail=1; }
 
+# MAX_CANDIDATES cap: bounds classifier calls; default high enough to sample the distribution
+{ [ "${MAX_CANDIDATES:-0}" -ge 15 ]; } 2>/dev/null && echo "  ✓ MAX_CANDIDATES default ≥15 (representative sample)" || { echo "  ✗ MAX_CANDIDATES default too low/unset (${MAX_CANDIDATES:-unset})"; fail=1; }
+MAX_CANDIDATES=25; cap_reached 25 && echo "  ✓ cap_reached at limit" || { echo "  ✗ cap_reached should be true at limit"; fail=1; }
+cap_reached 10 && { echo "  ✗ should not cap below limit"; fail=1; } || echo "  ✓ not capped below limit"
+grep -q 'cap_reached' "$WRAP" && echo "  ✓ triage loop references cap_reached" || { echo "  ✗ loop doesn't use cap_reached"; fail=1; }
+
 # structural ordering: the triage-only early-return precedes EVERY execute/PR/publish action
 guard_ln=$(grep -n 'if is_triage_only' "$WRAP" | head -1 | cut -d: -f1)
 task_wt_ln=$(grep -n 'b "rh-night/\$tid"' "$WRAP" | head -1 | cut -d: -f1)
