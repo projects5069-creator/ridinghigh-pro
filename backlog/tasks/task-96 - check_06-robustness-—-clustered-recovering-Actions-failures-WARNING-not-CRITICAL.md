@@ -3,10 +3,10 @@ id: TASK-96
 title: >-
   check_06 robustness — clustered/recovering Actions failures = WARNING not
   CRITICAL
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-06-02 04:52'
-updated_date: '2026-06-04 19:51'
+updated_date: '2026-06-19 17:26'
 labels:
   - health-audit
 dependencies: []
