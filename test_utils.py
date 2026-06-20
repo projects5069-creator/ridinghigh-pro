@@ -151,12 +151,14 @@ def test_is_day_complete(t):
     now = get_peru_time()
     today = now.date()
     
-    # Yesterday (assuming not weekend)
+    # Most recent past TRADING day. Skip weekends AND holidays via is_trading_day (same
+    # SSoT the impl uses) — else this trips when "yesterday" is a market holiday, e.g. run
+    # on Sat 2026-06-20 → yesterday = Fri 2026-06-19 = Juneteenth (clock-hermetic, TASK-184).
     yesterday = today - dt.timedelta(days=1)
-    while yesterday.weekday() >= 5:  # Skip weekends
+    while yesterday.weekday() >= 5 or not is_trading_day(yesterday):  # skip weekends + holidays
         yesterday = yesterday - dt.timedelta(days=1)
     yesterday_str = yesterday.strftime("%Y-%m-%d")
-    t.assert_equal(is_day_complete(yesterday_str), True, "day_complete_past_weekday")
+    t.assert_equal(is_day_complete(yesterday_str), True, "day_complete_past_trading_day")
     
     # Tomorrow (never complete)
     tomorrow_str = (today + dt.timedelta(days=5)).strftime("%Y-%m-%d")
