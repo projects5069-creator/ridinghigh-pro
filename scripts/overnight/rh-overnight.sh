@@ -23,6 +23,14 @@ KEYCHAIN_SERVICE="${KEYCHAIN_SERVICE:-rh-overnight-oauth}"
 BASE_BRANCH="${RH_BASE_BRANCH:-main}"   # branch tasks/reports base off; override for isolated §11 runs
 PYBIN="${RH_PYBIN:-/usr/bin/python3}"   # stdlib-only runner scripts; bypasses the modern-python PATH shim
 
+# launchd hands us a minimal PATH (/usr/bin:/bin:/usr/sbin:/sbin). The external tools this
+# runner needs live OUTSIDE it: claude → ~/.npm-global/bin, gh → ~/bin, node → /usr/local/bin
+# (git is already in the base PATH). Without this the smoke check + `gh pr create` die with
+# exit 127 "command not found" — exactly the 2026-06-20 abort. Prepend BEFORE any tool call;
+# runs at top level so it also applies to `claude` subprocesses (which shell out to gh).
+RH_TOOL_DIRS="${RH_TOOL_DIRS:-$HOME/.npm-global/bin:$HOME/bin:/opt/homebrew/bin:/usr/local/bin}"
+export PATH="$RH_TOOL_DIRS:$PATH"
+
 now_lima() { TZ="America/Lima" date +%H:%M; }
 today()    { TZ="America/Lima" date +%Y-%m-%d; }
 night_raw_dir() { echo "$RAW_BASE/$1"; }   # per-night subdir → no stale rows in a fresh report
@@ -106,8 +114,13 @@ main() {
   export CLAUDE_CODE_OAUTH_TOKEN="$token"   # precedence #5 → subscription billing
 
   # Smoke auth check (confirms the token authenticates; structural guarantee = no API key + OAuth token present).
-  claude -p --output-format json "ok" >/dev/null 2>&1 \
-    || { echo "ABORT: subscription auth smoke check failed"; exit 2; }
+  # Discard only stdout (the "ok" JSON); let stderr flow to the run log (main tee's fd2) so a
+  # future auth/PATH failure is VISIBLE, not silent — the 2026-06-20 abort hid exit 127 behind 2>&1.
+  local smoke_rc=0
+  claude -p --output-format json "ok" >/dev/null || smoke_rc=$?
+  if [ "$smoke_rc" -ne 0 ]; then
+    echo "ABORT: subscription auth smoke check failed (claude exit $smoke_rc)"; exit 2
+  fi
 
   # 1. Pre-flight: clean tree + BASE_BRANCH resolves (so the runner can execute from an
   #    isolated worktree while basing tasks/reports/SHA on BASE_BRANCH = main).

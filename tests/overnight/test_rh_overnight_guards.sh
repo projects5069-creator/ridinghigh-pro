@@ -55,5 +55,28 @@ grep -qE 'with-requirements requirements.txt --with pytest' "$WRAP" \
   && echo "  ✓ pre-flight pytest uses --with-requirements (matches CI)" \
   || { echo "  ✗ pre-flight pytest missing --with-requirements → would false-abort"; fail=1; }
 
+# launchd PATH fix: the WRAPPER must prepend the dirs where the external tools live.
+# launchd's minimal PATH is /usr/bin:/bin:/usr/sbin:/sbin — it lacks claude
+# (~/.npm-global/bin) and gh (~/bin), which is why the 2026-06-20 run died exit 127.
+# Prove the wrapper adds them by starting from launchd's exact PATH in an isolated
+# shell, sourcing, then re-reading PATH — so a pass means the WRAPPER did it, not the
+# tester's ambient PATH.
+WRAPPER_PATH=$(env -i HOME="$HOME" /bin/bash -c \
+  'PATH=/usr/bin:/bin:/usr/sbin:/sbin; source "'"$WRAP"'" >/dev/null 2>&1; printf "%s" "$PATH"')
+case ":$WRAPPER_PATH:" in *":$HOME/.npm-global/bin:"*) echo "  ✓ wrapper adds claude dir (~/.npm-global/bin) to launchd PATH";; \
+  *) echo "  ✗ wrapper does NOT add claude dir to launchd PATH"; fail=1;; esac
+case ":$WRAPPER_PATH:" in *":$HOME/bin:"*) echo "  ✓ wrapper adds gh dir (~/bin) to launchd PATH";; \
+  *) echo "  ✗ wrapper does NOT add gh dir to launchd PATH"; fail=1;; esac
+case ":$WRAPPER_PATH:" in *":/usr/local/bin:"*) echo "  ✓ wrapper adds node dir (/usr/local/bin) to launchd PATH";; \
+  *) echo "  ✗ wrapper does NOT add node dir to launchd PATH"; fail=1;; esac
+
+# Smoke check must NOT swallow stderr — a launchd auth/PATH failure has to land in the
+# run log (main already tee's fd1+fd2 to it), not /dev/null, or we're blind again.
+if grep -E 'output-format json "ok"' "$WRAP" | grep -qE '2>&1|2>\s*/dev/null'; then
+  echo "  ✗ smoke check still swallows stderr (2>&1 / 2>/dev/null)"; fail=1
+else
+  echo "  ✓ smoke check lets stderr reach the run log"
+fi
+
 [ "$fail" -eq 0 ] && echo "ALL PASS" || echo "FAILURES"
 exit $fail
