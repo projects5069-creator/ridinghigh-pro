@@ -3,10 +3,10 @@ id: TASK-180
 title: >-
   split-halt-artifact-detector — unify TASK-90+148+173, clean DropsLab+RH
   aggregates
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-06-14 19:07'
-updated_date: '2026-06-16 16:16'
+updated_date: '2026-06-21 17:58'
 labels:
   - data-integrity
 dependencies: []
@@ -31,4 +31,6 @@ reverse-split/halt artifacts poison every aggregate (DropsLab d1 mean +124% vs m
 
 <!-- SECTION:NOTES:BEGIN -->
 DropsLab-half proof obtained read-only 2026-06-16 (see TASK-90 notes): -2.3pp recovery cleanup confirmed, n=3627, 152 artifacts. Permanent port + write-back still pending (SSoT decision + post-market).
+
+DONE 2026-06-21: AC#1 detector both systems; AC#2 recompute-clean (RH cross_month_loaders + DropsLab filter); AC#3 daily check — RH health_audit Check 29 + DropsLab report_interday_contamination (commit 50b7e00). gap C closed.
 <!-- SECTION:NOTES:END -->

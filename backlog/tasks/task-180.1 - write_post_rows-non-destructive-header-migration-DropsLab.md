@@ -1,9 +1,10 @@
 ---
 id: TASK-180.1
 title: write_post_rows non-destructive header migration (DropsLab)
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-06-17 15:12'
+updated_date: '2026-06-21 17:58'
 labels:
   - data-integrity
 dependencies: []
@@ -24,3 +25,9 @@ write_post_rows (DropsLab drops_collector.py:250-253) calls ws.clear() on any he
 - [ ] #2 append-only guard raises on reorder/removal; data-loss abort guard raises on wide-grid-but-empty-values (both before any destructive op)
 - [ ] #3 POST-MARKET (RULE #6): a normal live run preserves row-count >=3733 (no-regression; migration branch exercised live in Stage 2)
 <!-- AC:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+AC#3 verified live 2026-06-21: drops_post row-count 4086 >= 3733 (no-regression; migration code live since bbb0012). AC#1/2 = mocked-ws tests (test_write_post_rows_v1.py).
+<!-- SECTION:NOTES:END -->
