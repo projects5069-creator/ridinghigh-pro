@@ -1,3 +1,5 @@
+> ⚠️ SUPERSEDED by docs/SESSION_HANDOFF_2026-06-20_overnight-disarmed.md — the runner was DISARMED on 2026-06-20. This file describes the prior "armed" state and is kept for history only.
+
 # SESSION HANDOFF — 2026-06-19 (Overnight runner ARMED)
 
 המשך ל-`SESSION_HANDOFF_2026-06-19_pm.md`. סשן זה: בניית+הקשחת+מיזוג+זיווד ה-overnight runner.
