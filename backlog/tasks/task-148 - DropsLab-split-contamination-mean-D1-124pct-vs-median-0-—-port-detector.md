@@ -1,10 +1,10 @@
 ---
 id: TASK-148
 title: DropsLab split contamination (mean D1 +124pct vs median 0) — port detector
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-06-11 04:02'
-updated_date: '2026-06-16 01:29'
+updated_date: '2026-06-21 14:20'
 labels:
   - TASK-139-INV
 dependencies: []

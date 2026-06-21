@@ -1,10 +1,10 @@
 ---
 id: TASK-90
 title: 'DropsLab: ניקוי ערכי recovery בלתי-אפשריים (reverse-splits)'
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-06-01 01:22'
-updated_date: '2026-06-16 16:16'
+updated_date: '2026-06-21 14:20'
 labels:
   - dropslab
   - data-quality

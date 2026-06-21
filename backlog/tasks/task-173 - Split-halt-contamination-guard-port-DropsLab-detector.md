@@ -1,10 +1,10 @@
 ---
 id: TASK-173
 title: Split/halt contamination guard (port DropsLab detector)
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-06-13 01:26'
-updated_date: '2026-06-16 01:29'
+updated_date: '2026-06-21 14:20'
 labels:
   - TASK-171
 dependencies: []
