@@ -16,6 +16,9 @@ import gspread
 
 # הגדרות
 ROOT_FOLDER_ID = "1mHSdsTENVuMTtlv4XM54SrbadCEF_HHh"
+# TASK-143 AC#3: the 2026-07 orphan was created by a rotation run against the WRONG
+# root (RidingHigh-Data). Guard every run against it; this root must never be written to.
+KNOWN_BAD_ROOT_FOLDER_ID = "1u330dPMAVGRDaKaQ81_B9To9uYaSBCl2"  # RidingHigh-Data (orphan source)
 SHEET_NAMES = [
     "timeline_live",
     "daily_snapshots",
@@ -78,10 +81,17 @@ def find_or_create_folder(drive, name, parent_id):
              f"and mimeType='application/vnd.google-apps.folder' and trashed=false")
     res = drive.files().list(q=query, fields="files(id, name)").execute()
     files = res.get('files', [])
+    if len(files) > 1:
+        # TASK-143 AC#3: fail-closed — never silently pick files[0] when the name
+        # query is ambiguous (that is exactly how the 2026-07 fork went unnoticed).
+        raise RuntimeError(
+            f"DUPLICATE FOLDER GUARD (TASK-143): {len(files)} folders named '{name}' "
+            f"under parent {parent_id} — refusing to pick one. IDs: {[f['id'] for f in files]}"
+        )
     if files:
         print(f"   📁 תיקייה '{name}' כבר קיימת: {files[0]['id']}")
         return files[0]['id'], False
-    
+
     meta = {
         'name': name,
         'mimeType': 'application/vnd.google-apps.folder',
@@ -90,6 +100,44 @@ def find_or_create_folder(drive, name, parent_id):
     folder = drive.files().create(body=meta, fields='id').execute()
     print(f"   ✅ נוצרה תיקייה '{name}': {folder['id']}")
     return folder['id'], True
+
+
+def assert_correct_root(root_id):
+    """Fail-closed root guard (TASK-143 AC#3). The rotation must run ONLY against the
+    canonical RidingHighPro root; the 2026-07 orphan came from a run against
+    RidingHigh-Data. Raises ValueError on the bad root or any non-canonical id."""
+    if root_id == KNOWN_BAD_ROOT_FOLDER_ID:
+        raise ValueError(
+            f"ROOT GUARD (TASK-143): refusing to run against RidingHigh-Data ({root_id}) "
+            f"— this created the 2026-07 orphan. Expected {ROOT_FOLDER_ID}."
+        )
+    if root_id != ROOT_FOLDER_ID:
+        raise ValueError(
+            f"ROOT GUARD (TASK-143): root {root_id} is not the canonical RidingHighPro "
+            f"root {ROOT_FOLDER_ID}."
+        )
+
+
+def find_duplicate_month_folders(drive, name):
+    """Return every folder named `name` across ALL parents (TASK-143 AC#3 post-rotation
+    check). >1 means a cross-root duplicate like the 2026-07 orphan."""
+    query = (f"name='{name}' and mimeType='application/vnd.google-apps.folder' "
+             f"and trashed=false")
+    res = drive.files().list(q=query, fields="files(id, name, parents)").execute()
+    return res.get('files', [])
+
+
+def scan_orphan_root(drive, bad_root_id, known_ids):
+    """Advisory (TASK-143 AC#3): list folders under the RidingHigh-Data root not in
+    `known_ids`. Reports only — NEVER deletes (manual review by design)."""
+    query = (f"'{bad_root_id}' in parents and "
+             f"mimeType='application/vnd.google-apps.folder' and trashed=false")
+    res = drive.files().list(q=query, fields="files(id, name, parents)").execute()
+    orphans = [f for f in res.get('files', []) if f['id'] not in (known_ids or set())]
+    for o in orphans:
+        print(f"   ⚠️  ORPHAN (TASK-143): folder '{o.get('name')}' ({o['id']}) under "
+              f"RidingHigh-Data — not in config; manual review (no auto-delete).")
+    return orphans
 
 
 def find_or_create_sheet(drive, gc, sa_email, filename, folder_id):
@@ -159,8 +207,17 @@ def main():
         print("⚠️  לא נמצא SA email - לא יתבצע שיתוף אוטומטי!")
     
     # 1. תיקיית החודש
+    assert_correct_root(ROOT_FOLDER_ID)  # TASK-143 AC#3: fail-closed on wrong root
     print(f"\n📁 תיקיית {month_key}")
     month_folder_id, folder_created = find_or_create_folder(drive, month_key, ROOT_FOLDER_ID)
+    # TASK-143 AC#3: post-creation duplicate guard + orphan advisory
+    _dups = find_duplicate_month_folders(drive, month_key)
+    if len(_dups) > 1:
+        raise RuntimeError(
+            f"DUPLICATE MONTH GUARD (TASK-143): {len(_dups)} folders named '{month_key}' "
+            f"across roots: {[(f['id'], f.get('parents')) for f in _dups]}"
+        )
+    scan_orphan_root(drive, KNOWN_BAD_ROOT_FOLDER_ID, known_ids={month_folder_id})
     
     # 2. 7 Sheets
     print(f"\n📄 יצירת 7 Sheets:")
