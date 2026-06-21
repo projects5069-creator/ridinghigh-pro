@@ -92,6 +92,26 @@ check_auth() {
   echo "OK: subscription token present, no API key, secret env clean"; return 0
 }
 
+# Classify ONE task body → verdict JSON. FAIL-CLOSED: any classify failure (non-zero claude,
+# empty/invalid output) → auto_safe=false, so the task is NEVER auto-executed; the caller
+# routes it to needs_human. Guarded (|| v="") so one failure can't abort the run under set -e
+# (the 2026-06-20 exit-1: candidate 52/59 killed the whole sweep). claude's stderr is preserved
+# to a per-task .classify.err instead of /dev/null'd.
+classify_verdict() {
+  local body="$1" wt="$2" settings="$3" errlog="$4"
+  local v=""
+  v="$(printf '%s' "$body" | ( cd "$wt" && claude -p --model "$CLASSIFY_MODEL" \
+        --settings "$settings" --permission-mode dontAsk \
+        --append-system-prompt "$(cat "$REPO/scripts/overnight/classify_task.md")" \
+        --output-format json \
+        --json-schema '{"type":"object","properties":{"auto_safe":{"type":"boolean"},"touches_core":{"type":"array","items":{"type":"string"}},"reads_data":{"type":"boolean"},"reason":{"type":"string"}},"required":["auto_safe","reason"]}' \
+        2>>"$errlog" ) | jq -r '.structured_output // empty')" || v=""
+  if ! printf '%s' "$v" | jq -e 'type=="object"' >/dev/null 2>&1; then
+    v="$(jq -n --arg e "${errlog##*/}" '{auto_safe:false,reason:("classify failed — see "+$e)}')"
+  fi
+  printf '%s\n' "$v"
+}
+
 # --- Orchestration (runs only when executed, not sourced) -----------------------
 main() {
   set -euo pipefail
@@ -144,6 +164,11 @@ main() {
   local candidates; candidates="$("$PYBIN" "$REPO/scripts/overnight/triage_filter.py" "$TASKS_DIR")"
   local wt_scan="$REPO/../rh-night-scan-$stamp"
   git worktree add --detach --force "$wt_scan" "$BASE_BRANCH" >/dev/null 2>&1 || true
+  # Never orphan the scan worktree again (the 2026-06-20 exit-1 left it behind). No prior EXIT
+  # trap exists in this script, so this does not clobber one. Idempotent with the explicit
+  # removal below (|| true). Note: by design only the read-only scan worktree is auto-removed;
+  # per-task execute worktrees are intentionally kept for inspection unless the task is "done".
+  trap 'git worktree remove --force "$wt_scan" 2>/dev/null || true' EXIT
   local queue=() n_needs=0 classified=0
   while read -r tid; do
     [ -n "$tid" ] || continue
@@ -152,12 +177,7 @@ main() {
     if ! is_triage_only && [ "${#queue[@]}" -ge "$MAX_TASKS" ]; then break; fi
     classified=$((classified + 1))
     local body; body="$(cat "$TASKS_DIR/task-${tid#TASK-} "*.md 2>/dev/null || true)"
-    local verdict; verdict="$(printf '%s' "$body" | ( cd "$wt_scan" && claude -p --model "$CLASSIFY_MODEL" \
-        --settings "$resolved_settings" --permission-mode dontAsk \
-        --append-system-prompt "$(cat "$REPO/scripts/overnight/classify_task.md")" \
-        --output-format json \
-        --json-schema '{"type":"object","properties":{"auto_safe":{"type":"boolean"},"touches_core":{"type":"array","items":{"type":"string"}},"reads_data":{"type":"boolean"},"reason":{"type":"string"}},"required":["auto_safe","reason"]}' \
-        2>/dev/null ) | jq -r '.structured_output // empty')"
+    local verdict; verdict="$(classify_verdict "$body" "$wt_scan" "$resolved_settings" "$RAW_DIR/${tid}.classify.err")"
     if [ "$(printf '%s' "$verdict" | jq -r '.auto_safe // false')" = "true" ]; then
       queue+=("$tid")
     else
