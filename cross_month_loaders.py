@@ -45,6 +45,7 @@ import pandas as pd
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import sheets_manager
+from backfill_interday_v1 import backfill_interday_flags  # TASK-182: recompute-on-missing
 
 
 # ──────────────────────────────────────────────────────────────────────────────
@@ -157,6 +158,16 @@ def exclude_interday_artifacts(df, flag_col="InterdayArtifact"):
     """
     if df is None or df.empty or flag_col not in df.columns:
         return (df, 0.0, 0)
+    # TASK-182: legacy rows carry a blank/NaN flag (written before TASK-180 collector
+    # wiring, or from a month whose sheet lacks the column -> reindexed to NaN). Recompute
+    # those in-memory from the D0-D5 close chain (flag_interday_artifact_chain, SSoT) so
+    # they are excluded too; otherwise _coerce_bool maps blank->False and they leak into
+    # aggregates AND health_audit Check 29. A present explicit flag is trusted and never
+    # recomputed (backfill_interday_flags only fills blanks). Non-destructive: backfill
+    # works on a copy -- the caller's df and the Sheet are never written.
+    close_cols = [f"D{i}_Close" for i in range(6)]
+    if all(c in df.columns for c in close_cols):
+        df = backfill_interday_flags(df)
     is_artifact = _coerce_bool(df[flag_col])
     n_excluded  = int(is_artifact.sum())
     total       = len(df)
