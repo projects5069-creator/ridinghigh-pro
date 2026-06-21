@@ -1,10 +1,10 @@
 ---
 id: TASK-143
 title: Resolve duplicate RH-2026-07-post_analysis before Jul 1 rotation
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-06-11 04:02'
-updated_date: '2026-06-12 23:30'
+updated_date: '2026-06-21 19:12'
 labels:
   - TASK-139-INV
 dependencies: []
@@ -25,10 +25,10 @@ TASK-139-INV RH-4.3: TWO Drive files named RH-2026-07-post_analysis (1ASXu2... o
 - [ ] #3 FOLLOW-UP (plan-mode, touches live rotation script): root-guard in prepare_next_month.py — assert correct ROOT_FOLDER_ID + single folder-per-month + post-rotation duplicate check; investigate the RidingHigh-Data root for other orphans
 <!-- AC:END -->
 
-
-
 ## Implementation Notes
 
 <!-- SECTION:NOTES:BEGIN -->
 2026-06-12: orphan cleanup DONE (manual Drive trash). Deadline-driven part (before 2026-07-01 rotation) resolved — config pipeline was always correct (points to LIVE folder). Priority lowered HIGH->MEDIUM: only the prevention root-guard remains (separate plan-mode session). The duplicate was a wrong-ROOT_FOLDER_ID run, not a transient sheet race.
+
+AC#3 done 2026-06-21: root-guard (4 guards) in prepare_next_month, TDD 6 tests, 474 passed. All 3 ACs met -> 143 Done. CAVEAT: orphan 1IaqLr trashed-state not independently verified (MCP lacks flag); config points to live only; recommend manual Drive-trash eye-check.
 <!-- SECTION:NOTES:END -->
