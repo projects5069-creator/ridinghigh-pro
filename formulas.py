@@ -66,7 +66,7 @@ Design Principles:
 5. Validated caps where applicable (e.g., REL_VOL max 100)
 """
 
-from config import SCORE_WEIGHTS_V2, SCORE_CAPS_V2, SCORE_RSI_PARAMS, REL_VOL_CAP, INTERDAY_ARTIFACT_THRESHOLD_PCT
+from config import SCORE_WEIGHTS_V2, SCORE_CAPS_V2, REL_VOL_CAP, INTERDAY_ARTIFACT_THRESHOLD_PCT
 from config import TP_THRESHOLD_FRAC, SL_THRESHOLD_FRAC, SLIP
 
 
@@ -474,11 +474,10 @@ def calculate_score(metrics):
         MxV=25, RunUp=25, ATRX=20, RSI=10, VWAP=10, ScanChange=5, REL_VOL=5
     Caps (thresholds for max contribution per metric):
         MxV=200 (|mxv|), RunUp=30%, ATRX=5x, VWAP=8%, ScanChange=60%, REL_VOL=15x
-    RSI: bell curve centered at 50-70 sweet spot.
+    RSI: overbought-only graded (>=90 -> full, >=85 -> 0.7, >=80 -> 0.4; else 0).
     """
     W = SCORE_WEIGHTS_V2
     C = SCORE_CAPS_V2
-    R = SCORE_RSI_PARAMS
     score = 0
     # MxV — negative values only (pump signal)
     try:

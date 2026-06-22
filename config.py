@@ -53,22 +53,15 @@ SCORE_CAPS_V2 = {
     "MxV":        200,   # abs value (scores based on |mxv|/200)
     "RunUp":      30,    # percentage
     "ATRX":       5,     # ratio
-    "RSI_HIGH":   70,    # bell curve center high
-    "RSI_LOW":    60,    # bell curve center low
     "VWAP":       8,     # percentage
     "ScanChange": 60,    # percentage
     "REL_VOL":    15,    # ratio (for score contribution only)
 }
 """Score v2 caps - thresholds for max contribution per metric."""
 
-SCORE_RSI_PARAMS = {
-    "CENTER_LOW":   50,   # RSI below this → linear ramp up
-    "CENTER_HIGH":  50,   # (alias of CENTER_LOW for clarity in formula)
-    "SWEET_HIGH":   70,   # RSI 50-70 → peak zone
-    "OVER_DECAY":   30,   # RSI above 70 decays over this range (70-100)
-    "HALF_POINT":   20,   # midpoint weight transition (50 → 70 spans 20)
-}
-"""RSI scoring bell curve parameters."""
+# Note: RSI has no cap/params entry — calculate_score uses hardcoded overbought
+# tiers (>=90/85/80). The former SCORE_RSI_PARAMS + RSI_HIGH/RSI_LOW bell-curve
+# constants were dead config (never read) and removed in TASK-188.
 
 
 # ═══════════════════════════════════════════════════════════════════════
