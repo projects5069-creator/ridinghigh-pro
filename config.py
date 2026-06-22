@@ -312,7 +312,8 @@ AGENT_MARKET_CAP_MAX = 2_000_000_000  # $2B maximum
 # Exit criteria — same as scanner except no time limit
 AGENT_TP_PCT = 10                  # Same as TP_THRESHOLD_PCT
 AGENT_SL_PCT = 10                  # Same as SL_THRESHOLD_PCT
-AGENT_NO_TIME_LIMIT = True         # ⚠️ DIFFERENT from MAX_HOLDING_DAYS=5
+# (AGENT_NO_TIME_LIMIT removed TASK-151 — dead constant, 0 code refs; the agent's
+#  no-holding-time-limit design is enforced by the absence of a time check, not a flag.)
 
 # Force-close all OPEN positions at 14:55-14:59 Peru (just before market close).
 # Disabled 2026-05-07 — real trader cannot trade after market close, so simulating
