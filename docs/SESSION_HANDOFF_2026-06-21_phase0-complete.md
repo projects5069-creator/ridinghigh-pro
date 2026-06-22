@@ -9,13 +9,16 @@
 - **orphan state correction** (`236a92f`) — ה-orphan `1IaqLr` התגלה **חי** (לא נמחק 6/12 כפי ש-143 AC#1 טען), 9 empty sheets, disjoint מ-23 config IDs, אפס סיכון. החלטה: leave-and-document → **TASK-187 (LOW)** נוצר.
 - **TASK-159** → **Done** (`4a0c4d4`) — מחיקת dead-code: מחולל 7-הכללים `_generate_lessons` (פלט חושב-ונזרק) + call-site + 4 טסטים; `AutoLessons` (forensic prose) = הנתיב היחיד. intent=REPLACE (`cce6c12`). 472 passed, אפס regression. PK v3.44.
 - **TASK-132** → **Done** (subsumed) — recount הוכיח **13/14 כבר שוחררו** (TASK-130 + backfill 6/10); נותרה רק SBLX 2026-04-28 (delisted) → קופלה ל-**TASK-149** (delisting). **אפס live write.**
+- **TASK-38** → **Done** (`24ad147`) — verify-and-close: 3 בדיקות freshness לסוכנים (Critic/MarketContext/News) **כבר מחווטות** (`health_audit` check_25/26/27, WARNING). אפס קוד.
+- **TASK-151** → **Done** (`24ad147`) — dead-const מינימלי: הוסר רק `AGENT_NO_TIME_LIMIT` (0-ref). premise "9 dead" **שגוי** (RSI_LOW/HIGH = dict keys חיים; MARKET_CLOSE בשימוש; MIN_PRICE/MAX_HOLDING_DAYS/MEDIUM_SCORE = display-only מכוון). 472 passed.
+- **TASK-188** → **נוצר** (To Do, MEDIUM) — RSI-semantics PK-vs-code investigation (bell-curve מול overbought-only), spun off מ-151.
 
 ## מצב מפתח
 - **PHASE 0 (data-integrity) שלם** — TASK-180 היה החוסם האחרון. data נקי לקראת research.
 - **crossover = exploratory** — HYP-001 ב-`docs/HYPOTHESES.md` עדיין **DRAFT** (לא REGISTERED). discovery -17.75%/n=62 מוצהר "NOT evidence". מבנית **~4-5 חודשים מהרצה** (TASK-179 forward-only, n≥150 events חדשים), GO/NO-GO לא מובטח. **לא wire-it-now** (מאושר עמיחי 21/6).
 
 ## commits היום
-- **RH** (main, 0/0): `068f3f9` → `a3ee8e6` → `32384bf` → `854a28f` → `f71b71d` → `236a92f` → `4a8501b` (handoff) → `4a0c4d4`. PK **v3.38 → v3.44** (6 bumps, Anti-Drift §4).
+- **RH** (main, 0/0): `068f3f9` → `a3ee8e6` → `32384bf` → `854a28f` → `f71b71d` → `236a92f` → `4a8501b` → `4a0c4d4` → `1ea7af9` → `24ad147`. PK **v3.38 → v3.44** (6 bumps, Anti-Drift §4).
 - **DropsLab** (main, 0/0): `50b7e00` (daily-check gap C).
 
 ## פתוח — לא בוער (לקריאה ב-backlog החי)
