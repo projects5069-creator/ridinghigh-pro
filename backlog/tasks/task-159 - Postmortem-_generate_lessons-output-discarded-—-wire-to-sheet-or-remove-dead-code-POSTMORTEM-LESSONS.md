@@ -3,10 +3,10 @@ id: TASK-159
 title: >-
   Postmortem _generate_lessons output discarded — wire to sheet or remove dead
   code [POSTMORTEM-LESSONS]
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-06-11 18:28'
-updated_date: '2026-06-11 18:29'
+updated_date: '2026-06-22 01:05'
 labels:
   - TASK-134-followup
 dependencies: []

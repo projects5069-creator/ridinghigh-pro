@@ -100,16 +100,6 @@ class PostmortemEngine:
             entry_price=self._safe_float(position.get("EntryPrice"), 0.0),
         )
 
-        # Generate auto-lessons
-        lessons = self._generate_lessons(
-            position=position,
-            decision_context=decision_context,
-            mfe=mfe,
-            mae=mae,
-            duration=duration_hours,
-            agent_mode=agent_mode,
-        )
-
         # Build postmortem record (17 fields matching Sheet schema)
         postmortem_id = f"PM-{uuid.uuid4().hex[:12]}"
         postmortem = {
@@ -225,70 +215,6 @@ class PostmortemEngine:
         except Exception as e:
             logger.warning("Failed to compute MFE/MAE for %s: %s", ticker, e)
             return None, None
-
-    # ════════════════════════════════════════════════════════════════════
-    # Auto-lessons (rule-based)
-    # ════════════════════════════════════════════════════════════════════
-
-    def _generate_lessons(
-        self,
-        position: Dict[str, Any],
-        decision_context: Dict[str, Any],
-        mfe: Optional[float],
-        mae: Optional[float],
-        duration: float,
-        agent_mode: str,
-    ) -> List[str]:
-        """Rule-based auto-lesson generator (7 rules)."""
-        lessons = []
-
-        metrics = decision_context.get("metrics", {})
-        atrx = metrics.get("ATRX", 0)
-        rsi = metrics.get("RSI", 0)
-        pnl_pct = self._safe_float(position.get("RealizedPnLPct"), 0.0)
-        exit_reason = position.get("ExitReason", "")
-        entry_price = self._safe_float(position.get("EntryPrice"), 0.0)
-        sl_price = entry_price * (1 + AGENT_SL_PCT / 100) if entry_price else 0
-
-        is_loss = pnl_pct < 0
-
-        # Rule 1: LOSS + high ATRX
-        if is_loss and atrx > 3:
-            lessons.append("High ATRX — consider archetype-specific limits")
-
-        # Rule 2: LOSS + RSI overbought (90+)
-        if is_loss and rsi > 90:
-            lessons.append("RSI 90+ at entry — momentum may have continued")
-
-        # Rule 3: Fast outcome (LIVE_PAPER only — DRY_RUN has artificial timing)
-        if duration < 1 and agent_mode == AGENT_MODE_LIVE:
-            lessons.append("Very fast outcome — entry timing optimization candidate")
-
-        # Rule 4: MAE > SL level → SL saved us
-        if mae is not None and sl_price > 0 and mae > sl_price and not is_loss:
-            lessons.append("MAE exceeded SL — stop-loss prevented larger loss")
-
-        # Rule 5: MFE much better than TP → trailing TP candidate
-        if mfe is not None and entry_price > 0:
-            actual_drop_pct = (entry_price - mfe) / entry_price * 100
-            if actual_drop_pct > AGENT_TP_PCT * 1.5:
-                lessons.append(
-                    f"Stock fell {actual_drop_pct:.1f}% (TP={AGENT_TP_PCT}%) — trailing TP candidate"
-                )
-
-        # Rule 6: EOD close + profit
-        if exit_reason == "EOD_CLOSE" and pnl_pct > 0:
-            lessons.append("EOD forced close with profit — consider extending hold")
-
-        # Rule 7: EOD close + loss
-        if exit_reason == "EOD_CLOSE" and pnl_pct < 0:
-            lessons.append("EOD forced close with loss — earlier exit signal needed")
-
-        # Special: no bar data available
-        if mfe is None and mae is None:
-            lessons.append("No bar data available — MFE/MAE not computed")
-
-        return lessons
 
     # ════════════════════════════════════════════════════════════════════
     # Sheet writing

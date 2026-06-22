@@ -141,41 +141,21 @@ class TestDecisionContext:
 
 
 class TestAutoLessons:
-    # NOTE: AutoLessons is now Hebrew forensic prose (commit cce6c12), so the 7 rule
-    # strings no longer land in pm["AutoLessons"]. The rule LOGIC still runs in
-    # _generate_lessons (verified), so these tests exercise it directly. (The rule
-    # output is currently computed-then-discarded in generate() — tracked separately.)
-    def test_loss_with_high_atrx_triggers_rule1(self, engine):
-        """LOSS + ATRX>3 → 'High ATRX' rule fires (via _generate_lessons)."""
+    # AutoLessons is Hebrew forensic prose (_build_forensic_prose, commit cce6c12).
+    # The deprecated 7-rule _generate_lessons was computed-then-discarded in generate()
+    # and was REMOVED in TASK-159 — AutoLessons (prose) is the sole lessons output.
+    def test_generate_lessons_removed(self, engine):
+        """The dead 7-rule generator no longer exists on the engine (TASK-159)."""
+        assert not hasattr(engine, "_generate_lessons")
+
+    def test_autolessons_field_is_prose_string(self, engine):
+        """A generated postmortem carries an AutoLessons prose string (no 7-rule output)."""
         pos = _closed_position(RealizedPnLPct="-7.0", ExitReason="SL_HIT")
-        lessons = engine._generate_lessons(
-            position=pos, decision_context={"metrics": {"ATRX": 4.5}},
-            mfe=None, mae=None, duration=2.0, agent_mode=AGENT_MODE_LIVE)
-        assert any("High ATRX" in l for l in lessons)
-
-    def test_loss_with_high_rsi_triggers_rule2(self, engine):
-        """LOSS + RSI>90 → 'RSI 90+' rule fires (via _generate_lessons)."""
-        pos = _closed_position(RealizedPnLPct="-7.0", ExitReason="SL_HIT")
-        lessons = engine._generate_lessons(
-            position=pos, decision_context={"metrics": {"RSI": 92}},
-            mfe=None, mae=None, duration=2.0, agent_mode=AGENT_MODE_LIVE)
-        assert any("RSI 90+" in l for l in lessons)
-
-    def test_dry_run_skips_fast_outcome_rule(self, engine):
-        """Rule 3 (fast outcome) does NOT trigger outside LIVE mode (via _generate_lessons)."""
-        pos = _closed_position(Status=STATUS_DRY_RUN_CLOSED)
-        lessons = engine._generate_lessons(
-            position=pos, decision_context={"metrics": {}},
-            mfe=None, mae=None, duration=0.016, agent_mode=AGENT_MODE_DRY_RUN)
-        assert not any("Very fast outcome" in l for l in lessons)
-
-    def test_eod_close_with_profit_triggers_rule6(self, engine):
-        """EOD_CLOSE + profit → 'extending hold' rule fires (via _generate_lessons)."""
-        pos = _closed_position(ExitReason="EOD_CLOSE", RealizedPnLPct="3.0")
-        lessons = engine._generate_lessons(
-            position=pos, decision_context={"metrics": {}},
-            mfe=None, mae=None, duration=2.0, agent_mode=AGENT_MODE_LIVE)
-        assert any("extending hold" in l for l in lessons)
+        pm = engine.generate(pos)
+        assert "AutoLessons" in pm
+        assert isinstance(pm["AutoLessons"], str)
+        # the deprecated English rule strings must never appear in the prose field
+        assert "consider archetype-specific limits" not in pm["AutoLessons"]
 
 
 class TestSchemaIntegrity:
