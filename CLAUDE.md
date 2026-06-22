@@ -326,3 +326,28 @@ task-list update, no exceptions) → verify →
 ask "any request today that did not become a TASK?". Do not mix unrelated
 system investigation into a ritual. The protocol file is the source of
 truth; this rule only points to it.
+
+---
+
+## RULE #14: PK — Never Print the Body; Always Read the Latest by mtime
+
+Two hard constraints on the Project Knowledge file (`docs/*PK*.md`):
+
+1. **Never print the PK body in output.** Not the full file, not excerpts,
+   not "for context." When the user pastes CC output into chat it must never
+   carry PK text — that pollutes the chat with possibly-stale PK. If a task
+   genuinely needs a PK fact, quote ONLY the single relevant line/section
+   (1–2 lines), never blocks.
+
+2. **When you must read the PK, always the newest by mtime — never by a
+   version number or a date in the filename:**
+   ```bash
+   PK=$(ls -t docs/*PK*.md | head -1)
+   ```
+   Use `*PK*.md` (NOT `*PK*`) so `.bak_*` backups are excluded — a fresh
+   backup is newest by mtime and would otherwise be picked. Never open a
+   specific PK file, never grep for "v3.44/v3.46", never compare versions.
+
+This refines RULE #13 (still update the PK on close) and the rhpro-live
+skill (still read the live PK): read it and act on it, but do NOT echo its
+body into output.
