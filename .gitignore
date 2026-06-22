@@ -17,6 +17,8 @@ data/
 !whipsaw_verdicts.json
 # Overnight runner — night settings must be tracked (test_guardrails + CI read it)
 !.claude/settings.night.json
+# TASK-167 — derived sheet-schema contract; CI round-trip test reads it from disk
+!SCHEMA.json
 # Overnight runner — raw per-task JSON + run logs are local only
 docs/overnight/raw/
 
