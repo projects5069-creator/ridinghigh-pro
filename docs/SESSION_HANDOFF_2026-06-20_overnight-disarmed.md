@@ -1,3 +1,5 @@
+> **SUPERSEDED by `SESSION_HANDOFF_2026-06-21_phase0-complete.md` (2026-06-21).**
+
 # Session Handoff — 2026-06-20 (Overnight Runner: ARMED → DISARMED)
 
 ## מה קרה היום
