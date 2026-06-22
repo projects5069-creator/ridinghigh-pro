@@ -1,9 +1,10 @@
 ---
 id: TASK-188
 title: Investigate RSI-semantics PK claim vs code (bell-curve vs overbought-only)
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-06-22 01:50'
+updated_date: '2026-06-22 13:53'
 labels: []
 dependencies: []
 priority: medium
