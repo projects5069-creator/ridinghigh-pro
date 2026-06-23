@@ -44,6 +44,7 @@ AGENT_SHEET_NAMES = [
     "pending_suggestions",
     "config_history",
     "borrow_data",
+    "borrow_coverage",
     "agent_scorecard",
     "weekly_summary",
     "skip_summary",

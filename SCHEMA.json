@@ -23,6 +23,20 @@
       "mode": "exact",
       "source": "AGENT_SHEET_HEADERS"
     },
+    "borrow_coverage": {
+      "columns": [
+        "CheckDate",
+        "CheckTime",
+        "ScannedUniverse",
+        "WithBorrowData",
+        "PctWithBorrowData",
+        "ShortableCount",
+        "PctShortable",
+        "Source"
+      ],
+      "mode": "exact",
+      "source": "AGENT_SHEET_HEADERS"
+    },
     "borrow_data": {
       "columns": [
         "Ticker",
