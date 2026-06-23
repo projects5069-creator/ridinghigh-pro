@@ -65,6 +65,7 @@ from utils import (
     parse_market_cap,
     parse_volume,
     is_market_hours,
+    classify_trade,
 )
 from config import (
     MIN_SCORE_DISPLAY,
@@ -2030,6 +2031,13 @@ def _simulate_short_trades(pa_df: pd.DataFrame):
                 tp15_hit = False
                 has_data = False
 
+                # TASK-46: build OHLC for the COMPLETED days only (preserves the
+                # pre-market/intraday gate + tp15 marker), then delegate the
+                # first-touch TP/SL/whipsaw verdict to the SSoT classify_trade.
+                # whipsaw_as_loss=True keeps the Portfolio Tracker's pessimistic
+                # whipsaws-as-losses metric; resolve_on_available=True keeps the
+                # early-resolution on whatever days have settled.
+                _ohlc = {}
                 for day in range(1, 6):
                     # Skip this day if the full trading session hasn't closed yet
                     day_date = _row_trading_days[day - 1] if day - 1 < len(_row_trading_days) else ""
@@ -2040,22 +2048,20 @@ def _simulate_short_trades(pa_df: pd.DataFrame):
                     if pd.isna(high) or pd.isna(low):
                         break
                     has_data = True
-
                     if low <= tp15_price:
                         tp15_hit = True
+                    _ohlc[f"D{day}_High"] = float(high)
+                    _ohlc[f"D{day}_Low"]  = float(low)
 
-                    sl_hit = high >= sl_price
-                    tp_hit = low  <= tp10_price
-
-                    if sl_hit and tp_hit:
-                        status, exit_day, pnl = "SL ❌", day, round(-investment * SL_PCT, 2)
-                        break
-                    elif sl_hit:
-                        status, exit_day, pnl = "SL ❌", day, round(-investment * SL_PCT, 2)
-                        break
-                    elif tp_hit:
-                        status, exit_day, pnl = "TP10 ✅", day, round(investment * TP_PCT, 2)
-                        break
+                _verdict, _vday = classify_trade(
+                    entry_price, _ohlc, entry_price=entry_price,
+                    whipsaw_as_loss=True, resolve_on_available=True)
+                if _verdict == "LOSS":        # incl. same-day whipsaw (pessimistic)
+                    status, exit_day, pnl = "SL ❌", _vday, round(-investment * SL_PCT, 2)
+                elif _verdict == "WIN":
+                    status, exit_day, pnl = "TP10 ✅", _vday, round(investment * TP_PCT, 2)
+                # NO_TOUCH / PENDING -> status stays "Open ⏳"; the existing
+                # portfolio_live / live-price fallback block below handles it.
 
                 if status == "Open ⏳":
                     if not has_data:

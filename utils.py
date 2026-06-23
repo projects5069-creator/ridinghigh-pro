@@ -497,7 +497,8 @@ def calculate_stats(scan_price, ohlc):
     }
 
 
-def classify_trade(scan_price, ohlc, entry_price=None):
+def classify_trade(scan_price, ohlc, entry_price=None,
+                   whipsaw_as_loss=False, resolve_on_available=False):
     """
     Classify a simulated short trade outcome, day-by-day (D1->D5).
 
@@ -515,6 +516,13 @@ def classify_trade(scan_price, ohlc, entry_price=None):
         entry_price: TASK-142 — explicit entry basis (e.g. D1_Open executable). When
             None, falls back to scan_price. The WIN/LOSS/WHIPSAW mapping below is
             UNCHANGED — only the TP/SL anchor moves to this entry.
+        whipsaw_as_loss: TASK-46 — when True, a same-day both-touch returns
+            'LOSS' instead of 'WHIPSAW' (the dashboard Portfolio Tracker's
+            pessimistic whipsaws-as-losses metric). Default False = canonical.
+        resolve_on_available: TASK-46 — when True, classify on the days present
+            in `ohlc` (caller passes only completed days), resolving at the first
+            touch (early-resolution); 'PENDING' only if it runs out with <5 days.
+            Default False = canonical (require all 5 days, else PENDING).
 
     Returns:
         (classification, resolution_day) tuple — resolution_day = the D-day (1-5)
@@ -536,30 +544,44 @@ def classify_trade(scan_price, ohlc, entry_price=None):
     if entry is None or entry <= 0:
         return ('PENDING', None)
 
-    # A trade may only be classified once all 5 days have settled.
-    # Fewer than 5 days of OHLC = trade is still live ("in the air") —
-    # no win/loss decision is permitted yet.
-    for i in range(1, 6):
-        if ohlc.get(f"D{i}_Low") is None or ohlc.get(f"D{i}_High") is None:
-            return ('PENDING', None)
+    # Canonical: a trade may only be classified once all 5 days have settled.
+    # Fewer than 5 days of OHLC = trade is still live ("in the air") — no
+    # win/loss decision is permitted yet. resolve_on_available skips this guard
+    # and instead resolves on whatever days the caller supplied (TASK-46).
+    if not resolve_on_available:
+        for i in range(1, 6):
+            if ohlc.get(f"D{i}_Low") is None or ohlc.get(f"D{i}_High") is None:
+                return ('PENDING', None)
 
-    tp_price = entry * (1 - TP_THRESHOLD_FRAC)
-    sl_price = entry * (1 + SL_THRESHOLD_FRAC)
+    # Round thresholds to 4 dp (TASK-46): prices are penny-tick, so a raw float
+    # like 3.1*1.1 = 3.4100000000000006 must not make a boundary High of 3.41
+    # miss the SL by 6e-16. Matches the dashboard's round(...,4) — converges the
+    # two consumers on the same verdict.
+    tp_price = round(entry * (1 - TP_THRESHOLD_FRAC), 4)
+    sl_price = round(entry * (1 + SL_THRESHOLD_FRAC), 4)
+    whip = 'LOSS' if whipsaw_as_loss else 'WHIPSAW'
 
     # Walk D1->D5 in order; the first day that resolves the trade decides it.
+    # With resolve_on_available, stop at the first missing day.
+    last_seen = 0
     for i in range(1, 6):
-        lo = ohlc[f"D{i}_Low"]
-        hi = ohlc[f"D{i}_High"]
+        lo = ohlc.get(f"D{i}_Low")
+        hi = ohlc.get(f"D{i}_High")
+        if lo is None or hi is None:
+            break                   # no more settled days to evaluate
+        last_seen = i
         tp_hit = lo <= tp_price
         sl_hit = hi >= sl_price
         if tp_hit and sl_hit:
-            return ('WHIPSAW', i)   # same day, both ends — unresolvable
+            return (whip, i)        # same day, both ends — whipsaw (or loss)
         if sl_hit:
             return ('LOSS', i)      # SL resolved first
         if tp_hit:
             return ('WIN', i)       # TP resolved first
 
-    return ('NO_TOUCH', 5)          # 5 full days, never resolved
+    if last_seen >= 5:
+        return ('NO_TOUCH', 5)      # 5 full days, never resolved
+    return ('PENDING', None)        # ran out of settled days without resolving
 
 
 def classify_trade_row_full(row, entry_basis="ScanPrice"):
