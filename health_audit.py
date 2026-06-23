@@ -52,11 +52,13 @@ import os
 import re
 import sys
 import json
+import math
+import random
 import subprocess
 from datetime import datetime, timedelta
 from pathlib import Path
 
-from utils import is_trading_day
+from utils import is_trading_day, calculate_stats
 from cross_month_loaders import load_post_analysis_all_months, exclude_interday_artifacts
 
 # ============================================================================
@@ -1252,6 +1254,113 @@ def check_29_interday_artifacts(gc):
     return _interday_artifact_result(df)
 
 
+# ---------------------------------------------------------------------------
+# TASK-166 — Daily Lineage Sentinel
+# Recompute ONE random settled post_analysis row via the calculate_stats SSoT
+# (utils.py) and WARN if any stored field drifted. Advisory only — never blocks.
+# ---------------------------------------------------------------------------
+
+# Fields recomputed by calculate_stats AND persisted as post_analysis columns.
+# Excludes IntraDay_SL (an alias of SL_Hit_D5, not a stored column) and the
+# forward-only D6-D25 columns (calculate_stats never reads them).
+_LINEAGE_FIELDS = (
+    "MaxDrop%", "BestDay", "TP10_Hit", "TP15_Hit", "TP20_Hit",
+    "D1_Gap%", "SL_Hit_D5",
+    "NetPnL_SlipOnly", "NetPnL_Borrow50", "NetPnL_Borrow200", "NetPnL_Borrow500",
+)
+_LINEAGE_TOL = 0.01  # both sides already round(.,2); abs tol absorbs half-even edge
+_OHLC_KEYS = tuple(f"D{i}_{f}" for i in range(1, 6)
+                   for f in ("Open", "High", "Low", "Close"))  # 20 D1-D5 keys
+
+
+def _is_blank(v):
+    """True for None / NaN / empty-string — the shared 'no value' state. Stored
+    blanks coerce to NaN; calculate_stats emits None for D1_Gap%/NetPnL_* on
+    WHIPSAW/NO_TOUCH/PENDING."""
+    if v is None:
+        return True
+    try:
+        return math.isnan(float(v))
+    except (TypeError, ValueError):
+        return str(v).strip() == ""
+
+
+def _field_drift(stored, fresh, tol=_LINEAGE_TOL):
+    """One field: no drift when both blank or both numeric within tol; drift on
+    any mismatch. Pure, deterministic."""
+    sb, fb = _is_blank(stored), _is_blank(fresh)
+    if sb and fb:
+        return False            # None-vs-None / NaN-vs-None — not drift
+    if sb != fb:
+        return True             # one side has a value, the other doesn't
+    return abs(round(float(stored), 2) - round(float(fresh), 2)) > tol
+
+
+def _row_is_settled(row):
+    """True iff all 20 D1-D5 OHLC values are present & numeric. This is the only
+    settlement criterion (no Verdict column exists) and is exactly the condition
+    under which calculate_stats yields non-None outputs. Pure; row is a dict /
+    pandas Series."""
+    get = row.get if hasattr(row, "get") else lambda k: row[k]
+    return all(not _is_blank(get(k)) for k in _OHLC_KEYS)
+
+
+def _build_ohlc(row):
+    """Build the calculate_stats ohlc dict from a row — only the 20 D1-D5 keys
+    (forward-only D6-D25 deliberately excluded)."""
+    return {k: float(row[k]) for k in _OHLC_KEYS}
+
+
+def _lineage_compare_result(ticker, scan_date, scan_price, ohlc, stored):
+    """PURE lineage check on ONE row — no randomness, no Sheets, no selection.
+    Recomputes via calculate_stats and compares each _LINEAGE_FIELDS entry.
+    PASSED when all match; WARNING listing the drifting field(s) otherwise."""
+    fresh = calculate_stats(scan_price, ohlc)
+    drifts = [f"{f} (stored={stored.get(f)} vs fresh={fresh.get(f)})"
+              for f in _LINEAGE_FIELDS if _field_drift(stored.get(f), fresh.get(f))]
+    if not drifts:
+        return CheckResult("30", "Lineage Sentinel", "Data quality", PASSED,
+                           f"{ticker}/{scan_date}: recompute matches stored "
+                           f"({len(_LINEAGE_FIELDS)} fields)")
+    return CheckResult("30", "Lineage Sentinel", "Data quality", WARNING,
+                       f"{ticker}/{scan_date}: {len(drifts)} field(s) drifted: "
+                       + "; ".join(drifts),
+                       details="; ".join(drifts))
+
+
+def check_30_lineage_sentinel(gc):
+    """Q: recompute ONE random settled post_analysis row end-to-end via the
+    calculate_stats SSoT and WARN if any stored field drifted — catches silent
+    pipeline/data corruption (TASK-166). Drift -> WARNING (advisory, no CI fail);
+    skip / load / row-prep error -> INFO."""
+    if gc is None:
+        return CheckResult("30", "Lineage Sentinel", "Data quality",
+                           INFO, "Skipped (no Sheets access)")
+    try:
+        df = load_post_analysis_all_months()
+    except Exception as e:
+        return CheckResult("30", "Lineage Sentinel", "Data quality",
+                           INFO, f"Could not load post_analysis: {e}")
+    if df is None or len(df) == 0:
+        return CheckResult("30", "Lineage Sentinel", "Data quality",
+                           INFO, "post_analysis is empty")
+    settled = [r for _, r in df.iterrows() if _row_is_settled(r)]
+    if not settled:
+        return CheckResult("30", "Lineage Sentinel", "Data quality",
+                           INFO, "No settled rows to audit")
+    row = random.choice(settled)
+    try:
+        scan_price = float(row["ScanPrice"])
+        ohlc = _build_ohlc(row)
+        stored = {f: row.get(f) for f in _LINEAGE_FIELDS}
+        ticker = str(row.get("Ticker", "?"))
+        scan_date = str(row.get("ScanDate", "?"))
+    except Exception as e:
+        return CheckResult("30", "Lineage Sentinel", "Data quality",
+                           INFO, f"Row prep failed: {e}")
+    return _lineage_compare_result(ticker, scan_date, scan_price, ohlc, stored)
+
+
 def check_17_fundamentals_provider():
     """P1: Verify fundamentals provider returns valid data for a known ticker.
 
@@ -1883,7 +1992,7 @@ def main():
 
     # Run all checks
     results = []
-    print("[health_audit] Running 23 checks...")
+    print("[health_audit] Running 30 checks...")
 
     # Code integrity
     results.append(check_01_duplicate_functions())
@@ -1905,6 +2014,7 @@ def main():
     results.append(check_20_float_pct_stuck(gc))
     results.append(check_21_gap_outliers(gc))
     results.append(check_29_interday_artifacts(gc))
+    results.append(check_30_lineage_sentinel(gc))
     results.append(check_23_nan_scantime(gc))
     results.append(check_24_sentinel_health(gc))
     results.append(check_25_critic_agent(gc))
