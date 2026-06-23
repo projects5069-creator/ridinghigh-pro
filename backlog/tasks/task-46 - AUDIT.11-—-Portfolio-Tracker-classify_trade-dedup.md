@@ -1,9 +1,10 @@
 ---
 id: TASK-46
 title: AUDIT.11 — Portfolio Tracker classify_trade dedup
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-05-25 10:25'
+updated_date: '2026-06-23 00:01'
 labels: []
 dependencies: []
 priority: low
