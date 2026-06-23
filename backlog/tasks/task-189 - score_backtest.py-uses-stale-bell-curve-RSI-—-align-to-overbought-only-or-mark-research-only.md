@@ -3,9 +3,10 @@ id: TASK-189
 title: >-
   score_backtest.py uses stale bell-curve RSI — align to overbought-only or mark
   research-only
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-06-22 17:08'
+updated_date: '2026-06-23 20:31'
 labels:
   - rsi
   - drift
