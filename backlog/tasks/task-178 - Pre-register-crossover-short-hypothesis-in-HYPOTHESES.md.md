@@ -1,9 +1,10 @@
 ---
 id: TASK-178
 title: Pre-register crossover-short hypothesis in HYPOTHESES.md
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-06-13 01:27'
+updated_date: '2026-06-23 17:55'
 labels:
   - TASK-171
   - crossover-short
