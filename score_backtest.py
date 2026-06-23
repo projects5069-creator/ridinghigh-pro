@@ -4,6 +4,15 @@ Score Backtest: compare v1, v2, v3 scoring formulas against MaxDrop%.
 Reads post_analysis data and computes three score versions per row,
 then measures which one best predicts MaxDrop%.
 
+⚠️ RESEARCH-ONLY / HISTORICAL SNAPSHOTS — NOT the live SSoT.
+The three scorers below are point-in-time snapshots kept for this comparison:
+v1 = commit 77e3964 (RSI linear-to-80), v2 = commit f3d96ca (RSI bell-curve 60-70),
+v3 = a proposed/never-shipped variant. They INTENTIONALLY do not track the live
+SSoT `formulas.calculate_score`, whose RSI is **overbought-only since TASK-188**
+(≥90→full / ≥85→0.7 / ≥80→0.4; bell-curve removed). Do not "fix" the RSI shapes
+here to match production — that would corrupt the historical comparison (TASK-189).
+This file is CORE_UNSAFE, imported by no .py, and in no workflow → zero live impact.
+
 Usage:
   python score_backtest.py
 """
@@ -52,9 +61,11 @@ def score_v1(mxv, run_up, rel_vol, rsi, atrx, gap, vwap, change):
 
 
 # ═══════════════════════════════════════════════════════════════════════
-# Score v2 — current code (commit f3d96ca, 11-Apr-2026)
+# Score v2 — SNAPSHOT of commit f3d96ca (11-Apr-2026) — PRE-TASK-188, NOT current production
 #   MxV=25%/cap200, RunUp=25%/cap30, ATRX=20%/cap5,
-#   RSI=10%/bell60-70, VWAP=10%/cap8, ScanChange=5%/cap60, REL_VOL=5%/cap15x
+#   RSI=10%/bell60-70 (HISTORICAL f3d96ca shape; production RSI is now overbought-only
+#       — see formulas.calculate_score / formulas.py:496), VWAP=10%/cap8,
+#   ScanChange=5%/cap60, REL_VOL=5%/cap15x
 # ═══════════════════════════════════════════════════════════════════════
 def score_v2(mxv, run_up, rel_vol, rsi, atrx, gap, vwap, change):
     score = 0
@@ -70,7 +81,8 @@ def score_v2(mxv, run_up, rel_vol, rsi, atrx, gap, vwap, change):
     # ATRX — 20% — cap 5x
     score += min(atrx / 5, 1) * 20
 
-    # RSI — 10% — bell curve, sweet spot 60-70
+    # RSI — 10% — bell curve, sweet spot 60-70 (HISTORICAL f3d96ca snapshot; production
+    # is overbought-only since TASK-188 — see formulas.calculate_score. Do NOT align here.)
     if rsi < 50:
         score += (rsi / 50) * 5
     elif rsi <= 70:
@@ -122,7 +134,8 @@ def score_v3(mxv, run_up, rel_vol, rsi, atrx, gap, vwap, change):
     if vwap > 0:
         score += min(vwap / 8, 1) * 10
 
-    # RSI — 5% — bell curve (same shape, lower weight)
+    # RSI — 5% — bell curve (same shape, lower weight) — part of the PROPOSED v3 variant
+    # (research, never shipped); production RSI is overbought-only (TASK-188). Do NOT align here.
     if rsi < 50:
         score += (rsi / 50) * 2.5
     elif rsi <= 70:
