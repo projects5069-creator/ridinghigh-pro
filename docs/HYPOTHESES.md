@@ -86,17 +86,17 @@ record if a hypothesis is re-opened under a new rule.
 
 | ID | Name | Status | Registered | Verdict |
 |----|------|--------|-----------|---------|
-| HYP-001 | crossover-short | **DRAFT** | — | pending (blocked on TASK-172 coverage + TASK-177) |
+| HYP-001 | crossover-short | **REGISTERED** | 2026-06-23 | validation pending TASK-179 (n≥150, ~mid-July) |
 
 ---
 
-## §D · HYP-001 — crossover-short (DRAFT)
+## §D · HYP-001 — crossover-short (REGISTERED)
 
-> **Methodology (§A) is LOCKED. The specific VALUES of this record
-> (HOLD_DAYS, the entry/exit hold window) are NOT locked — they are sealed by
-> TASK-178, after TASK-172 (coverage) lands. **TASK-177 is DONE — it collected the
-> scan-anchored D1-D25 data superset that CONTAINS the hold window; it did not
-> define or lock it.**
+> **REGISTERED 2026-06-23 (TASK-178). The rule is now LOCKED — HOLD_DAYS,
+> entry, and exit are fixed and may NOT be tuned to validation data. Dependencies
+> cleared at registration: TASK-172 (coverage) ✅, TASK-177 (D1-D25 superset) ✅,
+> and PHASE 0 data-integrity blockers (TASK-180/150/105/144) all ✅. Validation
+> (TASK-179) runs only on crossover events detected AFTER this date.**
 
 **Hypothesis.** SHORT a DropsLab breakdown-event in a ticker that was an
 RH pump (scanner trigger, e.g. +15%) within the preceding <=10 calendar days —
@@ -108,33 +108,37 @@ DropsLab drop-event within <=10 calendar days of the RH scan.
 6/12) is EXCLUDED from the tradable universe — not counted as a loss — with an
 explicit survivorship-transparency note in any reported result.
 
-**[!] Three distinct time anchors — do NOT conflate (this is the central open
-question TASK-178 must resolve):**
+**[!] Three distinct time anchors — RESOLVED by TASK-178 (2026-06-23):**
 - **Crossover window = <=10 calendar days** — how soon after the RH pump the
   ticker crosses into DropsLab. Defines universe membership.
-- **Hold window = D6-D15** — how long the short is held after entry. **TASK-178**
-  must define this precisely, including D6-D15 measured from WHAT (the pump, or
-  the drop-event). TASK-177 (DONE) supplied the scan-anchored D1-D25 data that
-  CONTAINS any such window — it did NOT pick the anchor. Currently UNRESOLVED.
-- **Discovery window = 5 days post-event** — what the discovery sample actually
-  measured. This is NOT the validation hold window.
+- **Hold window = D1→D5 from the drop-event** (entry d1_close → exit d5_close,
+  5 trading days, time-only). **LOCKED to equal the discovery window.** The
+  earlier D6-D15 framing is REJECTED: it was an untested window, and validating a
+  different window than the one discovery measured is methodologically unsound
+  (backtest-expert: validate the window you actually discovered). TASK-177's
+  D6-D25 data remains available but is NOT used by this hold rule.
+- **Discovery window = 5 days post-event** — what the discovery sample measured;
+  the validation hold window now EQUALS it (no window mismatch remains).
 
 **Entry.** SHORT at **d1_close of the drop-event day** (DropsLab is
 closes-only per OQ-2 -> close-to-close entry, zero-discretion).
 
-**Exit.** `[PENDING TASK-178]` — discovery used the D+5 close; the validation
-hold window (D6-D15 from the drop-event) is **derived from TASK-177's D1-D25 data
-and locked by TASK-178** — TASK-177 supplied the containing data, not the window.
-NOT fixed to D+5 here. No discretionary TP/SL in the DRAFT; TP/SL grid-sensitivity
-is a TASK-179 question.
+**Exit (LOCKED by TASK-178).** Cover at **D5_Close — exactly 5 trading days after
+the d1_close entry; time-only, zero-discretion, NO TP/SL.** This matches the
+discovery measurement (close-to-close D1→D5), verified against
+`docs/research/INVESTIGATION_2026-06-12_II/phase_evidence.md` (the −17.75% n=62 is a
+pure 5-day continuation with no stops). *TP/SL grid-sensitivity remains a TASK-179
+question (explored with BH deflation). The **±10% band (TP10/SL10)** that appears in
+the dashboard short-simulation is the **SIMULATION exit (sim/179), NOT this
+pre-registered rule** — see the §D↔PK-v3.21 reconciliation in the PK changelog.*
 
 **Locked fitness (sealed by 178).** Per §A.5: `calculate_net_pnl(short)` at
 borrow **500%/yr x HOLD_DAYS/365** + slip **2%/side**, GO only if the entire
 bootstrap CI stays profitable-for-short on **n >= 150 new events** (n >= 30 per
-sub-segment). HOLD_DAYS is the §A.5(a) placeholder — locked by TASK-178, NOT
-fixed here.
-*Borrow sensitivity (illustration only, NOT the gate): at 5d ≈ 6.8%, at 15d
-≈ 20.5% of position value — the gate uses whatever HOLD_DAYS 178 locks.*
+sub-segment). **HOLD_DAYS = 5** (LOCKED by TASK-178) → borrow accrual
+**500%/yr × 5/365 ≈ 6.85%** of position value.
+*Borrow sensitivity (illustration only, NOT the gate): at 5d ≈ 6.85%, at 15d
+≈ 20.5% — the gate uses the locked HOLD_DAYS=5.*
 *Why slip 2x and not the 0.5%/side phase-5 baseline: crossover-short enters
 stocks in active collapse (HTB, thin liquidity, wide spreads) where realistic
 slippage exceeds baseline — part of the deliberate "punish".*
@@ -145,23 +149,27 @@ RH pumps cross into DropsLab within <=10 days; post-event continuation
 MEDIUM confidence, selection on a known event, borrow unpriced -> NOT evidence
 for the validation.
 
-**[!] Discovery vs validation windows DIFFER.** The -17.75% is evidence for the
-**5-day** post-event window ONLY. The proposed validation hold (D6-D15) is a
-**different, not-yet-tested window** — the -17.75% does NOT transfer to it.
-TASK-178 must resolve whether D6-D15 extends or replaces the discovery window
-(using TASK-177's D1-D25 data); it must NOT lock until it does. This is the
-hypothesis's biggest open weakness, kept visible by design.
+**[✓] Discovery and validation windows now MATCH.** TASK-178 resolved this by
+locking the hold window to the **same 5-day** post-event window the discovery
+measured (entry d1_close → exit d5_close). The −17.75% is gross-price evidence for
+exactly this window; validation (179) re-measures it net of worst-case borrow +
+slip 2× on a fresh out-of-sample n≥150. (The former "biggest open weakness" — a
+mismatched D6-D15 hold — is removed, not papered over: D6-D15 was rejected, not
+adopted.) Remaining honest caveat: the discovery n=62 is selection on a known event,
+borrow unpriced, MEDIUM confidence → still NOT evidence; only the hold-out validates.
 
 **Hold-out.** Validation events = any crossover identified AFTER the
 registration date. The n=62 discovery set is locked, never recycled (179 AC#1).
 Power target: >=150 new events (~450 RH rows, ~4-5 months at current rate).
 
-**Dependencies.** TASK-172 (borrow shortability flags — collecting verified
-6/11, universe-coverage still open) · TASK-177 ✅ DONE — scan-anchored D1-D25 data
-superset (full OHLC D1-5; Close+Low D6-25, data-only; forward-only from 2026-06-13)
-that CONTAINS the hold window; the window definition/anchor is TASK-178, not 177.
+**Dependencies (AC#2 — all cleared at registration).** TASK-172 ✅ DONE (borrow
+shortability flags + borrow_coverage tab) · TASK-177 ✅ DONE (scan-anchored D1-D25
+superset) · PHASE 0 data-integrity ✅ (TASK-180 split/halt detector, TASK-150 schema
+drift, TASK-105 paper_portfolio write, TASK-144 DropsLab — all Done). The hold-window
+definition was TASK-178's to make (now locked above), not TASK-177's.
 
-**Status: DRAFT** — not locked until TASK-178, after 172 (177 ✅).
+**Status: REGISTERED (2026-06-23, TASK-178)** — rule LOCKED. Next: TASK-179
+validation on the forward hold-out (n≥150, ~mid-July).
 
 ---
 
