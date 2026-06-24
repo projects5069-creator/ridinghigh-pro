@@ -3,10 +3,10 @@ id: TASK-136
 title: >-
   Quota reduction audit — cut non-essential Sheets writes/reads in agent_minute
   (News Detective first)
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-06-10 18:56'
-updated_date: '2026-06-11 04:01'
+updated_date: '2026-06-24 14:22'
 labels:
   - agent
   - infra
