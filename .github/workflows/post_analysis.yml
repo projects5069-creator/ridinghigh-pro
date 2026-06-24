@@ -51,15 +51,7 @@ jobs:
         run: |
           python enrich_post_analysis.py
 
-      - name: Backfill missing OHLC
-        env:
-          GOOGLE_CREDENTIALS_JSON: ${{ secrets.GOOGLE_CREDENTIALS_JSON }}
-          ALPACA_API_KEY_ID: ${{ secrets.ALPACA_API_KEY_ID }}
-          ALPACA_SECRET_KEY: ${{ secrets.ALPACA_SECRET_KEY }}
-          DATA_PROVIDER: alpaca
-          ALPACA_PAPER: "true"
-        run: |
-          # TASK-124: v2 cross-month (current + previous) heals end-of-month
-          # rows that v1 (active-month, D1-only trigger) left PENDING forever.
-          # v1 stays in the repo (§12); only this step stops calling it.
-          python backfill_ohlc_v2.py --recent 2 --apply
+      # TASK-190: OHLC backfill moved to its own workflow (backfill_ohlc.yml).
+      # It was the last step and routinely crossed this job's 15min timeout
+      # as monthly rows accumulated, cancelling the whole collect job.
+      # Decoupling keeps the collector fast/reliable; backfill runs after.

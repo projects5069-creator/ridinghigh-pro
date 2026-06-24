@@ -1,0 +1,36 @@
+name: OHLC Backfill
+
+on:
+  schedule:
+    - cron: '45 21 * * 1-5'   # 16:45 Peru (UTC-5), Mon-Fri — runs AFTER post_analysis collector (16:05) finishes; decoupled per TASK-190
+  workflow_dispatch:
+
+jobs:
+  backfill:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          pip install finvizfinance gspread google-auth google-api-python-client pandas yfinance pytz pandas_market_calendars ta alpaca-py
+
+      - name: Backfill missing OHLC (cross-month, decoupled from collector — TASK-190)
+        env:
+          GOOGLE_CREDENTIALS_JSON: ${{ secrets.GOOGLE_CREDENTIALS_JSON }}
+          ALPACA_API_KEY_ID: ${{ secrets.ALPACA_API_KEY_ID }}
+          ALPACA_SECRET_KEY: ${{ secrets.ALPACA_SECRET_KEY }}
+          DATA_PROVIDER: alpaca
+          ALPACA_PAPER: "true"
+        run: |
+          # TASK-124: v2 cross-month (current + previous) heals end-of-month
+          # rows that v1 (active-month, D1-only trigger) left PENDING forever.
+          # TASK-190: moved here from post_analysis.yml so a slow/timed-out
+          # backfill no longer cancels the collector (own 25m budget).
+          python backfill_ohlc_v2.py --recent 2 --apply
