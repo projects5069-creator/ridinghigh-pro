@@ -25,3 +25,11 @@
 ## Notes
 - This session: 166 commit (build-first, verify pending) + 178 register + 189 research-only. 5 commits total; main clean & synced.
 - Roster/wave map: prior planning artifacts under `~/.claude/plans/`.
+
+---
+
+## ⏳ PENDING FOLLOW-UP (added 2026-06-23 ~21:35 Peru — AFTER this handoff was first written)
+A later session (post-close) executed **TASK-190**; one item awaits **live verification**:
+- **TASK-190 → In Progress — do NOT close without live AC#5 verify.** Isolated OHLC backfill into its own workflow `backfill_ohlc.yml` (cron `45 21 * * 1-5` = 16:45 Peru, timeout 25m) to fix the `post_analysis` 15min job-timeout; removed the backfill step from `post_analysis.yml`; PK v3.52. Committed + **pushed** (`96dcf50`, main `0 0` vs origin). AC#1-4 ✅.
+- **⚠️ AC#5 LIVE-VERIFY PENDING — on/after 2026-06-25.** `backfill_ohlc.yml` first runs **2026-06-24 16:45 Peru**; it should close the 2 mapped gaps. Target in `docs/GAP_MAP_OHLC_2026-06-23.md`: **APWC 2026-06-18 (D2)** + **HSPT 2026-06-11 (D2-D5, suspected unfillable/delisted)**.
+- **ACTION next session (trigger: Amihay says "אמת AC#5"):** run the read-only gap-map **locally** (creds are local-only → a cloud routine cannot do it, per open TASK-93). Re-run `backfill_ohlc_v2` candidate logic as dry-run over `--recent 2`. **REAL-GAP=0 (or only HSPT flagged unfillable) → `backlog task edit 190 -s Done`.** Any gap beyond HSPT → report BEFORE closing. Never close without this live check.
