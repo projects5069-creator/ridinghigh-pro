@@ -1,14 +1,22 @@
-# SESSION HANDOFF — 2026-06-23 (Tuesday, ~17:45 Peru)
+# SESSION HANDOFF — 2026-06-23 (Tuesday) — refreshed ~21:50 Peru (full-day close)
 
 ## State
-- **HEAD:** `a3b74be` (main, clean, `0 0` vs origin — all pushed; +the close commit on top)
-- **OPEN tasks:** 44
-- **PK:** v3.51 · **Mode:** DRY_RUN · **Sentinel:** shadow
-- **Market:** closed (>15:00 Peru); post-EOD quiet window is OPEN.
+- **HEAD:** `2724987` (main, clean, `0 0` vs origin — all pushed)
+- **OPEN tasks:** 50 (To Do 48 · In Progress 2 = TASK-186, TASK-190)
+- **PK:** v3.53 · **Mode:** DRY_RUN · **Sentinel:** shadow
+- **Market:** closed (after-hours, ~21:50 Peru).
 
 ## Done this session
 - **TASK-178 → Done** — HYP-001 (crossover-short) **REGISTERED** in `docs/HYPOTHESES.md` (DRAFT→REGISTERED). Zero-discretion rule LOCKED: SHORT at drop-event d1_close, **exit = D5_Close (5 trading days, time-only, NO TP/SL)**, HOLD_DAYS=5, borrow 500%×5/365≈6.85% + slip 2%/side, GO only if full bootstrap CI profitable-for-short on n≥150 new events. Resolved §D↔PK-v3.21 drift: the ±10% is the dashboard **simulation** exit (sim/179), not the pre-registered rule (discovery = pure 5d close-to-close, verified vs INVESTIGATION_2026-06-12_II); D6-D15 rejected as untested. AC#1/#2 ✅ (172/177/PHASE0 clear). `ed55e1b` + `9bd34f3`. PK v3.49.
 - **TASK-189 → Done** — `score_backtest.py` marked **RESEARCH-ONLY** (historical v1@77e3964 / v2@f3d96ca / v3-proposed snapshots); fixed misleading "current code" label on v2 (pre-TASK-188); inline notes point to the SSoT (overbought-only RSI). **Comment/docstring only — math byte-identical**, py_compile OK, suite 506 passed, stays CORE_UNSAFE/imported-by-nothing → zero live impact. AC#1 (mark research-only) + AC#2 (grep: only this file re-implements bell-curve RSI, documented). `97fd06b` + `a3b74be`. PK v3.50.
+
+## Session 2 (evening 2026-06-23) — TASK-190 done & pushed (AC#5 pending)
+A second working block this day, downstream of a full investigation chain
+(edge-audit → status report → post_analysis-failure diagnosis):
+- **Diagnosis:** `post_analysis.yml` collector failing/cancelled most days since ~6/16 — **root-cause = job `timeout-minutes:15`**; the last step (OHLC backfill) crossed the ceiling as monthly rows accumulated → GitHub killed the job (`docs/DIAGNOSIS_post_analysis_2026-06-23.md`).
+- **TASK-190 (HIGH, In Progress) — fix shipped:** new workflow `backfill_ohlc.yml` (cron 16:45 Peru, own 25m timeout) runs `backfill_ohlc_v2.py --recent 2 --apply`; the backfill step was removed from `post_analysis.yml` so the collector finishes fast; PK v3.52. **Committed + pushed:** `96dcf50` (fix) + `2724987` (handoff flag). AC#1-4 ✅.
+- **Gap-map (live read):** only **2 real settled-gaps** remain (`docs/GAP_MAP_OHLC_2026-06-23.md`) — APWC 6/18 (D2), HSPT 6/11 (D2-D5, suspected unfillable). The earlier "87% fill" was a stale-snapshot artifact (pending-legit rows counted as missing).
+- **Local-only docs (deferred, NOT committed — Amihay handles separately):** `GAP_MAP_OHLC_2026-06-23.md`, `STATUS_2026-06-23.md`, `INVESTIGATION_2026-06-23_edge_audit_v1.md`, `INVESTIGATION_METHODOLOGY_v1.md`.
 
 ## Next frontier — ⚠️ TASK-166 live-verify is the FIRST action next session
 - **TASK-166** — lineage sentinel `check_30` (`health_audit.py`) is **code+CI done** (`1ddf281`, TDD 17/17, suite 506, PK v3.48) but **stays To Do**. The open critical step is the **live-verify**: run `check_30(gc)` against a real settled `post_analysis` row (known-good) in a quiet/post-EOD window, confirm it reports INFO/WARNING correctly with no false drift. **Only after PASSED → `backlog task edit 166 -s Done`.** Do NOT mark Done before that.
