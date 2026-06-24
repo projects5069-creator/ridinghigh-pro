@@ -268,13 +268,20 @@ def evaluate_signal(
     return d
 
 
-def _check_filters(d: Decision, signal: Dict[str, Any], quality: Dict[str, Any]) -> Optional[str]:
+def _check_filters(d: Decision, signal: Dict[str, Any], quality: Dict[str, Any],
+                   include_score_gate: bool = True) -> Optional[str]:
     """
     Run all entry filters. Returns skip_reason string if any fails, else None.
     Order: most likely failures first for efficiency.
+
+    include_score_gate: when True (default, byte-identical to prior behavior) the
+        Score gate (Filter 1) is enforced. When False, ONLY Filter 1 is skipped —
+        filters 2-11 (the explicit proven gates) still run. This is the Option-B
+        explicit-only gate used by the shadow observer (TASK-128) to measure, forward,
+        what would change if Score were decoupled from entry (resolves 141+174).
     """
     # Filter 1: Score
-    if d.score < AGENT_MIN_SCORE:
+    if include_score_gate and d.score < AGENT_MIN_SCORE:
         return f"SCORE_TOO_LOW: {d.score:.2f} < {AGENT_MIN_SCORE}"
 
     # Filter 2: MxV (must be very negative)
