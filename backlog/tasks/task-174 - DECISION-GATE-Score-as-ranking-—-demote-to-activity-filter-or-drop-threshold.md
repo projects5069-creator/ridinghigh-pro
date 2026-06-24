@@ -1,9 +1,10 @@
 ---
 id: TASK-174
 title: '[DECISION GATE] Score-as-ranking — demote to activity-filter or drop threshold'
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-06-13 01:26'
+updated_date: '2026-06-24 16:05'
 labels:
   - TASK-171
 dependencies: []

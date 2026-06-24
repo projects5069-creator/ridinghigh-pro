@@ -1,9 +1,10 @@
 ---
 id: TASK-128
 title: Gate כניסה מבוסס-מדדים בא shadow mode
-status: To Do
+status: In Progress
 assignee: []
 created_date: '2026-06-10 01:03'
+updated_date: '2026-06-24 16:05'
 labels: []
 dependencies: []
 priority: medium

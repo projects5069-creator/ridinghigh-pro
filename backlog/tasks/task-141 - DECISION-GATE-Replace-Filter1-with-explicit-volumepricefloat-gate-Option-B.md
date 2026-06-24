@@ -3,10 +3,10 @@ id: TASK-141
 title: >-
   [DECISION GATE] Replace Filter1 with explicit volume+price+float gate (Option
   B)
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-06-11 04:01'
-updated_date: '2026-06-13 01:27'
+updated_date: '2026-06-24 16:05'
 labels:
   - TASK-139-INV
 dependencies: []

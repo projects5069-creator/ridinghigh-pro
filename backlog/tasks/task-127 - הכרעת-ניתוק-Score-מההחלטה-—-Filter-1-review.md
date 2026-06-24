@@ -1,10 +1,10 @@
 ---
 id: TASK-127
 title: הכרעת ניתוק Score מההחלטה — Filter 1 review
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-06-10 01:03'
-updated_date: '2026-06-13 01:27'
+updated_date: '2026-06-24 16:05'
 labels: []
 dependencies: []
 priority: medium
