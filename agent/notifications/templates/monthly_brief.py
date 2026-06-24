@@ -150,7 +150,7 @@ def _metric_table(detail):
         '<span style="font-size:12px;color:#6b7280;font-weight:normal;">'
         '— כמה כל מדד הבדיל בין מנצחות למפסידות (תיאורי, לא טריגר מסחר)</span></h3>'
         '<p style="font-size:12px;color:#6b7280;margin:2px 0 6px;">'
-        'לכל מדד: הערך הממוצע במנצחות מול מפסידות. "פער" = כמה המדד הבדיל ביניהן '
+        'לכל מדד: הערך החציוני במנצחות מול מפסידות. "פער" = כמה המדד הבדיל ביניהן '
         '— פער גדול = עזר לחזות, פער קטן = לא עזר.</p>'
         '<table style="border-collapse:collapse;font-size:13px;width:100%;max-width:520px;">'
         '<tr style="background:#f8f9fa;">'

@@ -1,9 +1,10 @@
 ---
 id: TASK-87
 title: Investigate mxv sentinel values polluting monthly entry-metric avg
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-05-31 21:45'
+updated_date: '2026-06-24 19:23'
 labels:
   - bug
   - data-quality
@@ -25,3 +26,9 @@ build_monthly_detail (TASK-48) avg mxv for May = -1053 (win) / -1107 (loss), but
 - [ ] #2 mxv avg sane after filtering
 - [ ] #3 mxv re-added to monthly Section C
 <!-- AC:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+DONE 2026-06-24 (TDD). Root cause: NOT sentinels (0 values == -9999 / == 0.0 in MxV). MxV=((mcap-price*vol)/mcap)*100 is a heavy-tailed signed ratio (median APR/MAY -216/-396 vs mean -1914/-1425, min -21950/-12598); the arithmetic mean is genuine but unrepresentative, and the +92.67 sample is a legitimately-positive row. Fix: build_monthly_detail Section C switched mean->statistics.median for ALL metrics (critic_v1.py:_avgs); mxv re-added to _METRICS+_LABELS; monthly_brief.py wording average->median (label). AC#1 source=heavy-tail (no sentinels). AC#2 median sane (~-200/-400). AC#3 mxv re-added (as median). Section C is descriptive email-only -> zero live ENTER/SKIP/WR/Score impact; render-time, no Sheet write, no historical recompute. TDD test_monthly_section_c_median_v1.py 4/4; suite 535 passed.
+<!-- SECTION:NOTES:END -->

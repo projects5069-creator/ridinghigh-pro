@@ -16,6 +16,7 @@ No sheet writing, no orchestrator wiring — computation and return only.
 """
 
 import logging
+import statistics
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
@@ -353,20 +354,24 @@ class CriticAgent:
         manual_cleanup = sum(1 for t in mt if t.get("exit_reason") == "MANUAL_CLEANUP")
         pre_fix = sum(1 for t in mt if t.get("data_quality") == "PRE_FIX")
 
-        # --- Section C: exploratory entry-metric averages (DESCRIPTIVE, not a trigger) ---
-        _METRICS = ("score_at_entry", "run_up", "atrx", "float_pct")  # mxv dropped — sentinel pollution (separate TASK)
+        # --- Section C: exploratory entry-metric MEDIANS (DESCRIPTIVE, not a trigger) ---
+        # TASK-87: report MEDIAN, not mean. The entry metrics are heavy-tailed ratios — mxv =
+        # ((mcap-price*vol)/mcap)*100 has an extreme negative tail (to ~-12,000), so an arithmetic
+        # mean is genuine but unrepresentative (the old "mxv sentinel pollution" was a misdiagnosis:
+        # no sentinels, just a tail-dragged mean). The median is robust, so mxv is re-added here.
+        _METRICS = ("score_at_entry", "run_up", "atrx", "float_pct", "mxv")
         wins = [t for t in mt if t.get("verdict") == "WIN"]
         losses = [t for t in mt if t.get("verdict") == "LOSS"]
 
         def _avgs(group):
             if not group:
                 return {m: None for m in _METRICS}
-            return {m: round(sum(_safe_float(t.get(m)) for t in group) / len(group), 2) for m in _METRICS}
+            return {m: round(statistics.median([_safe_float(t.get(m)) for t in group]), 2) for m in _METRICS}
         entry_metrics_win = _avgs(wins)
         entry_metrics_loss = _avgs(losses)
         # Per-metric quality: how well each entry metric separated winners from losers.
         # rel = |gap| / max(|win|,|loss|) normalizes across metric scales. DESCRIPTIVE only.
-        _LABELS = {"score_at_entry": "Score", "run_up": "RunUp", "atrx": "ATRX", "float_pct": "Float%"}
+        _LABELS = {"score_at_entry": "Score", "run_up": "RunUp", "atrx": "ATRX", "float_pct": "Float%", "mxv": "MxV"}
         metric_quality = []
         for _k in _METRICS:
             _wv, _lv = entry_metrics_win.get(_k), entry_metrics_loss.get(_k)
