@@ -31,6 +31,7 @@ import pytz
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
 import sheets_manager
+import config as _config  # TASK-128: read EXPLICIT_GATE_MODE at call time (test-monkeypatchable)
 from agent.trader.decision_logic import Decision
 from agent.logging.decision_id_generator import DecisionIDGenerator
 
@@ -133,6 +134,9 @@ class DecisionLogger:
         self.run_start = _now.strftime("%Y-%m-%d %H:%M:%S")
         self.run_id = os.environ.get("GITHUB_RUN_ID") or _now.strftime("%Y%m%d-%H%M%S")
         self._skip_acc = {}  # reason_key -> {count, tickers[], score_min, score_max}
+        # TASK-128: in-run shadow-gate aggregation (one summary row per run). Tracks,
+        # of the live SCORE_TOO_LOW skips, how many the explicit-only gate would ALLOW.
+        self._shadow_acc = {"score_skips": 0, "would_allow": []}
 
     def _accumulate_skip(self, decision: Decision) -> None:
         """Add one SKIP decision to the in-run accumulator (never raises)."""
@@ -205,6 +209,69 @@ class DecisionLogger:
             print(f"[DecisionLogger] skip_summary flush failed (non-fatal): {e}", file=sys.stderr)
             return 0
 
+    # ── TASK-128: explicit-gate shadow summary (mirrors skip_summary) ──────────
+
+    def _accumulate_shadow_gate(self, decision: Decision) -> None:
+        """Add one decision to the in-run shadow-gate accumulator (never raises).
+
+        Population = live SKIPs on Score; of those, the ones the explicit-only gate
+        would ALLOW are the divergences (decision.shadow_explicit_divergence, set by
+        decision_logic._observe_explicit_gate). Non-Score skips are ignored.
+        """
+        reason = getattr(decision, "skip_reason", "") or ""
+        if not reason.startswith("SCORE_TOO_LOW"):
+            return
+        self._shadow_acc["score_skips"] += 1
+        if getattr(decision, "shadow_explicit_divergence", False):
+            self._shadow_acc["would_allow"].append(getattr(decision, "ticker", "?") or "?")
+
+    def _build_shadow_gate_row(self) -> Optional[List[Any]]:
+        """Build the ONE summary row for this run, or None to write nothing.
+
+        None when EXPLICIT_GATE_MODE == "off" (observer disabled) or no Score skips
+        were seen (nothing to compare). Pure — no I/O. Schema matches
+        create_agent_sheets.AGENT_SHEET_HEADERS["shadow_gate_events"].
+        """
+        mode = getattr(_config, "EXPLICIT_GATE_MODE", "shadow")
+        if mode == "off" or self._shadow_acc["score_skips"] == 0:
+            return None
+        tickers = self._shadow_acc["would_allow"]
+        if len(tickers) > SKIP_SUMMARY_TICKER_CAP:
+            shown = ",".join(tickers[:SKIP_SUMMARY_TICKER_CAP])
+            tickers_cell = f"{shown} +{len(tickers) - SKIP_SUMMARY_TICKER_CAP} more"
+        else:
+            tickers_cell = ",".join(tickers)
+        return [
+            self.run_start,
+            self.run_id,
+            mode,
+            self._shadow_acc["score_skips"],
+            len(tickers),
+            tickers_cell,
+        ]
+
+    def flush_shadow_gate_summary(self) -> int:
+        """Write ONE shadow-gate summary row per run to shadow_gate_events.
+
+        Quota-cheap (one batched safe_append_rows, dedup on run_id), mirrors
+        flush_skip_summary. Never raises — observability must not fail the run.
+        Returns rows written (0 on no-op/error).
+        """
+        row = self._build_shadow_gate_row()
+        if row is None:
+            return 0
+        try:
+            ws = sheets_manager.get_worksheet("shadow_gate_events")
+            if ws is None:
+                print("[DecisionLogger] shadow_gate_events worksheet unavailable", file=sys.stderr)
+                return 0
+            sheets_manager.safe_append_rows(ws, [row], dedup_col=1, dedup_vals={self.run_id})
+            self._shadow_acc = {"score_skips": 0, "would_allow": []}
+            return 1
+        except Exception as e:
+            print(f"[DecisionLogger] shadow_gate flush failed (non-fatal): {e}", file=sys.stderr)
+            return 0
+
     def _decision_to_row(self, decision: Decision) -> List[Any]:
         """Convert Decision to ordered list of 42 values matching Sheet."""
         row = []
@@ -260,6 +327,11 @@ class DecisionLogger:
                 self._accumulate_skip(decision)
             except Exception as e:
                 print(f"[DecisionLogger] skip accumulation failed: {e}", file=sys.stderr)
+            # TASK-128: aggregate the explicit-gate shadow divergence (guarded).
+            try:
+                self._accumulate_shadow_gate(decision)
+            except Exception as e:
+                print(f"[DecisionLogger] shadow_gate accumulation failed: {e}", file=sys.stderr)
             return decision.decision_id  # success — NOT an error
 
         # ENTER decisions: write to sheet (rare event, only when we actually enter)

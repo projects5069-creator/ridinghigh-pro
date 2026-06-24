@@ -753,6 +753,12 @@ def run() -> Dict[str, Any]:
     except Exception as e:
         logger.warning("skip_summary flush failed (non-fatal): %s", e)
 
+    # TASK-128: one shadow-gate summary row per run (explicit-gate vs live Score gate).
+    try:
+        summary["shadow_gate_rows"] = decision_logger.flush_shadow_gate_summary()
+    except Exception as e:
+        logger.warning("shadow_gate flush failed (non-fatal): %s", e)
+
     # Monitor positions
     try:
         monitor_stats = position_manager.monitor_all()

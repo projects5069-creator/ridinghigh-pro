@@ -321,6 +321,18 @@
       "mode": "exact",
       "source": "AGENT_SHEET_HEADERS"
     },
+    "shadow_gate_events": {
+      "columns": [
+        "Timestamp",
+        "RunID",
+        "ExplicitGateMode",
+        "ScoreSkips",
+        "WouldAllow",
+        "DivergenceTickers"
+      ],
+      "mode": "exact",
+      "source": "AGENT_SHEET_HEADERS"
+    },
     "skip_summary": {
       "columns": [
         "Timestamp",

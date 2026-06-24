@@ -48,6 +48,7 @@ AGENT_SHEET_NAMES = [
     "agent_scorecard",
     "weekly_summary",
     "skip_summary",
+    "shadow_gate_events",
 ]
 
 # Headers for each sheet (see AGENT_SHEET_HEADERS below for exact column counts)
@@ -213,6 +214,12 @@ AGENT_SHEET_HEADERS = {
         # Aggregation (5)
         "SkipReason", "Count", "Tickers", "ScoreMin", "ScoreMax",
     ],  # 7 columns
+    "shadow_gate_events": [
+        # TASK-128: per-run explicit-gate shadow summary (one row/run). ScoreSkips =
+        # live SKIPs on Score; WouldAllow = of those, how many the explicit-only gate
+        # would ALLOW (the Score-decoupling divergence to compare forward).
+        "Timestamp", "RunID", "ExplicitGateMode", "ScoreSkips", "WouldAllow", "DivergenceTickers",
+    ],  # 6 columns
 }
 
 
