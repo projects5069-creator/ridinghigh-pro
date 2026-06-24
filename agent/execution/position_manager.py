@@ -51,6 +51,66 @@ EXIT_MANUAL = "MANUAL"
 # EOD close time (Peru): 14:55 = 5 min before market close 15:00
 EOD_CLOSE_TIME = dtime(14, 55)
 
+# Quota-reduction cut (TASK-136 C1): route the per-minute paper_portfolio read
+# through the 60s-cached get_sheet_records (TASK-58) instead of an uncached
+# get_all_records, so it shares the cache account-state-builder already populated
+# in the same run. get_sheet_records returns ALL strings (sheets_manager:441-447);
+# the position pipeline expects EntryPrice/TP/SL as float and Quantity as int, so
+# _coerce_portfolio_record normalizes the cached records back to the gspread-
+# equivalent numeric types before they reach _get_open_positions.
+
+# Portfolio fields the position pipeline consumes numerically (float), plus the
+# single int field. Everything else (PositionID, Ticker, Status, IDs, dates) stays
+# a string — matching how the writer's PositionID match and Status checks read it.
+_PORTFOLIO_FLOAT_FIELDS = (
+    "EntryPrice", "ExitPrice", "TPPrice", "SLPrice", "CurrentPrice",
+    "UnrealizedPnL", "UnrealizedPnLPct", "RealizedPnL", "RealizedPnLPct",
+    "PositionSizeUSD",
+)
+_PORTFOLIO_INT_FIELDS = ("Quantity",)
+
+
+def _coerce_portfolio_record(rec: Dict[str, Any]) -> Dict[str, Any]:
+    """Normalize a string-valued paper_portfolio record (from the cached
+    get_sheet_records reader) to the gspread get_all_records()-equivalent types.
+
+    Numeric whitelist only: prices/PnL → float, Quantity → int (via float so a
+    display-formatted "100.0" does not crash int("100.0")). Blank ("") and
+    non-numeric values are preserved unchanged (a blank numeric cell is "" under
+    gspread too). Returns a NEW dict; the input is not mutated.
+    """
+    out = dict(rec)
+    for k in _PORTFOLIO_FLOAT_FIELDS:
+        v = out.get(k)
+        if isinstance(v, str) and v.strip() != "":
+            try:
+                out[k] = float(v)
+            except (ValueError, TypeError):
+                pass  # leave non-numeric strings as-is (matches gspread)
+    for k in _PORTFOLIO_INT_FIELDS:
+        v = out.get(k)
+        if isinstance(v, str) and v.strip() != "":
+            try:
+                out[k] = int(float(v))
+            except (ValueError, TypeError):
+                pass
+    return out
+
+
+def cached_portfolio_reader() -> List[Dict[str, Any]]:
+    """Read paper_portfolio via the 60s-cached get_sheet_records (TASK-58) and
+    coerce each record to the numeric types the position pipeline expects.
+
+    Wired into PositionManager(sheet_reader=...) by the orchestrator so the
+    per-minute position read shares the cache rather than making a duplicate
+    uncached API call (TASK-136 C1).
+    """
+    import sheets_manager
+    return [
+        _coerce_portfolio_record(r)
+        for r in sheets_manager.get_sheet_records("paper_portfolio")
+    ]
+
 
 class PositionManager:
     """

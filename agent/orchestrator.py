@@ -533,7 +533,7 @@ def run() -> Dict[str, Any]:
         from agent.logging.decision_logger import DecisionLogger
         from agent.execution.alpaca_broker import AlpacaBroker
         from agent.execution.order_manager import OrderManager
-        from agent.execution.position_manager import PositionManager
+        from agent.execution.position_manager import PositionManager, cached_portfolio_reader
         from agent.analytics.postmortem_engine import PostmortemEngine
         from data_provider import get_data_provider
         import sheets_manager
@@ -630,6 +630,9 @@ def run() -> Dict[str, Any]:
         position_manager = PositionManager(
             broker=broker,
             data_provider=data_provider,
+            sheet_reader=cached_portfolio_reader,  # TASK-136 C1: share the 60s
+            # paper_portfolio cache (account-state-builder already read it this
+            # run at :222) instead of a duplicate uncached get_all_records.
             sheet_writer=_portfolio_sheet_writer,
             postmortem_engine=postmortem_engine,
         )
