@@ -351,6 +351,14 @@ AGENT_SCORE_VERSION = "v2.6"
 DATA_SENTINEL_ENABLED = True
 SENTINEL_MODE = "shadow"  # "shadow" (log only) | "active" (block) | "off" — TASK-66 2026-06-03: active→shadow (counterfactual: would-block WR 64% vs 41%, n=36 single-regime; active was HALTing on false positives). Restore selectively later.
 
+# TASK-128 / Option-B shadow-first (resolves decision-gates 141+174): explicit
+# proven-filter gate (Score decoupled from entry). Mirrors SENTINEL_MODE semantics:
+#   "shadow" (default) — observe-only: log what the explicit-only gate WOULD decide,
+#                        never changes the live action. Score gate stays authoritative.
+#   "active"  — RESERVED for the future Stage-2 live flip (NOT wired yet — observes only).
+#   "off"     — full no-op (no observation computed).
+EXPLICIT_GATE_MODE = "shadow"
+
 # Per-check enable flags (Phase 2 + 3 use these)
 SENTINEL_CHECK_PRICE_FRESHNESS = True       # FINVIZ vs Alpaca delta
 SENTINEL_CHECK_COMPLETENESS = True          # 7 required metrics

@@ -39,6 +39,10 @@ from config import (
 from agent.trader.score_calculator import calculate_agent_score
 from agent.perception.data_quality import validate as validate_quality
 from agent.perception.tradability import check_tradability
+import config as _config  # TASK-128: read EXPLICIT_GATE_MODE at call time (test-monkeypatchable)
+import logging
+
+logger = logging.getLogger("agent.trader.decision_logic")
 
 PERU_TZ = pytz.timezone("America/Lima")
 
@@ -116,6 +120,11 @@ class Decision:
     # orchestrator can surface/count the failure instead of swallowing it.
     portfolio_written: bool = True
 
+    # TASK-128 shadow observer (runtime-only; NOT a decision_log column): what the
+    # explicit-only gate (Score decoupled) would decide, set by _observe_explicit_gate.
+    shadow_explicit_skip_reason: Optional[str] = None  # None = explicit gate would ALLOW
+    shadow_explicit_divergence: bool = False  # True only when live SKIPs on Score but explicit allows
+
 
 # ── Helper functions ──────────────────────────────────────────────────────────
 
@@ -136,6 +145,31 @@ def _calculate_position(price: float) -> Dict[str, Any]:
         "tp_price": round(tp_price, 4),
         "sl_price": round(sl_price, 4),
     }
+
+
+def _observe_explicit_gate(d: Decision, signal: Dict[str, Any], quality: Dict[str, Any],
+                           live_skip_reason: Optional[str]) -> None:
+    """Shadow observer (TASK-128): record what the explicit-only gate would decide.
+
+    Mirrors Sentinel shadow mode. Reads config.EXPLICIT_GATE_MODE at call time:
+      - "off" → full no-op (no computation, fields stay at their defaults).
+      - otherwise (shadow / active) → compute the explicit-only verdict via the
+        Step-1 seam (`include_score_gate=False`, no duplicate chain, §10) and attach it.
+    Divergence = the live logic SKIPs on Score but the explicit gate would ALLOW —
+    the only behaviour change Score-decoupling can produce. **Never sets d.action.**
+    active mode is RESERVED (the future Stage-2 live flip): it still only observes here.
+    """
+    mode = getattr(_config, "EXPLICIT_GATE_MODE", "shadow")
+    if mode == "off":
+        return
+    d.shadow_explicit_skip_reason = _check_filters(d, signal, quality, include_score_gate=False)
+    if (live_skip_reason and live_skip_reason.startswith("SCORE_TOO_LOW")
+            and d.shadow_explicit_skip_reason is None):
+        d.shadow_explicit_divergence = True
+        logger.info(
+            "[EXPLICIT-GATE SHADOW] %s would ALLOW — live SKIP (%s)",
+            d.ticker, live_skip_reason,
+        )
 
 
 # ── Main entry point ──────────────────────────────────────────────────────────
@@ -232,6 +266,10 @@ def evaluate_signal(
 
         # ── Decision tree ──
         skip_reason = _check_filters(d, signal, quality)
+
+        # TASK-128 shadow observer — measure what the explicit-only gate (Score
+        # decoupled) would decide. Observe-only: never alters the live action below.
+        _observe_explicit_gate(d, signal, quality, skip_reason)
 
         if skip_reason:
             d.action = "SKIP"
