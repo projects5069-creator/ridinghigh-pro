@@ -5,8 +5,8 @@ on:
     # 8 runs/day (open + 7 hourly), Mon–Fri, during US market window.
     # Market open (13:30 UTC) — most volatile hour, must not be skipped
     - cron: '30 13 * * 1-5'
-    # Top of every hour through close (14:00–20:00 UTC)
-    - cron: '0 14-20 * * 1-5'
+    # :23 each hour (offset off :00 to avoid GH hour-boundary 429 cluster — TASK-193)
+    - cron: '23 14-20 * * 1-5'
   workflow_dispatch:
 
 jobs:

@@ -436,6 +436,67 @@ def detect_outage(now: datetime) -> Optional[Dict[str, Any]]:
 # Main run
 # ════════════════════════════════════════════════════════════════════
 
+def make_portfolio_batch_writer(ws, hdr, pid_col):
+    """TASK-192 (C4): buffer per-position paper_portfolio cell updates, flush as ONE
+    batch_update. Returns (writer, flush).
+
+    writer(pos, updates) appends row-specific cells to a buffer — each cell targets
+    pos['_row_number'] (Bug #2 fix; PositionID fallback if absent), so a position's
+    value can never land in another's row. flush() issues a single
+    safe_batch_update(USER_ENTERED) for all buffered cells and clears the buffer,
+    so N monitored positions cost 1 API write instead of N. Returns the cell count
+    written (0 on empty/error). Never raises — observability/writes must not break the run.
+    """
+    from gspread.utils import rowcol_to_a1
+    buffer = []
+
+    def writer(pos, updates):
+        if not ws or not hdr:
+            logger.error("paper_portfolio not available for update")
+            return
+        target_row = pos.get("_row_number")
+        if not target_row:
+            # Fallback: match by PositionID (legacy path; logs a warning)
+            pos_id = pos.get("PositionID", "")
+            if not pos_id:
+                logger.warning("No _row_number and no PositionID in pos dict")
+                return
+            logger.warning("pos %s has no _row_number — falling back to PositionID match", pos_id)
+            try:
+                col_values = ws.col_values(pid_col + 1)
+                for row_idx, val in enumerate(col_values[1:], start=2):
+                    if val == pos_id:
+                        target_row = row_idx
+                        break
+            except Exception as e:
+                logger.error("Fallback row lookup failed for %s: %s", pos_id, e)
+                return
+            if not target_row:
+                logger.warning("PositionID %s not in sheet", pos_id)
+                return
+        for col_name, value in updates.items():
+            if col_name in hdr:
+                col_idx_1 = hdr.index(col_name) + 1
+                a1 = rowcol_to_a1(target_row, col_idx_1)
+                buffer.append({"range": a1, "values": [[value]]})
+
+    def flush():
+        if not buffer:
+            return 0
+        try:
+            import sheets_manager as _sm
+            _sm.safe_batch_update(ws, buffer, value_input_option="USER_ENTERED")
+            n = len(buffer)
+            buffer.clear()
+            return n
+        except Exception as e:
+            logger.error("Failed to flush portfolio batch (%d cells): %s", len(buffer), e)
+            buffer.clear()
+            return 0
+
+    return writer, flush
+
+
 def run() -> Dict[str, Any]:
     """
     Main orchestrator run. Called once per minute by GitHub Actions.
@@ -569,63 +630,16 @@ def run() -> Dict[str, Any]:
         # Wires position updates (CurrentPrice, UnrealizedPnL, TP/SL closes)
         # back into the paper_portfolio sheet. Cache header at init to
         # minimise quota usage. Uses gspread A1 helper for >26 cols safety.
-        from gspread.utils import rowcol_to_a1 as _rowcol_to_a1
         _portfolio_ws = sheets_manager.get_worksheet("paper_portfolio")
         _portfolio_hdr = _portfolio_ws.row_values(1) if _portfolio_ws else []
         _portfolio_pid_col = (
             _portfolio_hdr.index("PositionID") if "PositionID" in _portfolio_hdr else 0
         )
 
-        def _portfolio_sheet_writer(pos: dict, updates: dict):
-            """Write position updates to paper_portfolio.
-
-            Targets the exact row via pos["_row_number"] (set by
-            _get_open_positions). Matching by PositionID is unsafe — duplicate
-            IDs route updates to the wrong row (Bug #2 fix 2026-05-16).
-            """
-            if not _portfolio_ws or not _portfolio_hdr:
-                logger.error("paper_portfolio not available for update")
-                return
-            target_row = pos.get("_row_number")
-            if not target_row:
-                # Fallback: match by PositionID (legacy path; logs a warning)
-                pos_id = pos.get("PositionID", "")
-                if not pos_id:
-                    logger.warning("No _row_number and no PositionID in pos dict")
-                    return
-                logger.warning(
-                    "pos %s has no _row_number — falling back to PositionID match",
-                    pos_id,
-                )
-                try:
-                    col_values = _portfolio_ws.col_values(_portfolio_pid_col + 1)
-                    for row_idx, val in enumerate(col_values[1:], start=2):
-                        if val == pos_id:
-                            target_row = row_idx
-                            break
-                except Exception as e:
-                    logger.error("Fallback row lookup failed for %s: %s", pos_id, e)
-                    return
-                if not target_row:
-                    logger.warning("PositionID %s not in sheet", pos_id)
-                    return
-            try:
-                # Build batch update
-                cells = []
-                for col_name, value in updates.items():
-                    if col_name in _portfolio_hdr:
-                        col_idx_1 = _portfolio_hdr.index(col_name) + 1
-                        a1 = _rowcol_to_a1(target_row, col_idx_1)
-                        cells.append({"range": a1, "values": [[value]]})
-                if cells:
-                    import sheets_manager as _sm
-                    _sm.safe_batch_update(
-                        _portfolio_ws, cells, value_input_option="USER_ENTERED"
-                    )
-            except Exception as e:
-                logger.error(
-                    "Failed to update position %s: %s", pos.get("Ticker"), e
-                )
+        # TASK-192 (C4): buffer per-position writes, flush ONE batch_update per step.
+        _portfolio_writer, _portfolio_flush = make_portfolio_batch_writer(
+            _portfolio_ws, _portfolio_hdr, _portfolio_pid_col
+        )
 
         position_manager = PositionManager(
             broker=broker,
@@ -633,7 +647,7 @@ def run() -> Dict[str, Any]:
             sheet_reader=cached_portfolio_reader,  # TASK-136 C1: share the 60s
             # paper_portfolio cache (account-state-builder already read it this
             # run at :222) instead of a duplicate uncached get_all_records.
-            sheet_writer=_portfolio_sheet_writer,
+            sheet_writer=_portfolio_writer,
             postmortem_engine=postmortem_engine,
         )
     except Exception as e:
@@ -762,6 +776,7 @@ def run() -> Dict[str, Any]:
     # Monitor positions
     try:
         monitor_stats = position_manager.monitor_all()
+        summary["portfolio_write_cells"] = _portfolio_flush()  # TASK-192: 1 batch_update for all monitored
         summary["monitored"] = sum(monitor_stats.values()) if isinstance(monitor_stats, dict) else 0
         logger.info("Position monitor: %s", monitor_stats)
     except Exception as e:
@@ -772,6 +787,7 @@ def run() -> Dict[str, Any]:
     if is_eod_window(now):
         try:
             eod_stats = position_manager.eod_close_all()
+            _portfolio_flush()  # TASK-192: 1 batch_update for all EOD closes
             summary["eod_closed"] = sum(eod_stats.values()) if isinstance(eod_stats, dict) else 0
             logger.info("EOD close: %s", eod_stats)
         except Exception as e:
