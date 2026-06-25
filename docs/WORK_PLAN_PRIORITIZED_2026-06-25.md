@@ -58,7 +58,7 @@ VERDICT (מאומת מול backtest-expert, snapshot paper_portfolio 05-22, n=79
 3. **המנוף האמיתי (F2):** למדוד net-PnL תחת entry=D1_Close על snapshot קיים — זו ההשערה היחידה שעשויה להפוך edge. read-only, מזין 178/179.
 4. **data-integrity זול:** 63 (snapshot) · 65 (postmortems) · 182-legacy-row live-check.
 5. **חבילת-הכרעה לעמיחי (C):** 176(demote) + 186(park) + 153/154 + 92 + 170 + 66 + 194 — להגיש יחד.
-6. **חסומים (אין פעולה):** 179 (n>=150 ~אמצע-יולי) · 128/194 (>=2 שב' shadow) · 74->71 (הכרעת pull כבד) · 69 (n רב-שבועי).
+6. **חסומים (אין פעולה):** 179 (n>=150 ~אמצע-יולי) · 128/194 (>=2 שב' shadow) · 74->71 (הכרעת pull כבד) · 69 (n רב-שבועי) · 109 (RECONCILE_AUTO_REPAIR — חסום עד track-record נקי של 106; follow-up ל-108).
 7. **דחה (pre-register-only):** 68/72/75 ב-HYPOTHESES.md — נמוך עד execution-edge מוכח.
 
 ## הערות-אזהרה
