@@ -6,7 +6,7 @@ title: >-
 status: To Do
 assignee: []
 created_date: '2026-05-29 17:48'
-updated_date: '2026-06-04 16:28'
+updated_date: '2026-06-26 15:50'
 labels: []
 dependencies: []
 priority: medium
@@ -22,5 +22,5 @@ Root-cause fix for the Sheets 429 read-quota contention (follows TASK-55 phase-2
 ## Implementation Notes
 
 <!-- SECTION:NOTES:BEGIN -->
-4/6: Phase 1+2 (read reduction) VERIFIED live — run 26964724118 total=4 reads; per-tab 4 tabs x1 each = consolidation verified (per-tab counter, NOT per-function — no build_account_state attribution; timeline_live 4->2 is scanner target, needs scanner log). S2 deferred (no quota pressure). NOT closing: AC is separate SA for health_audit (GOOGLE_CREDENTIALS_JSON_HA) — not done. Open Q: does combined peak (agent+scanner+health_audit same minute) still hit 60? If not, separate SA may be unnecessary — measure peak before building.
+MEASURE-FIRST resolved 2026-06-26: peak DOES hit 60. Direct evidence — live 429s fired in production run 26964724118 (2026-06-04 16:22 market hours; agent_orchestrator + sentinel + news_detective). Per-tab read-counter under-counts (reported 4 reads in the same run that threw 429), so no clean peak number, but the 429 firing is stronger proof than any counter. Verdict: TASK-58 JUSTIFIED, not redundant. Build (2nd SA + share 18 sheets + GOOGLE_CREDENTIALS_JSON_HA secret + config switch) remains a separate scheduled step — infra change, not a quick fix.
 <!-- SECTION:NOTES:END -->
