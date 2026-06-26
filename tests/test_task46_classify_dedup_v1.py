@@ -14,6 +14,7 @@ import os
 import sys
 
 import pandas as pd
+import pytest
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -101,6 +102,8 @@ def _parity_for(path, basis):
 
 # ── #1 per-row parity + pinned win-rate over real fixtures ─────────────────
 def test_fixture_parity_and_pinned_winrate():
+    if not (os.path.exists(APR) and os.path.exists(MAY)):
+        pytest.skip("local research fixtures absent (Decision 4: research CSVs stay local-only)")
     for path in (APR, MAY):
         for basis in ("ScanPrice", "D1_Open"):
             _df, ref, ssot = _parity_for(path, basis)
