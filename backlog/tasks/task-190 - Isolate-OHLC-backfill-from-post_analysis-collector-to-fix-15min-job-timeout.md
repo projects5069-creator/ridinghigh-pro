@@ -1,10 +1,10 @@
 ---
 id: TASK-190
 title: Isolate OHLC backfill from post_analysis collector to fix 15min job-timeout
-status: In Progress
+status: Done
 assignee: []
 created_date: '2026-06-24 02:00'
-updated_date: '2026-06-24 02:06'
+updated_date: '2026-06-27 15:27'
 labels: []
 dependencies: []
 priority: high
@@ -25,3 +25,9 @@ Root-cause (docs/DIAGNOSIS_post_analysis_2026-06-23.md): the collect job in post
 - [ ] #4 PK updated per Anti-Drift Contract (collector loses backfill step + new backfill workflow documented in the workflows section) + version bump + changelog
 - [ ] #5 Rows that previously lacked OHLC get backfilled within a few days of the new workflow running (verify the ~87% TP10_Hit/MaxDrop% fill-rate gap closes - outcome, not just mechanism)
 <!-- AC:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+AC#5 verified 2026-06-27 (Sat) via dry-run re-check: REAL-GAP fillable=0. CLWT 2026-06-17 D5 (open as of 6/26) was filled by the Fri 6/26 16:45 Peru backfill run — end-to-end outcome confirmed (fillable 1->0 across scheduled run). May=0 stable. Only remainder: HSPT 2026-06-11 = known-unfillable (yfinance/Alpaca return empty, delisted/no-data) — documented, not a backfill failure. Gap closed for all fillable rows.
+<!-- SECTION:NOTES:END -->
