@@ -1,10 +1,10 @@
 ---
 id: TASK-200
 title: איסוף תוצאות D1-D5 גם למניות MxV<=-100% שלא עברו Score>=60
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-06-28 03:28'
-updated_date: '2026-06-28 04:01'
+updated_date: '2026-06-28 23:51'
 labels: []
 dependencies: []
 ordinal: 206000
