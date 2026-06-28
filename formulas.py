@@ -200,6 +200,10 @@ def calculate_float_pct(float_shares, shares_outstanding):
             return 0.0
         if float_shares is None or float_shares == 0:
             return 0.0
+        if float_shares > shares_outstanding:
+            # Float can never exceed shares outstanding — garbage provider input
+            # (TASK-201). Treat as invalid; 0.0 matches the None/0 convention above.
+            return 0.0
         return float(float_shares / shares_outstanding * 100)
     except (TypeError, ValueError, ZeroDivisionError):
         return 0.0
