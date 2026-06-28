@@ -6,7 +6,7 @@ title: >-
 status: To Do
 assignee: []
 created_date: '2026-05-31 02:32'
-updated_date: '2026-05-31 02:37'
+updated_date: '2026-06-28 01:54'
 labels:
   - critic
   - analysis
@@ -25,4 +25,6 @@ ordinal: 73000
 
 <!-- SECTION:NOTES:BEGIN -->
 מרחיב את TASK-48: TASK-48 מספק את שכבת הסיכום (build_weekly_row/monthly_row — WR/TotalPnL/AvgWin/AvgLoss, code-complete 30/5). TASK-73 מוסיף מעליו את שכבת הניתוח-עומק (Profit Factor/Expectancy/MaxDrawdown, קורלציות מדורגות, counterfactual סוכנים, דגלים אוטומטיים, דוח research). שני החלקים יחד = הניתוח האוטומטי המלא.
+
+אישור-חקירה (צ'אט 2026-06-27, READ-ONLY): ה-Critic חי ומחווט (3 workflows יומי/שבועי/חודשי + מייל + agent_scorecard) — לא להסיר. score_analytics=0 שורות = downstream של MetricsAtEntry-ריק (TASK-65), לא Critic מת.
 <!-- SECTION:NOTES:END -->
