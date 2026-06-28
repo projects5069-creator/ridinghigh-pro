@@ -42,7 +42,7 @@ from utils import (
     validate_stock_data,
     PERU_TZ,
 )
-from config import MIN_SCORE_DISPLAY
+from config import MIN_SCORE_DISPLAY, AGENT_MXV_MAX
 
 CATALYST_CATEGORIES = [
     "merger_acquisition", "fda_approval", "clinical_trial",
@@ -72,6 +72,23 @@ def score_cell_and_version(raw_score):
         return round(float(raw_score), 2), SCORE_VERSION
     except (TypeError, ValueError):
         return "", "v3_scoreless"
+
+
+def select_candidates(snapshots_df):
+    """TASK-200: the post_analysis collection universe = MxV <= AGENT_MXV_MAX
+    (the metric עמיחי trades), NOT Score >= MIN_SCORE.
+
+    Rationale: in the scoreless era (SCORE_WRITE_FROZEN) daily_snapshots.Score is
+    blank, so a Score>=60 filter collects ~nothing; MxV is always present. MxV is
+    coerced numerically (sheet values arrive as strings).
+
+    CRITICAL (feeds TASK-128): selection is MxV-ONLY. The supporting metrics
+    TPD / REL_VOL / Float% are kept as columns but MUST NOT filter here — adding a
+    sub-condition would bias 128's validation set."""
+    if snapshots_df.empty or "MxV" not in snapshots_df.columns:
+        return snapshots_df.iloc[0:0].copy()
+    mxv = pd.to_numeric(snapshots_df["MxV"], errors="coerce")
+    return snapshots_df[mxv <= AGENT_MXV_MAX].copy()
 
 
 # ── Catalyst analysis (unchanged from v4) ────────────────────────────────────
@@ -426,10 +443,10 @@ def run(target_date: str = None):
         today_rows = snapshots_df[snapshots_df.get("Date", pd.Series(dtype=str)) == today_str]
         print(f"[Collector] Today ({today_str}) rows available: {len(today_rows)}")
 
-    candidates = snapshots_df[snapshots_df["Score"] >= MIN_SCORE].copy()
-    print(f"[Collector] {len(candidates)} stocks with score >= {MIN_SCORE}")
+    candidates = select_candidates(snapshots_df)   # TASK-200: MxV-based universe (was Score>=MIN_SCORE)
+    print(f"[Collector] {len(candidates)} stocks with MxV <= {AGENT_MXV_MAX} (TASK-200 universe)")
     if candidates.empty:
-        print(f"[Collector] ⚠️ No candidates found — check that daily_snapshots has Score>={MIN_SCORE_DISPLAY} stocks")
+        print(f"[Collector] ⚠️ No candidates found — check that daily_snapshots has MxV<={AGENT_MXV_MAX} stocks")
         return
 
     # Load timeline_live for stats
