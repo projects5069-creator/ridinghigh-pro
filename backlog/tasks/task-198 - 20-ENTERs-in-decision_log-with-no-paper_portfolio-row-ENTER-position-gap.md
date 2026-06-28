@@ -4,6 +4,7 @@ title: 20 ENTERs in decision_log with no paper_portfolio row (ENTER->position ga
 status: To Do
 assignee: []
 created_date: '2026-06-27 20:42'
+updated_date: '2026-06-28 00:13'
 labels: []
 dependencies: []
 ordinal: 204000
@@ -21,3 +22,9 @@ ordinal: 204000
 - [ ] #2 להחליט אם זה באג (ENTER לא הפך לפוזיציה) או התנהגות-תקינה (re-entry blocked)
 - [ ] #3 read-only recon; אפס תיקון עד הכרעה
 <!-- AC:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+צ'אט-recon 2026-06-27 (READ-ONLY): היפותזה שורש משותף עם MetricsAtEntry-ריק (TASK-65) — ה-join postmortem<->decision_log עובר ב-_read_decision(position_id) (linear-scan, מחזיר {} ב-miss). 20 ה-ENTER-ללא-pp עשויים לחלוק את אותו מנגנון (PositionID!=DecisionID או drop בכתיבה). לחקור את ה-lookup כחשוד יחיד. אין מסקנת-edge (הופרך, PK v3.63).
+<!-- SECTION:NOTES:END -->
