@@ -4,6 +4,7 @@ title: מחקר כוח-חיזוי per-מדד מול עסקאות רווח/הפס
 status: To Do
 assignee: []
 created_date: '2026-06-28 00:11'
+updated_date: '2026-06-28 03:28'
 labels: []
 dependencies: []
 ordinal: 205000
@@ -22,3 +23,14 @@ ordinal: 205000
 - [ ] #3 READ-ONLY; אסור לגעת בטכניקת הכניסה (MxV<=-100%) או ביציאה הדינמית
 - [ ] #4 תלות: שם התיקייה החודשית יסופק ע"י עמיחי לפני התחלה
 <!-- AC:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+התקדמות (צ'אט 2026-06-27, READ-ONLY, raw דפוס-לילה night=(ScanPrice-D1_Open)/ScanPrice, post_analysis CLEAN n=161, ללא Borrow/Score): דירוג 7 המדדים מול תוצאת-לילה —
+(1) MxV = אות-בסיס חזק+יציב (Spearman -0.315; MxV<=-100% → 77% ירדו, night חציון +12.71% מול 58%/+1.87% ב->-100%; 3/3 חודשים).
+(2) TPD (מרחק close מ-(H+L+C)/3) = אות מותנה אורתוגונלי, התוספת הגדולה בתוך MxV<=-100% (Δ+11.80pp; חצי-עליון night +20.2%, maxrise שלילי). standalone~0.
+(3) ScanChange% = השני standalone (Spearman +0.240) והשני בתוספת (Δ+8.14pp), אך חופף ל-MxV (גודל-פאמפ). הערה: נדחה בטעות קודם עקב שם-עמודה (ScanChange מול ScanChange%) — תוקן, מלא 88-100%.
+(4) RunUp = חופף ל-MxV (Δ-2.35pp redundant). (5) REL_VOL = תוספת קלה לא-יציבה (Δ+3.78pp). (6) RSI = חלש+הפוך (RSI נמוך עדיף, overbought 91-99 הגרוע; מנוגד למשקל RSI>=90=מלא בנוסחת Score — אישור נוסף למחיקת Score). (7) ATRX = רעש (Δ+0.18pp).
+caveats: raw; Score>=60 (מגבלת-מבנה → TASK-200); ריכוז-יוני (33/50); רבעונים n~25/15 רועשים; אימות רב-חודשי ~2026-07-27. שלב הבא = IB ground-truth (האוכלוסייה האמיתית) כשתסופק התיקייה החודשית.
+<!-- SECTION:NOTES:END -->
