@@ -1,9 +1,10 @@
 ---
 id: TASK-201
 title: ערך Float% מושחת ב-post_analysis — FloatShares נכתב בשדה האחוז
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-06-28 05:27'
+updated_date: '2026-06-28 14:40'
 labels: []
 dependencies: []
 ordinal: 207000
