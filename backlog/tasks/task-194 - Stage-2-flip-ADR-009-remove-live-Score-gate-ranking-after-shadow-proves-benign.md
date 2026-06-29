@@ -6,7 +6,7 @@ title: >-
 status: To Do
 assignee: []
 created_date: '2026-06-24 16:10'
-updated_date: '2026-06-29 21:46'
+updated_date: '2026-06-29 23:30'
 labels:
   - agent
   - score
@@ -24,9 +24,9 @@ ADR-009 Stage 2 driver-removal — the LIVE flip deferred by the 141+174 ruling 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
 - [x] #1 decision_logic live path (evaluate_signal) honors EXPLICIT_GATE_MODE: shadow=Score gates byte-identical, active=Filter 1 skipped + filters 2-11 decide (TDD)
-- [ ] #2 flip AND revert = single EXPLICIT_GATE_MODE config value; zero code change to toggle
+- [x] #2 flip AND revert = single EXPLICIT_GATE_MODE config value; zero code change to toggle
 - [x] #3 stage-1 lands flag=shadow -> zero live-behavior change verified (shadow test byte-identical)
-- [ ] #4 flip to active blocked until >=2 weeks multi-regime shadow_gate_events show divergence benign by BOTH frequency AND would-enter loss-profile (no catastrophic-loss spike vs current)
-- [ ] #5 zero touch to scanner-ranking (S2) and calculate_score retire (S3) - separate tasks
-- [ ] #6 PK + ADR-009 updated with decision + reversible-flag mechanism
+- [ ] #4 flip executed 2026-06-29 ahead of shadow-accumulation (owner decision, DRY_RUN/reversible); monitoring now POST-flip: track active-mode entries + outcomes vs prior Score-gated; revert=EXPLICIT_GATE_MODE shadow
+- [x] #5 zero touch to scanner-ranking (S2) and calculate_score retire (S3) - separate tasks (208/209)
+- [x] #6 PK + ADR-009 updated with decision + reversible-flag mechanism
 <!-- AC:END -->
