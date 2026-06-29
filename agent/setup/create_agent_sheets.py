@@ -283,11 +283,19 @@ def create_agent_sheets(month_key: str, dry_run: bool = False):
         return config[month_key]
 
     if dry_run:
-        print(f"\n[DRY-RUN] Would create the following sheets in folder {month_key}:")
-        for name in AGENT_SHEET_NAMES:
+        # AC#2 (TASK-207): mirror the live run's per-sheet config-skip so the preview
+        # reflects what would actually be created. Offline — the Drive-by-name fallback
+        # the live run also performs needs OAuth, so it is noted but not done here.
+        month_cfg = sheets_manager._load_config().get(month_key, {})
+        missing = [n for n in AGENT_SHEET_NAMES if n not in month_cfg]
+        already = [n for n in AGENT_SHEET_NAMES if n in month_cfg]
+        print(f"\n[DRY-RUN] {len(already)}/{len(AGENT_SHEET_NAMES)} already in config "
+              f"(skipped); would create {len(missing)} sheet(s) in folder {month_key} "
+              f"(Drive-by-name fallback not checked offline):")
+        for name in missing:
             col_count = len(AGENT_SHEET_HEADERS[name])
             print(f"   RH-{month_key}-{name} ({col_count} columns)")
-        print(f"\n[DRY-RUN] Would update sheets_config.json with {len(AGENT_SHEET_NAMES)} new IDs")
+        print(f"\n[DRY-RUN] Would update sheets_config.json with {len(missing)} new IDs")
         print(f"[DRY-RUN] No changes made.")
         return None
 
