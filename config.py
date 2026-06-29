@@ -358,6 +358,10 @@ SENTINEL_MODE = "shadow"  # "shadow" (log only) | "active" (block) | "off" — T
 #   "active"  — RESERVED for the future Stage-2 live flip (NOT wired yet — observes only).
 #   "off"     — full no-op (no observation computed).
 EXPLICIT_GATE_MODE = "shadow"
+# TASK-128 T-B: MxV<=AGENT_MXV_MAX AND price>=AGENT_MIN_SCANPRICE_USD entry-to-tracking
+# shadow observer. "shadow" = observe-only (never alters d.action); "off" = no-op.
+# Promotion to active is TASK-194 (~2026-07-27 multi-regime), never auto.
+MXV_PRICE_GATE_MODE = "shadow"
 
 # Per-check enable flags (Phase 2 + 3 use these)
 SENTINEL_CHECK_PRICE_FRESHNESS = True       # FINVIZ vs Alpaca delta

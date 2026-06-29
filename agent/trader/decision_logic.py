@@ -124,6 +124,9 @@ class Decision:
     # explicit-only gate (Score decoupled) would decide, set by _observe_explicit_gate.
     shadow_explicit_skip_reason: Optional[str] = None  # None = explicit gate would ALLOW
     shadow_explicit_divergence: bool = False  # True only when live SKIPs on Score but explicit allows
+    # TASK-128 T-B shadow observer (runtime-only): would the MxV<=-100 AND price>=$3
+    # entry-to-tracking gate enter? Set by _observe_mxv_price_gate; never affects d.action.
+    shadow_mxv_price_enter: bool = False
 
 
 # ── Helper functions ──────────────────────────────────────────────────────────
@@ -170,6 +173,30 @@ def _observe_explicit_gate(d: Decision, signal: Dict[str, Any], quality: Dict[st
             "[EXPLICIT-GATE SHADOW] %s would ALLOW — live SKIP (%s)",
             d.ticker, live_skip_reason,
         )
+
+
+def mxv_price_would_enter(mxv, price) -> bool:
+    """TASK-128 T-B: the ONLY entry-to-tracking condition עמיחי approved —
+    MxV <= AGENT_MXV_MAX (-100) AND price >= AGENT_MIN_SCANPRICE_USD ($3). Pure predicate,
+    no side effects. Used by the SEPARATE shadow observer below; NEVER part of
+    _check_filters (the live gate), so it cannot change live behaviour."""
+    if mxv is None or price is None:
+        return False
+    try:
+        return float(mxv) <= AGENT_MXV_MAX and float(price) >= AGENT_MIN_SCANPRICE_USD
+    except (TypeError, ValueError):
+        return False
+
+
+def _observe_mxv_price_gate(d: Decision, signal: Dict[str, Any]) -> None:
+    """Shadow observer (TASK-128 T-B): record whether the MxV+price entry-to-tracking gate
+    would enter. Mirrors _observe_explicit_gate — runtime-only, reads
+    config.MXV_PRICE_GATE_MODE at call time, **never sets d.action**, separate from
+    _check_filters. "off" -> no-op. Promotion to active is TASK-194, not here."""
+    mode = getattr(_config, "MXV_PRICE_GATE_MODE", "shadow")
+    if mode == "off":
+        return
+    d.shadow_mxv_price_enter = mxv_price_would_enter(d.mxv, d.price)
 
 
 # ── Main entry point ──────────────────────────────────────────────────────────
@@ -270,6 +297,9 @@ def evaluate_signal(
         # TASK-128 shadow observer — measure what the explicit-only gate (Score
         # decoupled) would decide. Observe-only: never alters the live action below.
         _observe_explicit_gate(d, signal, quality, skip_reason)
+        # TASK-128 T-B: separate shadow observer for the MxV+price entry-to-tracking gate.
+        # Observe-only; never alters the live action below.
+        _observe_mxv_price_gate(d, signal)
 
         if skip_reason:
             d.action = "SKIP"
