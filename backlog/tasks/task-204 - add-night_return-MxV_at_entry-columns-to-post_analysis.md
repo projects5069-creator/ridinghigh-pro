@@ -1,9 +1,10 @@
 ---
 id: TASK-204
 title: add night_return + MxV_at_entry columns to post_analysis
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-06-29 04:15'
+updated_date: '2026-06-29 04:58'
 labels: []
 dependencies: []
 ordinal: 210000
