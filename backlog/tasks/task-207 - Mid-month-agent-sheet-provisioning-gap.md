@@ -4,6 +4,7 @@ title: Mid-month agent sheet provisioning gap
 status: To Do
 assignee: []
 created_date: '2026-06-29 13:44'
+updated_date: '2026-06-29 18:32'
 labels:
   - infra
 dependencies: []
@@ -20,5 +21,5 @@ _ensure_month() in sheets_manager iterates only SHEET_NAMES (legacy core), not A
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
 - [ ] #1 An agent tab added to AGENT_SHEET_NAMES gets provisioned for the current already-existing month — either by extending _ensure_month to cover AGENT_SHEET_NAMES, or via a documented one-shot procedure. Approach decided in-task after recon.
-- [ ] #2 create_agent_sheets --dry-run performs the same per-sheet idempotency check as the live run, so its output reflects what the live run will actually create (no false N-would-create for tabs already in sheets_config).
+- [x] #2 create_agent_sheets --dry-run performs the same per-sheet idempotency check as the live run, so its output reflects what the live run will actually create (no false N-would-create for tabs already in sheets_config).
 <!-- AC:END -->
