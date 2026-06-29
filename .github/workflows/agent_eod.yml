@@ -9,6 +9,8 @@ jobs:
   run-eod:
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    permissions:
+      contents: write   # TASK-207: self-heal step commits sheets_config.json
     steps:
       - name: Checkout code
         uses: actions/checkout@v5
@@ -27,3 +29,19 @@ jobs:
           ALPACA_PAPER: 'true'
           DATA_PROVIDER: alpaca
         run: python -m agent.orchestrator_eod
+      - name: Self-heal — provision current-month agent sheets (idempotent, TASK-207)
+        env:
+          GOOGLE_OAUTH_TOKEN_JSON: ${{ secrets.GOOGLE_OAUTH_TOKEN_JSON }}
+          GOOGLE_CREDENTIALS_JSON: ${{ secrets.GOOGLE_CREDENTIALS_JSON }}
+        run: python -m agent.setup.create_agent_sheets
+      - name: Commit and push sheets_config (only if a sheet was provisioned)
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add sheets_config.json
+          if git diff --staged --quiet; then
+            echo "No changes to config"
+          else
+            git commit -m "Auto: self-heal current-month agent sheets (TASK-207)"
+            git push
+          fi
