@@ -91,6 +91,20 @@ def select_candidates(snapshots_df):
     return snapshots_df[mxv <= AGENT_MXV_MAX].copy()
 
 
+def clamp_float_pct(val):
+    """TASK-203: Float% is a percentage and must lie in (0, 100]. The collector copies
+    Float% as-is from daily_snapshots, so a value computed pre-TASK-201 from garbage
+    float_shares (e.g. 42,473,000) would propagate. Null any out-of-range/NaN/None
+    value instead of recording it. Applied ONLY to Float% — other metric_fields untouched."""
+    try:
+        v = float(val)
+    except (TypeError, ValueError):
+        return None
+    if v != v or not (0 < v <= 100):   # v!=v catches NaN
+        return None
+    return v
+
+
 # ── Catalyst analysis (unchanged from v4) ────────────────────────────────────
 def fetch_finviz_news(ticker: str, scan_date: str) -> list:
     import urllib.request, re
@@ -497,6 +511,8 @@ def run(target_date: str = None):
                          "PriceToHigh", "PriceTo52WHigh", "Float%"]
         metrics = {f: round(pd.to_numeric(row.get(f, None), errors="coerce"), 2)
                    for f in metric_fields}
+        # TASK-203: guard Float% only — null out-of-range/corrupt copies (others untouched)
+        metrics["Float%"] = clamp_float_pct(metrics.get("Float%"))
 
         # ── Raw inputs for metric validation & future regression ──────────────
         raw_inputs = {}
