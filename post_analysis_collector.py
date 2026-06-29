@@ -33,6 +33,7 @@ from formulas import (
     calculate_rel_vol,
     calculate_score,
     flag_interday_artifact_chain,
+    night_return_from_gap,
 )
 from utils import (
     is_trading_day,
@@ -614,6 +615,10 @@ def run(target_date: str = None):
             **catalyst_data,
             **{k: round(v, 2) if isinstance(v, float) else v for k, v in ohlc.items()},
             **{k: round(v, 2) if isinstance(v, float) else v for k, v in stats.items()},
+            # TASK-204: night_return = -D1_Gap% (overnight drop, short-profit positive).
+            # SSoT: derived from the existing D1_Gap% (None stays None). MxV_at_entry skipped —
+            # the existing MxV column already holds the scan-time (entry) MxV.
+            "night_return": night_return_from_gap(stats.get("D1_Gap%")),
             **d0_fund,
             **tl_stats,
             "audit_flag": audit_flag,

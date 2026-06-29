@@ -327,6 +327,18 @@ def calculate_d1_gap(d1_open, scan_price):
         return 0.0
 
 
+def night_return_from_gap(d1_gap):
+    """night_return = the overnight DROP from scan to next open, in trader convention
+    where a favorable short move is POSITIVE. It is exactly -D1_Gap% (TASK-204).
+
+    SSoT (§10): DERIVED from the single overnight calculator (calculate_d1_gap) via a
+    sign flip — NOT a second formula. Callers pass the already-computed D1_Gap%.
+    None (D1 not yet available) stays None — distinct from a real 0 move."""
+    if d1_gap is None or d1_gap != d1_gap:   # None or NaN
+        return None
+    return -float(d1_gap)
+
+
 def is_interday_artifact(prev_close, next_close, threshold_pct=None):
     """Flag a suspected split/halt artifact from a close-to-close inter-day move (TASK-180).
 
