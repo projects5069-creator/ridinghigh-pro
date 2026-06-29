@@ -1,9 +1,10 @@
 ---
 id: TASK-203
 title: 'fix Float% contamination: guard at collector copy-path + clean corrupted rows'
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-06-29 04:14'
+updated_date: '2026-06-29 04:38'
 labels: []
 dependencies: []
 ordinal: 209000
