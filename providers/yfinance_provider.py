@@ -301,6 +301,15 @@ class YFinanceFundamentalsProvider(FundamentalsProvider):
             "sector": None,
             "industry": None,
             "ipo_epoch": None,
+            # TASK-206: structural/short + ownership + fundamentals
+            "short_float": None,
+            "days_to_cover": None,
+            "inst_own": None,
+            "insider_own": None,
+            "beta": None,
+            "roe": None,
+            "profit_margin": None,
+            "pe": None,
         }
         try:
             info = self._yf.Ticker(ticker).info
@@ -312,6 +321,15 @@ class YFinanceFundamentalsProvider(FundamentalsProvider):
                 "sector":             info.get("sector"),
                 "industry":           info.get("industry"),
                 "ipo_epoch":          _safe_int(info.get("firstTradeDateMilliseconds") / 1000) if info.get("firstTradeDateMilliseconds") else None,
+                # TASK-206: structural/short + ownership + fundamentals (floats; 0.0 preserved)
+                "short_float":        _safe_float(info.get("shortPercentOfFloat")),
+                "days_to_cover":      _safe_float(info.get("shortRatio")),
+                "inst_own":           _safe_float(info.get("heldPercentInstitutions")),
+                "insider_own":        _safe_float(info.get("heldPercentInsiders")),
+                "beta":               _safe_float(info.get("beta")),
+                "roe":                _safe_float(info.get("returnOnEquity")),
+                "profit_margin":      _safe_float(info.get("profitMargins")),
+                "pe":                 _safe_float(info.get("trailingPE")),
             }
         except Exception as e:
             logger.warning(f"yfinance fundamentals({ticker}) failed: {e}")
@@ -321,5 +339,13 @@ class YFinanceFundamentalsProvider(FundamentalsProvider):
 def _safe_int(v) -> Optional[int]:
     try:
         return int(v) if v is not None and v != 0 else None
+    except (TypeError, ValueError):
+        return None
+
+
+def _safe_float(v) -> Optional[float]:
+    # TASK-206: 0.0 is meaningful (0% short/inst) — preserve it, unlike _safe_int.
+    try:
+        return float(v) if v is not None else None
     except (TypeError, ValueError):
         return None
