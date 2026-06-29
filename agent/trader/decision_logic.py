@@ -292,7 +292,11 @@ def evaluate_signal(
         d.reentries_used_today = _entries_by_ticker.get(signal.get("ticker", ""), 0)
 
         # ── Decision tree ──
-        skip_reason = _check_filters(d, signal, quality)
+        # TASK-194 Stage-1: Score gate (Filter 1) is honored UNLESS EXPLICIT_GATE_MODE=="active"
+        # (the Score-decouple flip). shadow/off/any-other -> Score still gates (safe default).
+        # Reversible: flip/revert = the EXPLICIT_GATE_MODE config value alone, no code change.
+        _score_gate_on = getattr(_config, "EXPLICIT_GATE_MODE", "shadow") != "active"
+        skip_reason = _check_filters(d, signal, quality, include_score_gate=_score_gate_on)
 
         # TASK-128 shadow observer — measure what the explicit-only gate (Score
         # decoupled) would decide. Observe-only: never alters the live action below.
