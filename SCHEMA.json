@@ -328,7 +328,9 @@
         "ExplicitGateMode",
         "ScoreSkips",
         "WouldAllow",
-        "DivergenceTickers"
+        "DivergenceTickers",
+        "MxVPriceWouldEnter",
+        "MxVPriceTickers"
       ],
       "mode": "exact",
       "source": "AGENT_SHEET_HEADERS"

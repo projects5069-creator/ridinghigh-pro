@@ -218,8 +218,11 @@ AGENT_SHEET_HEADERS = {
         # TASK-128: per-run explicit-gate shadow summary (one row/run). ScoreSkips =
         # live SKIPs on Score; WouldAllow = of those, how many the explicit-only gate
         # would ALLOW (the Score-decoupling divergence to compare forward).
+        # TASK-128 C2-A: MxVPriceWouldEnter = decisions the MxV<=-100 AND price>=$3
+        # entry-to-tracking gate would enter (shadow); MxVPriceTickers = capped list.
         "Timestamp", "RunID", "ExplicitGateMode", "ScoreSkips", "WouldAllow", "DivergenceTickers",
-    ],  # 6 columns
+        "MxVPriceWouldEnter", "MxVPriceTickers",
+    ],  # 8 columns
 }
 
 

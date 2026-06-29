@@ -136,7 +136,7 @@ class DecisionLogger:
         self._skip_acc = {}  # reason_key -> {count, tickers[], score_min, score_max}
         # TASK-128: in-run shadow-gate aggregation (one summary row per run). Tracks,
         # of the live SCORE_TOO_LOW skips, how many the explicit-only gate would ALLOW.
-        self._shadow_acc = {"score_skips": 0, "would_allow": []}
+        self._shadow_acc = {"score_skips": 0, "would_allow": [], "mxv_price_enter": []}
 
     def _accumulate_skip(self, decision: Decision) -> None:
         """Add one SKIP decision to the in-run accumulator (never raises)."""
@@ -218,6 +218,10 @@ class DecisionLogger:
         would ALLOW are the divergences (decision.shadow_explicit_divergence, set by
         decision_logic._observe_explicit_gate). Non-Score skips are ignored.
         """
+        # TASK-128 C2-A: MxV+price would-enter is counted for EVERY decision (set by
+        # decision_logic._observe_mxv_price_gate), independent of the Score-skip path below.
+        if getattr(decision, "shadow_mxv_price_enter", False):
+            self._shadow_acc["mxv_price_enter"].append(getattr(decision, "ticker", "?") or "?")
         reason = getattr(decision, "skip_reason", "") or ""
         if not reason.startswith("SCORE_TOO_LOW"):
             return
@@ -233,21 +237,28 @@ class DecisionLogger:
         create_agent_sheets.AGENT_SHEET_HEADERS["shadow_gate_events"].
         """
         mode = getattr(_config, "EXPLICIT_GATE_MODE", "shadow")
-        if mode == "off" or self._shadow_acc["score_skips"] == 0:
+        mxv_tickers = self._shadow_acc["mxv_price_enter"]
+        # Write the row if EITHER observer has something to report (TASK-128 C2-A):
+        # the Score-decouple part (existing) OR the MxV+price would-enter part (new).
+        score_part_empty = (mode == "off" or self._shadow_acc["score_skips"] == 0)
+        if score_part_empty and len(mxv_tickers) == 0:
             return None
+
+        def _cap(ts):
+            if len(ts) > SKIP_SUMMARY_TICKER_CAP:
+                return f"{','.join(ts[:SKIP_SUMMARY_TICKER_CAP])} +{len(ts) - SKIP_SUMMARY_TICKER_CAP} more"
+            return ",".join(ts)
+
         tickers = self._shadow_acc["would_allow"]
-        if len(tickers) > SKIP_SUMMARY_TICKER_CAP:
-            shown = ",".join(tickers[:SKIP_SUMMARY_TICKER_CAP])
-            tickers_cell = f"{shown} +{len(tickers) - SKIP_SUMMARY_TICKER_CAP} more"
-        else:
-            tickers_cell = ",".join(tickers)
         return [
             self.run_start,
             self.run_id,
             mode,
             self._shadow_acc["score_skips"],
             len(tickers),
-            tickers_cell,
+            _cap(tickers),
+            len(mxv_tickers),
+            _cap(mxv_tickers),
         ]
 
     def flush_shadow_gate_summary(self) -> int:
@@ -266,7 +277,7 @@ class DecisionLogger:
                 print("[DecisionLogger] shadow_gate_events worksheet unavailable", file=sys.stderr)
                 return 0
             sheets_manager.safe_append_rows(ws, [row], dedup_col=1, dedup_vals={self.run_id})
-            self._shadow_acc = {"score_skips": 0, "would_allow": []}
+            self._shadow_acc = {"score_skips": 0, "would_allow": [], "mxv_price_enter": []}
             return 1
         except Exception as e:
             print(f"[DecisionLogger] shadow_gate flush failed (non-fatal): {e}", file=sys.stderr)
