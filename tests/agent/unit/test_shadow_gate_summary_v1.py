@@ -52,7 +52,8 @@ def test_accumulate_ignores_non_score_skips():
     assert lg._shadow_acc["would_allow"] == []
 
 
-def test_build_row_shape_and_values():
+def test_build_row_shape_and_values(monkeypatch):
+    monkeypatch.setattr(dl._config, "EXPLICIT_GATE_MODE", "shadow")  # TASK-194: pin mode (global default now "active")
     lg = _logger()
     lg._accumulate_shadow_gate(_score_skip("AAA", True))
     lg._accumulate_shadow_gate(_score_skip("BBB", False))

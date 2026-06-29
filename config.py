@@ -355,9 +355,11 @@ SENTINEL_MODE = "shadow"  # "shadow" (log only) | "active" (block) | "off" — T
 # proven-filter gate (Score decoupled from entry). Mirrors SENTINEL_MODE semantics:
 #   "shadow" (default) — observe-only: log what the explicit-only gate WOULD decide,
 #                        never changes the live action. Score gate stays authoritative.
-#   "active"  — RESERVED for the future Stage-2 live flip (NOT wired yet — observes only).
+#   "active"  — Stage-2 live flip: Score gate (Filter 1) DROPPED, MxV (Filter 2) is the live driver.
 #   "off"     — full no-op (no observation computed).
-EXPLICIT_GATE_MODE = "shadow"
+# TASK-194 stage-2 flip 2026-06-29: Score gate OFF, MxV<=-100 is live entry driver.
+#   revert = set back to "shadow". Flipped without >=2wk shadow-accumulation (owner decision, DRY_RUN).
+EXPLICIT_GATE_MODE = "active"
 # TASK-128 T-B: MxV<=AGENT_MXV_MAX AND price>=AGENT_MIN_SCANPRICE_USD entry-to-tracking
 # shadow observer. "shadow" = observe-only (never alters d.action); "off" = no-op.
 # Promotion to active is TASK-194 (~2026-07-27 multi-regime), never auto.
