@@ -310,6 +310,7 @@ class YFinanceFundamentalsProvider(FundamentalsProvider):
             "roe": None,
             "profit_margin": None,
             "pe": None,
+            "raw": None,
         }
         try:
             info = self._yf.Ticker(ticker).info
@@ -330,6 +331,8 @@ class YFinanceFundamentalsProvider(FundamentalsProvider):
                 "roe":                _safe_float(info.get("returnOnEquity")),
                 "profit_margin":      _safe_float(info.get("profitMargins")),
                 "pe":                 _safe_float(info.get("trailingPE")),
+                # TASK-206 (beta): full .info catch-all (copy, not ref — no leaked mutation)
+                "raw":                dict(info),
             }
         except Exception as e:
             logger.warning(f"yfinance fundamentals({ticker}) failed: {e}")

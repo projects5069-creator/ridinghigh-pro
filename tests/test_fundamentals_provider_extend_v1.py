@@ -56,3 +56,23 @@ def test_empty_fallback_carries_new_fields():
     for k in NEW_KEYS:
         assert k in out, f"new field missing from fallback dict: {k}"
         assert out[k] is None, f"fallback {k} should be None, got {out[k]}"
+
+
+def test_get_fundamentals_carries_raw_info():
+    """TASK-206 (beta): raw key must carry the FULL .info dict for the JSON catch-all."""
+    prov = Provider()
+    prov._yf = _FakeYF(FAKE_INFO)
+    out = prov.get_fundamentals("FAKE")
+    assert "raw" in out, "raw (full .info) missing from success dict"
+    assert isinstance(out["raw"], dict)
+    # raw must contain fields we did NOT promote to columns (the whole point of catch-all)
+    assert out["raw"].get("shortPercentOfFloat") == 0.21
+    assert out["raw"].get("sector") == "Technology"
+
+
+def test_empty_fallback_raw_is_none():
+    prov = Provider()
+    prov._yf = _ExplodingYF()
+    out = prov.get_fundamentals("FAKE")
+    assert "raw" in out, "raw missing from fallback dict"
+    assert out["raw"] is None
