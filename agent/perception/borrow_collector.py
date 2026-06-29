@@ -25,19 +25,22 @@ import pandas as pd
 
 import sheets_manager
 import utils
+from config import AGENT_MXV_MAX
 
 SOURCE = "ALPACA"
 
 
-def get_scanned_universe(snapshots_df, min_score):
-    """Set of tickers in snapshots_df with Score >= min_score (the scanned
-    universe). Pure, no I/O. Empty set on empty df or missing Ticker/Score cols."""
+def get_scanned_universe(snapshots_df, mxv_max=AGENT_MXV_MAX):
+    """Set of tickers in snapshots_df with MxV <= mxv_max (the scanned universe).
+    TASK-208-B: switched from Score>=min_score — in the scoreless era (SCORE_WRITE_FROZEN)
+    daily_snapshots.Score is blank "" -> NaN -> selects nothing; MxV is kept and is the
+    live entry driver. Pure, no I/O. Empty set on empty df or missing Ticker/MxV cols."""
     if snapshots_df is None or snapshots_df.empty:
         return set()
-    if "Ticker" not in snapshots_df.columns or "Score" not in snapshots_df.columns:
+    if "Ticker" not in snapshots_df.columns or "MxV" not in snapshots_df.columns:
         return set()
-    score = pd.to_numeric(snapshots_df["Score"], errors="coerce")
-    sel = snapshots_df["Ticker"][score >= min_score]
+    mxv = pd.to_numeric(snapshots_df["MxV"], errors="coerce")
+    sel = snapshots_df["Ticker"][mxv <= mxv_max]
     return {str(t).strip() for t in sel if str(t).strip()}
 
 

@@ -53,7 +53,6 @@ def collect_borrow_snapshot(summary: Dict[str, Any]) -> None:
         import pandas as pd
         import sheets_manager
         import utils
-        from config import MIN_SCORE_DISPLAY
         from agent.perception import borrow_collector
         ws = sheets_manager.get_worksheet("daily_snapshots")
         if ws is not None:
@@ -63,7 +62,7 @@ def collect_borrow_snapshot(summary: Dict[str, Any]) -> None:
                 today = utils.get_peru_time().strftime("%Y-%m-%d")
                 if "Date" in df.columns:
                     df = df[df["Date"] == today]
-                scanned = borrow_collector.get_scanned_universe(df, MIN_SCORE_DISPLAY)
+                scanned = borrow_collector.get_scanned_universe(df)  # TASK-208-B: MxV<=-100 (scoreless-era)
     except Exception as e:
         logger.warning("Borrow snapshot: scanned-universe read failed (non-fatal, fallback to positions): %s", e)
         scanned = set()

@@ -21,15 +21,15 @@ def test_borrow_coverage_header_registered():
     ]
 
 
-# ── Task 2: get_scanned_universe — Score>=min tickers from a snapshots df ──
-def test_get_scanned_universe_filters_by_min_score():
-    df = pd.DataFrame({"Ticker": ["AAA", "BBB", "CCC"], "Score": [75, 60, 59]})
-    assert bc.get_scanned_universe(df, min_score=60) == {"AAA", "BBB"}
+# ── Task 2: get_scanned_universe — MxV<=mxv_max tickers (TASK-208-B: was Score>=min) ──
+def test_get_scanned_universe_filters_by_mxv():
+    df = pd.DataFrame({"Ticker": ["AAA", "BBB", "CCC"], "MxV": [-150, -100, -50]})
+    assert bc.get_scanned_universe(df) == {"AAA", "BBB"}   # <= -100 (BBB boundary-inclusive)
 
 
 def test_get_scanned_universe_empty_or_missing_cols():
-    assert bc.get_scanned_universe(pd.DataFrame(), min_score=60) == set()
-    assert bc.get_scanned_universe(pd.DataFrame({"Ticker": ["X"]}), min_score=60) == set()
+    assert bc.get_scanned_universe(pd.DataFrame()) == set()
+    assert bc.get_scanned_universe(pd.DataFrame({"Ticker": ["X"]})) == set()  # no MxV col
 
 
 
@@ -160,18 +160,18 @@ def test_collect_borrow_snapshot_union_and_coverage(monkeypatch):
         lambda: _tz.timezone("America/Lima").localize(_dt.datetime(2026, 6, 14, 12, 0, 0)),
     )
 
-    # existing positions = {EXIST}; scanned snapshots = AAA(75), BBB(60), CCC(59-excluded)
+    # existing positions = {EXIST}; scanned snapshots by MxV<=-100: AAA(-150), BBB(-100), CCC(-50 excluded)
     import agent.orchestrator as _orch
     monkeypatch.setattr(_orch, "build_account_state", lambda *a, **k: {"existing_positions": {"EXIST"}})
 
     class _WS:
         def get_all_values(self):
             return [
-                ["Date", "Ticker", "Score"],
-                ["2026-06-14", "AAA", "75"],
-                ["2026-06-14", "BBB", "60"],
-                ["2026-06-14", "CCC", "59"],
-                ["2026-06-13", "OLD", "99"],  # different day -> excluded
+                ["Date", "Ticker", "MxV"],
+                ["2026-06-14", "AAA", "-150"],
+                ["2026-06-14", "BBB", "-100"],
+                ["2026-06-14", "CCC", "-50"],
+                ["2026-06-13", "OLD", "-200"],  # different day -> excluded
             ]
     import sheets_manager
     monkeypatch.setattr(sheets_manager, "get_worksheet", lambda tab, *a, **k: _WS() if tab == "daily_snapshots" else None)
@@ -186,7 +186,7 @@ def test_collect_borrow_snapshot_union_and_coverage(monkeypatch):
 
     eod.collect_borrow_snapshot({"errors": 0})
 
-    expected = {"EXIST", "AAA", "BBB"}  # CCC<60 and OLD(wrong day) excluded
+    expected = {"EXIST", "AAA", "BBB"}  # CCC(-50 > -100) and OLD(wrong day) excluded
     assert captured["tickers"] == expected
     assert captured["cov_universe"] == expected
 
