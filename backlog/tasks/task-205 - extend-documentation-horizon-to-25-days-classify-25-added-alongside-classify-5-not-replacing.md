@@ -1,11 +1,10 @@
 ---
 id: TASK-205
-title: >-
-  extend documentation horizon to 25 days (classify-25 added alongside
-  classify-5, not replacing)
+title: Display D6-D25 forward journey in dashboard
 status: To Do
 assignee: []
 created_date: '2026-06-29 04:15'
+updated_date: '2026-06-29 15:21'
 labels: []
 dependencies: []
 ordinal: 211000
@@ -14,13 +13,13 @@ ordinal: 211000
 ## Description
 
 <!-- SECTION:DESCRIPTION:BEGIN -->
-MAX_HOLDING_DAYS=5 (classify window) vs COLLECT_DAYS_FORWARD=25 (OHLC). Extend the documentation/classification horizon to 25 days for richer outcome study, WITHOUT changing existing 5-day semantics.
+Display the already-collected D6-D25 forward data (D{i}_Low + D{i}_Close, scanned >=2026-06-13) in the dashboard. Data is already written by the collector and already flows into _cached_post_analysis() — no collection or schema work needed. Pure display layer: a per-ticker 25-day journey as both a table and a price-path chart. No classification — raw Low/Close documentation only (no High beyond D5, so no symmetric WIN/LOSS).
 <!-- SECTION:DESCRIPTION:END -->
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 25-day documentation/classification computed and stored ALONGSIDE the existing 5-day classify (not replacing it)
-- [ ] #2 recon classify_trade callers (dashboard/analytics/orchestrator) BEFORE any change — verify none break
-- [ ] #3 final WIN/LOSS classification thresholds deferred until data is seen (B1)
-- [ ] #4 zero regression to existing classify_trade / 5-day outcome columns
+- [ ] #1 New dashboard page/section: each ticker D1-D25 journey in table form (row per ticker, columns D6_Low/D6_Close .. D25_Low/D25_Close)
+- [ ] #2 Price-path chart (plotly _go.Figure, mirroring existing overlay) of the Low path across D1-D25 for a selected ticker
+- [ ] #3 Rows scanned before 2026-06-13 (no D6-D25) handled gracefully — empty/NA, not errors or fake zeros
+- [ ] #4 Zero touch to collector/schema/classify_trade — display layer only, reads existing _cached_post_analysis() columns
 <!-- AC:END -->
