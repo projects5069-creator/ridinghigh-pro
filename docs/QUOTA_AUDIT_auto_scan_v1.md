@@ -47,3 +47,22 @@ into TASK-213 measurement window).
 ## Next step
 Implementation = separate task (mirror how TASK-136 split audit→fix).
 Touches live trading path → TDD + careful, market-hours-aware.
+
+---
+## REVISED FINDING (deep-recon 2026-06-30, supersedes AC#3 estimate)
+The "portfolio 3×/min → −2 reads/min" estimate was OPTIMISTIC. Live deep-recon:
+- portfolio read **2×/min** (489 run_scan + 625 update_portfolio_live), NOT 3×.
+- 3rd read (1155) is in **sync_score_tracker** (called line 550), which runs
+  **every 5 min only** — AC#1 mis-attributed it to update_live_trades (541).
+- ⚠️ **Line 510 WRITES portfolio between reads 489↔625** → a cached reader
+  CANNOT save the per-minute pair (write invalidates cache; caching a
+  written-within-minute tab = data-corruption bug, worse than 429).
+- Pure cached-reader saves ONLY the 5-min read (1155): ~1 read / 5 min.
+  Per-minute saving requires an in-memory frame pass (combined_port already
+  built at 510) → invasive signature refactor on 2 call-sites, live-path risk.
+
+**Conclusion:** portfolio de-dup is a SMALL, EXPENSIVE win and NOT the right
+fix for auto_scan's 429. Most per-minute reads (daily_snapshots, portfolio_live,
+daily_summary) are write-accompanied → not cache-able. The architecturally
+correct fix mirrors TASK-58: **dedicated SA for auto_scan** (or frequency
+reduction), NOT read de-dup. De-dup track CLOSED. See new follow-up task.

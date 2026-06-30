@@ -1,10 +1,10 @@
 ---
 id: TASK-214
 title: Quota audit auto_scan reads (auto_scanner.py 20 read-sites) — mirror TASK-136
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-06-30 17:05'
-updated_date: '2026-06-30 17:26'
+updated_date: '2026-06-30 17:53'
 labels:
   - quota
   - performance
@@ -25,4 +25,6 @@ Recon 30/6 (read-only) identified the remaining market-hours 429 driver after TA
 
 <!-- SECTION:NOTES:BEGIN -->
 RECON DONE 30/6 (AC#1+2+3, propose-only): audit ב-docs/QUOTA_AUDIT_auto_scan_v1.md. ממצא מרכזי: portfolio נקרא 3× per-minute (run_scan:492 + update_portfolio_live:628 + update_live_trades:1155) — אותה כפילות ש-TASK-136 חתך ב-position_manager. תיקון 3→1 = −2 reads/min ודאי. אושש חי: auto_scan 429-crashed 30/6 12:22 Peru (run 28463021682, נפל ב-portfolio_live, project 591299446687). baseline מספרי לא-מדיד (counter נקטע מ-429); מדד-הצלחה = ירידת תדירות-429 (מתחבר ל-213). מימוש = task נפרד (mirror 136 audit→fix split).
+
+DEEP-RECON 30/6 (data-driven): de-dup track CLOSED. portfolio הוא win קטן ויקר (2×/min לא 3×; write ב-510 חוסם cache; חיסכון ודאי רק ~1/5min). רוב הקריאות write-accompanied = לא cache-able. מסקנה: הפתרון הנכון = SA נפרד ל-auto_scan (mirror 58), לא de-dup. תועד ב-QUOTA_AUDIT_auto_scan_v1.md REVISED FINDING. 214 (audit) = Done; הפתרון עבר ל-TASK-215 (SA-נפרד).
 <!-- SECTION:NOTES:END -->
