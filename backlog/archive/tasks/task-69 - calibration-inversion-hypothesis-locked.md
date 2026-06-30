@@ -7,6 +7,7 @@ title: >-
 status: To Do
 assignee: []
 created_date: '2026-05-31 02:32'
+updated_date: '2026-06-30 14:16'
 labels:
   - score
   - calibration
@@ -21,3 +22,9 @@ ordinal: 69000
 <!-- SECTION:DESCRIPTION:BEGIN -->
 TASK-62: משקלים כמעט הפוכים לתרומה. P2.
 <!-- SECTION:DESCRIPTION:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+ARCHIVED 30/6: היפוך-משקלי-Score; Score לא שער יותר (AUC 0.531, SCORE_WRITE_FROZEN).
+<!-- SECTION:NOTES:END -->

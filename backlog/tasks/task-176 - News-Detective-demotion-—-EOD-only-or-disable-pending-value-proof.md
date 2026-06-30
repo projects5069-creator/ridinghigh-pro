@@ -4,6 +4,7 @@ title: News Detective demotion — EOD-only or disable pending value proof
 status: To Do
 assignee: []
 created_date: '2026-06-13 01:26'
+updated_date: '2026-06-30 14:16'
 labels:
   - TASK-171
 dependencies: []
@@ -22,3 +23,9 @@ ordinal: 179000
 - [ ] #1 News Detective no longer runs per-minute (EOD-only or disabled)
 - [ ] #2 Quota savings measured
 <!-- AC:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+MERGED TASK-67 (30/6): כולל אימות מחקרי לפני demotion — סימולציית 'חדשות מהותיות→לא לשורט' (WITHOUT WR 62% > WITH 60%, EDGAR r=-0.156). רצף: הוכח חוסר-ערך → EOD-only/disable.
+<!-- SECTION:NOTES:END -->

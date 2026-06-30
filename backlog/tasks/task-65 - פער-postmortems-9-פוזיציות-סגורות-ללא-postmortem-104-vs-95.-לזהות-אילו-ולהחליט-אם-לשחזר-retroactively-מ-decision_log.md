@@ -6,7 +6,7 @@ title: >-
 status: To Do
 assignee: []
 created_date: '2026-05-31 00:48'
-updated_date: '2026-06-28 00:13'
+updated_date: '2026-06-30 14:16'
 labels:
   - data-quality
   - postmortems
@@ -32,4 +32,6 @@ ordinal: 65000
 
 <!-- SECTION:NOTES:BEGIN -->
 צ'אט-recon 2026-06-27 (READ-ONLY, נפרד+נוסף ל-scope=36 שכבר תועד): מעבר על 182 ה-postmortems הקיימים מצא MetricsAtEntry ריק (={}) ב-55% (101/182) — בעיה מובחנת מ-36 ה-חסרים (כאן ה-postmortem קיים אך חסר-מדדים). היפותזה-לשורש (לא מאומת): postmortem_engine._get_decision_context קורא ל-_read_decision(position_id) שעושה linear-scan ב-decision_log ומחזיר {} ב-miss — לחקור quota-drop של כתיבת decision_log מול PositionID!=DecisionID מול eventual-consistency. רלוונטי גם ל-TASK-198. הערה: אין כאן מסקנת-edge — ה-edge-verdict השלילי הופרך בדוח IB (PK v3.63).
+
+MERGED TASK-198 (30/6): חקירת-שורש אחת על _read_decision (linear-scan→{} ב-miss) המכסה שני סימפטומים — 36 postmortems חסרי-MetricsAtEntry + 20 ENTERs ללא שורת paper_portfolio. read-only עד הכרעה.
 <!-- SECTION:NOTES:END -->

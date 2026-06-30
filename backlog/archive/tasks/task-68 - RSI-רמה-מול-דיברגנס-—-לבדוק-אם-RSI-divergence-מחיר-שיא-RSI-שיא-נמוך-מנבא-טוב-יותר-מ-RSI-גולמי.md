@@ -6,6 +6,7 @@ title: >-
 status: To Do
 assignee: []
 created_date: '2026-05-31 02:32'
+updated_date: '2026-06-30 14:16'
 labels:
   - metric
   - rsi
@@ -19,3 +20,9 @@ ordinal: 68000
 <!-- SECTION:DESCRIPTION:BEGIN -->
 TASK-62: RSI גולמי r=0.021 (החלש, משקל 10). ספרות: divergence עובד, רמה לא. P2.
 <!-- SECTION:DESCRIPTION:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+ARCHIVED 30/6: RSI-divergence לשיפור Score; Score מנוטרל post-flip (EXPLICIT_GATE_MODE active 29/6) — אין מנוע לכייל.
+<!-- SECTION:NOTES:END -->

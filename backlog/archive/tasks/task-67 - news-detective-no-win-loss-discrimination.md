@@ -7,7 +7,7 @@ title: >-
 status: To Do
 assignee: []
 created_date: '2026-05-31 01:47'
-updated_date: '2026-05-31 02:32'
+updated_date: '2026-06-30 14:16'
 labels:
   - agent
   - news-detective
@@ -26,3 +26,9 @@ ordinal: 67000
 <!-- AC:BEGIN -->
 - [ ] #1 סימולציה: 'יש חדשות מהותיות -> לא לשורט', כמה היינו מרוויחים (TASK-62: WITHOUT news WR 62% > WITH 60%)
 <!-- AC:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+ARCHIVED→MERGED 30/6: מוזג ל-TASK-176 (News Detective demotion).
+<!-- SECTION:NOTES:END -->
