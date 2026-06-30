@@ -124,6 +124,18 @@ def _get_gc():
     except Exception:
         pass
 
+    # TASK-215: dedicated auto_scan SA to end 429 contention on the shared SA.
+    # ⚠️ BLAST-RADIUS: _get_gc is shared by ~20 modules. This branch must stay
+    # no-op for everyone EXCEPT auto_scan. SAFETY = GOOGLE_CREDENTIALS_JSON_AS is
+    # injected ONLY in auto_scan.yml — NEVER in any other workflow. Empty/absent
+    # falls through to the shared SA (truthy-guard, same pattern as TASK-58 _HA).
+    creds_json_as = os.environ.get("GOOGLE_CREDENTIALS_JSON_AS")
+    if creds_json_as:
+        import json as _json
+        creds = Credentials.from_service_account_info(
+            _json.loads(creds_json_as), scopes=SCOPES)
+        return gspread.authorize(creds)
+
     creds_json = os.environ.get("GOOGLE_CREDENTIALS_JSON")
     if creds_json:
         import json as _json
