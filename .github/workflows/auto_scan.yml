@@ -2,7 +2,7 @@ name: RidingHigh Auto Scanner
 
 on:
   schedule:
-    - cron: '*/1 13-19 * * 1-5'  # every minute, market hours UTC, Mon-Fri
+    - cron: '*/1 13-21 * * 1-5'  # every min; 13-21 UTC covers EDT(13:30-20:00)+EST(14:30-21:00); is_market_hours gates
   workflow_dispatch:
 
 jobs:

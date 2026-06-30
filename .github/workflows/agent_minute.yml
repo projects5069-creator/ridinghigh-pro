@@ -2,7 +2,7 @@ name: Agent — Every Minute (DRY_RUN)
 
 on:
   schedule:
-    - cron: '*/1 13-20 * * 1-5'
+    - cron: '*/1 13-21 * * 1-5'  # 13-21 UTC covers EDT+EST market close; is_market_hours gates actual runs
   workflow_dispatch:
 
 jobs:

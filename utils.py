@@ -152,9 +152,15 @@ def is_market_hours():
     """
     from datetime import time as dt_time
     now = get_peru_time()
-    market_open  = dt_time(8, 30)
-    market_close = dt_time(15, 0)
-    return is_trading_day(now.date()) and market_open <= now.time() <= market_close
+    if not is_trading_day(now.date()):
+        return False
+    # DST-aware: NYSE is 09:30-16:00 ET (which observes DST); Peru does not. Derive the
+    # Peru window from the ET window on this date — hardcoding 08:30-15:00 only holds in
+    # summer/EDT; winter/EST is 09:30-16:00 Peru. (CLAUDE.md RULE #10.)
+    et = pytz.timezone("America/New_York")
+    open_peru  = et.localize(datetime.combine(now.date(), dt_time(9, 30))).astimezone(PERU_TZ)
+    close_peru = et.localize(datetime.combine(now.date(), dt_time(16, 0))).astimezone(PERU_TZ)
+    return open_peru <= now <= close_peru
 
 
 def is_day_complete(date_str):
