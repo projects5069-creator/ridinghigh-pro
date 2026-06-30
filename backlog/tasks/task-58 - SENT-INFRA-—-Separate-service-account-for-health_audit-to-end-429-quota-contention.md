@@ -3,10 +3,10 @@ id: TASK-58
 title: >-
   SENT/INFRA — Separate service account for health_audit to end 429 quota
   contention
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-05-29 17:48'
-updated_date: '2026-06-30 16:24'
+updated_date: '2026-06-30 16:48'
 labels: []
 dependencies: []
 priority: medium
