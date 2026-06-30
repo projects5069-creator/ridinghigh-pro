@@ -45,7 +45,8 @@ def test_shadow_records_score_divergence_would_allow():
     assert d.action == ""                             # observer NEVER sets the live action
 
 
-def test_no_divergence_when_explicit_also_blocks():
+def test_no_divergence_when_explicit_also_blocks(monkeypatch):
+    monkeypatch.setattr(decision_logic._config, "ENTRY_GATE_MINIMAL", False)  # Volume (F4) opt-in under minimal
     d, sig, q = _passes_all_but_score()
     d.volume = 50                                     # explicit gate also blocks (volume)
     _observe_explicit_gate(d, sig, q, "SCORE_TOO_LOW: 30.00 < 50")
@@ -84,7 +85,8 @@ def test_evaluate_signal_enter_unchanged_and_observed():
     assert d.shadow_explicit_divergence is False      # live didn't score-block → no divergence
 
 
-def test_evaluate_signal_skip_action_never_changed_by_shadow():
+def test_evaluate_signal_skip_action_never_changed_by_shadow(monkeypatch):
+    monkeypatch.setattr(decision_logic._config, "ENTRY_GATE_MINIMAL", False)  # Volume (F4) opt-in under minimal
     sig = _enter_signal()
     sig["volume"] = 50                                # SKIP on volume
     d = evaluate_signal(sig)

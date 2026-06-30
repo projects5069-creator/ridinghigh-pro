@@ -352,6 +352,11 @@ def _check_filters(d: Decision, signal: Dict[str, Any], quality: Dict[str, Any],
         explicit-only gate used by the shadow observer (TASK-128) to measure, forward,
         what would change if Score were decoupled from entry (resolves 141+174).
     """
+    # ENTRY_GATE_MINIMAL (reversible): when True, skip the 6 universe/protective filters
+    # (F3 RunUp, F4 Volume, F4c Blacklist, F4d Toxic, F5 MarketCap, F11 ROCKET). MxV, Price,
+    # Quality and the exposure-safety filters (Existing/ColdStart/Reentry/Buying) always run.
+    _minimal = getattr(_config, "ENTRY_GATE_MINIMAL", False)
+
     # Filter 1: Score
     if include_score_gate and d.score < AGENT_MIN_SCORE:
         return f"SCORE_TOO_LOW: {d.score:.2f} < {AGENT_MIN_SCORE}"
@@ -361,11 +366,11 @@ def _check_filters(d: Decision, signal: Dict[str, Any], quality: Dict[str, Any],
         return f"MXV_TOO_HIGH: {d.mxv:.0f} > {AGENT_MXV_MAX}"
 
     # Filter 3: RunUp
-    if d.run_up < AGENT_RUNUP_MIN:
+    if not _minimal and d.run_up < AGENT_RUNUP_MIN:
         return f"RUNUP_TOO_LOW: {d.run_up:.1f}% < {AGENT_RUNUP_MIN}%"
 
     # Filter 4: Volume
-    if d.volume < AGENT_VOLUME_MIN:
+    if not _minimal and d.volume < AGENT_VOLUME_MIN:
         return f"VOLUME_TOO_LOW: {d.volume} < {AGENT_VOLUME_MIN}"
 
     # Filter 4b (L6 — Layers paradigm, 2026-05-25): ScanPrice minimum
@@ -379,7 +384,7 @@ def _check_filters(d: Decision, signal: Dict[str, Any], quality: Dict[str, Any],
     # Filter 4c (Stage 2 — Layers, 2026-05-26): chronic dropper blacklist
     # Tickers identified via DropsLab cross-reference as 3+ drops in 30d.
     # AEHL + TDIC together account for ~$120 of DRY_RUN losses in Apr+May.
-    if d.ticker in CHRONIC_DROPPER_BLACKLIST:
+    if not _minimal and d.ticker in CHRONIC_DROPPER_BLACKLIST:
         return f"BLACKLISTED_TICKER: {d.ticker} in chronic dropper list"
 
     # Filter 4d (L3 — Layers paradigm, 2026-05-26): Toxic Profile
@@ -389,14 +394,14 @@ def _check_filters(d: Decision, signal: Dict[str, Any], quality: Dict[str, Any],
     # Winners typically have RSI 80-86 AND Price/SMA20 150-220 — both fail this AND.
     # If price_vs_sma20 is None (data unavailable), filter is SKIPPED — defaults to
     # "trust the other filters" rather than block-on-missing-data.
-    if d.rsi is not None and d.rsi > 88:
+    if not _minimal and d.rsi is not None and d.rsi > 88:
         if d.price_vs_sma20 is not None and d.price_vs_sma20 > 250:
             return f"TOXIC_PROFILE: RSI={d.rsi:.1f}>88 AND Price/SMA20={d.price_vs_sma20:.0f}%>250"
 
     # Filter 5: Market cap range
-    if d.market_cap < AGENT_MARKET_CAP_MIN:
+    if not _minimal and d.market_cap < AGENT_MARKET_CAP_MIN:
         return f"MARKET_CAP_TOO_SMALL: ${d.market_cap:,.0f} < ${AGENT_MARKET_CAP_MIN:,}"
-    if d.market_cap > AGENT_MARKET_CAP_MAX:
+    if not _minimal and d.market_cap > AGENT_MARKET_CAP_MAX:
         return f"MARKET_CAP_TOO_LARGE: ${d.market_cap:,.0f} > ${AGENT_MARKET_CAP_MAX:,}"
 
     # Filter 6: Data quality
@@ -433,7 +438,7 @@ def _check_filters(d: Decision, signal: Dict[str, Any], quality: Dict[str, Any],
         _pth = float(_pth)
     except (TypeError, ValueError):
         _pth = 0.0
-    if d.run_up >= AGENT_ROCKET_GUARD_RUNUP and _pth >= AGENT_ROCKET_GUARD_PTH:
+    if not _minimal and d.run_up >= AGENT_ROCKET_GUARD_RUNUP and _pth >= AGENT_ROCKET_GUARD_PTH:
         return (f"ROCKET_GUARD: {d.ticker} still climbing — "
                 f"RunUp={d.run_up:.1f}% >= {AGENT_ROCKET_GUARD_RUNUP}% AND "
                 f"PriceToHigh={_pth:.1f}% >= {AGENT_ROCKET_GUARD_PTH}%")

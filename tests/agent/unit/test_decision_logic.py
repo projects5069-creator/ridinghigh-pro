@@ -51,7 +51,8 @@ def test_low_score_skips(good_signal):
     assert "SCORE" in d.skip_reason or "RUNUP" in d.skip_reason or "MXV" in d.skip_reason
 
 
-def test_low_volume_skips(good_signal):
+def test_low_volume_skips(good_signal, monkeypatch):
+    monkeypatch.setattr("config.ENTRY_GATE_MINIMAL", False)  # this tests the full-gate (Volume now opt-in)
     good_signal["volume"] = 50  # below 100K threshold
     d = evaluate_signal(good_signal)
     assert d.action == "SKIP"
@@ -174,7 +175,8 @@ def _good_signal_with_ticker(ticker, price=7.0):
     }
 
 
-def test_l3_blacklist_blocks_aehl():
+def test_l3_blacklist_blocks_aehl(monkeypatch):
+    monkeypatch.setattr("config.ENTRY_GATE_MINIMAL", False)  # blacklist (F4c) is opt-in under minimal
     from agent.trader.decision_logic import evaluate_signal
     decision = evaluate_signal(_good_signal_with_ticker("AEHL"))
     assert decision.action == "SKIP"
@@ -182,7 +184,8 @@ def test_l3_blacklist_blocks_aehl():
         f"Expected BLACKLISTED_TICKER, got: {decision.skip_reason}"
 
 
-def test_l3_blacklist_blocks_tdic():
+def test_l3_blacklist_blocks_tdic(monkeypatch):
+    monkeypatch.setattr("config.ENTRY_GATE_MINIMAL", False)  # blacklist (F4c) is opt-in under minimal
     from agent.trader.decision_logic import evaluate_signal
     decision = evaluate_signal(_good_signal_with_ticker("TDIC"))
     assert decision.action == "SKIP"
@@ -224,8 +227,9 @@ def _signal_with_l3(rsi, price_vs_sma20, ticker="TEST", price=7.0):
     }
 
 
-def test_l3_toxic_profile_blocks_extreme():
+def test_l3_toxic_profile_blocks_extreme(monkeypatch):
     """Toxic median: RSI=92.61, Price/SMA20=305 — MUST be blocked."""
+    monkeypatch.setattr("config.ENTRY_GATE_MINIMAL", False)  # Toxic (F4d) is opt-in under minimal
     from agent.trader.decision_logic import evaluate_signal
     d = evaluate_signal(_signal_with_l3(rsi=92.61, price_vs_sma20=305))
     assert d.action == "SKIP"

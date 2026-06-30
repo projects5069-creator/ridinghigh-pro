@@ -328,7 +328,7 @@ AGENT_COLD_START_DAILY_LOSS_ALERT_USD = 200
 # Max times the agent may re-enter the SAME ticker in one day. Re-entry
 # after a same-day SL/TP exit is intentional (volatile pumps give repeat
 # setups) but must be bounded to limit churn / single-ticker exposure.
-AGENT_MAX_REENTRIES_PER_TICKER = 3
+AGENT_MAX_REENTRIES_PER_TICKER = 1  # 2026-06-29: was 3 — tightened to 1 re-entry/ticker/day
 
 # ROCKET_GUARD (Filter 11) — block shorting a stock still climbing vertically.
 # Calibrated on 196 post_analysis rows: RunUp>=50 AND PriceToHigh>=-10
@@ -360,6 +360,10 @@ SENTINEL_MODE = "shadow"  # "shadow" (log only) | "active" (block) | "off" — T
 # TASK-194 stage-2 flip 2026-06-29: Score gate OFF, MxV<=-100 is live entry driver.
 #   revert = set back to "shadow". Flipped without >=2wk shadow-accumulation (owner decision, DRY_RUN).
 EXPLICIT_GATE_MODE = "active"
+# 2026-06-29: entry gate = MxV + price + quality + exposure-safety ONLY. When True, the 6
+# universe/protective filters (RunUp, Volume, Blacklist, Toxic, MarketCap, ROCKET) are
+# skipped in _check_filters. Off = all filters return (fully reversible).
+ENTRY_GATE_MINIMAL = True
 # TASK-128 T-B: MxV<=AGENT_MXV_MAX AND price>=AGENT_MIN_SCANPRICE_USD entry-to-tracking
 # shadow observer. "shadow" = observe-only (never alters d.action); "off" = no-op.
 # Promotion to active is TASK-194 (~2026-07-27 multi-regime), never auto.

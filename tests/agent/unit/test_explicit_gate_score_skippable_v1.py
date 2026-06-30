@@ -54,8 +54,9 @@ def test_default_keeps_score_gate_on_byte_identical():
     assert reason is not None and reason.startswith("SCORE_TOO_LOW")
 
 
-def test_score_gate_off_skips_only_score_not_other_filters():
+def test_score_gate_off_skips_only_score_not_other_filters(monkeypatch):
     """With the Score gate OFF a *non*-score filter still fires (only Filter 1 is skipped)."""
+    monkeypatch.setattr("config.ENTRY_GATE_MINIMAL", False)  # Volume (F4) is opt-in under minimal
     d, sig, q = _passes_all_but_score()
     d.volume = 50  # break Filter 4
     reason = _check_filters(d, sig, q, include_score_gate=False)
