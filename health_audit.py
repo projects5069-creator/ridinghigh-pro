@@ -134,10 +134,12 @@ def get_gspread_client(local=False):
         if local and CREDENTIALS_FILE.exists():
             creds = Credentials.from_service_account_file(
                 str(CREDENTIALS_FILE), scopes=scopes)
-        elif "GOOGLE_CREDENTIALS_JSON_HA" in os.environ:
+        elif os.environ.get("GOOGLE_CREDENTIALS_JSON_HA"):
             # TASK-58: dedicated health_audit SA to end 429 contention with the
-            # trading SA. Falls through to GOOGLE_CREDENTIALS_JSON when unset →
-            # no-op until the secret is provisioned.
+            # trading SA. Truthy check (not `in os.environ`) — GitHub Actions sets
+            # an unset secret to "" (present-but-empty), so `in` would match and
+            # json.loads("") would crash; truthy treats ""/absent alike → falls
+            # through to GOOGLE_CREDENTIALS_JSON. No-op until the secret exists.
             info = json.loads(os.environ["GOOGLE_CREDENTIALS_JSON_HA"])
             creds = Credentials.from_service_account_info(info, scopes=scopes)
         elif "GOOGLE_CREDENTIALS_JSON" in os.environ:

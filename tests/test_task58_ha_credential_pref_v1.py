@@ -64,3 +64,17 @@ def test_ha_only(monkeypatch):
 
     assert err is None
     assert captured["info"]["marker"] == "HA"
+
+
+def test_empty_ha_falls_back_to_trading(monkeypatch):
+    """GitHub Actions sets an unset secret to "" (present-but-empty). The guard
+    must treat empty as absent and fall back to the trading SA — not json.loads("")
+    and crash. This is the no-op safety before the _HA secret is provisioned."""
+    captured = _capture(monkeypatch)
+    monkeypatch.setenv("GOOGLE_CREDENTIALS_JSON_HA", "")  # empty = unset secret in CI
+    monkeypatch.setenv("GOOGLE_CREDENTIALS_JSON", json.dumps({"marker": "TRADING"}))
+
+    client, err = ha.get_gspread_client(local=False)
+
+    assert err is None, f"empty _HA must not crash; got err={err}"
+    assert captured["info"]["marker"] == "TRADING"

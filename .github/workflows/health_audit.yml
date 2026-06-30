@@ -34,6 +34,8 @@ jobs:
       - name: Run health audit
         env:
           GOOGLE_CREDENTIALS_JSON: ${{ secrets.GOOGLE_CREDENTIALS_JSON }}
+          # TASK-58: dedicated health_audit SA (empty when secret unset → code falls back to trading SA)
+          GOOGLE_CREDENTIALS_JSON_HA: ${{ secrets.GOOGLE_CREDENTIALS_JSON_HA }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_REPO: ${{ github.repository }}
           GMAIL_USER: ${{ secrets.GMAIL_USER }}

@@ -6,7 +6,7 @@ title: >-
 status: To Do
 assignee: []
 created_date: '2026-05-29 17:48'
-updated_date: '2026-06-30 15:23'
+updated_date: '2026-06-30 16:24'
 labels: []
 dependencies: []
 priority: medium
@@ -29,4 +29,6 @@ RECON 30/6 (READ-ONLY, recon-before-code): 2 תיקונים מול הנחת-המ
 (2) קריטי — לא שיתוף חד-פעמי: כל רוטציה חודשית יוצרת ~7 spreadsheets חדשים; נתיב ה-provisioning (_share_with_service_account sheets_manager:204 + create_agent_sheets, TASK-207 self-heal) משתף כיום רק עם ה-SA המסחרי. TASK-58 חייב להרחיב את נתיב ה-auto-share לשני ה-SAs — אחרת health_audit נשבר ב-no-access בכל 1-בחודש (פצצת-זמן).
 change surface: (א) ידני: SA שני + שיתוף 20 הקבצים + secret GOOGLE_CREDENTIALS_JSON_HA. (ב) קוד: health_audit.py:122 (prefer _HA + fallback למסחרי = no-op בטוח עד שה-secret קיים) + health_audit.yml:36 (הזרקת secret) + הרחבת auto-share ברוטציה (קריטי-מתמשך).
 health_audit מבודד אוטומטית — gc עצמאי (get_gspread_client:122), אפס קריאה דרך sheets_manager.get_sheet_records → הפניית ה-gc שלו ל-SA אחר מוציאה אותו מ-quota המסחרי. SA נוכחי: ridinghigh-sheets-v2@ridinghigh-pro-v2.iam.gserviceaccount.com.
+
+DONE 30/6 (infra מאומת): (1) קוד step-1+2 — health_audit prefers GOOGLE_CREDENTIALS_JSON_HA עם truthy-guard (os.environ.get, מטפל גם empty-secret של GHA, no-op בטוח עד provisioning). (2) ROOT folder (1mHSds...) שותף עם ridinghigh-health-audit@ כ-reader — הורשה מאומתת חיה 2/2 (2026-06/timeline_live + 2026-05/post_analysis). (3) חשש-רוטציה בוטל: folders חודשיים תחת ROOT יורשים אוטומטית — אין צורך בקוד auto-share. נותר ידני אחרון: GH secret GOOGLE_CREDENTIALS_JSON_HA (תוכן ה-key). עד שיוגדר — fallback ל-SA המסחרי. health_audit.yml כבר מזריק את השורה (additive).
 <!-- SECTION:NOTES:END -->
