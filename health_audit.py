@@ -134,6 +134,12 @@ def get_gspread_client(local=False):
         if local and CREDENTIALS_FILE.exists():
             creds = Credentials.from_service_account_file(
                 str(CREDENTIALS_FILE), scopes=scopes)
+        elif "GOOGLE_CREDENTIALS_JSON_HA" in os.environ:
+            # TASK-58: dedicated health_audit SA to end 429 contention with the
+            # trading SA. Falls through to GOOGLE_CREDENTIALS_JSON when unset →
+            # no-op until the secret is provisioned.
+            info = json.loads(os.environ["GOOGLE_CREDENTIALS_JSON_HA"])
+            creds = Credentials.from_service_account_info(info, scopes=scopes)
         elif "GOOGLE_CREDENTIALS_JSON" in os.environ:
             info = json.loads(os.environ["GOOGLE_CREDENTIALS_JSON"])
             creds = Credentials.from_service_account_info(info, scopes=scopes)
