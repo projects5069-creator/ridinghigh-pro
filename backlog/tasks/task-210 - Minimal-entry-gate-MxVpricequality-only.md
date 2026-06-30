@@ -1,10 +1,10 @@
 ---
 id: TASK-210
 title: Minimal entry gate - MxV+price+quality only
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-06-30 00:31'
-updated_date: '2026-06-30 00:38'
+updated_date: '2026-06-30 02:06'
 labels: []
 dependencies: []
 ordinal: 216000

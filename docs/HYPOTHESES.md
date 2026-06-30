@@ -87,6 +87,7 @@ record if a hypothesis is re-opened under a new rule.
 | ID | Name | Status | Registered | Verdict |
 |----|------|--------|-----------|---------|
 | HYP-001 | crossover-short | **REGISTERED** | 2026-06-23 | validation pending TASK-179 (n≥150, ~mid-July) |
+| HYP-002 | minimal-MxV-gate | **DRAFT** | 2026-06-29 | live forward-capture; concludes at n≥150 post-flip entries |
 
 ---
 
@@ -170,6 +171,37 @@ definition was TASK-178's to make (now locked above), not TASK-177's.
 
 **Status: REGISTERED (2026-06-23, TASK-178)** — rule LOCKED. Next: TASK-179
 validation on the forward hold-out (n≥150, ~mid-July).
+
+---
+
+## §F · HYP-002 — minimal-MxV-gate (DRAFT)
+
+### HYP-002 · minimal-MxV-gate
+- Status:            DRAFT  (live since the 2026-06-29 flip; concludes after n≥150 post-flip entries)
+- Registered:        2026-06-29  (rule locked in config: EXPLICIT_GATE_MODE=active, ENTRY_GATE_MINIMAL=True)
+- Hypothesis:        the minimal entry gate (MxV<=-100 ∧ price>=$3, with Score AND the 6
+                     universe/protective filters OFF) yields forward net outcomes at least
+                     as good as the prior Score+full-filter gate.
+- Universe:          FINVIZ screener (Price>$2 ∧ Today+15%) → tickers passing the LIVE
+                     ENTRY_GATE_MINIMAL gate (MxV<=-100 ∧ price>=$3 ∧ data-quality ∧ exposure-safety).
+- Entry:             SHORT, ScanPrice basis, agent DRY_RUN entry; reentry <= 1/ticker/day.
+- Exit:              standard agent TP/SL (AGENT_TP_PCT / AGENT_SL_PCT).
+- HOLD_DAYS:         <=5 (classify window / MAX_HOLDING_DAYS).
+- Locked fitness:    net expectancy via calculate_net_pnl @ borrow 500%/yr × HOLD/365 +
+                     slip 2%/side; GO = bootstrap CI on the profitable side AND not-worse
+                     than the Score-gated baseline over the same window.
+- Power target:      n >= 150 entries detected AFTER 2026-06-29 (the flip date).
+- Hold-out rule:     measure ONLY post-flip entries; pre-flip Score-gated trades are the
+                     comparison baseline, never recycled as discovery.
+- Discovery sample:  research-199 (raw/exploratory, single-regime June, small n) —
+                     provenance only, NOT evidence.
+- Dependencies:      flip live ✅ · shadow_gate_events provisioned ✅ · decision_log capture ✅.
+- Result:            <filled at CONCLUDED: verdict + worst-case net exp + CI + k>.
+
+**Caveat.** This is a forward live experiment in DRY_RUN, fully reversible (ENTRY_GATE_MINIMAL=False
+restores the 6 filters; EXPLICIT_GATE_MODE=shadow restores Score). It was flipped ahead of the
+≥2-week multi-regime shadow precondition (TASK-194 AC#4, 0 shadow rows at flip) as an explicit
+owner decision — so the early n is single-regime and NOT evidence until the power target is met.
 
 ---
 

@@ -1,28 +1,48 @@
-# SESSION HANDOFF — 2026-06-29 (Monday) — MxV-shadow master-plan execution day
+# SESSION HANDOFF — 2026-06-29 (Monday) — entry-gate revolution: Score OFF + minimal MxV-gate (LIVE, DRY_RUN)
+
+> ⚠️ This supersedes the earlier 2026-06-29 morning handoff (HEAD 94714b5). The morning plan
+> ("flip is always TASK-194, time-blocked ~2026-07-27, never auto") was **overridden in the
+> afternoon by an explicit owner decision**: the live entry logic was flipped TODAY.
 
 ## State
-- **HEAD:** `94714b5` (main, clean, `0 0` vs origin — all commits pushed)
-- **OPEN tasks:** 42 (In Progress: TASK-128 shadow-gate; TASK-186 overnight-runner [disarmed per memory]; rest To Do)
-- **PK:** v3.75 (bumped across the day; reflects 200/201/203/204/128-C1/128-C2-A) · **Mode:** DRY_RUN · **Sentinel:** shadow · **EXPLICIT_GATE_MODE / MXV_PRICE_GATE_MODE:** shadow
-- **Market:** closed (late-night, ~01:00 Peru).
+- **HEAD:** `3ae1363` (main, clean, `0 0` vs origin — all pushed)
+- **OPEN tasks:** 45 (In Progress: TASK-128 shadow-gate; TASK-186 overnight-runner [disarmed])
+- **PK:** v3.79 (bumped 3.76→3.79 across the day) · **Mode:** DRY_RUN (no real money)
+- **LIVE entry flags (changed today, all reversible):**
+  - `EXPLICIT_GATE_MODE = "active"` ← was "shadow": **Score gate (Filter 1) OFF**
+  - `ENTRY_GATE_MINIMAL = True`: **6 filters OFF** (RunUp/Volume/Blacklist/Toxic/MarketCap/ROCKET)
+  - `AGENT_MAX_REENTRIES_PER_TICKER = 1` ← was 3
+  - `AGENT_DRY_RUN = True` · `SENTINEL_MODE = "shadow"` · `MXV_PRICE_GATE_MODE = "shadow"`
+- **Live entry gate NOW = `MxV<=-100` ∧ `price>=$3` ∧ data-quality ∧ exposure-safety** (existing/cold-start/reentry/buying-power). Everything else off.
+- **Market:** closed (~16:00 Peru / evening).
 
-## Done today (MxV-shadow master plan)
-- **TASK-201 → Done** — guard `calculate_float_pct` against garbage provider floatShares (forward-only). (`4a2a999`)
-- **TASK-200 → Done** — collector candidate selection `Score>=60` → `MxV<=-100` (`select_candidates`); June backfill verified. Cross-month limitation → **TASK-202 opened**. (`5985763`)
-- **TASK-203 → Done** — guard Float% at collector copy-path (`clamp_float_pct`, (0,100] else NULL) + retro-cleanup of 12 May+June rows. (`9a5d4fc`/`1884e0b`)
-- **TASK-204 → Done** — `night_return` column = −D1_Gap% (SSoT-derived, no second calculator); MxV_at_entry skipped (redundant); backfill 357 values. (`1bee4fc`/`6d9c340`)
-- **TASK-128 → code C1+C2-A committed (stays In Progress):**
-  - C1 (`52dafbb`) — isolated MxV+price shadow observer: would-enter = `MxV<=-100 AND price>=$3` ONLY; `_check_filters`/`d.action` byte-identical (proven isolation from the live gate).
-  - C2-A (`94714b5`) — `shadow_gate_events` per-run summary now counts MxV+price would-enter (header 6→8); FIELD_MAPPING/decision_log untouched. C2-B (per-decision flag) skipped — redundant vs post_analysis.
+## ⭐⭐ READ FIRST next session — LIVE-VERIFY THE FLIP (the only thing that matters tomorrow)
+At market open (DST-aware now: ~08:30 Peru summer), the FIRST `agent_minute` run is the
+first-ever run of the new gate. **Read `decision_log` and confirm:**
+1. ENTERs now appear that were previously `SCORE_TOO_LOW` (low Score, MxV<=-100, price>=$3).
+2. Entry volume is sane — NOT a flood of illiquid/extreme-cap names (Volume + MarketCap are OFF, so watch REL_VOL / liquidity of the new entries).
+3. `shadow_gate_events` finally gets its first row (tab was provisioned today; was 0 rows).
+- **If the new population looks bad → staged revert (one config value each):**
+  - `ENTRY_GATE_MINIMAL = False` (restores the 6 filters), and/or
+  - `EXPLICIT_GATE_MODE = "shadow"` (restores the Score gate).
 
-## Infra bug discovered (NOT from C2-A — pre-existing)
-- `shadow_gate_events` was **never provisioned/registered** in sheets_config (for any month) → `flush_shadow_gate_summary` — **including the existing Score-divergence shadow** — has been silently no-op'ing since it was added (catches the exception → returns 0). **Zero damage** (silent no-op, no bad write). This blocks live-verification of TASK-128 AC#3.
+## Done today
+- **TASK-207 → Done** (`a5b87a2`/`78245e7`/`aebcb4a`/`384ed7d`) — agent-sheet provisioning gap: self-heal step in `agent_eod` runs `create_agent_sheets --month current` (idempotent) + commit/push sheets_config; **verified live** (workflow_dispatch created `shadow_gate_events`, 8 cols). + dry-run config-skip fidelity.
+- **TASK-208-B → Done** (`5a127ad`) — `borrow_collector.get_scanned_universe` selects by `MxV<=-100` not frozen Score (daily_snapshots.Score was blank in scoreless era → empty universe → live TASK-172 coverage gap). 208-A (auto_scanner ranking, cosmetic) stays open under TASK-208.
+- **TASK-194 → stage-1 + stage-2 flip EXECUTED** (`1f451c2` wire, `7f6b965` flip): `evaluate_signal` honors `EXPLICIT_GATE_MODE`; flipped shadow→active. **Owner decision, AHEAD of the ≥2-week shadow precondition** (0 shadow rows at flip time) — safe because DRY_RUN + reversible. AC 5/6 (#4 = post-flip monitoring, open by design). S2=208 / S3=209 spun out.
+- **TASK-210 → Done** (`6b5586d`) — minimal entry gate: `ENTRY_GATE_MINIMAL` wraps 6 filters; reentry 3→1; 7 default-dependent tests pinned `minimal=False`.
+- **TASK-212 → Done** (`16045d3`) — dashboard Timeline Archive: combined `$price / mxv` cells (Score off), green styler MxV<=-100, width 120px. **Verified visually (screenshots).**
+- **DST fix** (`a0d63fe`) — `is_market_hours` was Peru-hardcoded (summer-only) → now derives the window from ET (`America/New_York`), correct in both seasons; crons `auto_scan` 13-19→13-21, `agent_minute` 13-20→13-21. TDD 5/5.
+- **TASK-206 → foundation only (stays To Do)** (`936948e`/`0a372f0`) — provider `get_fundamentals` exposes 8 fields + `raw` .info catch-all; collector-write / FINVIZ-Custom still open.
 
-## ⭐ Next chat
-- **Provision `shadow_gate_events`** (create sheet + register in sheets_config, monthly rotation) → activates TASK-128 AC#3 AND fixes the silently-failing Score-divergence shadow → live-verify (flush test row, read back 8 values) → **close TASK-128 Done**. A separate gated op (creates a new Sheet file) — needs explicit go.
-- After: **T-E** (TASK-206 fundamentals), **T-D** (TASK-205 25-day horizon), **T-F** (TASK-202 cross-month backfill, optional), **T-G** (TASK-194 Score-flip-to-active — time-blocked ~2026-07-27, never auto).
+## Open / next
+- **TASK-128** (In Progress) — AC#3 (shadow_gate_events row written) verifiable tomorrow after first run; but post-flip the Score-divergence (WouldAllow) zeroes by design (live==explicit).
+- **TASK-194 AC#4** — ongoing post-flip monitoring (not "done"; it's a watch item).
+- **New today:** TASK-208 (S2 scanner-ranking), TASK-209 (S3 retire calculate_score), TASK-211 (is_day_complete DST latent ~Nov), TASK-212 (dashboard, Done).
+- **TASK-206 next:** collector-write of the 8 fields + raw_fundamentals_json + FINVIZ-Custom.
 
 ## Notes
-- DRY_RUN · shadow · zero real trades. The flip to active is always TASK-194, time-blocked on multi-regime verification (~2026-07-27), never automatic.
-- TDD throughout (RED→GREEN); test suite green (271 passed; sole failure = pre-existing `test_write_real_decision_to_sheet` integration, confirmed on a clean tree).
-- Zero touch to `_check_filters` / `d.action` (live-gate isolation, life-critical constraint).
+- DRY_RUN throughout — zero real money. Every entry-logic change is reversible via a single config value.
+- TDD on every code change (RED→GREEN). Full suite: **2 pre-existing failures only** (`test_write_real_decision_to_sheet` integration-Sheets, verified on clean tree; `test_filename_length_guard` stale premise — no files ≥200B).
+- The thesis shift: re-validation deflated the protective filters (Toxic/ROCKET added May-2026, not in the 2yr method; ROCKET blocked 12 wins vs 7 losses) and Score is non-predictive (AUC 0.531). The edge lives in MxV + price. The minimal gate maximizes the MxV-driven entry population for forward measurement.
+- Latent (not fixed): `is_day_complete` same DST bug (TASK-211); auto_scan ~14:05 stop earlier today never root-caused (likely Actions throttle — needs `gh run list`).
