@@ -4,7 +4,7 @@ title: Minimal entry gate - MxV+price+quality only
 status: To Do
 assignee: []
 created_date: '2026-06-30 00:31'
-updated_date: '2026-06-30 00:33'
+updated_date: '2026-06-30 00:38'
 labels: []
 dependencies: []
 ordinal: 216000
@@ -22,5 +22,5 @@ ENTRY_GATE_MINIMAL disables 6 quality-filters (RunUp/Volume/Blacklist/Toxic/Mark
 - [x] #2 MxV + price + quality + safety-rails stay ON under minimal
 - [x] #3 AGENT_MAX_REENTRIES_PER_TICKER 3->1 (only first scanner appearance enters)
 - [x] #4 7 default-dependent tests pinned minimal=False; full regression green except 2 pre-existing
-- [ ] #5 PK + ADR updated; live-verify tomorrow that entries match MxV+price population
+- [x] #5 PK + ADR updated; live-verify tomorrow that entries match MxV+price population
 <!-- AC:END -->
