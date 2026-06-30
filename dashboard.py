@@ -1721,10 +1721,15 @@ def timeline_archive_page():
     if selected_ticker == "— All tickers (overview) —":
         st.subheader(f"All tickers — {selected_date}")
 
-        day_df["Score"] = pd.to_numeric(day_df.get("Score", 0), errors="coerce")
+        # Combined Price/MxV cell (Score is logically off post-194; show the live drivers).
+        for _c in ("Price", "MxV"):
+            day_df[_c] = pd.to_numeric(day_df.get(_c), errors="coerce")
+        day_df["_cell"] = day_df.apply(
+            lambda r: f"${r['Price']:.2f} / {r['MxV']:.0f}"
+            if pd.notna(r.get("Price")) and pd.notna(r.get("MxV")) else "", axis=1)
         if "ScanTime" in day_df.columns:
-            pivot = day_df.pivot_table(index="Ticker", columns="ScanTime", values="Score", aggfunc="last")
-            pivot = pivot[sorted(pivot.columns, reverse=True)].round(2)
+            pivot = day_df.pivot_table(index="Ticker", columns="ScanTime", values="_cell", aggfunc="last")
+            pivot = pivot[sorted(pivot.columns, reverse=True)]
         else:
             pivot = day_df.set_index("Ticker") if "Ticker" in day_df.columns else day_df
 
@@ -1738,8 +1743,17 @@ def timeline_archive_page():
         with col2:
             st.metric("Time Points", len(pivot.columns))
 
-        styled = pivot.style.map(color_score).format("{:.2f}")
-        st.dataframe(styled, use_container_width=True, height=600)
+        def _color_mxv_cell(val):
+            # green when MxV <= -100 (a short-entry candidate); cell looks like "$5.20 / -150"
+            try:
+                mxv = float(str(val).split("/")[-1])
+            except (ValueError, AttributeError, IndexError):
+                return ""
+            return "background-color: #1a4a1a; color: #80ff80" if mxv <= -100 else ""
+        styled = pivot.style.map(_color_mxv_cell)
+        # fixed per-column pixel width so each "$price / mxv" cell fits exactly
+        _colcfg = {c: st.column_config.TextColumn(width=120) for c in pivot.columns}
+        st.dataframe(styled, height=600, column_config=_colcfg)
 
         csv = pivot.to_csv()
         st.download_button("📥 Download CSV", csv, f"timeline_{selected_date}.csv", "text/csv")
