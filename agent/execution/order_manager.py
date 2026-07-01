@@ -56,6 +56,30 @@ STATUS_OPEN = "OPEN"
 STATUS_CANCELLED_TIMEOUT = "CANCELLED_TIMEOUT"
 STATUS_REJECTED = "REJECTED"
 
+# Canonical paper_portfolio column order (matches create_agent_sheets.py:81-88).
+# TASK-217: the entry-write builds rows BY NAME against this list instead of a
+# fixed positional list, so a header/field change can never silently misplace a
+# value (the 2026-07 tab drifted to a stale 23-col header and a positional append
+# shifted every value +2). See docs/PLAN_paper_portfolio_misalign_fix_v2.md.
+PORTFOLIO_COLUMNS = [
+    "PositionID", "Ticker", "EntryDate", "EntryTime", "EntryPrice", "Quantity",
+    "PositionSizeUSD", "Side", "EntryOrderID", "TPOrderID", "SLOrderID",
+    "TPPrice", "SLPrice", "CurrentPrice", "UnrealizedPnL", "UnrealizedPnLPct",
+    "Status", "ExitPrice", "ExitDate", "ExitTime", "ExitReason",
+    "RealizedPnL", "RealizedPnLPct", "LastUpdated", "DataQuality",
+]
+
+
+def build_portfolio_row(values: dict, header: list) -> list:
+    """Order `values` (col_name -> value) by `header`; blank for absent columns.
+
+    Raises KeyError if `values` contains a key not in `header` — surfacing a
+    schema drift loudly instead of silently misplacing data (TASK-217)."""
+    unknown = set(values) - set(header)
+    if unknown:
+        raise KeyError(f"paper_portfolio: unknown columns {sorted(unknown)}")
+    return [values.get(col, "") for col in header]
+
 
 # ════════════════════════════════════════════════════════════════════════
 # OrderManager
@@ -238,33 +262,26 @@ class OrderManager:
         # CurrentPrice, UnrealizedPnL, UnrealizedPnLPct, Status,
         # ExitPrice, ExitDate, ExitTime, ExitReason,
         # RealizedPnL, RealizedPnLPct, LastUpdated, DataQuality
-        row = [
-            decision.decision_id or "",       # PositionID (same as DecisionID)
-            decision.ticker,                  # Ticker
-            entry_date,                       # EntryDate
-            entry_time,                       # EntryTime
-            decision.execution_price or decision.price,  # EntryPrice
-            decision.quantity,                # Quantity
-            decision.position_size_usd,       # PositionSizeUSD
-            "short",                          # Side
-            order.id,                         # EntryOrderID
-            tp_order_id,                      # TPOrderID
-            sl_order_id,                      # SLOrderID
-            decision.tp_price,                # TPPrice
-            decision.sl_price,                # SLPrice
-            "",                               # CurrentPrice
-            "",                               # UnrealizedPnL
-            "",                               # UnrealizedPnLPct
-            status,                           # Status
-            "",                               # ExitPrice
-            "",                               # ExitDate
-            "",                               # ExitTime
-            "",                               # ExitReason
-            "",                               # RealizedPnL
-            "",                               # RealizedPnLPct
-            now.isoformat(),                  # LastUpdated
-            "CLEAN",                          # DataQuality (post-2026-05-16 bug fixes)
-        ]
+        # TASK-217: build BY NAME against the canonical header (not a positional
+        # list) so a header/field change can never silently misplace a value.
+        row = build_portfolio_row({
+            "PositionID": decision.decision_id or "",
+            "Ticker": decision.ticker,
+            "EntryDate": entry_date,
+            "EntryTime": entry_time,
+            "EntryPrice": decision.execution_price or decision.price,
+            "Quantity": decision.quantity,
+            "PositionSizeUSD": decision.position_size_usd,
+            "Side": "short",
+            "EntryOrderID": order.id,
+            "TPOrderID": tp_order_id,
+            "SLOrderID": sl_order_id,
+            "TPPrice": decision.tp_price,
+            "SLPrice": decision.sl_price,
+            "Status": status,
+            "LastUpdated": now.isoformat(),
+            "DataQuality": "CLEAN",  # post-2026-05-16 bug fixes
+        }, PORTFOLIO_COLUMNS)
 
         # TASK-105: return whether the row was persisted so execute() can
         # surface a failed write instead of swallowing it silently.
