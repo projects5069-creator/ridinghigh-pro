@@ -86,5 +86,16 @@
     "skip_summary": "13jMGlhpHHvz739WT6tTexS7J4z4IZ3pd-SI7TjWLML0",
     "borrow_coverage": "1k_exONFQXwKKhiAjRLpeAmB1W6r8J3k4a8Ca-4cCM2A",
     "shadow_gate_events": "1LjVTYdWMpDDePF4VG12zjVhrIzBA2EPF3qkGTAvYjA0"
+  },
+  "2026-08": {
+    "timeline_live": "1U_SUQV2MZGdTGJKymzUnnVssdcfLhutiRqqIfqwWFQ4",
+    "daily_snapshots": "1EisqdxHCYBlQg_ddlUrR1S1c98feWaiYGQTR_lknxHw",
+    "daily_summary": "1mP-6pBwGVHplAe28XZBLmBzUSs7peJUXiAwaWbcP2o0",
+    "post_analysis": "1Rjo7kZ4vIt_oUzEetOg-cT4p6mNFrwgmstqvM2FKYUI",
+    "portfolio": "15-ROHqYeuQeytun3m5BwGGqiwlgsTGzPCj4NgL3iGww",
+    "portfolio_live": "1Iengm1LZWuDR8xoMEHuQL2tXKlLiQK0eVGMc3NiIrX0",
+    "score_tracker": "1_NC6LOTa1HhdYw7kwNAJfNCg0XizdjvDxSJVx6rD9H8",
+    "live_trades": "1b0VbCM1l91XDDVgE43pntq8SQLVLYvR-L3dWgCTTZ0w",
+    "ticker_follow_up": "1_lkN8EQMeqxo2vXDApF9ppo9wwiSjBpx_3gOcx3vdYc"
   }
 }
