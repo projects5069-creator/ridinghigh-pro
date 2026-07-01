@@ -136,6 +136,21 @@ def _get_gc():
             _json.loads(creds_json_as), scopes=SCOPES)
         return gspread.authorize(creds)
 
+    # agent_minute dedicated SA to end 429 contention on the shared SA (live A/B
+    # 2026-07-01: agent_minute 37-61x/run "429 Read requests per minute per user"
+    # on the shared SA while auto_scan on _AS stayed clean the same minutes).
+    # Mirror of TASK-215 (_AS) / TASK-58 (_HA).
+    # ⚠️ BLAST-RADIUS: _get_gc is shared by ~20 modules. This branch must stay
+    # no-op for everyone EXCEPT agent_minute. SAFETY = GOOGLE_CREDENTIALS_JSON_AM
+    # is injected ONLY in agent_minute.yml — NEVER in any other workflow.
+    # Empty/absent falls through to the shared SA (truthy-guard, same as _AS/_HA).
+    creds_json_am = os.environ.get("GOOGLE_CREDENTIALS_JSON_AM")
+    if creds_json_am:
+        import json as _json
+        creds = Credentials.from_service_account_info(
+            _json.loads(creds_json_am), scopes=SCOPES)
+        return gspread.authorize(creds)
+
     creds_json = os.environ.get("GOOGLE_CREDENTIALS_JSON")
     if creds_json:
         import json as _json
