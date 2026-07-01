@@ -147,21 +147,15 @@ def _get_gc():
     creds_json_am = os.environ.get("GOOGLE_CREDENTIALS_JSON_AM")
     if creds_json_am:
         import json as _json
-        _info_am = _json.loads(creds_json_am)
-        # DIAGNOSTIC (2026-07-01): expose which SA agent_minute actually uses.
-        # client_email is an identifier, NOT a secret (private_key is never printed).
-        print(f"[_get_gc] selected _AM SA: client_email={_info_am.get('client_email')}", flush=True)
-        creds = Credentials.from_service_account_info(_info_am, scopes=SCOPES)
+        creds = Credentials.from_service_account_info(
+            _json.loads(creds_json_am), scopes=SCOPES)
         return gspread.authorize(creds)
 
     creds_json = os.environ.get("GOOGLE_CREDENTIALS_JSON")
     if creds_json:
         import json as _json
-        _info_shared = _json.loads(creds_json)
-        # DIAGNOSTIC (2026-07-01): expose the shared SA on fallthrough (client_email
-        # only — never the private_key).
-        print(f"[_get_gc] selected shared SA: client_email={_info_shared.get('client_email')}", flush=True)
-        creds = Credentials.from_service_account_info(_info_shared, scopes=SCOPES)
+        creds = Credentials.from_service_account_info(
+            _json.loads(creds_json), scopes=SCOPES)
         return gspread.authorize(creds)
 
     creds_path = os.path.expanduser("~/RidingHighPro/google_credentials.json")
