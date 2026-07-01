@@ -4,7 +4,7 @@ title: Gate כניסה מבוסס-מדדים בא shadow mode
 status: In Progress
 assignee: []
 created_date: '2026-06-10 01:03'
-updated_date: '2026-06-29 04:16'
+updated_date: '2026-07-01 01:12'
 labels: []
 dependencies: []
 priority: medium
@@ -31,4 +31,6 @@ Design from validated metrics only (Price band 5-10 strongest so far; D1-gap nee
 קלט-מדדים מאומת (מחקר 199, צ'אט 2026-06-28, raw/exploratory MxV<=-100%): הצעת-גייט מבוססת 4 ממדים עצמאיים בחלוקת-תפקידים (ablation): מנוע-רווח = MxV<=-100 (בסיס, כבר בגייט) + TPD>=6 (תוספת +6.5pp רווח, אורתוגונלי); מסנני-זנב = REL_VOL>=15 (קטסט 8->4%) + Float%>=60 (קטסט 4->0%). כולם בלתי-תלויים (Spearman ~0 ביניהם). חסמים לפני shadow/active: (1) TASK-201 — Float% מושחת (42M) לתיקון; (2) TASK-200 — נתון מוגבל ל-Score>=60 (היקום החלקי); (3) ניתוק-Score Filter1 — TASK-194/127. גבול-אמינות: שמיש עד MxV+TPD+REL_VOL (n=28); הוספת Float% קורסת ל-n=13. אזהרה: raw, ריכוז-יוני, 8 קטסטרופליות = exploratory; דורש 2+ שבועות multi-regime (~2026-07-27) לפני shadow->active. recon אישר: כיום רק MxV בגייט, 3 ממדים חסרים, Filter1 (Score) עדיין פעיל.
 
 master plan 2026-06-29: core AC added for MxV+price shadow observer separate from _check_filters; Score/Toxic/ROCKET_GUARD non-blocking tracking metrics. Source-trace proved protective filters were NOT part of the 2yr real-money method, all added May-2026, repo born 2026-03-18; re-validation deflated them: 129pp became 19.7pp; ROCKET_GUARD blocks 12 wins vs 7 losses. Sequenced as T-B with TASK-203..206 + 202/194.
+
+2026-06-30: פער-provisioning תוקן — shadow_gate_events נוצר ב-2026-07 (commit c19e246, נדחף). חלון-התצפית מוגן מ-1/7. observer בנוי+מחובר (52dafbb), ב-shadow, אוסף דאטה עד ~7/27.
 <!-- SECTION:NOTES:END -->
