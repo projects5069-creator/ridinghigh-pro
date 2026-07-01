@@ -350,6 +350,11 @@ AGENT_SCORE_VERSION = "v2.6"
 # ════════════════════════════════════════════════════════════════════
 DATA_SENTINEL_ENABLED = True
 SENTINEL_MODE = "shadow"  # "shadow" (log only) | "active" (block) | "off" — TASK-66 2026-06-03: active→shadow (counterfactual: would-block WR 64% vs 41%, n=36 single-regime; active was HALTing on false positives). Restore selectively later.
+# TASK-176: News Detective demoted off the per-minute path. It calls get_worksheet()
+# per-ticker (~46 read-req/run — the largest agent_minute 429 contributor, 46/91) and
+# research proved it net-negative (WITH-news WR 60% < WITHOUT 62%, EDGAR r=-0.156).
+# False = skip per-minute (reversible). Flip True to restore, or re-add EOD-only later.
+NEWS_DETECTIVE_ENABLED = False
 
 # TASK-128 / Option-B shadow-first (resolves decision-gates 141+174): explicit
 # proven-filter gate (Score decoupled from entry). Mirrors SENTINEL_MODE semantics:

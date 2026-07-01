@@ -497,6 +497,24 @@ def make_portfolio_batch_writer(ws, hdr, pid_col):
     return writer, flush
 
 
+def _maybe_write_news(news_detective, ticker: str) -> None:
+    """TASK-176: gate news_detective off the per-minute path.
+
+    news_detective.write_findings() calls get_worksheet() per-ticker (~46 Sheets
+    read-requests/run — the single biggest agent_minute 429 contributor, 46/91).
+    Research proved it net-negative (WITH-news WR 60% < WITHOUT 62%, EDGAR r=-0.156),
+    so it is disabled per-minute via config.NEWS_DETECTIVE_ENABLED (reversible).
+    Log-only, never blocks — a write error is swallowed (matches prior behaviour).
+    """
+    from config import NEWS_DETECTIVE_ENABLED
+    if not NEWS_DETECTIVE_ENABLED:
+        return
+    try:
+        news_detective.write_findings(ticker)
+    except Exception as e:
+        logger.warning("News Detective failed for %s: %s", ticker, e)
+
+
 def run() -> Dict[str, Any]:
     """
     Main orchestrator run. Called once per minute by GitHub Actions.
@@ -716,11 +734,8 @@ def run() -> Dict[str, Any]:
                 if sentinel_result.is_warn:
                     logger.warning("Sentinel WARN %s: %s", ticker, sentinel_result.reason)
 
-                # News Detective — log-only, never blocks
-                try:
-                    news_detective.write_findings(ticker)
-                except Exception as e:
-                    logger.warning("News Detective failed for %s: %s", ticker, e)
+                # News Detective — log-only, never blocks; gated off per-minute (TASK-176)
+                _maybe_write_news(news_detective, ticker)
 
                 decision = trader.evaluate(signal, account_state)
                 log_result = decision_logger.log(decision)
