@@ -4,7 +4,7 @@ title: News Detective demotion — EOD-only or disable pending value proof
 status: To Do
 assignee: []
 created_date: '2026-06-13 01:26'
-updated_date: '2026-06-30 14:16'
+updated_date: '2026-07-02 04:43'
 labels:
   - TASK-171
 dependencies: []
@@ -27,5 +27,5 @@ ordinal: 179000
 ## Implementation Notes
 
 <!-- SECTION:NOTES:BEGIN -->
-MERGED TASK-67 (30/6): כולל אימות מחקרי לפני demotion — סימולציית 'חדשות מהותיות→לא לשורט' (WITHOUT WR 62% > WITH 60%, EDGAR r=-0.156). רצף: הוכח חוסר-ערך → EOD-only/disable.
+AC#1 DONE (news_detective off per-minute, NEWS_DETECTIVE_ENABLED=False, pushed 5f0b288). AC#2 (quota savings) = measure via scripts/measure_429_by_workflow_v1.py over 1-3/7.
 <!-- SECTION:NOTES:END -->
