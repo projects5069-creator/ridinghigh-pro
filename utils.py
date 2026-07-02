@@ -167,9 +167,10 @@ def is_day_complete(date_str):
     """
     True when the full trading day for date_str has closed.
     
-    Market close = 15:00 Peru time.
+    Market close = 16:00 ET (America/New_York), DST-aware — 15:00 Peru in
+    summer/EDT, 16:00 Peru in winter/EST.
     - Past weekdays: always complete
-    - Today: complete only after 15:00 Peru
+    - Today: complete only after the ET close (16:00 ET) reached in Peru time
     - Future or weekends: never complete
     
     Args:
@@ -197,9 +198,15 @@ def is_day_complete(date_str):
     if day < today:
         return True
     
-    # Today - complete after market close
+    # Today - complete after market close. DST-aware: NYSE closes 16:00 ET (which
+    # observes DST); Peru does not. Derive the Peru close from the ET close on this
+    # date — hardcoding 15:00 Peru (MARKET_CLOSE_HOUR_PERU) only holds in summer/EDT;
+    # winter/EST close is 16:00 Peru. Same fix as is_market_hours (a0d63fe). RULE #10.
     if day == today:
-        return now_peru.hour >= MARKET_CLOSE_HOUR_PERU
+        from datetime import time as dt_time
+        et = pytz.timezone("America/New_York")
+        close_peru = et.localize(datetime.combine(day, dt_time(16, 0))).astimezone(PERU_TZ)
+        return now_peru >= close_peru
     
     # Future - never complete yet
     return False
