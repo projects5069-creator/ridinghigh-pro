@@ -6,7 +6,7 @@ title: >-
 status: To Do
 assignee: []
 created_date: '2026-05-30 22:18'
-updated_date: '2026-05-30 22:46'
+updated_date: '2026-07-02 21:11'
 labels: []
 dependencies: []
 priority: medium
@@ -16,7 +16,5 @@ ordinal: 62000
 ## Implementation Notes
 
 <!-- SECTION:NOTES:BEGIN -->
-כלול הבחנת %-edge מול $-edge: net pnl_pct מול net$ (השבוע net%=-1.6% אך net$=+144 → edge אחוזי שטוח/שלילי, הרווח מגודל פוזיציה לא מיתרון). הצג net%/median% ליד ה-$ לשקיפות. AvgWin<AvgLoss = דגל.
-
-הערה (TASK-78, 2026-06-03): טענת 'DropsLab EMPTY' שעלתה כאן ב-30/5 הייתה Sheet ID שגוי (homoglyph I/l, תוקן TASK-77), לא מקור ריק. הגיליון מלא — אומת חי (drops_raw 2851 / drops_post 2156). הניתוח עצמו (%-edge מול $-edge) נשאר רלוונטי.
+Measured 2026-07-02 (n=229 joined closed trades, analyze_trades_vix_v1.py): MxV WIN mean -1315/med -698 vs LOSS mean -1395/med -559 — no monotonic separation, median inverted. ATRX WIN 5.00 vs LOSS 4.90 — negligible. Conclusion: MxV/ATRX do NOT predict per-trade outcome in this data. Consistent with TASK-199 (MxV = candidate-selection engine not per-trade predictor; ATRX = noise). Null result — documented.
 <!-- SECTION:NOTES:END -->

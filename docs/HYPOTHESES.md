@@ -247,6 +247,23 @@ owner decision — so the early n is single-regime and NOT evidence until the po
 
 ---
 
+## §H · NULL RESULTS (measured 2026-07-02)
+
+Measured, not promoted — recorded so they are not re-litigated without new data
+(analyze_trades_vix_v1.py, n from joined closed trades):
+
+- **(a) MxV/ATRX per-trade outcome (TASK-62)** — no separation, n=229. MxV WIN
+  med −698 vs LOSS med −559 (inverted); ATRX WIN 5.00 vs LOSS 4.90 (negligible).
+  Consistent with research-199: MxV is a candidate-selection engine, not a
+  per-trade predictor; ATRX ≈ noise.
+- **(b) VIX-regime WR (TASK-70 / TASK-170)** — inconclusive. VIX<20 n=205 WR 53.7%,
+  20-30 n=14 WR 57.1%, >30 n=0. The whole 05-07 window was low-vol → no regime
+  variance; the original TASK-70 finding (72% vs 58%) did NOT reproduce.
+- **Neither promoted.** Re-test triggers: real VIX variance (entries at >30) /
+  larger n in the mid-bucket.
+
+---
+
 ## §E · Integration (TASK-165 AC#2)
 
 - **Session close ritual** (`docs/SESSION_PROTOCOL.md`): when a session produced
