@@ -14,7 +14,7 @@
 - `655fbc5` — fail-closed classify_verdict + stderr→.classify.err + scan-worktree trap EXIT
 
 ## מצב נוכחי
-- **Runner DISARMED** — launchctl unload (מאומת: לא ב-launchctl list; plist על הדיסק → reload-able עם launchctl load).
+- **Runner DISARMED** — launchctl unload (מאומת: לא ב-launchctl list; plist על הדיסק → reload-able עם launchctl load). [CORRECTED 2026-07-02: unload-only did NOT hold; login reloaded plist. Fired 9 nights, all ABORTED. Truly disarmed 2026-07-02 via rename->.disabled+bootout, launchctl verified empty. See POSTMORTEM_overnight_ARMED_2026-07-02.md]
 - **TASK-186** (Build overnight runner) — In Progress, תקוע על execute-proof. ה-execute machine ממופה וקיים (queue→worktree rh-night/$tid→execute_task.md: debug→TDD→review→draft PR @ :51) אך **לא validated end-to-end** — אין auto-safe אמיתי להריץ עליו.
 - **TASK-126** — To Do (needs_human, לא Done).
 

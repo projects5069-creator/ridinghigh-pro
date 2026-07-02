@@ -46,7 +46,7 @@ next monthly rotation / `create_agent_sheets` run; until then `flush` no-ops gra
   `shadow_gate_events`** show the divergence is benign (~mid-July, AND a 2nd regime must appear — not
   just calendar). Linked to TASK-128 + ADR-009.
 - **TASK-179** (validate crossover-short) — until n≥150 forward (~mid-July).
-- **TASK-186** — overnight runner, parked/disarmed.
+- **TASK-186** — overnight runner, parked/disarmed. [CORRECTED 2026-07-02: unload-only did NOT hold; login reloaded plist. Fired 9 nights, all ABORTED. Truly disarmed 2026-07-02 via rename->.disabled+bootout, launchctl verified empty. See POSTMORTEM_overnight_ARMED_2026-07-02.md]
 
 ## Notes
 - 6 commits today; main clean & synced. Two HIGH closed (136 + the 141/174/127 gate trio).

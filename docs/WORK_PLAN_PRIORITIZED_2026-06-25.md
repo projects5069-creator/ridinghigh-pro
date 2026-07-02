@@ -38,7 +38,7 @@ VERDICT (מאומת מול backtest-expert, snapshot paper_portfolio 05-22, n=79
 - 74 | פער ~770/1000 מאומת (post_analysis 54-57/~1000) | כבד (Alpaca) | הכרעת-עמיחי | data-quality-checker
 
 ## C. מסלול DECIDE (8 הכרעות לעמיחי — שורה+המלצה)
-- 186 overnight-runner | קוד+טסטים GREEN, DISARMED 6/20 | המלצה: להשאיר DISARMED עד שיש משימת auto-safe אמיתית (פרמיסת "TASK-126=auto-safe" הופרכה — 0/59 auto-safe). ערך = template + --triage-only.
+- 186 overnight-runner | קוד+טסטים GREEN, DISARMED 6/20 | המלצה: להשאיר DISARMED עד שיש משימת auto-safe אמיתית (פרמיסת "TASK-126=auto-safe" הופרכה — 0/59 auto-safe). ערך = template + --triage-only. [CORRECTED 2026-07-02: unload-only did NOT hold; login reloaded plist. Fired 9 nights, all ABORTED. Truly disarmed 2026-07-02 via rename->.disabled+bootout, launchctl verified empty. See POSTMORTEM_overnight_ARMED_2026-07-02.md]
 - 194 Stage-2 flip | להסיר Score gate חי | המלצה: BLOCKED נכון — להמתין ל-128 (>=2 שב' shadow רב-משטרי). לא לפעול עכשיו.
 - 176 News-Detective demote | net-negative, quota כבד | המלצה: **demote ל-EOD-only** (67 מאשר אפס discrimination; ch-audit F6 quota חריגה ×6-×12). זול ומפחית עומס.
 - 170 market-regime wire | market_context מוכן | המלצה: לחווט כ-shadow-modifier בלבד (לא חי) — עד שיש edge; אחרת מוסיף רעש להחלטה ללא signal מוכח.

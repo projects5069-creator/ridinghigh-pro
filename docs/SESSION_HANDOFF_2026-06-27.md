@@ -25,7 +25,7 @@
 ## Open items / next
 - **TASK-65** — decide & execute backfill approach for the 36 closed-without-postmortem.
 - **TASK-198** — classify the 20 not-in-pp: re-entry duplicate (e.g. EHGO-124202 beside 085304) vs rejected-ENTER (borrow/shares) vs real ENTER→position pipeline gap.
-- **Carried:** TASK-166 (lineage sentinel live-verify, post-EOD only), TASK-128 (shadow gate, In Progress), TASK-186 (overnight runner, In Progress/disarmed per memory).
+- **Carried:** TASK-166 (lineage sentinel live-verify, post-EOD only), TASK-128 (shadow gate, In Progress), TASK-186 (overnight runner, In Progress/disarmed per memory). [CORRECTED 2026-07-02: unload-only did NOT hold; login reloaded plist. Fired 9 nights, all ABORTED. Truly disarmed 2026-07-02 via rename->.disabled+bootout, launchctl verified empty. See POSTMORTEM_overnight_ARMED_2026-07-02.md]
 
 ## ⭐ Planned for the NEXT chat
 **TASK-65 backfill decision for the 36** (or TASK-198 recon of the 20) — both unblocked, read-only-until-approved.

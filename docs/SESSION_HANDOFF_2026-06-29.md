@@ -6,7 +6,7 @@
 
 ## State
 - **HEAD:** `3ae1363` (main, clean, `0 0` vs origin — all pushed)
-- **OPEN tasks:** 45 (In Progress: TASK-128 shadow-gate; TASK-186 overnight-runner [disarmed])
+- **OPEN tasks:** 45 (In Progress: TASK-128 shadow-gate; TASK-186 overnight-runner [disarmed]) [CORRECTED 2026-07-02: unload-only did NOT hold; login reloaded plist. Fired 9 nights, all ABORTED. Truly disarmed 2026-07-02 via rename->.disabled+bootout, launchctl verified empty. See POSTMORTEM_overnight_ARMED_2026-07-02.md]
 - **PK:** v3.79 (bumped 3.76→3.79 across the day) · **Mode:** DRY_RUN (no real money)
 - **LIVE entry flags (changed today, all reversible):**
   - `EXPLICIT_GATE_MODE = "active"` ← was "shadow": **Score gate (Filter 1) OFF**
