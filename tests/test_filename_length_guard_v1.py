@@ -77,11 +77,24 @@ def test_ci_noargs_scans_tree_and_passes_at_250():
     assert rc == 0, f"existing tracked tree must pass the 250 CI hard cap\n{out}"
 
 
-def test_noargs_default_200_flags_grandfathered():
-    """Sanity: at the strict 200 margin the 3 grandfathered 204-219B files DO flag.
+def test_noargs_default_200_flags_grandfathered(tmp_path):
+    """No-args (git ls-files) mode flags an over-limit basename at the strict 200 margin.
 
-    Documents why CI uses 250 (hard-cap margin) while pre-commit uses 200 on
-    staged-only files — a repo-wide 200 scan is intentionally not the CI gate.
+    Synthetic & hermetic: build a throwaway git repo holding one 210-byte ASCII
+    basename, stage it, then run the guard with no args INSIDE that repo. This
+    replaces the old dependency on the real tree still carrying grandfathered
+    204-219B files — the last such file was shortened (204B->83B, dcd218a), so a
+    repo-wide 200 scan of the real tree now finds nothing. What we verify is the
+    guard's no-args tree-scan behaviour, not the contents of this repo's tree.
     """
-    rc, out = _run([], limit=200)
-    assert rc == 1, "repo-wide scan at 200 is expected to flag the grandfathered files"
+    long_base = "a" * 210  # 210 ASCII bytes, in the old 204-219B grandfathered band
+    (tmp_path / long_base).write_text("x")
+    subprocess.run(["git", "init", "-q"], cwd=tmp_path, check=True)
+    subprocess.run(["git", "add", "-A"], cwd=tmp_path, check=True)
+    env = dict(os.environ)
+    env["FILENAME_BYTE_LIMIT"] = "200"
+    p = subprocess.run(["bash", SCRIPT], cwd=tmp_path, env=env,
+                       capture_output=True, text=True)
+    out = p.stdout + p.stderr
+    assert p.returncode == 1, f"no-args 200 scan must flag the 210B basename\n{out}"
+    assert "210 bytes" in out
