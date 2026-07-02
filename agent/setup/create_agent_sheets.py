@@ -268,6 +268,32 @@ def _set_headers(gc, sheet_id: str, headers: list):
         print(f"      ⚠️ Could not set headers: {e}")
 
 
+def header_matches_canonical(existing: list, canonical: list) -> bool:
+    """Pure: True iff `existing` header equals `canonical` exactly (order + set).
+
+    TASK-217: catches the 2026-07 drift class — a tab created by an older schema
+    (missing columns) and/or with trailing phantom blank columns. Trailing blanks
+    or missing/extra/re-ordered columns all fail. No Sheets access (§10)."""
+    return list(existing) == list(canonical)
+
+
+def assert_header_canonical(existing: list, canonical: list, name: str) -> None:
+    """Fail-loud on header drift for an existing tab (TASK-217 Task4).
+
+    Raises ValueError describing the drift instead of silently provisioning into a
+    mismatched tab (which is how the 2026-07 paper_portfolio corrupted 8 rows).
+    Does NOT rewrite live data — surfacing is the caller's decision."""
+    if header_matches_canonical(existing, canonical):
+        return
+    missing = [c for c in canonical if c not in existing]
+    extra = [c for c in existing if c not in canonical]
+    phantom = sum(1 for c in existing if c == "")
+    raise ValueError(
+        f"{name}: header drift — missing={missing} extra={[e for e in extra if e]} "
+        f"phantom_blanks={phantom} (expected {len(canonical)} cols, got {len(existing)})"
+    )
+
+
 def create_agent_sheets(month_key: str, dry_run: bool = False):
     """Create all agent sheets (len(AGENT_SHEET_NAMES)) for the given month."""
     print(f"\n{'='*60}")
