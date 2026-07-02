@@ -87,7 +87,8 @@ record if a hypothesis is re-opened under a new rule.
 | ID | Name | Status | Registered | Verdict |
 |----|------|--------|-----------|---------|
 | HYP-001 | crossover-short | **REGISTERED** | 2026-06-23 | validation pending TASK-179 (n≥150, ~mid-July) |
-| HYP-002 | minimal-MxV-gate | **DRAFT** | 2026-06-29 | live forward-capture; concludes at n≥150 post-flip entries |
+| HYP-002 | minimal-MxV-gate | **REGISTERED** | 2026-07-02 | live forward-capture since 6/29 flip; concludes at n≥150 post-flip entries OR 45 trading days, first-of |
+| HYP-003 | 4-dim-gate (MxV+TPD+REL_VOL+Float%) | **DRAFT** | — | tracking-only, awaiting n; criterion TBD |
 
 ---
 
@@ -174,11 +175,15 @@ validation on the forward hold-out (n≥150, ~mid-July).
 
 ---
 
-## §F · HYP-002 — minimal-MxV-gate (DRAFT)
+## §F · HYP-002 — minimal-MxV-gate (REGISTERED)
 
 ### HYP-002 · minimal-MxV-gate
-- Status:            DRAFT  (live since the 2026-06-29 flip; concludes after n≥150 post-flip entries)
-- Registered:        2026-06-29  (rule locked in config: EXPLICIT_GATE_MODE=active, ENTRY_GATE_MINIMAL=True)
+- Status:            REGISTERED  (live capture since the 2026-06-29 flip; criterion locked 2026-07-02)
+- Registered:        2026-07-02  (criterion locked; gate itself live in config since 2026-06-29:
+                     EXPLICIT_GATE_MODE=active, ENTRY_GATE_MINIMAL=True)
+- Scope:             DUAL-CONDITION ONLY (MxV<=-100 ∧ price>=$3). The 3 additional research-199
+                     dimensions (TPD>=6, REL_VOL>=15, Float%>=60) are TRACKING-ONLY here and are
+                     deferred to HYP-003 — they do NOT gate and do NOT enter this fitness.
 - Hypothesis:        the minimal entry gate (MxV<=-100 ∧ price>=$3, with Score AND the 6
                      universe/protective filters OFF) yields forward net outcomes at least
                      as good as the prior Score+full-filter gate.
@@ -189,7 +194,20 @@ validation on the forward hold-out (n≥150, ~mid-July).
 - HOLD_DAYS:         <=5 (classify window / MAX_HOLDING_DAYS).
 - Locked fitness:    net expectancy via calculate_net_pnl @ borrow 500%/yr × HOLD/365 +
                      slip 2%/side; GO = bootstrap CI on the profitable side AND not-worse
-                     than the Score-gated baseline over the same window.
+                     than the Score-gated baseline (test below).
+- Not-worse test:    baseline = Score-gated entries 2026-06-01→2026-06-28, scored with the SAME
+                     fitness (calculate_net_pnl @ borrow 500%/yr, slip 2%/side). Test = bootstrap
+                     95% CI on the difference (minimal − baseline) in net expectancy;
+                     not-worse iff the CI lower bound > −2pp. GO = profitable CI AND not-worse.
+- Stopping rule:     decide ONLY at n>=150 post-flip entries OR 45 trading days post-flip
+                     (2026-06-29), whichever comes FIRST. Interim peeks = safety-only (halt on
+                     catastrophic loss), never decisional. The 2026-07-27 promote checkpoint
+                     (TASK-194 AC#4 / TASK-128 AC#4) is a SEPARATE shadow→active decision and
+                     does NOT conclude this hypothesis.
+- Config freeze:     AGENT_TP_PCT=10 · AGENT_SL_PCT=10 · HOLD<=5 (MAX_HOLDING_DAYS) ·
+                     reentry<=1/ticker/day (AGENT_MAX_REENTRIES_PER_TICKER=1) — frozen for this
+                     hypothesis; ANY change to these voids the run and requires re-registration.
+- k reported:        k=2 (dual-condition HYP-002 + 4-dim HYP-003 candidate) per §A.2.
 - Power target:      n >= 150 entries detected AFTER 2026-06-29 (the flip date).
 - Hold-out rule:     measure ONLY post-flip entries; pre-flip Score-gated trades are the
                      comparison baseline, never recycled as discovery.
@@ -202,6 +220,30 @@ validation on the forward hold-out (n≥150, ~mid-July).
 restores the 6 filters; EXPLICIT_GATE_MODE=shadow restores Score). It was flipped ahead of the
 ≥2-week multi-regime shadow precondition (TASK-194 AC#4, 0 shadow rows at flip) as an explicit
 owner decision — so the early n is single-regime and NOT evidence until the power target is met.
+
+---
+
+## §G · HYP-003 — 4-dim-gate (DRAFT stub)
+
+### HYP-003 · 4-dim-gate (MxV + TPD + REL_VOL + Float%)
+- Status:            DRAFT  (stub — tracking-only; criterion TBD)
+- Registered:        —
+- Hypothesis:        adding TPD>=6 (profit engine, +6.5pp in research-199) and the tail filters
+                     REL_VOL>=15 and Float%>=60 to the HYP-002 dual-condition gate improves
+                     worst-case net expectancy without collapsing entry count.
+- Universe:          same as HYP-002; the 3 extra dimensions are recorded as TRACKING metrics
+                     only (never gate) while this is DRAFT.
+- Entry/Exit/HOLD:   TBD at registration (inherit HYP-002 frozen params unless re-specified).
+- Locked fitness:    TBD — criterion deliberately NOT locked yet; awaiting n
+                     (research-199 reliability boundary: 3-dim n=28, +Float% collapses to n=13).
+- Power target:      TBD.
+- Hold-out rule:     only events after future registration date; research-199 discovery sample
+                     locked, never re-scored.
+- Discovery sample:  research-199 (raw/exploratory, June-concentrated, Spearman~0 between dims) —
+                     provenance only, NOT evidence.
+- Dependencies:      HYP-002 concluded (or its capture mature) · tracking columns accumulating ·
+                     Float% integrity guards (TASK-201/203 ✅).
+- Result:            —
 
 ---
 
