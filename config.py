@@ -314,7 +314,7 @@ AGENT_SL_PCT = 10                  # Same as SL_THRESHOLD_PCT
 # Open positions roll over to next trading day.
 AGENT_FORCE_EOD_CLOSE = False
 AGENT_EOD_CLOSE_MIN_BEFORE = 5     # Close 5 min before market close
-RECONCILE_AUTO_REPAIR = False      # TASK-108: EOD auto-repair of missing paper_portfolio rows from decision_log. GATE: keep OFF until TASK-106 flag-only proves accurate over time (0 proof days as of 2026-06-03); auto-repair WRITES to the sheet.
+RECONCILE_AUTO_REPAIR = False      # TASK-108: EOD auto-repair of missing paper_portfolio rows from decision_log. GATE: keep OFF until TASK-106 flag-only proves accurate over time. Status as of 2026-07-02: 2 true-positives observed 6/30 (GVH,SDOT), 0 FP, but single-day only — NOT meaningful period. Gate NOT met. Also: repair writes lossy BACKFILL row (Status=CLOSED, PnL empty) even on true-positive. Prefer fixing 429 root-cause (TASK-215) over backfill. Keep False. (see TASK-109)
 
 # Position sizing
 AGENT_POSITION_SIZE_USD = 1000     # Same as POSITION_SIZE_USD
