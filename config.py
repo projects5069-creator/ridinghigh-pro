@@ -344,6 +344,13 @@ AGENT_LIVE_PAPER = False           # Becomes True after M10 approval
 # Postmortem schema versioning — bump when score formula changes
 AGENT_SCORE_VERSION = "v2.6"
 
+# TASK-219: header-drift severity tier for provisioning (create_agent_sheets).
+# CORE tabs carry money/decision data — a header drift on them raises (halts
+# provisioning) rather than silently writing into a mismatched schema (the
+# 2026-07 paper_portfolio 8-row corruption). All other agent tabs warn+log.
+# score_analytics excluded on purpose — frozen/diagnostic, not decision-bearing.
+CORE_TABS = {"paper_portfolio", "decision_log", "postmortems"}
+
 
 # ════════════════════════════════════════════════════════════════════
 # Data Sentinel — gatekeeper layer (Phase 1 added 2026-05-11)

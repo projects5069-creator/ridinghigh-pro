@@ -28,6 +28,7 @@ PERU_TZ = pytz.timezone("America/Lima")
 # Add repo root to path so we can import sheets_manager
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 import sheets_manager
+from config import CORE_TABS  # TASK-219: header-drift raise tier
 
 
 # ── Agent sheet definitions ──────────────────────────────────────────────────
@@ -258,13 +259,18 @@ def _already_done(month_key: str) -> bool:
     return all(name in config[month_key] for name in AGENT_SHEET_NAMES)
 
 
-def _set_headers(gc, sheet_id: str, headers: list):
-    """Write header row to sheet1 of a spreadsheet."""
+def _set_headers(gc, sheet_id: str, headers: list, name: str = ""):
+    """Write header row to sheet1 of a spreadsheet.
+
+    TASK-219: for CORE_TABS a write failure raises (money/decision tabs must not
+    be provisioned with an unset/partial header); observability tabs warn+log."""
     try:
         spreadsheet = gc.open_by_key(sheet_id)
         ws = spreadsheet.sheet1
         ws.update("A1", [headers])
     except Exception as e:
+        if name in CORE_TABS:
+            raise RuntimeError(f"{name}: failed to set canonical header — {e}") from e
         print(f"      ⚠️ Could not set headers: {e}")
 
 
@@ -306,6 +312,34 @@ def create_agent_sheets(month_key: str, dry_run: bool = False):
         config = sheets_manager._load_config()
         for name in AGENT_SHEET_NAMES:
             print(f"   {name}: {config[month_key][name]}")
+
+        # TASK-219: idempotency short-circuit used to trust sheets_config.json blindly
+        # (config-only _already_done), so a tab whose LIVE header drifted was never
+        # re-validated — the 2026-07 paper_portfolio corruption slipped through here.
+        # Validate live headers of already-provisioned tabs: CORE_TABS raise (halt),
+        # others warn. Gated on `not dry_run` — needs a Sheets client, and dry-run
+        # (and _already_done itself) must stay offline/pure (§10).
+        if not dry_run:
+            gc = sheets_manager._get_gc()
+            if gc is None:
+                print("   ⚠️ No Service Account client — skipped header re-validation")
+            else:
+                for name in AGENT_SHEET_NAMES:
+                    canonical = AGENT_SHEET_HEADERS[name]
+                    try:
+                        existing = gc.open_by_key(config[month_key][name]).sheet1.row_values(1)
+                    except Exception as e:
+                        if name in CORE_TABS:
+                            raise
+                        print(f"   ⚠️ {name}: could not read header for re-validation — {e}")
+                        continue
+                    if name in CORE_TABS:
+                        assert_header_canonical(existing, canonical, name)
+                    elif not header_matches_canonical(existing, canonical):
+                        missing = [c for c in canonical if c not in existing]
+                        extra = [c for c in existing if c and c not in canonical]
+                        print(f"   ⚠️ {name}: header drift (missing={missing} extra={extra})")
+
         return config[month_key]
 
     if dry_run:
@@ -403,7 +437,7 @@ def create_agent_sheets(month_key: str, dry_run: bool = False):
 
         # Set headers
         headers = AGENT_SHEET_HEADERS[name]
-        _set_headers(gc, sheet_id, headers)
+        _set_headers(gc, sheet_id, headers, name)
         print(f"      Headers set ({len(headers)} columns)")
 
     # Update sheets_config.json
