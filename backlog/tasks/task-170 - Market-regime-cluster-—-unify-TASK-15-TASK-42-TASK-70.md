@@ -1,10 +1,10 @@
 ---
 id: TASK-170
 title: Market-regime cluster — unify TASK-15 + TASK-42 + TASK-70
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-06-12 22:55'
-updated_date: '2026-07-02 21:11'
+updated_date: '2026-07-03 03:08'
 labels:
   - vision
   - market-regime
@@ -29,5 +29,5 @@ Per TASK-156 agenda: unify the three market-regime items. (15) wire Market Conte
 ## Implementation Notes
 
 <!-- SECTION:NOTES:BEGIN -->
-VIX-sim measured 2026-07-02 (n=219 dated entries): VIX<20 n=205 WR53.7%, VIX 20-30 n=14 WR57.1%, VIX>30 n=0. Entire 05-07 period was low-vol -> zero high-VIX entries, no regime variance. Original TASK-70 finding (72% vs 58%) NOT reproducible — insufficient VIX spread. NOT ready for HYP-004 (no significant edge, no regime coverage, n=14 in mid-bucket is noise). Re-examine only when VIX variance appears or n grows. Inconclusive-not-actioned.
+Closed as inconclusive (measured 2026-07-02, n=219): period low-vol, n=14 mid-bucket, zero VIX>30 — original TASK-70 finding not testable, no regime variance. Documented §H + committed d93c7dc. Re-open as new task only if VIX variance appears.
 <!-- SECTION:NOTES:END -->
