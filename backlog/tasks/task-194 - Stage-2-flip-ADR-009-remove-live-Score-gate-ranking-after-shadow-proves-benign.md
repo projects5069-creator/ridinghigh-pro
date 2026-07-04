@@ -1,12 +1,12 @@
 ---
 id: TASK-194
 title: >-
-  Stage 2 flip (ADR-009): remove live Score gate + ranking after shadow proves
-  benign
+  ADR-009 post-flip monitoring: track active-mode entries vs Score-gated
+  baseline (flip executed 6/29)
 status: To Do
 assignee: []
 created_date: '2026-06-24 16:10'
-updated_date: '2026-06-29 23:30'
+updated_date: '2026-07-04 01:50'
 labels:
   - agent
   - score
@@ -30,3 +30,9 @@ ADR-009 Stage 2 driver-removal — the LIVE flip deferred by the 141+174 ruling 
 - [x] #5 zero touch to scanner-ranking (S2) and calculate_score retire (S3) - separate tasks (208/209)
 - [x] #6 PK + ADR-009 updated with decision + reversible-flag mechanism
 <!-- AC:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+E2E-AUDIT S5 (3/7) — הכותרת הקודמת ('flip after shadow proves benign') הייתה stale: ה-flip בוצע 6/29 (owner-decision, PK v3.77, ללא חלון-shadow — 0 שורות shadow_gate_events באותו רגע). ה-scope החי הנותר = AC#4 בלבד: ניטור post-flip של כניסות-active מול baseline Score-gated + revert-בערך-קונפיג. גבולות: הסרת-ranking = TASK-208 (AC#5) · retire calculate_score = TASK-209. קצב-ההכרעה צמוד ל-stopping-rule של HYP-002 (n>=150 post-flip או 45 ימי-מסחר; checkpoint 2026-07-27 = החלטת-promote נפרדת, HYPOTHESES.md:202-204).
+<!-- SECTION:NOTES:END -->

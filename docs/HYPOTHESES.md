@@ -204,7 +204,10 @@ validation on the forward hold-out (n≥150, ~mid-July).
                      catastrophic loss), never decisional. The 2026-07-27 promote checkpoint
                      (TASK-194 AC#4 / TASK-128 AC#4) is a SEPARATE shadow→active decision and
                      does NOT conclude this hypothesis.
-- Config freeze:     AGENT_TP_PCT=10 · AGENT_SL_PCT=10 · HOLD<=5 (MAX_HOLDING_DAYS) ·
+- Config freeze:     AGENT_TP_PCT=10 · AGENT_SL_PCT=10 · HOLD<=5 (the classify/fitness window,
+                     = CLASSIFY_DAYS, as in the HOLD_DAYS line at :194 — NOT a live forced-exit:
+                     MAX_HOLDING_DAYS is display-only and the agent has no time-based exit;
+                     wording clarified 2026-07-03, E2E-audit S2/S5, zero change to the frozen values) ·
                      reentry<=1/ticker/day (AGENT_MAX_REENTRIES_PER_TICKER=1) — frozen for this
                      hypothesis; ANY change to these voids the run and requires re-registration.
 - k reported:        k=2 (dual-condition HYP-002 + 4-dim HYP-003 candidate) per §A.2.

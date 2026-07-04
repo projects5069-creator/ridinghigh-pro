@@ -76,7 +76,7 @@ Silence is better than made-up facts.
 2. **Read the exact lines** you're about to edit (view tool)
 3. **Make the change**
 4. **Run `python3 -m py_compile <file>`**
-5. **If tests exist, run `python3 test_formulas.py`** — must show 107/107 passed
+5. **If tests exist, run `python3 test_formulas.py`** — must end with ALL tests passed, zero failures (the count grows over time — never pin a hard number here)
 6. **Report what changed** — no commit yet
 
 ---
@@ -124,7 +124,7 @@ If output is too long, show first 50 + last 20 lines with a clear marker.
 
 ### Source of Truth Hierarchy
 - **config.py**: All weights, caps, thresholds (SCORE_WEIGHTS_V2, TP/SL, REL_VOL_CAP, etc.)
-- **formulas.py**: All calculations (metrics + 9 score variants + entry score)
+- **formulas.py**: All calculations (metrics + `calculate_score` — single frozen scorer; ADR-009 scoreless era, variants B-I removed; historical replicas live only in score_backtest.py)
 - **auto_scanner.py**: FINVIZ scraping, Sheets I/O, orchestration (NOT calculations)
 - **dashboard.py**: Streamlit UI (NOT calculations)
 - **utils.py**: Shared utilities

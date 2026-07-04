@@ -4,7 +4,7 @@ title: Decouple Score from scanner ranking + portfolio selection (auto_scanner)
 status: To Do
 assignee: []
 created_date: '2026-06-29 21:46'
-updated_date: '2026-06-30 19:09'
+updated_date: '2026-07-04 01:50'
 labels: []
 dependencies: []
 priority: low
@@ -32,4 +32,10 @@ commit 5a127ad (29/6, יום ה-flip): get_scanned_universe בוחר לפי MxV<
 ⚠️ ה-scope הנותר ב-208 = decoupling של Score מ-ranking/display ב-auto_scanner (4 אתרים: 490/578/1335/1338,
 שכבת display/portfolio, נפרד מהחלטת-כניסה). זה Score-work → שייך לאשכול-Score, נדחה עם TASK-209
 (החלטת עמיחי 30/6: כל עבודת-Score בהמשך, לא עכשיו). לא לבצע את הנותר עד שנטפל ב-Score כמכלול.
+
+E2E-AUDIT S3 (3/7, קריאה-בלבד) — אימות-חי של אתרי-ה-ranking + אתר נוסף:
+run_scan portfolio-selection Score>=TRADE_ENTRY_MIN_SCORE (auto_scanner.py:488-490) ·
+update_live_trades ENTRY_MIN_SCORE=TRADE_ENTRY_MIN_SCORE (:994 — לא היה ברשימה המקורית) ·
+run_eod פילטר Score>= + sort_values('Score') (:1332-1338). החישובים עצמם דרך formulas (SSoT תקין);
+הכתיבה קפואה ב-score_cell. ראיות: plans/stateless-seeking-sifakis.md S3.
 <!-- SECTION:NOTES:END -->
