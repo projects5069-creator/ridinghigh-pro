@@ -10,7 +10,7 @@ import json
 import time
 import pytz
 import pandas as pd
-from datetime import datetime, time as dt_time
+from datetime import datetime, time as dt_time, timedelta
 
 sys.path.insert(0, os.path.expanduser("~/RidingHighPro"))
 import sheets_manager
@@ -74,8 +74,18 @@ PERU_TZ = pytz.timezone("America/Lima")  # kept for backward compat
 # is_market_hours imported from utils
 
 def is_snapshot_time():
+    # DST-aware (TASK-223): NYSE closes 16:00 ET (observes DST); Peru does not.
+    # Derive the Peru close from the ET close on today's date so the daily
+    # snapshot fires ~1 min before close year-round. Hardcoding 14:55-15:05 Peru
+    # only held in summer/EDT (close 15:00 Peru); winter/EST close is 16:00 Peru,
+    # where the old window fired an HOUR early → mid-session data in EOD columns.
+    # Mirror of utils.is_day_complete / is_market_hours (a0d63fe). RULE #10.
     now = get_peru_time()
-    return dt_time(14, 55) <= now.time() < dt_time(15, 5)
+    et = pytz.timezone("America/New_York")
+    close_peru = et.localize(datetime.combine(now.date(), dt_time(16, 0))).astimezone(PERU_TZ)
+    start = (close_peru - timedelta(minutes=5)).time()
+    end = (close_peru + timedelta(minutes=5)).time()
+    return start <= now.time() < end
 
 # is_trading_day imported from utils
 

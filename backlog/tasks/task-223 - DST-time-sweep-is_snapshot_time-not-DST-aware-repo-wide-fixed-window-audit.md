@@ -1,9 +1,10 @@
 ---
 id: TASK-223
 title: 'DST time-sweep: is_snapshot_time not DST-aware + repo-wide fixed-window audit'
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-07-04 01:48'
+updated_date: '2026-07-04 15:07'
 labels: []
 dependencies: []
 priority: high
@@ -18,6 +19,6 @@ E2E-audit S3 (3/7): auto_scanner:76-78 is_snapshot_time = hardcoded 14:55-15:05 
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 is_snapshot_time derives its window from the ET close (DST-aware), TDD with summer+winter anchors
-- [ ] #2 repo-wide sweep of hardcoded Peru-time windows documented: each site fixed or explicitly marked display-only
+- [x] #1 is_snapshot_time derives its window from the ET close (DST-aware), TDD with summer+winter anchors
+- [x] #2 repo-wide sweep of hardcoded Peru-time windows documented: each site fixed or explicitly marked display-only
 <!-- AC:END -->
