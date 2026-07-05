@@ -127,7 +127,11 @@ main() {
   unset ANTHROPIC_API_KEY ANTHROPIC_AUTH_TOKEN || true
   guard_no_api_key       || { echo "ABORT: an API key is set in env — refusing (would bill API)"; exit 2; }
   guard_clean_secret_env || { echo "ABORT: secret env vars present after scrub"; exit 2; }
-  guard_night_window     || { echo "ABORT: outside night window ($(now_lima) Lima) — deferred run suppressed"; exit 0; }
+  if [ "${MANUAL:-0}" = "1" ]; then
+    echo "MANUAL run — night-window bypassed"
+  else
+    guard_night_window   || { echo "ABORT: outside night window ($(now_lima) Lima) — deferred run suppressed"; exit 0; }
+  fi
 
   local token; token="$(read_oauth_token)"
   [ -n "$token" ] || { echo "ABORT: no subscription OAuth token in Keychain ($KEYCHAIN_SERVICE)"; exit 2; }
@@ -161,7 +165,20 @@ main() {
   sed "s#\${REPO}#$REPO#g" "$NIGHT_SETTINGS" > "$resolved_settings"
 
   # 2. Triage: layer-1 (deterministic) → layer-2 (classifier in a clean scan worktree).
-  local candidates; candidates="$("$PYBIN" "$REPO/scripts/overnight/triage_filter.py" "$TASKS_DIR")"
+  # MANUAL/QUEUE mode (M1): the task SOURCE becomes the human-written queue file; the
+  # classifier below still runs as a fail-closed veto over each queued task (spec §3).
+  # Non-manual = unchanged auto-discovery (zero regression).
+  local queue_file="${QUEUE_FILE:-$REPO/docs/auto-dancer/queue/QUEUE_${stamp}.md}"
+  local candidates
+  if [ "${MANUAL:-0}" = "1" ]; then
+    # A MANUAL run requires an explicit human-written queue — never silently fall back
+    # to auto-discovery (that would defeat the point of hand-picking the tasks).
+    [ -f "$queue_file" ] || { echo "ABORT: MANUAL run requires a queue file: $queue_file"; exit 2; }
+    echo "MANUAL/QUEUE mode — task source: $queue_file"
+    candidates="$("$PYBIN" "$REPO/scripts/overnight/read_queue.py" "$queue_file" | cut -f1)"
+  else
+    candidates="$("$PYBIN" "$REPO/scripts/overnight/triage_filter.py" "$TASKS_DIR")"
+  fi
   local wt_scan="$REPO/../rh-night-scan-$stamp"
   git worktree add --detach --force "$wt_scan" "$BASE_BRANCH" >/dev/null 2>&1 || true
   # Never orphan the scan worktree again (the 2026-06-20 exit-1 left it behind). No prior EXIT
@@ -260,6 +277,7 @@ if [ "${BASH_SOURCE[0]}" = "${0}" ]; then
   case "${1:-}" in
     --check-auth)  check_auth ;;          # §11 gate #3: invoke via launchd to verify Keychain context
     --triage-only) TRIAGE_ONLY=1 main "$@" ;;   # §11 gate-5 dry-run: pre-flight + triage, no execute/PR
+    --manual)      MANUAL=1 main "$@" ;;         # M1: manual trigger any hour — night-window bypassed, queue-file source
     *)             main "$@" ;;
   esac
 fi

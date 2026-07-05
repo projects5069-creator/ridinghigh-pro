@@ -21,6 +21,8 @@ data/
 !SCHEMA.json
 # Overnight runner — raw per-task JSON + run logs are local only
 docs/overnight/raw/
+# Auto Dancer (M1) — human-written queue files are local only (keep tree clean for guard_base_ready)
+docs/auto-dancer/queue/
 
 # Streamlit
 .streamlit/secrets.toml
