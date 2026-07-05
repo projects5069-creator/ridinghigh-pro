@@ -122,11 +122,20 @@ classify_verdict() {
 # to out_json; echo the tokens it spent (incl. cache) on stdout. FAIL-CLOSED: any claude
 # failure or empty result → out_json={"status":"error",...} and 0 tokens (never aborts set -e).
 # Pure I/O helper — sourced so tests can drive it; the caller composes the prompt file.
+# TASK-234: under `--setting-sources local --permission-mode dontAsk`, the --settings
+# permissions.allow list is NOT honored for tool-granting (proven at runtime: a Write to
+# .dancer/plan.md was denied despite Write(.dancer/**) in allow). Grant tools explicitly via
+# --allowedTools; --settings stays for deny(secrets)+hooks (deny still holds — safety-probed);
+# --setting-sources local stays to avoid the CLAUDE.md skill-gate poisoning headless runs.
+# Write/Edit are unscoped here (as Edit already was) — the mechanical scope-lock + CORE_UNSAFE
+# hook + external VERIFIER + human review bound what actually lands, not the write permission.
+RPI_ALLOWED_TOOLS="${RPI_ALLOWED_TOOLS:-Read Edit Write Grep Glob Bash(git *) Bash(pytest *) Bash(python3 -m py_compile *) Bash(grep *) Bash(ls *) Bash(cat *) Bash(head *) Bash(tail *) Bash(wc *) Bash(rg *) Bash(uv run *) Bash(gh pr *)}"
+
 run_stage() {
   local prompt_file="$1" model="$2" worktree="$3" settings="$4" out_json="$5" raw_json="$6"
   local turns="${7:-$MAX_TURNS}"   # optional per-stage turn cap; RPI chain uses MAX_TURNS, --plan-only passes PLAN_MAX_TURNS
   ( cd "$worktree" && claude -p --model "$model" --settings "$settings" \
-        --setting-sources local \
+        --setting-sources local --add-dir "$worktree" --allowedTools "$RPI_ALLOWED_TOOLS" \
         --permission-mode dontAsk --max-turns "$turns" --output-format json 2>/dev/null ) \
       < "$prompt_file" > "$raw_json" || true
   jq -r '.result // empty' "$raw_json" 2>/dev/null | sed -n '/{/,/}/p' > "$out_json" || true
