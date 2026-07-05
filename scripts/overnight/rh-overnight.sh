@@ -132,6 +132,64 @@ run_stage() {
   jq -r '((.usage.input_tokens//0)+(.usage.output_tokens//0)+(.usage.cache_read_input_tokens//0)+(.usage.cache_creation_input_tokens//0))' "$raw_json" 2>/dev/null || echo 0
 }
 
+# Run ONE P→C→E→C→V round for a single task: each stage via run_stage, artifacts → adir.
+# Echoes "<chain_status>\t<total_tokens>" on stdout. FAIL-CLOSED / early-stop: a stage that
+# errors → "stage_error"; PLAN not 'planned' → its status; a CRITIC 'bounce' → "bounced_plan"
+# / "bounced_exec"; VERIFY → "ready" | "rejected". This is ONE round; the retry/PARK loop
+# (spec §6, up to 5 rounds) is wired separately (3c-iii). Never commits/pushes — writes artifacts only.
+run_rpi_chain() {
+  local tid="$1" wt="$2" settings="$3" adir="$4"
+  mkdir -p "$adir"
+  local roles="$REPO/scripts/overnight"
+  local body; body="$(cat "$TASKS_DIR/task-${tid#TASK-} "*.md 2>/dev/null || true)"
+  local tmp; tmp="$(mktemp)"
+  local total=0 t chain_status="unknown" v
+
+  _emit() { rm -f "$tmp"; printf '%s\t%s\n' "$1" "$total"; }   # finalize: cleanup + emit status<TAB>tokens
+
+  # --- PLAN ---
+  printf 'TASK: %s\n\n%s\n\n%s\n' "$tid" "$body" "$(cat "$roles/plan_task.md")" > "$tmp"
+  t="$(run_stage "$tmp" "$PLAN_MODEL" "$wt" "$settings" "$adir/plan_result.json" "$adir/plan.raw.json")"
+  total=$((total + ${t:-0}))
+  v="$(jq -r '.status // "error"' "$adir/plan_result.json" 2>/dev/null || echo error)"
+  [ "$v" = "planned" ] || { _emit "$([ "$v" = "error" ] && echo stage_error || echo "$v")"; return 0; }
+
+  # --- CRITIC post-plan ---
+  printf 'STAGE: post-plan\nTASK: %s\n\n%s\n' "$tid" "$(cat "$roles/critique_task.md")" > "$tmp"
+  t="$(run_stage "$tmp" "$CRITIC_MODEL" "$wt" "$settings" "$adir/critique_plan.json" "$adir/critique_plan.raw.json")"
+  total=$((total + ${t:-0}))
+  v="$(jq -r '.verdict // "error"' "$adir/critique_plan.json" 2>/dev/null || echo error)"
+  [ "$v" = "error" ]  && { _emit stage_error; return 0; }
+  [ "$v" = "bounce" ] && { _emit bounced_plan; return 0; }
+
+  # --- EXECUTE ---
+  printf 'TASK: %s\n\n%s\n' "$tid" "$(cat "$roles/execute_task.md")" > "$tmp"
+  t="$(run_stage "$tmp" "$EXEC_MODEL" "$wt" "$settings" "$adir/execution.json" "$adir/execution.raw.json")"
+  total=$((total + ${t:-0}))
+  v="$(jq -r '.status // "error"' "$adir/execution.json" 2>/dev/null || echo error)"
+  [ "$v" = "error" ] && { _emit stage_error; return 0; }
+
+  # --- CRITIC post-execute ---
+  printf 'STAGE: post-execute\nTASK: %s\n\n%s\n' "$tid" "$(cat "$roles/critique_task.md")" > "$tmp"
+  t="$(run_stage "$tmp" "$CRITIC_MODEL" "$wt" "$settings" "$adir/critique_exec.json" "$adir/critique_exec.raw.json")"
+  total=$((total + ${t:-0}))
+  v="$(jq -r '.verdict // "error"' "$adir/critique_exec.json" 2>/dev/null || echo error)"
+  [ "$v" = "error" ]  && { _emit stage_error; return 0; }
+  [ "$v" = "bounce" ] && { _emit bounced_exec; return 0; }
+
+  # --- VERIFY ---
+  printf 'TASK: %s\n\n%s\n' "$tid" "$(cat "$roles/verify_task.md")" > "$tmp"
+  t="$(run_stage "$tmp" "$VERIFY_MODEL" "$wt" "$settings" "$adir/verify.json" "$adir/verify.raw.json")"
+  total=$((total + ${t:-0}))
+  v="$(jq -r '.verdict // "error"' "$adir/verify.json" 2>/dev/null || echo error)"
+  case "$v" in
+    ready)  _emit ready ;;
+    reject) _emit rejected ;;
+    *)      _emit stage_error ;;
+  esac
+  return 0
+}
+
 # --- Orchestration (runs only when executed, not sourced) -----------------------
 main() {
   set -euo pipefail
