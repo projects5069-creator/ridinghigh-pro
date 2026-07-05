@@ -47,11 +47,11 @@ esac
 STUB
 chmod +x "$TMP/bin/claude"
 
-# helper: fresh worktree + reset counter, run one task in a given mode → "status<TAB>tokens"
+# helper: fresh worktree + reset counter, run one task in a given mode (+optional budget) → "status<TAB>tokens"
 run_mode() {
-  local mode="$1" wtd="$TMP/$2"; mkdir -p "$wtd"
+  local mode="$1" wtd="$TMP/$2" budget="${3:-}"; mkdir -p "$wtd"
   echo 0 > "$STUB_COUNTER"
-  STUB_MODE="$mode" run_rpi_task TASK-9 "$wtd" /dev/null "$wtd/.dancer"
+  STUB_MODE="$mode" run_rpi_task TASK-9 "$wtd" /dev/null "$wtd/.dancer" "$budget"
 }
 
 # 1) happy → ready in 1 round
@@ -81,5 +81,20 @@ r="$(jq -r .rounds "$TMP/w4/.dancer/parked.json" 2>/dev/null)"
 out="$(run_mode blocked w5)"; st="${out%%$'\t'*}"
 r="$(jq -r .rounds "$TMP/w5/.dancer/task_result.json" 2>/dev/null)"
 [ "$st" = "blocked" ] && [ "$r" = "1" ] && ok "blocked → stop at round 1, no retry" || bad "blocked: status='$st' rounds='$r'"
+
+# 6) per-task budget: round-1 spends 10 tokens (> budget 5) → round 2 blocked before it runs
+out="$(run_mode exhaust w6 5)"; st="${out%%$'\t'*}"
+stage="$(jq -r .stage "$TMP/w6/.dancer/parked.json" 2>/dev/null)"
+r="$(jq -r .rounds "$TMP/w6/.dancer/parked.json" 2>/dev/null)"
+[ "$st" = "parked" ] && [ "$stage" = "budget_exceeded" ] && ok "over-budget → parked (budget_exceeded)" || bad "budget: status='$st' stage='$stage'"
+[ "$r" = "1" ] && ok "budget park after 1 completed round" || bad "budget rounds: '$r'"
+[ -f "$TMP/w6/.dancer/verify.json" ] && ok "round 1 completed (not cut mid-round)" || bad "round 1 was cut off"
+
+# 7) budget=0 → falls back to the night ceiling (default), NOT an immediate budget park
+out="$(run_mode exhaust w7 0)"; st="${out%%$'\t'*}"
+stage="$(jq -r .stage "$TMP/w7/.dancer/parked.json" 2>/dev/null)"
+r="$(jq -r .rounds "$TMP/w7/.dancer/parked.json" 2>/dev/null)"
+[ "$st" = "parked" ] && [ "$stage" != "budget_exceeded" ] && [ "$r" = "5" ] \
+  && ok "budget=0 → default (exhausts at 5 rounds, not a budget park)" || bad "budget=0: status='$st' stage='$stage' rounds='$r'"
 
 if [ "$fail" = "0" ]; then echo "ALL PASS"; else echo "FAILURES"; exit 1; fi

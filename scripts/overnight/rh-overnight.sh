@@ -212,9 +212,10 @@ _rpi_last_reason() {
 }
 
 # Write parked.json with a concrete written question + evidence paths (spec §6).
+# Optional $5 overrides the derived question (e.g. the budget-exceeded message).
 _rpi_park() {
-  local tid="$1" adir="$2" rounds="$3" stage="$4" q
-  q="$(_rpi_last_reason "$adir")"
+  local tid="$1" adir="$2" rounds="$3" stage="$4" q="${5:-}"
+  [ -n "$q" ] || q="$(_rpi_last_reason "$adir")"
   jq -n --arg t "$tid" --arg s "$stage" --arg q "$q" --argjson r "$rounds" \
     --arg p1 "$adir/plan_result.json" --arg p2 "$adir/critique_exec.json" --arg p3 "$adir/verify.json" \
     '{task:$t,stage:$s,question:$q,evidence_paths:[$p1,$p2,$p3],rounds:$r}' > "$adir/parked.json" 2>/dev/null || true
@@ -226,11 +227,22 @@ _rpi_park() {
 # → stop, not auto-fixable. MAX_ROUNDS exhausted → PARK. Echoes "<status>\t<total_tokens>".
 # FAIL-CLOSED: any unknown status or write failure → parked (never a false ready).
 run_rpi_task() {
-  local tid="$1" wt="$2" settings="$3" adir="$4"
+  local tid="$1" wt="$2" settings="$3" adir="$4" budget="${5:-}"
   mkdir -p "$adir"
+  # Per-task token budget (spec §7). Empty / non-numeric / 0 → fall back to the night ceiling
+  # = no effective per-task cap until we have measured real spend (M5). Checked BETWEEN rounds
+  # only — a started round always finishes; we never cut a round mid-flight.
+  case "$budget" in ''|*[!0-9]*) budget="$TOKEN_CEILING" ;; esac
+  [ "$budget" -gt 0 ] 2>/dev/null || budget="$TOKEN_CEILING"
   local total=0 round=0 prev_sig="" out st toks sig last_status="unknown"
   while [ "$round" -lt "$MAX_ROUNDS" ]; do
     round=$((round + 1))
+    # Between-rounds budget gate: only after ≥1 completed round; the finished round's tokens count.
+    if [ "$round" -gt 1 ] && [ "$total" -ge "$budget" ]; then
+      _rpi_park "$tid" "$adir" "$((round - 1))" budget_exceeded \
+        "task exceeded its token budget ($total >= $budget) after $((round - 1)) round(s) — human decision needed (raise budget / split / drop)"
+      printf 'parked\t%s\n' "$total"; return 0
+    fi
     out="$(run_rpi_chain "$tid" "$wt" "$settings" "$adir")"
     st="${out%%$'\t'*}"; toks="${out##*$'\t'}"
     total=$((total + ${toks:-0})); last_status="$st"
@@ -346,12 +358,18 @@ main() {
   # Non-manual = unchanged auto-discovery (zero regression).
   local queue_file="${QUEUE_FILE:-$REPO/docs/auto-dancer/queue/QUEUE_${stamp}.md}"
   local candidates
+  local -A task_budget=()      # tid → per-task token budget (QUEUE mode only; discovery → empty → default)
   if [ "${MANUAL:-0}" = "1" ]; then
     # A MANUAL run requires an explicit human-written queue — never silently fall back
     # to auto-discovery (that would defeat the point of hand-picking the tasks).
     [ -f "$queue_file" ] || { echo "ABORT: MANUAL run requires a queue file: $queue_file"; exit 2; }
     echo "MANUAL/QUEUE mode — task source: $queue_file"
-    candidates="$("$PYBIN" "$REPO/scripts/overnight/read_queue.py" "$queue_file" | cut -f1)"
+    local queue_tsv; queue_tsv="$("$PYBIN" "$REPO/scripts/overnight/read_queue.py" "$queue_file")"
+    candidates="$(printf '%s\n' "$queue_tsv" | cut -f1)"   # ordered ids (queue order = execution order)
+    local _qt _qb _qr
+    while IFS=$'\t' read -r _qt _qb _qr; do
+      [ -n "$_qt" ] && task_budget["$_qt"]="$_qb"
+    done <<< "$queue_tsv"
   else
     candidates="$("$PYBIN" "$REPO/scripts/overnight/triage_filter.py" "$TASKS_DIR")"
   fi
@@ -406,8 +424,10 @@ main() {
       || git worktree add --force "$wt" "auto-dancer/$tid" >/dev/null 2>&1 || { echo "  worktree add failed for $tid"; continue; }
     local adir="$wt/.dancer"
 
-    # Drive the RPI chain; run_rpi_task echoes "<status>\t<total_tokens>".
-    local out st toks; out="$(run_rpi_task "$tid" "$wt" "$resolved_settings" "$adir")"
+    # Drive the RPI chain; run_rpi_task echoes "<status>\t<total_tokens>". Per-task budget comes
+    # from the queue (QUEUE mode); discovery mode passes empty → run_rpi_task uses the night ceiling.
+    local tbud="${task_budget[$tid]:-}"
+    local out st toks; out="$(run_rpi_task "$tid" "$wt" "$resolved_settings" "$adir" "$tbud")"
     st="${out%%$'\t'*}"; toks="${out##*$'\t'}"
     spent=$(( spent + ${toks:-0} )); ran=$((ran + 1))
     echo "  $tid → $st; tokens+=$toks (spent $spent)"
