@@ -71,6 +71,12 @@ are BLOCKED (exec-capable) and will fail; do not attempt them. Plain read-only s
 the native Glob/Grep tools. If a shell command is denied, switch to the equivalent tool —
 never retry the denied command.
 
+## CONVERGENCE (do not exhaust your turns)
+After a FOCUSED recon (roughly 6–10 read-only lookups), STOP investigating and WRITE
+`plan.md`. A concise plan grounded in what you found beats endless exploration. Do NOT
+exhaust your turns — writing `plan.md` is the goal, not perfect coverage. If you hit your
+turn budget, write the best `plan.md` you can from what you already have.
+
 ## Halt conditions → emit status, still write what you have
 - Uncertain / missing information / needs a trading-judgment call → write `plan.md` with a
   `blocked` flag at the top and a **concrete written question** for the human. Do NOT guess.

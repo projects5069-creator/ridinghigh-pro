@@ -14,6 +14,7 @@ NIGHT_SETTINGS="$REPO/.claude/settings.night.json"
 MAX_TASKS="${MAX_TASKS:-3}"
 MAX_CANDIDATES="${MAX_CANDIDATES:-25}"   # hard cap on classifier calls/night (bounds token spend; samples the distribution)
 MAX_TURNS="${MAX_TURNS:-40}"
+PLAN_MAX_TURNS="${PLAN_MAX_TURNS:-15}"  # --plan-only DRY: tighter turn cap forces the PLANNER to converge to plan.md instead of exhausting MAX_TURNS on recon
 MAX_ROUNDS="${MAX_ROUNDS:-5}"           # Auto Dancer §6: retry the P→C→E→C→V round up to this many times before PARK
 TOKEN_CEILING="${TOKEN_CEILING:-600000}"
 WALL_CLOCK_MIN="${WALL_CLOCK_MIN:-180}"
@@ -123,8 +124,9 @@ classify_verdict() {
 # Pure I/O helper — sourced so tests can drive it; the caller composes the prompt file.
 run_stage() {
   local prompt_file="$1" model="$2" worktree="$3" settings="$4" out_json="$5" raw_json="$6"
+  local turns="${7:-$MAX_TURNS}"   # optional per-stage turn cap; RPI chain uses MAX_TURNS, --plan-only passes PLAN_MAX_TURNS
   ( cd "$worktree" && claude -p --model "$model" --settings "$settings" \
-        --permission-mode dontAsk --max-turns "$MAX_TURNS" --output-format json 2>/dev/null ) \
+        --permission-mode dontAsk --max-turns "$turns" --output-format json 2>/dev/null ) \
       < "$prompt_file" > "$raw_json" || true
   jq -r '.result // empty' "$raw_json" 2>/dev/null | sed -n '/{/,/}/p' > "$out_json" || true
   if [ ! -s "$out_json" ]; then
@@ -283,7 +285,7 @@ run_plan_only() {
   local roles="$REPO/scripts/overnight"
   local tmp; tmp="$(mktemp)"
   printf 'TASK: %s\n\n%s\n\n%s\n' "$tid" "$body" "$(cat "$roles/plan_task.md")" > "$tmp"
-  local t; t="$(run_stage "$tmp" "$PLAN_MODEL" "$wt" "$settings" "$adir/plan.md" "$adir/plan.raw.json")"
+  local t; t="$(run_stage "$tmp" "$PLAN_MODEL" "$wt" "$settings" "$adir/plan.md" "$adir/plan.raw.json" "$PLAN_MAX_TURNS")"
   rm -f "$tmp"
   local v; v="$(jq -r '.status // "error"' "$adir/plan.md" 2>/dev/null || echo error)"
   case "$v" in planned|blocked|needs_human) ;; *) v="stage_error" ;; esac
