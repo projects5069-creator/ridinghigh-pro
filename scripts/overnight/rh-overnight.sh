@@ -14,6 +14,7 @@ NIGHT_SETTINGS="$REPO/.claude/settings.night.json"
 MAX_TASKS="${MAX_TASKS:-3}"
 MAX_CANDIDATES="${MAX_CANDIDATES:-25}"   # hard cap on classifier calls/night (bounds token spend; samples the distribution)
 MAX_TURNS="${MAX_TURNS:-40}"
+MAX_ROUNDS="${MAX_ROUNDS:-5}"           # Auto Dancer §6: retry the P→C→E→C→V round up to this many times before PARK
 TOKEN_CEILING="${TOKEN_CEILING:-600000}"
 WALL_CLOCK_MIN="${WALL_CLOCK_MIN:-180}"
 NIGHT_END_HOUR="${NIGHT_END_HOUR:-5}"   # abort if Lima hour >= 5 (deferred-run guard)
@@ -187,6 +188,75 @@ run_rpi_chain() {
     reject) _emit rejected ;;
     *)      _emit stage_error ;;
   esac
+  return 0
+}
+
+# Signature of a retryable round = status + the reason/issues of every critic/verify artifact.
+# Two consecutive rounds with the SAME signature = no progress (marginal-value collapse).
+_rpi_sig() {
+  local adir="$1" st="$2" s="$2::" a
+  for a in critique_plan critique_exec verify; do
+    s="$s$(jq -c '{r:(.reason//""),i:(.issues//[])}' "$adir/$a.json" 2>/dev/null || echo '{}')"
+  done
+  printf '%s' "$s"
+}
+
+# Best machine-readable reason from the last gate (verify → critic-exec → critic-plan).
+_rpi_last_reason() {
+  local adir="$1" a r
+  for a in verify critique_exec critique_plan; do
+    r="$(jq -r 'if (.reason // "") != "" then .reason else (.issues[0].issue // "") end' "$adir/$a.json" 2>/dev/null || echo "")"
+    [ -n "$r" ] && [ "$r" != "null" ] && { printf '%s' "$r"; return 0; }
+  done
+  printf 'no machine-readable reason — inspect .dancer/ artifacts'
+}
+
+# Write parked.json with a concrete written question + evidence paths (spec §6).
+_rpi_park() {
+  local tid="$1" adir="$2" rounds="$3" stage="$4" q
+  q="$(_rpi_last_reason "$adir")"
+  jq -n --arg t "$tid" --arg s "$stage" --arg q "$q" --argjson r "$rounds" \
+    --arg p1 "$adir/plan_result.json" --arg p2 "$adir/critique_exec.json" --arg p3 "$adir/verify.json" \
+    '{task:$t,stage:$s,question:$q,evidence_paths:[$p1,$p2,$p3],rounds:$r}' > "$adir/parked.json" 2>/dev/null || true
+}
+
+# Drive one task through up to MAX_ROUNDS P→C→E→C→V rounds (spec §6). ready → task_result.json
+# "ready". bounced/rejected → retry, UNLESS the round is a repeat of the previous one (same
+# status + same reasons) → marginal-value collapse → PARK now. blocked/needs_human/stage_error
+# → stop, not auto-fixable. MAX_ROUNDS exhausted → PARK. Echoes "<status>\t<total_tokens>".
+# FAIL-CLOSED: any unknown status or write failure → parked (never a false ready).
+run_rpi_task() {
+  local tid="$1" wt="$2" settings="$3" adir="$4"
+  mkdir -p "$adir"
+  local total=0 round=0 prev_sig="" out st toks sig last_status="unknown"
+  while [ "$round" -lt "$MAX_ROUNDS" ]; do
+    round=$((round + 1))
+    out="$(run_rpi_chain "$tid" "$wt" "$settings" "$adir")"
+    st="${out%%$'\t'*}"; toks="${out##*$'\t'}"
+    total=$((total + ${toks:-0})); last_status="$st"
+    case "$st" in
+      ready)
+        jq -n --arg t "$tid" --argjson r "$round" --argjson k "$total" \
+          '{task:$t,status:"ready",rounds:$r,tokens:$k}' > "$adir/task_result.json" 2>/dev/null \
+          || { _rpi_park "$tid" "$adir" "$round" ready-write-failed; printf 'parked\t%s\n' "$total"; return 0; }
+        printf 'ready\t%s\n' "$total"; return 0 ;;
+      blocked|needs_human|stage_error)
+        jq -n --arg t "$tid" --arg s "$st" --argjson r "$round" --argjson k "$total" \
+          '{task:$t,status:$s,rounds:$r,tokens:$k}' > "$adir/task_result.json" 2>/dev/null || true
+        printf '%s\t%s\n' "$st" "$total"; return 0 ;;
+      bounced_plan|bounced_exec|rejected)
+        sig="$(_rpi_sig "$adir" "$st")"
+        if [ "$round" -gt 1 ] && [ "$sig" = "$prev_sig" ]; then
+          _rpi_park "$tid" "$adir" "$round" "$st"; printf 'parked\t%s\n' "$total"; return 0
+        fi
+        prev_sig="$sig" ;;
+      *)
+        _rpi_park "$tid" "$adir" "$round" "$st"; printf 'parked\t%s\n' "$total"; return 0 ;;
+    esac
+  done
+  # exhausted MAX_ROUNDS without a ready → PARK
+  _rpi_park "$tid" "$adir" "$round" "$last_status"
+  printf 'parked\t%s\n' "$total"
   return 0
 }
 
