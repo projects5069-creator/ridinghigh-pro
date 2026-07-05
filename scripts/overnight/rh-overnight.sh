@@ -386,19 +386,16 @@ main() {
   # classifier below still runs as a fail-closed veto over each queued task (spec §3).
   # Non-manual = unchanged auto-discovery (zero regression).
   local queue_file="${QUEUE_FILE:-$REPO/docs/auto-dancer/queue/QUEUE_${stamp}.md}"
-  local candidates
-  local -A task_budget=()      # tid → per-task token budget (QUEUE mode only; discovery → empty → default)
+  local candidates queue_tsv=""     # queue_tsv holds the full TSV (id⇥budget⇥note) in QUEUE mode; empty in discovery
+  # NOTE: macOS ships bash 3.2, which has NO associative arrays (`local -A` fails). Per-task
+  # budget is therefore looked up directly from queue_tsv at execute time (awk), not from a map.
   if [ "${MANUAL:-0}" = "1" ]; then
     # A MANUAL run requires an explicit human-written queue — never silently fall back
     # to auto-discovery (that would defeat the point of hand-picking the tasks).
     [ -f "$queue_file" ] || { echo "ABORT: MANUAL run requires a queue file: $queue_file"; exit 2; }
     echo "MANUAL/QUEUE mode — task source: $queue_file"
-    local queue_tsv; queue_tsv="$("$PYBIN" "$REPO/scripts/overnight/read_queue.py" "$queue_file")"
+    queue_tsv="$("$PYBIN" "$REPO/scripts/overnight/read_queue.py" "$queue_file")"
     candidates="$(printf '%s\n' "$queue_tsv" | cut -f1)"   # ordered ids (queue order = execution order)
-    local _qt _qb _qr
-    while IFS=$'\t' read -r _qt _qb _qr; do
-      [ -n "$_qt" ] && task_budget["$_qt"]="$_qb"
-    done <<< "$queue_tsv"
   else
     candidates="$("$PYBIN" "$REPO/scripts/overnight/triage_filter.py" "$TASKS_DIR")"
   fi
@@ -453,9 +450,10 @@ main() {
       || git worktree add --force "$wt" "auto-dancer/$tid" >/dev/null 2>&1 || { echo "  worktree add failed for $tid"; continue; }
     local adir="$wt/.dancer"
 
-    # Drive the RPI chain; run_rpi_task echoes "<status>\t<total_tokens>". Per-task budget comes
-    # from the queue (QUEUE mode); discovery mode passes empty → run_rpi_task uses the night ceiling.
-    local tbud="${task_budget[$tid]:-}"
+    # Drive the RPI chain; run_rpi_task echoes "<status>\t<total_tokens>". Per-task budget is
+    # pulled straight from the queue TSV (bash-3.2-safe: no associative array); discovery mode
+    # has an empty queue_tsv → empty tbud → run_rpi_task falls back to the night ceiling.
+    local tbud; tbud="$(printf '%s\n' "$queue_tsv" | awk -F'\t' -v t="$tid" '$1==t{print $2; exit}')"
     local out st toks; out="$(run_rpi_task "$tid" "$wt" "$resolved_settings" "$adir" "$tbud")"
     st="${out%%$'\t'*}"; toks="${out##*$'\t'}"
     spent=$(( spent + ${toks:-0} )); ran=$((ran + 1))
