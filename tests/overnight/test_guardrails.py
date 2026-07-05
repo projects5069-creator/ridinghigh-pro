@@ -57,14 +57,21 @@ def test_settings_denies_uv_run_interpreter():
 def test_execute_prompt_shape():
     with open(os.path.join(REPO, "scripts/overnight/execute_task.md"), encoding="utf-8") as fh:
         t = fh.read().lower()
-    for skill in ["using-git-worktrees", "systematic-debugging",
-                  "test-driven-development", "verification-before-completion",
-                  "finishing-a-development-branch"]:
-        assert skill in t, skill
-    assert "--draft" in t and "--base main" in t
+    # EXECUTOR role (Auto Dancer M2a): TDD-driven, plan-scoped, NO self-review, NO commit/push/PR.
+    for must in ["test-driven-development",      # STEP 0 skill-gate
+                 "scope-lock", "allowed-files",  # mechanical scope from plan.md
+                 "str_replace",                  # in-place edit discipline
+                 "executor", "verifier"]:        # its own role + the downstream gate it defers to
+        assert must in t, must
+    # the old PR / worktree-creation workflow steps were deliberately cut (M2a):
+    for gone in ["using-git-worktrees", "finishing-a-development-branch", "draft pr"]:
+        assert gone not in t, gone
+    # NOTE: "git push" / "gh pr create" DO appear — but only as PROHIBITIONS ("you NEVER run …"),
+    # so we don't assert their absence; we assert the prohibition instead.
     assert "never" in t and "main" in t and "push" in t        # main never pushed
     assert "not instructions" in t                              # injection guard
     assert "rule #4" in t or "backup" in t                      # dated .bak
-    assert "step 0" in t and "skill-gate" in t                  # mandatory skill-load first (satisfies the user skill-gate)
-    for key in ["task", "status", "branch", "pr_url", "tokens"]:
-        assert key in t                                          # result JSON contract
+    assert "step 0" in t and "skill-gate" in t                  # mandatory skill-load first
+    for key in ["task", "status", "files_changed", "done_sentence_check"]:
+        assert key in t                                         # new result JSON contract
+    assert "pr_url" not in t                                    # PR field removed from the JSON
