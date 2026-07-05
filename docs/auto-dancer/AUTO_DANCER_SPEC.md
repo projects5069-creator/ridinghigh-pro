@@ -96,8 +96,9 @@
 | | |
 |---|---|
 | קלט | המשימה + ה-artifact של השלב הנבדק בלבד: אחרי-PLAN → `plan.md`; אחרי-EXECUTE → diff + פלט-טסטים. רץ **בין כל שני שלבים**, לא רק בסוף |
-| פלט | `critique-N.json`: `{verdict: pass\|bounce, reasons[], required_fixes[]}` |
-| כלל | **fail-closed:** לא הצליח לאמת → `bounce` (צעד אחורה עם נימוק), לא pass. bounce ×2 → PARK (§6) |
+| פלט | `critique-N.json`: `{verdict: pass\|bounce, issues:[{issue, severity, evidence, suggested_fix}]}` |
+| ראיית-כלי (חובה) | **חייב להריץ כלי אמת (pytest ממוקד / git diff) ולצרף את הפלט כראיה ב-verdict. verdict בלי ראיית-כלי = fail-closed** — בודק בלי כלים רק מהדהד את היוצר; כלי דטרמיניסטי מונע "לדבר אותו" לאישור |
+| כלל | **fail-closed:** לא הצליח לאמת → `bounce` (צעד אחורה עם נימוק), לא pass. סבב חוזר עד 5 סבבים → PARK (§6) |
 | מותר | Read, Grep, Glob, Bash קריאה-בלבד |
 | אסור | לתקן בעצמו; Edit/Write; "לאשר בהסתייגות" |
 | מודל | Opus (`CRITIC_MODEL=opus`) |
@@ -116,7 +117,8 @@
 | | |
 |---|---|
 | קלט | **תיאור-המשימה + `git diff` + פלט-הרצת-הטסטים בלבד — לעולם לא את השיחה.** בידוד = נטרול self-reporting bias והטיית-הסכמה-עם-הקודם |
-| פלט | `verify.json`: `{verdict: ready\|reject, checks: {scope_match, tests_green_evidence, core_unsafe_untouched, done_sentence_met}}` |
+| פלט | `verify.json`: `{verdict: ready\|reject, checks: {scope_match, tests_green_evidence, core_unsafe_untouched, done_sentence_met}, issues:[{issue, severity, evidence, suggested_fix}]}` |
+| ראיית-כלי (חובה) | **חייב להריץ כלי אמת (pytest ממוקד / git diff) ולצרף את הפלט כראיה ב-verdict. verdict בלי ראיית-כלי = fail-closed** — בודק בלי כלים רק מהדהד את המבצע; כלי דטרמיניסטי מונע "לדבר אותו" לאישור |
 | תפקיד | השער האחרון פר-משימה: `ready` → ה-orchestrator עושה commit מקומי (§8); `reject` → bounce (נספר ל-stuck-loop §6) |
 | מודל | Opus (`VERIFY_MODEL=opus`) |
 | הערה | **נפרד מ-Agent #8** (`rh-routine-checker`) — #8 נשאר כלי-הבוקר של עמיחי, ללא שינוי (הוא גם בנוי ל-branch בשם `night/*`; ה-Dancer יוצר `auto-dancer/*` — אי-התאמה מכוונת, שני כלים שונים) |
@@ -124,6 +126,10 @@
 ---
 
 ## 5. מטריצת-סמכות-החלטה
+
+**טופולוגיה: pipeline סדרתי — משימה-אחת-בכל-פעם ב-worktree מבודד. אין ריצה מקבילה,
+ולכן אין collision על shared-state (מקור-הכשל מספר-1 במערכות רב-סוכן). תואם דפוס
+Composio-AO המוכח בפרודקשן.**
 
 שלושה צירים; **AUTO רק אם שלושתם ירוקים** — אחרת PARK + escalate:
 
@@ -154,9 +160,10 @@ VERIFIER `ready` — כך שגם "commit" לעולם אינו החלטת-מוד�
 
 ## 6. סמנטיקת park & continue
 
-- **stuck-loop פר-משימה:** 2 סבבי plan↔critic (bounce ×2) **+** retry-ביצוע 1
-  (reject של critic/verifier אחרי execution) → **PARK**. backstop: `--max-turns` פר-שלב
-  **[קיים]**.
+- **ping-pong loop פר-משימה:** **עד 5 סבבי `plan↔critic` / `execute↔verify` לפני PARK**
+  (3–5 = הטווח המוכח שמסלק 90%+ מהבעיות). תקרת-הטוקנים פר-משימה (§7) עדיין עוצרת קודם
+  אם נפגעת. **critical (טסט אדום / חריגת-scope / core-unsafe) → תמיד סבב חוזר; עניין-סגנון
+  בלבד → לא שורף סבב.** backstop: `--max-turns` פר-שלב **[קיים]**.
 - **PARK ≠ הקפאת-ריצה. stuck = park; התור ממשיך תמיד** למשימה הבאה.
 - **רשומת-park:** `parked.json` — `{task, stage, question, evidence_paths[]}`. השאלה
   חייבת להיות **שאלה כתובה וקונקרטית לעמיחי**, לא "לא הצלחתי".
@@ -177,7 +184,7 @@ VERIFIER `ready` — כך שגם "commit" לעולם אינו החלטת-מוד�
 | 2 | verification-passed | שער VERIFIER `ready` לפני כל commit | **[חדש]** |
 | 3 | budget-reached | פר-ריצה: `TOKEN_CEILING` 600k (כולל cache) + wall-clock 180min **[קיים]**; פר-משימה: `budget:` מהתור (ברירת-מחדל 150k) **[חדש]**; פר-שלב: `--max-turns` **[קיים]** |
 | 4 | marginal-value-collapsed | retry-ביצוע שלא שינה את ה-diff / bounce חוזר על אותו נימוק → PARK מיידי (בלי למצות תקציב) | **[חדש]** |
-| 5 | stuck-loop | מוני-bounce של §6 (2+1) | **[חדש]** (max-turns כ-backstop **[קיים]**) |
+| 5 | stuck-loop | מוני-סבב של §6 (עד 5 סבבי ping-pong) | **[חדש]** (max-turns כ-backstop **[קיים]**) |
 | 6 | human-handoff | סטטוסים `needs_human` / `uncertain` **[קיים]** + `parked` **[חדש]** |
 
 ---
@@ -211,6 +218,8 @@ Agent #8 אם רוצה) → מכריע: push+PR / תיקון / זריקה (`work
 - `run_<stamp>.log` — לוג-ריצה מלא (תבנית ה-tee הקיימת) **[קיים]**
 - פר-משימה: `plan.md` · `critique-1..N.json` · `execution.json` · `verify.json` ·
   `parked.json` (אם רלוונטי) · raw JSON פר-שלב + טוקנים פר-שלב **[חדש]**
+- **trace-id פר-משימה ופר-שלב (`P→C→E→C→V`) בכל artifact ובלוג — בלי trace, ניפוי-שגיאות
+  = ניחוש** **[חדש]**
 - `_budget.json` מורחב: spent-מול-budget פר-משימה, פירוק פר-שלב, מוני-bounce **[להתאים]**
 - `build_report.py` **[להתאים]**: קבוצת-סטטוס `⏸ PARKED` (עם השאלה הכתובה) · שורת
   trace פר-משימה (`P→C→E→C→V`) · טבלת-תקציב · ההבחנה PARK/RED של §6
@@ -274,3 +283,6 @@ Agent #8 אם רוצה) → מכריע: push+PR / תיקון / זריקה (`work
    (terminal-notifier / דוח-בלבד) יוגדר ב-M4, בלי push.
 8. **re-arm של launchd אסור בעיצוב זה.** אם אי-פעם יידון מחדש — לפי checklist-ה-postmortem
    של TASK-220 (bootout **וגם** rename) ותחת §11 supervised gates בלבד.
+
+**מקורות (חיזוקי-הביקורת):** מבוססים על דפוס generator-critic-verifier המוכח (3–5 סבבים,
+בידוד-בודק, ראיית-כלי) ועל התאמה ל-Composio-AO (pipeline סדרתי, בלי shared-state collision).
