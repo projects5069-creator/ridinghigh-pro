@@ -14,7 +14,7 @@ NIGHT_SETTINGS="$REPO/.claude/settings.night.json"
 MAX_TASKS="${MAX_TASKS:-3}"
 MAX_CANDIDATES="${MAX_CANDIDATES:-25}"   # hard cap on classifier calls/night (bounds token spend; samples the distribution)
 MAX_TURNS="${MAX_TURNS:-40}"
-PLAN_MAX_TURNS="${PLAN_MAX_TURNS:-15}"  # --plan-only DRY: tighter turn cap forces the PLANNER to converge to plan.md instead of exhausting MAX_TURNS on recon
+PLAN_MAX_TURNS="${PLAN_MAX_TURNS:-30}"  # --plan-only DRY: turn cap for the PLANNER; raised 15->30 (probe: planner exhausted turns at num_turns=9 during correct recon before writing plan.md). Convergence hint in plan_task.md still forces write before the budget is spent.
 MAX_ROUNDS="${MAX_ROUNDS:-5}"           # Auto Dancer §6: retry the P→C→E→C→V round up to this many times before PARK
 TOKEN_CEILING="${TOKEN_CEILING:-600000}"
 WALL_CLOCK_MIN="${WALL_CLOCK_MIN:-180}"

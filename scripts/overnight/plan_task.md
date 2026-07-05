@@ -77,6 +77,11 @@ After a FOCUSED recon (roughly 6–10 read-only lookups), STOP investigating and
 exhaust your turns — writing `plan.md` is the goal, not perfect coverage. If you hit your
 turn budget, write the best `plan.md` you can from what you already have.
 
+**HARD STOP:** when you have covered the key files (or by your ~20th lookup at the latest),
+STOP all investigation on your NEXT turn and WRITE `plan.md` immediately. Running out of
+turns before writing `plan.md` is a FAILURE. Budget your turns: reserve the final 2-3 turns
+for writing, not exploring.
+
 ## Halt conditions → emit status, still write what you have
 - Uncertain / missing information / needs a trading-judgment call → write `plan.md` with a
   `blocked` flag at the top and a **concrete written question** for the human. Do NOT guess.
