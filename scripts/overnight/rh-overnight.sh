@@ -300,6 +300,35 @@ check_scope_lock() {
   return 0
 }
 
+# §8 commit boundary for a VERIFIED `ready`: (1) mechanical scope-lock, (2) git-diff-verify —
+# reject a false-ready whose diff is EMPTY (VERIFIER said ready but no file changed), (3) the
+# orchestrator's LOCAL commit (never push, never PR). Writes a RAW_DIR status on every
+# non-commit outcome. Called ONLY when status == ready. Extracted from main() so it is testable.
+finalize_ready() {
+  local tid="$1" wt="$2" adir="$3" raw_dir="$4"
+  if ! check_scope_lock "$wt" "$adir"; then
+    echo "  SCOPE-LOCK FAILED for $tid — no commit; worktree kept for inspection"
+    jq -n --arg t "$tid" '{task:$t,status:"scope_violation",reason:"diff touched files outside plan allowed_files (or CORE_UNSAFE)"}' \
+      > "$raw_dir/${tid}.json" 2>/dev/null || true
+    return 0
+  fi
+  if [ -z "$( cd "$wt" && git status --porcelain -- ':!.dancer' 2>/dev/null )" ]; then
+    echo "  EMPTY-DIFF for $tid — ready but nothing changed; no commit, worktree kept"
+    jq -n --arg t "$tid" '{task:$t,status:"empty_diff",reason:"VERIFIER said ready but the diff is empty — no file changed (false-ready)"}' \
+      > "$raw_dir/${tid}.json" 2>/dev/null || true
+    return 0
+  fi
+  local dsent; dsent="$(jq -r '.done_sentence // "task"' "$adir/plan_result.json" 2>/dev/null || echo task)"
+  # Plain `git add -A` (NO pathspec): .dancer/ is gitignored so it is excluded automatically,
+  # with no warning. Naming .dancer in a pathspec (e.g. `-- . ':!.dancer'`) makes git print an
+  # "ignored path" warning and EXIT 1, which would short-circuit the `&& git commit` and drop
+  # the commit entirely — so we deliberately do not.
+  ( cd "$wt" && git add -A && git commit -q -m "auto-dancer($tid): $dsent" ) \
+    && echo "  committed locally to auto-dancer/$tid (no push)" \
+    || echo "  commit failed for $tid — worktree kept"
+  return 0
+}
+
 # --- Orchestration (runs only when executed, not sourced) -----------------------
 main() {
   set -euo pipefail
@@ -439,18 +468,7 @@ main() {
 
     # §8 commit boundary: LOCAL commit to the branch ONLY on a verified `ready` that also passes
     # the mechanical scope-lock — done by the orchestrator, never the model. No push, no PR.
-    if [ "$st" = "ready" ]; then
-      if check_scope_lock "$wt" "$adir"; then
-        local dsent; dsent="$(jq -r '.done_sentence // "task"' "$adir/plan_result.json" 2>/dev/null || echo task)"
-        ( cd "$wt" && git add -A -- ':!.dancer' && git commit -q -m "auto-dancer($tid): $dsent" ) \
-          && echo "  committed locally to auto-dancer/$tid (no push)" \
-          || echo "  commit failed for $tid — worktree kept"
-      else
-        echo "  SCOPE-LOCK FAILED for $tid — no commit; worktree kept for inspection"
-        jq -n --arg t "$tid" '{task:$t,status:"scope_violation",reason:"diff touched files outside plan allowed_files (or CORE_UNSAFE)"}' \
-          > "$RAW_DIR/${tid}.json" 2>/dev/null || true
-      fi
-    fi
+    [ "$st" = "ready" ] && finalize_ready "$tid" "$wt" "$adir" "$RAW_DIR"
     # Every outcome (committed `ready`, parked, blocked, rejected, needs_human, stage_error,
     # scope_violation) keeps its worktree for the morning review — nothing is auto-removed here.
     echo "  (worktree kept for inspection: $wt)"
