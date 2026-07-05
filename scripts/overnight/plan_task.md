@@ -63,6 +63,14 @@ anything that would force a PARK.
 - **Forbidden:** any `Edit`/`Write` to source or tests, any code, any
   `git` write command, any implementation recommendation not derived from a documented fact.
 
+## TOOL DISCIPLINE (read-only sandbox)
+Use the **Glob** tool for file discovery (e.g. `**/conftest.py`, `tests/**/test_*.py`) and
+the **Grep** tool for content search — NOT the `find` shell command. `find`, `sed`, `awk`
+are BLOCKED (exec-capable) and will fail; do not attempt them. Plain read-only shell
+(`grep`, `ls`, `cat`, `head`, `tail`, `wc`, `rg`) is allowed for quick inspection, but prefer
+the native Glob/Grep tools. If a shell command is denied, switch to the equivalent tool —
+never retry the denied command.
+
 ## Halt conditions → emit status, still write what you have
 - Uncertain / missing information / needs a trading-judgment call → write `plan.md` with a
   `blocked` flag at the top and a **concrete written question** for the human. Do NOT guess.
