@@ -36,7 +36,7 @@ import math
 import time
 import plotly.express as px
 from finvizfinance.screener.overview import Overview
-from datetime import datetime, time as dt_time, timedelta
+from datetime import datetime, timedelta
 import pytz
 from utils import parse_hhmm
 from data_logger import DataLogger
@@ -60,7 +60,7 @@ from formulas import (
     normalize_atrx,
     fmt_rate_ci,
 )
-from auto_scanner import calculate_score
+from auto_scanner import calculate_score, is_snapshot_time
 from utils import (
     parse_market_cap,
     parse_volume,
@@ -1199,14 +1199,6 @@ def load_timeline_today_from_sheets():
 
 # is_market_hours imported from utils
 
-def check_snapshot_time():
-    peru_tz = pytz.timezone("America/Lima")
-    now = datetime.now(peru_tz)
-    snapshot_time = dt_time(14, 59)
-    current_time = now.time()
-    return snapshot_time <= current_time < dt_time(15, 0)
-
-
 def _build_timeline_summary(arch_df):
     """
     Given a timeline_archive DataFrame (long format with Date, Ticker, ScanTime, Score),
@@ -1340,7 +1332,7 @@ def main_page():
             st.sidebar.success("✅ Cleared local cache!")
             st.rerun()
     
-    if check_snapshot_time() and not st.session_state.snapshot_done_today:
+    if is_snapshot_time() and not st.session_state.snapshot_done_today:
         tracker = LiveTracker()
         portfolio = PortfolioTracker()
         

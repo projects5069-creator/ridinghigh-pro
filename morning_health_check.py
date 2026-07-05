@@ -10,7 +10,7 @@ Read-only - לא עושה שינויים.
 """
 import sys
 import os
-from datetime import datetime
+from datetime import datetime, time as dt_time
 import pandas as pd
 import pytz
 
@@ -128,9 +128,12 @@ try:
             else:
                 print("  ℹ️  No valid ATRX values")
         elif len(today_ds) == 0:
-            hour = NOW.hour
-            if hour < 15:
-                print(f"  ℹ️  daily_snapshots writes at 14:59 Peru (current: {NOW.strftime('%H:%M')})")
+            # DST-aware close: 16:00 ET on today's date -> Peru (15:00 EDT / 16:00 EST).
+            # Mirror of utils.is_day_complete / auto_scanner.is_snapshot_time. RULE #10. TASK-231.
+            close_peru = pytz.timezone("America/New_York").localize(
+                datetime.combine(NOW.date(), dt_time(16, 0))).astimezone(PERU_TZ)
+            if NOW < close_peru:
+                print(f"  ℹ️  daily_snapshots writes ~1 min before close ({close_peru.strftime('%H:%M')} Peru; current: {NOW.strftime('%H:%M')})")
             else:
                 print("  ⚠️  WARNING: daily_snapshots should be written by now!")
         else:

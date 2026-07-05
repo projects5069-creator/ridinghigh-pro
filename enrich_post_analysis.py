@@ -9,13 +9,36 @@ v3: Uses sheets_manager (new multi-sheet architecture). No hardcoded local paths
 
 import argparse
 import pandas as pd
+import pytz
 from datetime import datetime, timedelta
 import time
 import sheets_manager
 from gsheets_sync import load_post_analysis_from_sheets, save_post_analysis_to_sheets
-from utils import is_trading_day, _is_missing
+from utils import is_trading_day, _is_missing, PERU_TZ
 from config import TP_THRESHOLD_FRAC, SL_THRESHOLD_FRAC
 from data_provider import get_data_provider
+
+
+def _min_to_close(peak_time, scan_date):
+    """Minutes between peak-score time (Peru) and the DST-aware market close
+    (16:00 ET on scan_date), clamped at 0. Returns '' on bad input.
+
+    DST-aware (TASK-231): hardcoding 15:00 Peru held only in summer/EDT; winter/
+    EST close is 16:00 Peru, so the old fixed 15:00 undercounted MinToClose by
+    60 min in winter. Derive the Peru close from 16:00 ET on scan_date — mirror
+    of utils.is_day_complete / auto_scanner.is_snapshot_time (a0d63fe / TASK-223).
+    RULE #10. scan_date format is "%Y-%m-%d" (same as fetch_d0_data).
+    """
+    try:
+        from datetime import time as dt_time
+        scan_d = datetime.strptime(scan_date, "%Y-%m-%d").date()
+        close_peru = pytz.timezone("America/New_York").localize(
+            datetime.combine(scan_d, dt_time(16, 0))).astimezone(PERU_TZ)
+        close_dt = pd.Timestamp(f"2000-01-01 {close_peru.strftime('%H:%M')}")
+        peak_dt = pd.Timestamp(f"2000-01-01 {peak_time}")
+        return str(max(0, int((close_dt - peak_dt).total_seconds() / 60)))
+    except Exception:
+        return ""
 
 
 def fetch_d0_data(ticker: str, scan_date: str) -> dict:
@@ -161,13 +184,8 @@ def run(backfill: bool = False):
                 if scan_price > 0:
                     pa.at[idx, "SL_Hit_D0"] = "1" if intra_high >= scan_price * (1 + SL_THRESHOLD_FRAC) else "0"
 
-                # MinToClose: minutes between peak score time and 15:00 close
-                try:
-                    peak_dt = pd.Timestamp(f"2000-01-01 {peak_time}")
-                    close_dt = pd.Timestamp("2000-01-01 15:00")
-                    pa.at[idx, "MinToClose"] = str(max(0, int((close_dt - peak_dt).total_seconds() / 60)))
-                except:
-                    pa.at[idx, "MinToClose"] = ""
+                # MinToClose: minutes between peak score time and close (see _min_to_close)
+                pa.at[idx, "MinToClose"] = _min_to_close(peak_time, scan_date)
 
                 row_changed = True
             else:
