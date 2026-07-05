@@ -1,9 +1,11 @@
 """Shape/validity tests for the committable config artifacts:
 classify_task.md (layer-2 prompt), com.rh.overnight.plist (launchd), and
-overnight_report_email.yml (decoupled email). The guardrail files
-(settings.night.json, execute_task.md, block_secrets.sh, rh-overnight.sh) are
-tested separately and held for explicit approval.
+overnight_report_email.yml (decoupled email). settings.night.json is covered
+here too (Auto Dancer M2b-3b — .dancer/ artifact write-scope + no security
+regression). The remaining guardrail files (execute_task.md, block_secrets.sh,
+rh-overnight.sh) are tested separately.
 """
+import json
 import os
 import plistlib
 
@@ -56,3 +58,37 @@ def test_email_workflow_shape():
     assert "secrets.SMTP_HOST" in y and "secrets.EMAIL_TO" in y
     assert "email_sender" in y                             # reuse existing sender
     assert "ANTHROPIC_API_KEY" not in y                    # email job needs no model
+
+
+def _night_settings():
+    return json.loads(_read(".claude/settings.night.json"))
+
+
+def test_night_settings_valid_json():
+    _night_settings()   # raises if malformed
+
+
+def test_dancer_artifact_write_scope():
+    # Auto Dancer M2b-3b: RPI roles may write artifacts under .dancer/ (plan.md,
+    # critique-*.json, verify.json, ...) — scoped, NOT a blanket Write.
+    allow = _night_settings()["permissions"]["allow"]
+    assert "Write(.dancer/**)" in allow
+    assert "Write(tests/**)" in allow                      # existing scope preserved
+    assert "Write" not in allow                            # never a blanket Write
+
+
+def test_secret_denies_intact():
+    # no security regression — every secret Read-deny still present
+    deny = _night_settings()["permissions"]["deny"]
+    for pat in [
+        "Read(**/.env)", "Read(**/.env.*)", "Read(**/google_credentials.json)",
+        "Read(**/oauth_credentials.json)", "Read(**/*_sheet_id)", "Read(**/secrets.toml)",
+    ]:
+        assert pat in deny, pat
+
+
+def test_hooks_intact():
+    # both PreToolUse guard hooks still registered
+    hooks = json.dumps(_night_settings()["hooks"])
+    assert "block_secrets.sh" in hooks
+    assert "block_core_unsafe.sh" in hooks

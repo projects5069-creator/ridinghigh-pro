@@ -21,6 +21,7 @@
       "Read",
       "Edit",
       "Write(tests/**)",
+      "Write(.dancer/**)",
       "Bash(git *)",
       "Bash(pytest *)",
       "Bash(python3 -m py_compile *)",
