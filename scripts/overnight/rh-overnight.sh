@@ -260,6 +260,34 @@ run_rpi_task() {
   return 0
 }
 
+# Mechanical scope-lock: prove the task's git diff touched ONLY files in the plan's
+# allowed_files, and NO CORE_UNSAFE file (belt-and-suspenders beyond block_core_unsafe.sh).
+# Returns 0 iff every touched file is allowed AND non-CORE_UNSAFE. FAIL-CLOSED: no
+# allowed_files, or any jq/git error → return 1 (never approve without a scope). Touched =
+# committed-since-base ∪ staged ∪ unstaged ∪ untracked(non-ignored); .dancer/ is gitignored
+# so its artifacts are excluded.
+check_scope_lock() {
+  local wt="$1" adir="$2"
+  local allowed; allowed="$(jq -r '.allowed_files[]?' "$adir/plan_result.json" 2>/dev/null)" || return 1
+  [ -n "$allowed" ] || { echo "scope-lock: no allowed_files in plan (fail-closed)" >&2; return 1; }
+  local touched
+  touched="$( cd "$wt" && {
+        git diff --name-only "$BASE_BRANCH"...HEAD 2>/dev/null
+        git diff --name-only 2>/dev/null
+        git diff --name-only --cached 2>/dev/null
+        git ls-files --others --exclude-standard 2>/dev/null
+      } | sort -u )" || return 1
+  local f verdict
+  while IFS= read -r f; do
+    [ -n "$f" ] || continue
+    printf '%s\n' "$allowed" | grep -Fxq -- "$f" \
+      || { echo "SCOPE VIOLATION: $f (not in plan allowed_files)" >&2; return 1; }
+    verdict="$("$PYBIN" "$REPO/scripts/overnight/core_unsafe.py" --anchored "$f" 2>/dev/null | awk 'NR==1{print $1}')"
+    [ "$verdict" = "UNSAFE" ] && { echo "SCOPE VIOLATION (CORE_UNSAFE): $f" >&2; return 1; }
+  done <<< "$touched"
+  return 0
+}
+
 # --- Orchestration (runs only when executed, not sourced) -----------------------
 main() {
   set -euo pipefail
