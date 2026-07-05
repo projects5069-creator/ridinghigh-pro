@@ -34,4 +34,9 @@ grep -qF 'git commit -q -m "auto-dancer(' "$SCRIPT"                        && ok
 grep -vE '^[[:space:]]*#' "$SCRIPT" | grep -q 'gh pr create' \
   && bad "gh pr create present in runner (non-comment)" || ok "no gh pr create command in runner"
 
+# 5) PLAN_ONLY DRY mode wired: --plan-only flag, is_plan_only branch in the loop, run_plan_only called
+grep -qF -- '--plan-only)' "$SCRIPT"                        && ok "case has --plan-only" || bad "--plan-only case missing"
+grep -qF 'run_plan_only "$tid" "$pbody" "$wt" "$resolved_settings" "$adir"' "$SCRIPT" && ok "loop calls run_plan_only" || bad "run_plan_only not wired"
+grep -qF 'if is_plan_only; then' "$SCRIPT"                  && ok "is_plan_only branch present" || bad "is_plan_only branch missing"
+
 if [ "$fail" = "0" ]; then echo "ALL PASS"; else echo "FAILURES"; exit 1; fi

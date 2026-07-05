@@ -432,15 +432,20 @@ main() {
     # production stops once the queue is full; the dry-run keeps sampling to MAX_CANDIDATES to show the distribution
     if ! is_triage_only && [ "${#queue[@]}" -ge "$MAX_TASKS" ]; then break; fi
     classified=$((classified + 1))
-    local body; body="$(cat "$TASKS_DIR/task-${tid#TASK-} "*.md 2>/dev/null || true)"
-    local verdict; verdict="$(classify_verdict "$body" "$wt_scan" "$resolved_settings" "$RAW_DIR/${tid}.classify.err")"
-    if [ "$(printf '%s' "$verdict" | jq -r '.auto_safe // false')" = "true" ]; then
+    if is_plan_only; then
+      # PLAN_ONLY: no classifier veto — the PLANNER runs read-only on every queued task.
       queue+=("$tid")
     else
-      # serialize NEEDS-HUMAN so it reaches the morning report (not echo-only)
-      jq -n --arg t "$tid" --arg r "$(printf '%s' "$verdict" | jq -r '.reason // "unclassified"')" \
-            '{task:$t,status:"needs_human",reason:$r}' > "$RAW_DIR/${tid}.json"
-      n_needs=$((n_needs + 1))
+      local body; body="$(cat "$TASKS_DIR/task-${tid#TASK-} "*.md 2>/dev/null || true)"
+      local verdict; verdict="$(classify_verdict "$body" "$wt_scan" "$resolved_settings" "$RAW_DIR/${tid}.classify.err")"
+      if [ "$(printf '%s' "$verdict" | jq -r '.auto_safe // false')" = "true" ]; then
+        queue+=("$tid")
+      else
+        # serialize NEEDS-HUMAN so it reaches the morning report (not echo-only)
+        jq -n --arg t "$tid" --arg r "$(printf '%s' "$verdict" | jq -r '.reason // "unclassified"')" \
+              '{task:$t,status:"needs_human",reason:$r}' > "$RAW_DIR/${tid}.json"
+        n_needs=$((n_needs + 1))
+      fi
     fi
   done <<< "$candidates"
   git worktree remove --force "$wt_scan" 2>/dev/null || true
@@ -468,6 +473,19 @@ main() {
     git worktree add --force "$wt" -b "auto-dancer/$tid" "$BASE_BRANCH" >/dev/null 2>&1 \
       || git worktree add --force "$wt" "auto-dancer/$tid" >/dev/null 2>&1 || { echo "  worktree add failed for $tid"; continue; }
     local adir="$wt/.dancer"
+
+    if is_plan_only; then
+      # PLAN_ONLY DRY: run ONLY the PLANNER, save its plan.md to the report dir, then stop —
+      # no critic/execute/verify, no scope-lock, no commit. Worktree kept for inspection.
+      local pbody; pbody="$(cat "$TASKS_DIR/task-${tid#TASK-} "*.md 2>/dev/null || true)"
+      local pout pst ptoks; pout="$(run_plan_only "$tid" "$pbody" "$wt" "$resolved_settings" "$adir")"
+      pst="${pout%%$'\t'*}"; ptoks="${pout##*$'\t'}"
+      spent=$(( spent + ${ptoks:-0} )); ran=$((ran + 1))
+      cp "$adir/plan.md" "$RAW_DIR/${tid}.plan.md" 2>/dev/null || true
+      cp "$adir/plan_result.json" "$RAW_DIR/${tid}.json" 2>/dev/null || true
+      echo "  $tid PLANNED ($pst); plan.md saved (no execute, worktree kept: $wt)"
+      continue
+    fi
 
     # Drive the RPI chain; run_rpi_task echoes "<status>\t<total_tokens>". Per-task budget is
     # pulled straight from the queue TSV (bash-3.2-safe: no associative array); discovery mode
@@ -516,6 +534,7 @@ if [ "${BASH_SOURCE[0]}" = "${0}" ]; then
     --check-auth)  check_auth ;;          # §11 gate #3: invoke via launchd to verify Keychain context
     --triage-only) TRIAGE_ONLY=1 main "$@" ;;   # §11 gate-5 dry-run: pre-flight + triage, no execute/PR
     --manual)      MANUAL=1 main "$@" ;;         # M1: manual trigger any hour — night-window bypassed, queue-file source
+    --plan-only)   PLAN_ONLY=1 MANUAL=1 main "$@" ;;   # PLANNER-only recon over the queue: no classify, no execute, no commit
     *)             main "$@" ;;
   esac
 fi
