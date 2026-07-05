@@ -389,8 +389,11 @@ main() {
     return 0
   fi
 
-  # 3. Execute loop — each task in its OWN fresh worktree (KEYSTONE isolation); circuit
-  #    breaker between tasks (tokens incl. cache / count / wall-clock).
+  # 3. Execute loop — each task in its OWN fresh worktree (KEYSTONE isolation), driven through
+  #    the full P→C→E→C→V RPI chain (run_rpi_task, up to MAX_ROUNDS); circuit breaker between
+  #    tasks. The ORCHESTRATOR — never the model — makes the LOCAL commit, and ONLY on a
+  #    verified `ready` that also passes the mechanical scope-lock (spec §8). Never push,
+  #    never gh pr, never touch main. Every worktree is kept for the morning review.
   local spent=0 ran=0 start_epoch; start_epoch="$(date +%s)"
   for tid in "${queue[@]:-}"; do
     [ -n "${tid:-}" ] || continue
@@ -398,27 +401,39 @@ main() {
     local elapsed_min=$(( ($(date +%s) - start_epoch) / 60 ))
     [ "$elapsed_min" -ge "$WALL_CLOCK_MIN" ] && { echo "wall-clock cap hit — stop"; break; }
 
-    local wt="$REPO/../rh-night-${tid}"
-    git worktree add --force "$wt" -b "rh-night/$tid" "$BASE_BRANCH" >/dev/null 2>&1 \
-      || git worktree add --force "$wt" "rh-night/$tid" >/dev/null 2>&1 || { echo "  worktree add failed for $tid"; continue; }
+    local wt="$REPO/../rh-dancer-${tid}"
+    git worktree add --force "$wt" -b "auto-dancer/$tid" "$BASE_BRANCH" >/dev/null 2>&1 \
+      || git worktree add --force "$wt" "auto-dancer/$tid" >/dev/null 2>&1 || { echo "  worktree add failed for $tid"; continue; }
+    local adir="$wt/.dancer"
 
-    local out="$RAW_DIR/${tid}.json"
-    printf 'TASK to execute: %s\n\n%s\n' "$tid" "$(cat "$REPO/scripts/overnight/execute_task.md")" \
-      | ( cd "$wt" && claude -p --model "$EXEC_MODEL" --settings "$resolved_settings" \
-            --permission-mode dontAsk --max-turns "$MAX_TURNS" --output-format json 2>/dev/null ) \
-          > "$RAW_DIR/${tid}.raw.json" || true
-    # Extract the task's result JSON (model's final message) + FULL token usage (incl. cache).
-    jq -r '.result // empty' "$RAW_DIR/${tid}.raw.json" 2>/dev/null \
-      | sed -n '/{/,/}/p' > "$out" || true
-    local used; used="$(jq -r '((.usage.input_tokens//0)+(.usage.output_tokens//0)+(.usage.cache_read_input_tokens//0)+(.usage.cache_creation_input_tokens//0))' "$RAW_DIR/${tid}.raw.json" 2>/dev/null || echo 0)"
-    spent=$(( spent + ${used:-0} )); ran=$((ran + 1))
-    echo "  $tid done; tokens+=$used (spent $spent)"
-    # DONE → drop the worktree (branch + draft PR persist); else keep it for inspection.
-    if [ "$(jq -r '.status // "unknown"' "$out" 2>/dev/null || echo unknown)" = "done" ]; then
-      git worktree remove --force "$wt" 2>/dev/null || true
-    else
-      echo "  (worktree kept for inspection: $wt)"
+    # Drive the RPI chain; run_rpi_task echoes "<status>\t<total_tokens>".
+    local out st toks; out="$(run_rpi_task "$tid" "$wt" "$resolved_settings" "$adir")"
+    st="${out%%$'\t'*}"; toks="${out##*$'\t'}"
+    spent=$(( spent + ${toks:-0} )); ran=$((ran + 1))
+    echo "  $tid → $st; tokens+=$toks (spent $spent)"
+
+    # Surface the per-task result to the morning report (task_result.json, else parked.json).
+    if   [ -f "$adir/task_result.json" ]; then cp "$adir/task_result.json" "$RAW_DIR/${tid}.json" 2>/dev/null || true
+    elif [ -f "$adir/parked.json" ];      then cp "$adir/parked.json"      "$RAW_DIR/${tid}.json" 2>/dev/null || true
     fi
+
+    # §8 commit boundary: LOCAL commit to the branch ONLY on a verified `ready` that also passes
+    # the mechanical scope-lock — done by the orchestrator, never the model. No push, no PR.
+    if [ "$st" = "ready" ]; then
+      if check_scope_lock "$wt" "$adir"; then
+        local dsent; dsent="$(jq -r '.done_sentence // "task"' "$adir/plan_result.json" 2>/dev/null || echo task)"
+        ( cd "$wt" && git add -A -- ':!.dancer' && git commit -q -m "auto-dancer($tid): $dsent" ) \
+          && echo "  committed locally to auto-dancer/$tid (no push)" \
+          || echo "  commit failed for $tid — worktree kept"
+      else
+        echo "  SCOPE-LOCK FAILED for $tid — no commit; worktree kept for inspection"
+        jq -n --arg t "$tid" '{task:$t,status:"scope_violation",reason:"diff touched files outside plan allowed_files (or CORE_UNSAFE)"}' \
+          > "$RAW_DIR/${tid}.json" 2>/dev/null || true
+      fi
+    fi
+    # Every outcome (committed `ready`, parked, blocked, rejected, needs_human, stage_error,
+    # scope_violation) keeps its worktree for the morning review — nothing is auto-removed here.
+    echo "  (worktree kept for inspection: $wt)"
   done
 
   # 4. Budget + report.
