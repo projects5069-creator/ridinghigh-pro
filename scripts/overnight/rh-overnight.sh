@@ -467,20 +467,12 @@ main() {
   local report="$RAW_DIR/REPORT_${stamp}.md"
   "$PYBIN" "$REPO/scripts/overnight/build_report.py" "$RAW_DIR" "$stamp" "$base_sha" "$report"
 
-  # 5. Publish report via a DEDICATED worktree — never stash/checkout main's working tree
-  #    (so the user's uncommitted files are untouched). main is never pushed.
-  local wt_rep="$REPO/../rh-night-report-$stamp"
-  git fetch --quiet origin overnight-reports 2>/dev/null || true
-  git worktree add --force "$wt_rep" -b overnight-reports >/dev/null 2>&1 \
-    || git worktree add --force "$wt_rep" overnight-reports >/dev/null 2>&1 \
-    || git worktree add --force --detach "$wt_rep" "$BASE_BRANCH" >/dev/null 2>&1
-  mkdir -p "$wt_rep/docs/overnight"
-  cp "$report" "$wt_rep/docs/overnight/"
-  ( cd "$wt_rep" && git add "docs/overnight/$(basename "$report")" \
-      && git commit -q -m "report: overnight $stamp" \
-      && git push -q origin HEAD:overnight-reports ) || echo "WARN: report publish failed"
-  git worktree remove --force "$wt_rep" 2>/dev/null || true
-  echo "== done: $report =="
+  # 5. Report stays LOCAL — spec §8.2 zero-push. The Auto Dancer never pushes anything: the
+  #    morning review is done locally against the per-task branches + this report. (Removed the
+  #    old overnight-reports worktree/commit/push; the email workflow that keyed off that push
+  #    is dormant by consequence — no code path here references it.)
+  echo "== report (local): $report =="
+  echo "   read it in the terminal — no push (spec §8.2)"
 }
 
 # Run only when executed directly (sourcing exposes guards to tests).
