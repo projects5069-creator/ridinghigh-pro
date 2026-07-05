@@ -405,7 +405,7 @@ main() {
   # trap exists in this script, so this does not clobber one. Idempotent with the explicit
   # removal below (|| true). Note: by design only the read-only scan worktree is auto-removed;
   # per-task execute worktrees are intentionally kept for inspection unless the task is "done".
-  trap 'git worktree remove --force "$wt_scan" 2>/dev/null || true' EXIT
+  trap 'git worktree remove --force "${wt_scan:-}" 2>/dev/null || true' EXIT
   local queue=() n_needs=0 classified=0
   while read -r tid; do
     [ -n "$tid" ] || continue
