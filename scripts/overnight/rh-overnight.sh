@@ -286,11 +286,14 @@ run_plan_only() {
   local roles="$REPO/scripts/overnight"
   local tmp; tmp="$(mktemp)"
   printf 'TASK: %s\n\n%s\n\n%s\n' "$tid" "$body" "$(cat "$roles/plan_task.md")" > "$tmp"
-  local t; t="$(run_stage "$tmp" "$PLAN_MODEL" "$wt" "$settings" "$adir/plan.md" "$adir/plan.raw.json" "$PLAN_MAX_TURNS")"
+  # TASK-234 Fix A: the PLANNER writes its plan DOCUMENT to .dancer/plan.md (an
+  # allowed write path under night settings); run_stage extracts the PLANNER's
+  # status JSON to plan_result.json (same name as the main RPI chain, line 157).
+  # Previously the status JSON went to .dancer/plan.md, colliding with the doc path.
+  local t; t="$(run_stage "$tmp" "$PLAN_MODEL" "$wt" "$settings" "$adir/plan_result.json" "$adir/plan.raw.json" "$PLAN_MAX_TURNS")"
   rm -f "$tmp"
-  local v; v="$(jq -r '.status // "error"' "$adir/plan.md" 2>/dev/null || echo error)"
+  local v; v="$(jq -r '.status // "error"' "$adir/plan_result.json" 2>/dev/null || echo error)"
   case "$v" in planned|blocked|needs_human) ;; *) v="stage_error" ;; esac
-  jq -n --arg t "$tid" --arg s "$v" '{task:$t,status:$s,mode:"plan_only"}' > "$adir/plan_result.json" 2>/dev/null || true
   printf '%s\t%s\n' "$v" "${t:-0}"
 }
 

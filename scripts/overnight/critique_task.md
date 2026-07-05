@@ -15,7 +15,7 @@ until a Skill/SKILL.md tool_use exists in the transcript). Do this FIRST — if 
 action is a Bash or Read, the gate will block it and waste a turn.
 
 ## What you review (depends on the stage you were called for)
-- **post-plan** — the `plan.md` the PLANNER produced. Is the research fact-backed
+- **post-plan** — the `.dancer/plan.md` the PLANNER produced. Is the research fact-backed
   (`file:line`)? Is the allowed-files list minimal and CORE_UNSAFE-free? Does the test
   strategy actually prove the bug? Is the "done" sentence single and checkable?
 - **post-execute** — the `git diff` + the test output. Does the diff match the plan's
