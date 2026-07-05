@@ -23,6 +23,9 @@ data/
 docs/overnight/raw/
 # Auto Dancer (M1) — human-written queue files are local only (keep tree clean for guard_base_ready)
 docs/auto-dancer/queue/
+# Auto Dancer (M2) — per-stage RPI artifacts (plan.md/critique/verify) written into each
+# worktree's .dancer/ — must stay untracked so the worktree tree stays clean for git-diff scoping
+.dancer/
 
 # Streamlit
 .streamlit/secrets.toml
