@@ -19,6 +19,9 @@ WALL_CLOCK_MIN="${WALL_CLOCK_MIN:-180}"
 NIGHT_END_HOUR="${NIGHT_END_HOUR:-5}"   # abort if Lima hour >= 5 (deferred-run guard)
 EXEC_MODEL="${EXEC_MODEL:-sonnet}"
 CLASSIFY_MODEL="${CLASSIFY_MODEL:-sonnet}"
+PLAN_MODEL="${PLAN_MODEL:-opus}"        # RPI role models (Auto Dancer M2): plan/critic/verify default to opus
+CRITIC_MODEL="${CRITIC_MODEL:-opus}"
+VERIFY_MODEL="${VERIFY_MODEL:-opus}"
 KEYCHAIN_SERVICE="${KEYCHAIN_SERVICE:-rh-overnight-oauth}"
 BASE_BRANCH="${RH_BASE_BRANCH:-main}"   # branch tasks/reports base off; override for isolated §11 runs
 PYBIN="${RH_PYBIN:-/usr/bin/python3}"   # stdlib-only runner scripts; bypasses the modern-python PATH shim
@@ -110,6 +113,23 @@ classify_verdict() {
     v="$(jq -n --arg e "${errlog##*/}" '{auto_safe:false,reason:("classify failed — see "+$e)}')"
   fi
   printf '%s\n' "$v"
+}
+
+# Run ONE role prompt (plan/critic/execute/verify) in a worktree; extract its result JSON
+# to out_json; echo the tokens it spent (incl. cache) on stdout. FAIL-CLOSED: any claude
+# failure or empty result → out_json={"status":"error",...} and 0 tokens (never aborts set -e).
+# Pure I/O helper — sourced so tests can drive it; the caller composes the prompt file.
+run_stage() {
+  local prompt_file="$1" model="$2" worktree="$3" settings="$4" out_json="$5" raw_json="$6"
+  ( cd "$worktree" && claude -p --model "$model" --settings "$settings" \
+        --permission-mode dontAsk --max-turns "$MAX_TURNS" --output-format json 2>/dev/null ) \
+      < "$prompt_file" > "$raw_json" || true
+  jq -r '.result // empty' "$raw_json" 2>/dev/null | sed -n '/{/,/}/p' > "$out_json" || true
+  if [ ! -s "$out_json" ]; then
+    printf '%s\n' '{"status":"error","reason":"stage failed"}' > "$out_json"
+    echo 0; return 0
+  fi
+  jq -r '((.usage.input_tokens//0)+(.usage.output_tokens//0)+(.usage.cache_read_input_tokens//0)+(.usage.cache_creation_input_tokens//0))' "$raw_json" 2>/dev/null || echo 0
 }
 
 # --- Orchestration (runs only when executed, not sourced) -----------------------
