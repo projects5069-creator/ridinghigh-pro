@@ -64,6 +64,7 @@ guard_base_ready() {            # replaces "cwd==main": pass only if tree is cle
 }
 
 is_triage_only() { [ "${TRIAGE_ONLY:-0}" = "1" ]; }   # --triage-only: stop after triage; no execute/PR/publish
+is_plan_only()   { [ "${PLAN_ONLY:-0}" = "1" ]; }     # --plan-only: run ONLY the PLANNER per task (read-only DRY), no execute
 cap_reached()    { [ "${1:-0}" -ge "$MAX_CANDIDATES" ]; }   # true once we've classified MAX_CANDIDATES tasks
 
 read_oauth_token() {            # subscription token from macOS Keychain (never on disk)
@@ -270,6 +271,24 @@ run_rpi_task() {
   _rpi_park "$tid" "$adir" "$round" "$last_status"
   printf 'parked\t%s\n' "$total"
   return 0
+}
+
+# --plan-only DRY: run ONLY the PLANNER for a task (mirrors run_rpi_chain's PLAN stage), write
+# .dancer/plan.md, and stop — no critic/execute/verify, no commit. Read-only w.r.t. the user's
+# code (writes only under .dancer/). Echoes "<status>\t<tokens>". FAIL-CLOSED: a stage failure
+# → status "stage_error". Used to preview what the PLANNER produces before a full run.
+run_plan_only() {
+  local tid="$1" body="$2" wt="$3" settings="$4" adir="$5"
+  mkdir -p "$adir"
+  local roles="$REPO/scripts/overnight"
+  local tmp; tmp="$(mktemp)"
+  printf 'TASK: %s\n\n%s\n\n%s\n' "$tid" "$body" "$(cat "$roles/plan_task.md")" > "$tmp"
+  local t; t="$(run_stage "$tmp" "$PLAN_MODEL" "$wt" "$settings" "$adir/plan.md" "$adir/plan.raw.json")"
+  rm -f "$tmp"
+  local v; v="$(jq -r '.status // "error"' "$adir/plan.md" 2>/dev/null || echo error)"
+  case "$v" in planned|blocked|needs_human) ;; *) v="stage_error" ;; esac
+  jq -n --arg t "$tid" --arg s "$v" '{task:$t,status:$s,mode:"plan_only"}' > "$adir/plan_result.json" 2>/dev/null || true
+  printf '%s\t%s\n' "$v" "${t:-0}"
 }
 
 # Mechanical scope-lock: prove the task's git diff touched ONLY files in the plan's
