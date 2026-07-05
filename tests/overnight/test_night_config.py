@@ -77,6 +77,22 @@ def test_dancer_artifact_write_scope():
     assert "Write" not in allow                            # never a blanket Write
 
 
+def test_planner_read_only_bash_allowed():
+    # PLANNER was blocked (permission_denials -> aborted_tools) when it tried find/grep/ls.
+    # Fix: add genuinely read-only Bash commands to `allow`. Deliberately EXCLUDE find/sed/awk
+    # (they can exec: find -exec, awk system(), sed e) so the allow-list can't auto-approve
+    # arbitrary code execution.
+    allow = _night_settings()["permissions"]["allow"]
+    for cmd in ["Bash(grep *)", "Bash(ls *)", "Bash(cat *)",
+                "Bash(head *)", "Bash(tail *)", "Bash(wc *)", "Bash(rg *)"]:
+        assert cmd in allow, cmd
+    # exec-capable commands must NOT be auto-approved
+    for cmd in ["Bash(find *)", "Bash(sed *)", "Bash(awk *)"]:
+        assert cmd not in allow, cmd
+    # blanket Write still never granted (read-perms change must not widen write scope)
+    assert "Write" not in allow
+
+
 def test_secret_denies_intact():
     # no security regression — every secret Read-deny still present
     deny = _night_settings()["permissions"]["deny"]
