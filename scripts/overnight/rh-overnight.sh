@@ -480,8 +480,8 @@ main() {
         '{tasks_run:$run,max_tasks:$maxt,tokens:$tok,token_ceiling:$ceil,ceiling_hit:($tok>=$ceil),per_task:{}}' \
         > "$RAW_DIR/_budget.json"
   # Write the report into the gitignored per-night RAW_DIR so the runner's own tree stays
-  # clean (else next run's guard_base_ready would abort). It is published to the
-  # overnight-reports branch (committed there as docs/overnight/REPORT_*.md) below.
+  # clean (else next run's guard_base_ready would abort). It is kept LOCAL (spec §8.2
+  # zero-push) — read it in the terminal; nothing is pushed.
   local report="$RAW_DIR/REPORT_${stamp}.md"
   "$PYBIN" "$REPO/scripts/overnight/build_report.py" "$RAW_DIR" "$stamp" "$base_sha" "$report"
 

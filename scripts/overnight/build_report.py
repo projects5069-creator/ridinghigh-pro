@@ -9,10 +9,19 @@ import os
 import sys
 
 _STATUS_GROUPS = [
-    ("done", "✅ DONE (draft PRs)"),
+    # The Auto Dancer statuses (current):
+    ("ready", "✅ READY (committed locally — review + push)"),
+    ("parked", "⏸ PARKED (needs your decision — question inside)"),
+    ("rejected", "❌ REJECTED (5 rounds, no pass)"),
+    ("blocked", "🚫 BLOCKED (planner could not proceed)"),
+    ("needs_human", "🚧 NEEDS-HUMAN (classifier veto — not attempted)"),
+    ("scope_violation", "⛔ SCOPE VIOLATION (diff outside plan / CORE_UNSAFE)"),
+    ("empty_diff", "◻️ EMPTY-DIFF (ready but nothing changed)"),
+    ("stage_error", "⚠️ STAGE ERROR (a role call failed)"),
+    # legacy (pre-Auto-Dancer) statuses, kept for backward compatibility:
+    ("done", "✅ DONE (legacy — committed)"),
     ("skipped", "⏭️ SKIPPED"),
-    ("needs_human", "🚧 NEEDS-HUMAN (auto-unsafe — NOT attempted)"),
-    ("red", "❌ RED / STOPPED (attempted, halted, NO PR)"),
+    ("red", "❌ RED / STOPPED (legacy — halted)"),
     ("uncertain", "⚠️ UNCERTAINTY FLAGS (agent stopped on a judgment call)"),
 ]
 
@@ -34,8 +43,24 @@ def _fmt_other(r):
     return line
 
 
+def _fmt_ready(r):
+    # committed locally to auto-dancer/<task>; the human reviews the diff and pushes. No PR.
+    tok = f"{r.get('tokens', 0) // 1000}k tok"
+    return (f"  {r['task']}  → branch auto-dancer/{r['task']} (committed locally, no push)\n"
+            f"    rounds {r.get('rounds', '?')} | {tok} | review the diff, then push if good")
+
+
+def _fmt_parked(r):
+    line = (f"  {r['task']}  [{r.get('stage', '?')}] after {r.get('rounds', '?')} round(s)\n"
+            f"    Q: {r.get('question', '(no question captured)')}")
+    ev = r.get("evidence_paths") or []
+    if ev:
+        line += "\n    evidence: " + ", ".join(ev)
+    return line
+
+
 def render_report(results, budget, date, base_sha):
-    out = [f"📊 RH OVERNIGHT — {date}  | base {base_sha} | claude 2.1.170",
+    out = [f"📊 THE AUTO DANCER — {date}  | base {base_sha}",
            "─" * 47]
     by_status = {}
     for r in results:
@@ -47,7 +72,7 @@ def render_report(results, budget, date, base_sha):
         if not rows:
             out.append("  (none)")
             continue
-        fmt = _fmt_done if key == "done" else _fmt_other
+        fmt = {"ready": _fmt_ready, "parked": _fmt_parked, "done": _fmt_done}.get(key, _fmt_other)
         out.extend(fmt(r) for r in rows)
     # budget — tokens, never dollars
     tok = budget.get("tokens", 0) // 1000
