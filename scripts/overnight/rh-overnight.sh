@@ -126,6 +126,7 @@ run_stage() {
   local prompt_file="$1" model="$2" worktree="$3" settings="$4" out_json="$5" raw_json="$6"
   local turns="${7:-$MAX_TURNS}"   # optional per-stage turn cap; RPI chain uses MAX_TURNS, --plan-only passes PLAN_MAX_TURNS
   ( cd "$worktree" && claude -p --model "$model" --settings "$settings" \
+        --setting-sources local \
         --permission-mode dontAsk --max-turns "$turns" --output-format json 2>/dev/null ) \
       < "$prompt_file" > "$raw_json" || true
   jq -r '.result // empty' "$raw_json" 2>/dev/null | sed -n '/{/,/}/p' > "$out_json" || true
