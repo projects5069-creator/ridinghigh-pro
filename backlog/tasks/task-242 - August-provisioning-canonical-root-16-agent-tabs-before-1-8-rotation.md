@@ -1,10 +1,10 @@
 ---
 id: TASK-242
 title: August provisioning - canonical root + 16 agent tabs before 1/8 rotation
-status: In Progress
+status: Done
 assignee: []
 created_date: '2026-07-29 08:00'
-updated_date: '2026-07-29 08:36'
+updated_date: '2026-07-29 09:07'
 labels:
   - bug
   - infra
