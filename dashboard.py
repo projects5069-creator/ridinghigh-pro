@@ -35,7 +35,6 @@ import pandas as pd
 import math
 import time
 import plotly.express as px
-from finvizfinance.screener.overview import Overview
 from datetime import datetime, timedelta
 import pytz
 from utils import parse_hhmm
@@ -66,6 +65,7 @@ from utils import (
     parse_volume,
     is_market_hours,
     classify_trade,
+    SanitizedOverview,
 )
 from config import (
     MIN_SCORE_DISPLAY,
@@ -219,7 +219,9 @@ class Dashboard:
     
     def fetch_finviz_data(self):
         try:
-            fviz = Overview()
+            # TASK-238: same DOM-based ticker extraction as auto_scanner, one
+            # implementation in utils (§10). Plain Overview returns AAMIX.
+            fviz = SanitizedOverview()
             filters_dict = {
                 'Price': 'Over $2',
                 'Performance': 'Today +15%',

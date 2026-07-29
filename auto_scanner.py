@@ -21,6 +21,7 @@ from utils import (
     parse_market_cap,
     parse_volume,
     get_market_cap_smart,
+    SanitizedOverview,
 )
 from formulas import (
     calculate_mxv,
@@ -134,7 +135,6 @@ def save_mc_cache():
 
 # ── Scanner logic (mirrors dashboard.py exactly) ─────────────────────────────
 # yfinance imported lazily where needed (Issue #9 Phase 2)
-from finvizfinance.screener.overview import Overview
 from ta.momentum import RSIIndicator
 from ta.volatility import AverageTrueRange
 import ta_helpers  # TASK-137: canonical Wilder RSI/ATR (shared with D0 method)
@@ -339,7 +339,11 @@ def analyze_ticker(ticker, finviz_row):
 
 def fetch_finviz():
     try:
-        fviz = Overview()
+        # TASK-238: SanitizedOverview reads the ticker from the DOM attribute
+        # instead of col.text, which finviz's logo placeholder letter corrupts
+        # (AMIX arrives as AAMIX, Agilent's A as AA). Same class for both the
+        # pinned 0.14.6 and whatever CI resolves to; see utils for the evidence.
+        fviz = SanitizedOverview()
         fviz.set_filter(filters_dict={'Price': 'Over $2', 'Performance': 'Today +15%'})
         df = fviz.screener_view()
         if df is None or df.empty: return None
