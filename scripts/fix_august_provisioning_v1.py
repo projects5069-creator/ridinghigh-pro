@@ -40,11 +40,17 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import sheets_manager  # noqa: E402
 
-MONTH = "2026-08"
+DEFAULT_MONTH = "2026-08"
 
 CANON_ROOT = "1mHSdsTENVuMTtlv4XM54SrbadCEF_HHh"
 CANON_AUG = "1k-N29HSIX13KHAgyg4qXZ6H6V_KcS0RQ"
 BAD_AUG = "1S5bAu4ppxscJE8X-FbtT2BGxs7-_nyR8"
+
+# Set by main() from --month / the resolved canonical month folder. Every command
+# reads these instead of the 2026-08 constants, so the tool works for any month
+# while the audited August ids stay documented above.
+MONTH = DEFAULT_MONTH
+TARGET_FOLDER = CANON_AUG
 
 SHARED_SA = sheets_manager.SERVICE_ACCOUNT_EMAIL
 
@@ -72,10 +78,53 @@ def _drive():
 
 
 def _august_tabs():
-    """{logical_name: file_id} for 2026-08, straight from sheets_config.json."""
+    """{logical_name: file_id} for the active month, from sheets_config.json."""
     config = json.load(open(sheets_manager.CONFIG_PATH))
     month = config.get("months", config)
     return month.get(MONTH, {})
+
+
+def _resolve_month_folder(drive, month, create=False, allow_missing=False):
+    """Return the canonical month folder id for `month`, under CANON_ROOT.
+
+    Never uses sheets_manager._get_root_folder_id — that helper resolves the root
+    through the shared service account, which has no permission on the canonical
+    root, and is exactly the bug this script exists to work around.
+
+    Fail-closed on duplicates: more than one folder with that name under the
+    canonical root means the cross-root split is happening again, and picking one
+    silently is how 2026-08 ended up half-provisioned.
+    """
+    if month == DEFAULT_MONTH:
+        return CANON_AUG
+
+    q = (f"name='{month}' and '{CANON_ROOT}' in parents "
+         f"and mimeType='application/vnd.google-apps.folder' and trashed=false")
+    found = drive.files().list(q=q, fields="files(id,name)").execute().get("files", [])
+
+    if len(found) > 1:
+        raise RuntimeError(
+            f"DUPLICATE FOLDER GUARD: {len(found)} folders named '{month}' under the "
+            f"canonical root: {[f['id'] for f in found]} — refusing to guess.")
+    if found:
+        print(f"  FOLDER / {found[0]['id']} / FOUND existing {month} under canonical root")
+        return found[0]["id"]
+
+    if not create:
+        if allow_missing:
+            print(f"  FOLDER / (none) / DRY-RUN would create {month} under the "
+                  f"canonical root")
+            return None
+        raise RuntimeError(
+            f"No folder named '{month}' under the canonical root (pass a command "
+            f"that creates it).")
+
+    meta = {"name": month, "mimeType": "application/vnd.google-apps.folder",
+            "parents": [CANON_ROOT]}
+    folder_id = drive.files().create(body=meta, fields="id").execute()["id"]
+    sheets_manager._share_with_service_account(drive, folder_id)
+    print(f"  FOLDER / {folder_id} / CREATED {month} under canonical root + shared SA")
+    return folder_id
 
 
 def _perms(drive, file_id):
@@ -97,7 +146,7 @@ def _describe(drive, name, file_id):
 def cmd_audit(drive):
     tabs = _august_tabs()
     print(f"AUDIT {MONTH} — {len(tabs)} tab(s) in sheets_config.json")
-    print(f"  CANON_AUG={CANON_AUG}  BAD_AUG={BAD_AUG}")
+    print(f"  CANON_TARGET={TARGET_FOLDER}  BAD_AUG={BAD_AUG}")
 
     in_canon = in_bad = elsewhere = 0
     fully_shared = 0
@@ -112,7 +161,7 @@ def cmd_audit(drive):
             continue
 
         parents = meta.get("parents", [])
-        if CANON_AUG in parents:
+        if TARGET_FOLDER in parents:
             where, marker = "CANON", "✓"
             in_canon += 1
         elif BAD_AUG in parents:
@@ -143,18 +192,18 @@ def cmd_audit(drive):
     # Inheritance verdict: judged only on sheets that already live in CANON_AUG.
     canon_names = [
         n for n in sorted(tabs)
-        if CANON_AUG in drive.files().get(
+        if TARGET_FOLDER in drive.files().get(
             fileId=tabs[n], fields="parents").execute().get("parents", [])
     ]
     if not canon_names:
-        print("INHERITANCE=UNKNOWN (no sheet currently under CANON_AUG)")
+        print("INHERITANCE=UNKNOWN (no sheet currently under the canonical folder)")
     elif all(not missing_map.get(n) for n in canon_names):
-        print(f"INHERITANCE=WORKS (all {len(canon_names)} sheet(s) under CANON_AUG "
-              f"carry _AS/_AM/_HA)")
+        print(f"INHERITANCE=WORKS (all {len(canon_names)} sheet(s) under the canonical "
+              f"folder carry _AS/_AM/_HA)")
     else:
         broken = [n for n in canon_names if missing_map.get(n)]
-        print(f"INHERITANCE=BROKEN ({len(broken)}/{len(canon_names)} sheet(s) under "
-              f"CANON_AUG missing a required SA: {broken[:5]})")
+        print(f"INHERITANCE=BROKEN ({len(broken)}/{len(canon_names)} sheet(s) under the "
+              f"canonical folder missing a required SA: {broken[:5]})")
     return missing_map
 
 
@@ -168,7 +217,7 @@ def cmd_move(drive, apply_changes):
         meta = drive.files().get(fileId=file_id, fields="id,parents").execute()
         parents = meta.get("parents", [])
 
-        if CANON_AUG in parents:
+        if TARGET_FOLDER in parents:
             print(f"  MOVE / {file_id} / SKIP already in CANON_AUG ({name})")
             skipped += 1
             continue
@@ -176,14 +225,14 @@ def cmd_move(drive, apply_changes):
         remove = ",".join(parents)
         if not apply_changes:
             print(f"  MOVE / {file_id} / DRY-RUN would move {name}: "
-                  f"{parents} -> {CANON_AUG}")
+                  f"{parents} -> {TARGET_FOLDER}")
             moved += 1
             continue
 
         try:
             drive.files().update(
                 fileId=file_id,
-                addParents=CANON_AUG,
+                addParents=TARGET_FOLDER,
                 removeParents=remove,
                 fields="id,parents",
             ).execute()
@@ -242,22 +291,101 @@ def cmd_reshare(drive, apply_changes):
           f"apply={apply_changes}")
 
 
+def cmd_provision_core(drive, apply_changes):
+    """Create the SHEET_NAMES core sheets for MONTH in the canonical month folder.
+
+    Mirrors what prepare_next_month does — create + share, no headers — but goes
+    through OAuth and the canonical root, so it cannot land in RidingHigh-Data.
+    Idempotent: an existing file with the same name in the folder is reused.
+    """
+    created = skipped = failed = 0
+    ids = {}
+
+    if TARGET_FOLDER is None:
+        for name in sheets_manager.SHEET_NAMES:
+            print(f"  PROVISION / (none) / DRY-RUN would create RH-{MONTH}-{name}")
+        print(f"PROVISION SUMMARY: created={len(sheets_manager.SHEET_NAMES)} skipped=0 "
+              f"failed=0 apply={apply_changes} (month folder does not exist yet)")
+        return
+
+    for name in sheets_manager.SHEET_NAMES:
+        display_name = f"RH-{MONTH}-{name}"
+        q = (f"name='{display_name}' and '{TARGET_FOLDER}' in parents "
+             f"and mimeType='application/vnd.google-apps.spreadsheet' and trashed=false")
+        found = drive.files().list(q=q, fields="files(id)").execute().get("files", [])
+
+        if found:
+            ids[name] = found[0]["id"]
+            print(f"  PROVISION / {found[0]['id']} / SKIP {name} already in folder")
+            skipped += 1
+            continue
+
+        if not apply_changes:
+            print(f"  PROVISION / (none) / DRY-RUN would create {display_name}")
+            created += 1
+            continue
+
+        try:
+            meta = {"name": display_name,
+                    "mimeType": "application/vnd.google-apps.spreadsheet",
+                    "parents": [TARGET_FOLDER]}
+            sheet_id = drive.files().create(body=meta, fields="id").execute()["id"]
+            sheets_manager._share_with_service_account(drive, sheet_id)
+            ids[name] = sheet_id
+            print(f"  PROVISION / {sheet_id} / OK created {display_name} + shared SA")
+            created += 1
+        except Exception as exc:
+            print(f"  PROVISION / (none) / FAIL {name}: {exc}")
+            failed += 1
+
+    if apply_changes and ids:
+        # MERGE into the existing month entry — replacing it wholesale would wipe
+        # agent tabs that create_agent_sheets registered earlier.
+        config = sheets_manager._load_config()
+        month_cfg = dict(config.get(MONTH, {}))
+        added = [k for k in ids if k not in month_cfg]
+        month_cfg.update(ids)
+        config[MONTH] = month_cfg
+        sheets_manager._save_config(config)
+        print(f"  CONFIG / sheets_config.json / OK merged {len(added)} new key(s) "
+              f"into {MONTH}, month now has {len(month_cfg)} tab(s)")
+
+    print(f"PROVISION SUMMARY: created={created} skipped={skipped} failed={failed} "
+          f"apply={apply_changes}")
+
+
 def main():
-    parser = argparse.ArgumentParser(description="TASK-242 August provisioning repair")
+    global MONTH, TARGET_FOLDER
+
+    parser = argparse.ArgumentParser(description="TASK-242 month provisioning repair")
+    parser.add_argument("--month", default=DEFAULT_MONTH,
+                        help=f"month key to operate on (default {DEFAULT_MONTH})")
     parser.add_argument("--audit", action="store_true", help="read-only report")
     parser.add_argument("--move", action="store_true",
-                        help="move 2026-08 sheets into the canonical month folder")
+                        help="move the month's sheets into the canonical month folder")
     parser.add_argument("--reshare", action="store_true",
-                        help="grant _AS/_AM/_HA on 2026-08 sheets")
+                        help="grant _AS/_AM/_HA/shared-SA on the month's sheets")
+    parser.add_argument("--provision-core", action="store_true",
+                        help="create the SHEET_NAMES core sheets in the canonical folder")
     parser.add_argument("--apply", action="store_true",
                         help="actually write (default is dry-run)")
     args = parser.parse_args()
 
-    if not (args.audit or args.move or args.reshare):
-        parser.error("pick one of --audit / --move / --reshare")
+    if not (args.audit or args.move or args.reshare or args.provision_core):
+        parser.error("pick one of --audit / --move / --reshare / --provision-core")
 
     drive = _drive()
 
+    MONTH = args.month
+    # Only --provision-core may create the month folder; the others must find it.
+    TARGET_FOLDER = _resolve_month_folder(
+        drive, MONTH,
+        create=args.provision_core and args.apply,
+        allow_missing=args.provision_core and not args.apply)
+    print(f"MONTH={MONTH}  TARGET_FOLDER={TARGET_FOLDER}")
+
+    if args.provision_core:
+        cmd_provision_core(drive, args.apply)
     if args.audit:
         cmd_audit(drive)
     if args.move:
