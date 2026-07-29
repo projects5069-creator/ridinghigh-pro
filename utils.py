@@ -815,3 +815,111 @@ def strip_comments(line):
         elif c == '#' and not in_string:
             return line[:i]
     return line
+
+
+# ── FINVIZ ticker extraction (TASK-238) ──────────────────────────────────────
+# §10 single source of truth: auto_scanner and dashboard both go through here.
+#
+# finviz renders a logo placeholder letter inside the ticker cell, so the naive
+# col.text that finvizfinance uses (0.14.6 overview.py:199, 1.3.0 base.py:127,
+# identical in both) concatenates it with the ticker. Measured live 2026-07-29:
+#
+#     col.text   real ticker
+#     AAMIX      AMIX
+#     AA         A            (Agilent)
+#     AAA        AA           (Alcoa)
+#
+# The last two rows are why this is not a string sanitizer. Stripping a doubled
+# first character breaks Alcoa; leaving short symbols alone leaves Agilent
+# broken. The clean value is in the DOM twice, so read it instead of guessing.
+
+FINVIZ_TICKER_ATTR = "data-boxover-ticker"
+
+
+def extract_finviz_ticker(td):
+    """Return the true ticker from a finviz screener table cell.
+
+    Order of preference, each verified present on every live row:
+      1. the td's data-boxover-ticker attribute
+      2. the <a class="tab-link"> text
+      3. the last stripped string in the cell (logo letter comes first)
+      4. the raw cell text, for markup with no logo element at all
+
+    Pure: no IO, no pandas, no network. Returns "" for anything unusable.
+    """
+    if td is None:
+        return ""
+
+    attr = td.get(FINVIZ_TICKER_ATTR) if hasattr(td, "get") else None
+    if attr and attr.strip():
+        return attr.strip().upper()
+
+    if hasattr(td, "find"):
+        link = td.find("a", class_="tab-link")
+        if link is not None and link.text.strip():
+            return link.text.strip().upper()
+
+    if hasattr(td, "stripped_strings"):
+        parts = [p for p in td.stripped_strings if p]
+        if parts:
+            return parts[-1].strip().upper()
+
+    text = getattr(td, "text", "") or ""
+    return text.strip().upper()
+
+
+def _sanitized_overview_class():
+    """Build the Overview subclass lazily so utils stays import-light."""
+    from finvizfinance.screener.overview import Overview
+    from finvizfinance.util import number_covert
+
+    class SanitizedOverview(Overview):
+        """Overview that reads the ticker from the DOM instead of col.text.
+
+        _get_table is the single funnel both 0.14.6 and 1.3.0 route every page
+        through, with an identical signature, so one override covers the pinned
+        version and whatever CI resolves to.
+        """
+
+        def _get_table(self, rows, df, num_col_index, table_header, limit=-1):
+            import pandas as pd
+
+            body = rows[1:]
+            if limit != -1:
+                body = body[0:limit]
+
+            try:
+                ticker_pos = list(table_header).index("Ticker")
+            except ValueError:
+                ticker_pos = None
+
+            frame = []
+            for row in body:
+                cols = row.findAll("td")[1:]
+                info = {}
+                for i, col in enumerate(cols):
+                    if i >= len(table_header):
+                        continue
+                    if i == ticker_pos:
+                        info[table_header[i]] = extract_finviz_ticker(col)
+                    elif i not in num_col_index:
+                        info[table_header[i]] = col.text
+                    else:
+                        info[table_header[i]] = number_covert(col.text)
+                frame.append(info)
+
+            if df is None or len(df) == 0:
+                return pd.DataFrame(frame, columns=list(table_header))
+            return pd.concat([df, pd.DataFrame(frame)], ignore_index=True)
+
+    return SanitizedOverview
+
+
+class _SanitizedOverviewProxy:
+    """Instantiating utils.SanitizedOverview() builds the real subclass."""
+
+    def __call__(self, *args, **kwargs):
+        return _sanitized_overview_class()(*args, **kwargs)
+
+
+SanitizedOverview = _SanitizedOverviewProxy()
