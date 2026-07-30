@@ -8,7 +8,14 @@ on:
 jobs:
   backfill:
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    # TASK-239 palliative 2: raised 2026-07-30 as headroom, not because the data
+    # demanded it. Measured on 2026-07-30: last ten runs span 8m53s to 18m22s and
+    # the last two went 18m22s down to 15m28s, so this job had about 38 percent
+    # headroom under the old 25 min ceiling. Raised anyway because it reads the
+    # same July rows as the collector through recent_months 2, and each phantom
+    # symbol there blocks the provider call for roughly 18s. If the collector
+    # trend reaches this job the ceiling is already in place.
+    timeout-minutes: 40
     steps:
       - uses: actions/checkout@v5
 
