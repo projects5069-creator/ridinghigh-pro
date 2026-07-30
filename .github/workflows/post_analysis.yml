@@ -8,7 +8,15 @@ on:
 jobs:
   collect:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    # TASK-239 palliative 2: raised 2026-07-30. Collector went 23m25s on 28/7 to
+    # 26m23s on 29/7, about 3 min per day, against a 30 min ceiling, so the run
+    # after next was projected at 32m and would have been cancelled. Each phantom
+    # symbol blocks yf.Ticker().info for roughly 18s and there are 35 of them in
+    # July, so about 10 min per run is pure waste. Marking those rows (TASK-246)
+    # is the real reduction. Incremental save is still missing:
+    # post_analysis_collector.py:638 saves one batch at the end, so a cancelled
+    # run loses everything.
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@v5
 

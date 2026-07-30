@@ -16,3 +16,17 @@ ordinal: 243000
 <!-- SECTION:DESCRIPTION:BEGIN -->
 post_analysis.yml timeout-minutes:15. Runs cancelled 23/7, 24/7, 27/7 at 15m1Xs; also 23/6. Time burned in the collector step: yfinance_provider.py:316 yf.Ticker(ticker).info blocks ~18s per dead symbol, no timeout, no skip-cache, no dedup; called once per row plus sleep 0.3 at :632. Same failure class as TASK-190. Independent of the finvizfinance root: fixing perf alone returns the job under 15 minutes. Consider raising timeout-minutes as an interim palliative before month end. Verify against the next scheduled run.
 <!-- SECTION:DESCRIPTION:END -->
+
+## MEASURED 2026-07-30
+
+The palliative from 28/7 held but the trend is against it. Collector duration went 23m25s on 28/7 to 26m23s on 29/7, roughly 3 minutes per day, against a 30 minute ceiling. Straight-line projection put the next run at 29.4m and the one after at 32.3m, so the second-next run would have been cancelled. Raised to 45 today.
+
+backfill_ohlc raised from 25 to 40 as headroom, NOT because the data demanded it. Its duration was measured today for the first time: last ten runs span 8m53s to 18m22s, and the last two went 18m22s down to 15m28s, so it had about 38 percent headroom under the old ceiling. The raise is insurance in case the collector trend reaches it, since it reads the same July rows through recent_months 2.
+
+The TASK-238 ticker fix did NOT reduce the runtime. It stops new phantom rows but the 35 existing ones in July are still read every run, and each unresolvable symbol blocks yf.Ticker().info for about 18 seconds, so roughly 10 minutes per run is pure waste. Marking those rows under TASK-246 is the actual fix for the runtime, not a cleanup task.
+
+Still not addressed and still the real risk: no timeout on the provider call, no skip cache for dead symbols, no dedup, and post_analysis_collector.py:638 saves a single batch after the loop so a cancelled run loses the whole day. Exposure is limited to two runs, since from 1/8 the active month becomes 2026-08 and post_analysis starts empty, but backfill keeps touching July via recent_months 2.
+
+Note on scope: the 30 minute ceiling covered three steps, not just the collector. EOD Snapshot, Run Post Analysis Collector and Enrich with Intraday Data all share the one job budget, so the 26m23s figure is the whole job.
+
+DECISION: this task stays open. The ceiling is a second palliative, not a fix.
