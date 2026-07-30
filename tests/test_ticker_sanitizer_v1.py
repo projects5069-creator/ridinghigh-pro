@@ -127,3 +127,72 @@ def test_sanitized_overview_repairs_the_ticker_column():
         "second row is Agilent: naive text gives 'AA', which is why a string "
         "rule cannot be used here"
     )
+
+
+# ── hook guards ──────────────────────────────────────────────────────────────
+# The extraction only works because SanitizedOverview overrides _get_table. If a
+# future finvizfinance release moves that method, renames it, or changes its
+# signature, the override stops applying and the corruption returns with no
+# error raised anywhere. These three run offline and fail loudly in that case.
+
+LIBRARY_GET_TABLE_SIGNATURE = "(self, rows, df, num_col_index, table_header, limit=-1)"
+
+
+def test_override_resolves_to_utils_not_to_the_library():
+    """Qualname is nested, so ask the module instead."""
+    import inspect
+
+    pytest.importorskip("finvizfinance")
+    ov = utils.SanitizedOverview()
+    module = inspect.getmodule(type(ov)._get_table)
+    assert module is not None, "could not resolve the module of _get_table"
+    assert module.__name__ == "utils", (
+        f"_get_table resolved to {module.__name__}, not utils. The override is "
+        f"no longer in the MRO and finviz tickers are being read raw again."
+    )
+
+
+def test_library_get_table_signature_is_what_the_override_expects():
+    """0.14.6 defines it on Overview, 1.3.0 on Base, both with this signature."""
+    import inspect
+
+    pytest.importorskip("finvizfinance")
+    from finvizfinance.screener.overview import Overview
+
+    actual = str(inspect.signature(Overview._get_table))
+    assert actual == LIBRARY_GET_TABLE_SIGNATURE, (
+        f"finvizfinance changed _get_table from {LIBRARY_GET_TABLE_SIGNATURE} "
+        f"to {actual}. utils.SanitizedOverview._get_table must be updated to "
+        f"match, otherwise the ticker column silently reverts to col.text."
+    )
+
+
+def test_offline_end_to_end_ticker_column_stays_clean():
+    """Fixed fixture, no network. Shape copied from the live page, 2026-07-29."""
+    pytest.importorskip("finvizfinance")
+    pytest.importorskip("pandas")
+    import pandas as pd
+
+    # AMIX is the plain corruption case. A and AA are the pair that proves a
+    # string rule cannot work: they arrive as AA and AAA respectively.
+    html = (
+        "<table><tr><td>No.</td><td>Ticker</td><td>Price</td></tr>"
+        + "".join(
+            f"<tr><td>{i}</td>" + REAL_CELL.format(t=t, first=t[0])
+            + f"<td>{p}</td></tr>"
+            for i, (t, p) in enumerate(
+                [("AMIX", "3.10"), ("A", "140.00"), ("AA", "31.50"),
+                 ("VEEE", "2.40"), ("AAC-U", "10.05")], start=1)
+        )
+        + "</table>"
+    )
+    rows = BeautifulSoup(html, "html.parser").find_all("tr")
+
+    ov = utils.SanitizedOverview()
+    df = ov._get_table(rows, pd.DataFrame([], columns=["Ticker", "Price"]),
+                       [], ["Ticker", "Price"])
+
+    assert list(df["Ticker"]) == ["AMIX", "A", "AA", "VEEE", "AAC-U"]
+    # And the naive path this replaced really would have been wrong.
+    naive = [r.find_all("td")[1].text.strip() for r in rows[1:]]
+    assert naive == ["AAMIX", "AA", "AAA", "VVEEE", "AAAC-U"]

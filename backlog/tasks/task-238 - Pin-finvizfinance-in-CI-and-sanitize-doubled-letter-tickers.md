@@ -1,9 +1,10 @@
 ---
 id: TASK-238
 title: Pin finvizfinance in CI and sanitize doubled-letter tickers
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-07-28 12:40'
+updated_date: '2026-07-30 11:52'
 labels:
   - bug
   - data-integrity
