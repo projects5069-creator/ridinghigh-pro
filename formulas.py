@@ -392,6 +392,105 @@ def flag_interday_artifact_chain(closes, threshold_pct=None):
         return (False, "")
 
 
+def is_confirmed_phantom(ticker, universe):
+    """True when `ticker` is a doubled-first-letter corruption of a real symbol.
+
+    TASK-246 / TASK-238. finviz rendered a logo placeholder letter inside the
+    ticker cell, so the feed concatenated it onto the symbol and AMIX arrived as
+    AAMIX. Measured live 2026-07-29, the damage is not recoverable from the string
+    alone:
+
+        feed value   real ticker
+        AAMIX        AMIX
+        AA           A            (Agilent)
+        AAA          AA           (Alcoa)
+
+    Stripping the doubled character breaks Alcoa; leaving short symbols alone
+    leaves Agilent broken. So this asks the data: doubled first character AND the
+    remainder is itself present in `universe`. A doubled first character with no
+    corroborating symbol is a CANDIDATE, not a phantom, and returns False, because
+    AA, AAPL, III, TTOO, MMM, CCJ and WW are all real.
+
+    Pure and scalar, same contract as is_interday_artifact: no pandas, no IO.
+
+    Args:
+        ticker:   the value as it appears in the sheet. None/blank -> False.
+        universe: any container of real symbols (set/list/dict keys) gathered from
+                  the same dataset. Empty/None -> False, since with no evidence
+                  nothing can be confirmed.
+
+    Returns:
+        bool
+    """
+    try:
+        t = str(ticker or "").strip().upper()
+        if len(t) < 2 or t[0] != t[1]:
+            return False
+        if not universe:
+            return False
+        return t[1:] in {str(u).strip().upper() for u in universe}
+    except (TypeError, ValueError):
+        return False
+
+
+PHANTOM_CONFIRMED = "PHANTOM_CONFIRMED"
+PHANTOM_SUSPECT = "PHANTOM_SUSPECT"
+PHANTOM_CLEAN = "CLEAN"
+
+
+def classify_phantom_tier(ticker, universe):
+    """Three-way phantom verdict for one ticker (TASK-246).
+
+    One bool is not enough to act on. Of the 83 stuck open positions measured on
+    2026-07-30, 67 have a corroborating symbol in the scanned data and 16 do not,
+    and the two groups warrant different treatment.
+
+        PHANTOM_CONFIRMED  first character doubled AND the remainder appears as a
+                           real ticker in `universe`. Proven corruption.
+        PHANTOM_SUSPECT    first character doubled but the remainder never
+                           appeared. Likely corruption, unproven.
+        CLEAN              the first character is NOT doubled. Nothing else.
+
+    CLEAN is a statement about shape, not about legitimacy. The real symbols AA,
+    AAPL, III, TTOO, MMM, CCJ and WW all double their first character and are
+    therefore SUSPECT here — deliberately (corrected 2026-08-03; the docstring
+    previously promised them CLEAN and no implementation could deliver it). The
+    universe passed in is built by mark_phantom_rows_v1.build_universe as "every
+    ticker seen anywhere in the loaded tabs", so it contains the corrupted values
+    themselves; "the symbol is in the universe" is therefore true of everything and
+    separates nothing. Telling AAPL from AAMIX needs an authoritative list of
+    tradable symbols, which this function has no way to obtain and must not try to
+    (no IO — see the purity contract below).
+
+    SUSPECT is the honest verdict for an unproven doubled letter, and the error
+    costs are asymmetric: a wrong SUSPECT excludes one legitimate row from a
+    research sample, a wrong CLEAN lets a stuck position count as a real trade.
+
+    The universe is a point-in-time input. A ticker classified SUSPECT today can
+    become CONFIRMED once its stripped form appears in the scanned universe, so a
+    marking run is a decision at a moment, not a permanent truth. Observed: the
+    July universe grew from 497 distinct tickers on 29/7 to 543 on 30/7 and the
+    confirmed counts rose with it.
+
+    The CONFIRMED test is not reimplemented here, it delegates to
+    is_confirmed_phantom (rule 10, single source of truth).
+
+    Pure and scalar, same contract as is_interday_artifact: no pandas, no IO.
+
+    Returns:
+        str, exactly one of PHANTOM_CONFIRMED / PHANTOM_SUSPECT / CLEAN.
+    """
+    try:
+        t = str(ticker or "").strip().upper()
+        if len(t) < 2 or t[0] != t[1]:
+            return PHANTOM_CLEAN
+        if is_confirmed_phantom(t, universe):
+            return PHANTOM_CONFIRMED
+        return PHANTOM_SUSPECT
+    except (TypeError, ValueError):
+        return PHANTOM_CLEAN
+
+
 def calculate_net_pnl(scan_price, classification, resolution_day, borrow_annual_rate, slip=SLIP):
     """Net short-side PnL FRACTION after slippage + borrow (TASK-140, phase6 cost model).
 

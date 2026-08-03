@@ -34,3 +34,9 @@ master plan 2026-06-29: core AC added for MxV+price shadow observer separate fro
 
 2026-06-30: פער-provisioning תוקן — shadow_gate_events נוצר ב-2026-07 (commit c19e246, נדחף). חלון-התצפית מוגן מ-1/7. observer בנוי+מחובר (52dafbb), ב-shadow, אוסף דאטה עד ~7/27.
 <!-- SECTION:NOTES:END -->
+
+## AUDIT 2026-08-03: TITLE SAYS SHADOW, THE GATE IS LIVE
+
+config.py line 374 EXPLICIT_GATE_MODE = "active" and line 378 ENTRY_GATE_MINIMAL = True. The flip happened on 2026-06-29, so the gate has not been in shadow mode for over a month. The task title and status are describing a state that no longer exists.
+
+The forward experiment on the flipped gate is HYP-002 in docs/HYPOTHESES.md section F. Its stopping rule fired on 2026-08-03 at n equals 173 against a threshold of 150, and the sample is 86 of 173 on phantom tickers with 54 entries beyond the frozen reentry cap. Whatever this task concludes depends on that decision first.

@@ -83,6 +83,80 @@ def test_cold_start_concurrent_limit(good_signal):
     assert "COLD_START_CONCURRENT" in d.skip_reason
 
 
+# ─────────────────────────────────────────────────────────────────────────
+# TASK-244 — account_state must fail CLOSED, not open.
+#
+# Measured live 2026-07-22 (agent_minute run 29940103210): a Sheets 429 on
+# paper_portfolio made build_account_state return pf_records=[], so the log
+# reported "Account state: 0 open positions" while 69 were actually open.
+# existing_positions was empty and cold_start_concurrent_used was 0, so
+# Filters 7, 8 and 9 all passed at once and the agent stacked repeat ENTERs
+# on tickers it already held. build_account_state already sets
+# paper_portfolio_fetch_failed at all three failure points
+# (agent/orchestrator.py:228, 274, 302) — until now only position_sync
+# consumed it, and no entry filter did.
+#
+# A blind account_state is not evidence of a free slot. Block the entry.
+# ─────────────────────────────────────────────────────────────────────────
+
+def test_account_state_unavailable_blocks_entry(good_signal):
+    """The 2026-07-22 shape: portfolio read failed, so the state looks empty."""
+    state = {
+        "existing_positions": [],          # empty ONLY because the read failed
+        "buying_power": 100_000,
+        "cold_start_concurrent_used": 0,   # 0 ONLY because the read failed
+        "cold_start_daily_used": 0,
+        "paper_portfolio_fetch_failed": True,
+    }
+    d = evaluate_signal(good_signal, state)
+    assert d.action == "SKIP"
+    assert "ACCOUNT_STATE_UNAVAILABLE" in d.skip_reason
+
+
+def test_account_state_healthy_still_enters(good_signal):
+    """An explicitly healthy read must not be blocked by the new filter."""
+    state = {
+        "existing_positions": [],
+        "buying_power": 100_000,
+        "cold_start_concurrent_used": 0,
+        "cold_start_daily_used": 0,
+        "paper_portfolio_fetch_failed": False,
+    }
+    d = evaluate_signal(good_signal, state)
+    assert d.action == "ENTER", f"got {d.action}: {d.skip_reason}"
+
+
+def test_account_state_flag_absent_is_backward_compatible(good_signal):
+    """Callers that predate the flag (and the None default) keep working."""
+    state = {
+        "existing_positions": [],
+        "buying_power": 100_000,
+        "cold_start_concurrent_used": 0,
+        "cold_start_daily_used": 0,
+    }
+    assert evaluate_signal(good_signal, state).action == "ENTER"
+    assert evaluate_signal(good_signal).action == "ENTER"
+
+
+def test_account_state_unavailable_outranks_the_blind_filters(good_signal):
+    """The reason must name the real cause, not a filter reading blind state.
+
+    Filters 7/8/9 all read the same failed fetch, so if one of them fired first
+    the log would blame the wrong thing and the 429 would stay invisible.
+    """
+    state = {
+        "existing_positions": ["TEST"],
+        "buying_power": 100_000,
+        "cold_start_concurrent_used": 5,
+        "cold_start_daily_used": 10,
+        "entries_today_by_ticker": {"TEST": 3},
+        "paper_portfolio_fetch_failed": True,
+    }
+    d = evaluate_signal(good_signal, state)
+    assert d.action == "SKIP"
+    assert "ACCOUNT_STATE_UNAVAILABLE" in d.skip_reason
+
+
 def test_field_mapping_backed_by_decision_fields():
     """Every decision_log column (FIELD_MAPPING) is backed by a real Decision field.
 

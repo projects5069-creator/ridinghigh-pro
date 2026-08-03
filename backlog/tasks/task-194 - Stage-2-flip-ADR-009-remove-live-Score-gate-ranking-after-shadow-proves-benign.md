@@ -36,3 +36,7 @@ ADR-009 Stage 2 driver-removal — the LIVE flip deferred by the 141+174 ruling 
 <!-- SECTION:NOTES:BEGIN -->
 E2E-AUDIT S5 (3/7) — הכותרת הקודמת ('flip after shadow proves benign') הייתה stale: ה-flip בוצע 6/29 (owner-decision, PK v3.77, ללא חלון-shadow — 0 שורות shadow_gate_events באותו רגע). ה-scope החי הנותר = AC#4 בלבד: ניטור post-flip של כניסות-active מול baseline Score-gated + revert-בערך-קונפיג. גבולות: הסרת-ranking = TASK-208 (AC#5) · retire calculate_score = TASK-209. קצב-ההכרעה צמוד ל-stopping-rule של HYP-002 (n>=150 post-flip או 45 ימי-מסחר; checkpoint 2026-07-27 = החלטת-promote נפרדת, HYPOTHESES.md:202-204).
 <!-- SECTION:NOTES:END -->
+
+## HYP-002 VOIDED 2026-08-03
+
+The run this task monitors was voided. n reached 173 against a threshold of 150 while 86 of those entries sat on phantom tickers and 54 breached the frozen reentry cap. Re-registered from 2026-08-03 with no carry forward. Whatever this task tracks starts again from that date.

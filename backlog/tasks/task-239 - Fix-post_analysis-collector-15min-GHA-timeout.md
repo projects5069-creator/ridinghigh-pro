@@ -30,3 +30,11 @@ Still not addressed and still the real risk: no timeout on the provider call, no
 Note on scope: the 30 minute ceiling covered three steps, not just the collector. EOD Snapshot, Run Post Analysis Collector and Enrich with Intraday Data all share the one job budget, so the 26m23s figure is the whole job.
 
 DECISION: this task stays open. The ceiling is a second palliative, not a fix.
+
+## AUDIT 2026-08-03: PREMISE STALE, SUPERSEDED
+
+The title says 15min timeout. The ceiling has been 45 since 2026-07-30 and 30 since 28/7, so a timeout is no longer the problem being solved. Both raises were palliatives on a symptom.
+
+The measured cause is that the collector reprocesses the whole month every night: select_candidates at post_analysis_collector.py:78 filters on MxV with no date bound, and COLLECT_DAYS_FORWARD of 25 from the 2026-06-13 cutoff means no row can complete inside a month. Four runs, zero skips in all of them.
+
+Moved to TASK-249 with the correct framing. This task should be closed or merged rather than worked as written.
