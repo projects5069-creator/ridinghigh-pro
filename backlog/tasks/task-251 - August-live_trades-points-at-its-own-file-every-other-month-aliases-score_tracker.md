@@ -33,3 +33,13 @@ Options, none chosen: leave it and document, or realign August to score_tracker.
 
 Related orphan, do not delete: the pre-created September live_trades 1l6j9c... was overwritten by the 1/8 automatic run and is now unreferenced.
 <!-- SECTION:DESCRIPTION:END -->
+
+## AUDIT NOTE 2026-08-03: THE TAB IS NEVER WRITTEN, IN ANY MONTH
+
+Measured after this task was filed: live_trades holds zero rows in 2026-07 and zero in 2026-08.
+
+The reason is the entry criterion, not the sheet id. auto_scanner.update_live_trades appends a row only when a scanner Score reaches TRADE_ENTRY_MIN_SCORE, which config.py line 106 sets to 70. The highest scanner Score in the live run of 2026-08-03 was 60.86. On top of that, config.py line 341 sets SCORE_WRITE_FROZEN to True under ADR-009 and TASK-127.2, and the whole Score demotion programme, TASK-208, TASK-209 and TASK-174, is retiring the metric this gate depends on.
+
+CONSEQUENCE FOR THIS TASK: the divergence recorded here is real in the config but has no observable effect, because nothing writes to either target. The section 10 problem, two SHEET_NAMES lists that disagree, is still worth fixing and belongs with TASK-243. The August specific question, whether to realign the id, is close to moot and this task may be closable on that basis.
+
+Not verified: whether live_trades was ever written in an earlier month, before the Score freeze.

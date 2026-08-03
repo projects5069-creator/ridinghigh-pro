@@ -29,3 +29,11 @@ The quota pressure is not historical. Cancelled agent_minute runs: 2 on 2026-07-
 This task is now the parent of TASK-244. A 429 on the paper_portfolio read made build_account_state return defaults, the log printed "Account state: 0 open positions" while 69 were open, and the three exposure filters passed together. Evidence in TASK-244, run 29940103210.
 
 TASK-244 added Filter 6b so the agent SKIPs instead of entering blind. That converts silent overexposure into lost trading time, which is the right trade, but the underlying read burst is untouched. Every minute the quota is exhausted is now a minute the agent cannot enter at all.
+
+## CORRECTION 2026-08-03, same evening
+
+The note above calls this task the parent of TASK-244. It is not, and this task is Done.
+
+This task covered the health_audit read burst and closed on it, and TASK-213 verified that reduction. The open owner of the remaining market hours 429, from agent_minute and auto_scan, is TASK-215. TASK-244 should be read against TASK-215, not against this task.
+
+The STILL LIVE measurement above stands on its own: the quota is still being hit. It is recorded here because this is where the history sits, not because this task should be reopened.

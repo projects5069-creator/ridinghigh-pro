@@ -25,3 +25,20 @@ TWO COMPETING EXPLANATIONS, NEITHER VERIFIED: (a) same root as the finviz parse 
 
 SCOPE: compare row counts against the raw finviz result count per scan if it is recorded anywhere, and check whether any drop or exception path silently discards rows. Blocked in practice on the ticker corruption scope.
 <!-- SECTION:DESCRIPTION:END -->
+
+## AUDIT NOTE 2026-08-03
+
+Two things from the write audit that bear on this task.
+
+FIRST, the premise may no longer hold. daily_snapshots rows per trading day: 2026-07-29 had 57, 2026-07-30 had 145, 2026-07-31 had 57, and 2026-08-03 had 85. Volume today is above the late July level, not halved. Either the drop reversed or it was never a sustained halving. Re-measure before investigating a cause.
+
+SECOND, a concrete candidate for volume variance that was not in the task. auto_scanner.py wraps the per ticker analysis loop and the loop around it in bare handlers, lines 413 to 416:
+
+                    except:
+                        pass
+    except:
+        pass
+
+A failure part way through the scan therefore produces a short result set with no error, no log line and a successful workflow conclusion. auto_scanner.py carries 5 bare except clauses and 7 handler bodies that are pass, continue or return with no logging. Every other write path module is clean by comparison: orchestrator, orchestrator_eod, post_analysis_collector and order_manager have zero bare handlers and log through except Exception.
+
+NOT VERIFIED: whether those handlers actually swallow anything in practice. Proving it needs instrumentation, a counter or a log line on each swallow, run over a full trading day. That measurement should come before any theory about the volume.

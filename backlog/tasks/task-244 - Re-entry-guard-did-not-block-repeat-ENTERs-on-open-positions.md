@@ -52,3 +52,11 @@ FIX APPLIED 2026-08-03, not yet verified live: Filter 6b in decision_logic._chec
 DEPENDS ON TASK-55. This filter stops the damage, it does not stop the 429. While the quota is exhausted the agent will now SKIP instead of entering blind, which is correct but is still lost trading time. The quota pressure is live: 29/7 had 175 cancelled agent_minute runs against 2 on 22/7.
 
 STILL OPEN: the 22/7 day produced 43 ENTERs against a daily cap of 10, which the decision_log read alone should have enforced. That implies both reads failed in the entering runs, not only paper_portfolio. Confirming it needs a decision_log read, which is quota heavy and must wait for market close.
+
+## CORRECTION 2026-08-03, same evening
+
+The DEPENDS ON line above names TASK-55. That is wrong. TASK-55 has status Done.
+
+The open owner of the 429 root is TASK-215, Dedicated SA for auto_scan, mirror TASK-58, real fix for market hours 429, status To Do. TASK-55 covered the health_audit contribution and closed on it; TASK-213 verified that specific reduction. What remains is the agent_minute and auto_scan read burst, which is TASK-215.
+
+Quota state measured 2026-08-03, and it moved: cancelled agent_minute runs were 118 on 07-31 and 25 on 08-03, cancelled auto_scan runs were 79 on 07-31 and zero on 08-03. Sampled agent_minute runs from today still carry 5 to 9 lines mentioning 429, so the pressure is lower but not gone. Why today was better is not established. It may be lower scan volume rather than any fix.
