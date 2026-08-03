@@ -110,6 +110,10 @@ class Decision:
     cold_start_concurrent_remaining: Optional[int] = None
     cold_start_daily_remaining: Optional[int] = None
     reentries_used_today: Optional[int] = None  # Bug #5: same-ticker entries today
+    # TASK-244: build_account_state could not read paper_portfolio / decision_log
+    # (typically a Sheets 429). The four safety fields above are then defaults,
+    # not measurements, and must not be trusted as evidence of a free slot.
+    account_state_unavailable: bool = False
 
     # Execution (3) — filled by M5
     order_id: Optional[str] = None
@@ -291,6 +295,13 @@ def evaluate_signal(
         _entries_by_ticker = account_state.get("entries_today_by_ticker", {})
         d.reentries_used_today = _entries_by_ticker.get(signal.get("ticker", ""), 0)
 
+        # TASK-244: did the state above come from a real read, or from the
+        # defaults left behind by a failed one? build_account_state sets this
+        # at all three failure points (agent/orchestrator.py:228, 274, 302).
+        d.account_state_unavailable = bool(
+            account_state.get("paper_portfolio_fetch_failed", False)
+        )
+
         # ── Decision tree ──
         # TASK-194 Stage-1: Score gate (Filter 1) is honored UNLESS EXPLICIT_GATE_MODE=="active"
         # (the Score-decouple flip). shadow/off/any-other -> Score still gates (safe default).
@@ -407,6 +418,16 @@ def _check_filters(d: Decision, signal: Dict[str, Any], quality: Dict[str, Any],
     # Filter 6: Data quality
     if not quality["is_trustworthy"]:
         return f"QUALITY_TOO_LOW: {quality['quality_score']:.2f} < 0.5; flags={quality['flags']}"
+
+    # Filter 6b: account_state could not be read (TASK-244).
+    # MUST precede filters 7-10 — they all read the same failed fetch, so a
+    # blind state would otherwise pass them all at once and let repeat ENTERs
+    # stack on positions already held (measured live 2026-07-22, 43 ENTERs on
+    # 4 tickers under a Sheets 429). Placed AFTER the signal-only filters 1-6
+    # so a signal that fails on its own merits still reports its own reason.
+    if d.account_state_unavailable:
+        return ("ACCOUNT_STATE_UNAVAILABLE: paper_portfolio/decision_log read failed — "
+                "exposure limits unverifiable, entry blocked")
 
     # Filter 7: Existing position
     if d.existing_position:

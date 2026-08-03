@@ -23,3 +23,9 @@ ordinal: 182000
 - [ ] #1 Validation runs ONLY on data collected after pre-registration (no reuse of the n=62 discovery sample)
 - [ ] #2 Verdict at n>=150 events: edge survives worst-case costs or hypothesis rejected — either outcome documented
 <!-- AC:END -->
+
+## AUDIT 2026-08-03: THE LISTED BLOCKERS ARE CLEARED
+
+The description says BLOCKED ON TASK-172 plus TASK-177 plus the pre-registration task. All three are Done: 172, 177 and 178. docs/HYPOTHESES.md section D records the same, dependencies cleared at registration on 2026-06-23.
+
+The real constraint is statistical power, not a dependency: the design needs 150 or more crossover events, roughly 4 to 5 months at the capture rate recorded in power_analysis.md. Worth restating in the description so the task is not read as blocked on other work.

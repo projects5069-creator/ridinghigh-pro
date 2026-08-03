@@ -27,3 +27,28 @@ SCOPE OF INVESTIGATION: read the ExistingPosition values for the 22/7 rows, find
 
 Do not fix without live verification. Quota heavy, run outside market hours.
 <!-- SECTION:DESCRIPTION:END -->
+
+## ROOT CORRECTED 2026-08-03
+
+The hypothesis recorded above is wrong. The guard does not misread stale state. It fails OPEN under a Google Sheets 429.
+
+Evidence, agent_minute run 29940103210 (2026-07-22 16:56Z):
+  [WARNING] build_account_state: paper_portfolio fetch failed (APIError: [429]: Quota exceeded
+  for quota metric 'Read requests' and limit 'Read requests per minute per user'), setting
+  paper_portfolio_fetch_failed=True
+  [INFO] Account state: 0 open positions, 36 ENTER today, $200000 buying_power
+Sixty nine positions were open at that moment. The state reported zero because the read failed, not because the sheet was empty.
+
+Counter evidence from the same day, run 29943602007 (17:44Z), no 429:
+  [INFO] Account state: 69 open positions, 40 ENTER today
+  [SKIP] ZZCMD Score=30.33 to EXISTING_POSITION: already short ZZCMD
+  [SKIP] AADVB, LLABT, IINLF, same reason
+So the filter logic is correct. The defect is that a failed read produces defaults that look like a free account: existing_positions empty, open_position_count zero, entries_today_by_ticker empty. Filters 7, 8 and 9 all read that same failed fetch, so they passed together.
+
+The signal already existed and nobody consumed it. build_account_state sets paper_portfolio_fetch_failed at all three failure points (agent/orchestrator.py:228 for paper_portfolio, :274 for decision_log, :302 for the outer handler). The only reader was agent/sentinel/checks/position_sync.py:43, which downgrades a drift BLOCK to a WARN. No entry filter looked at it.
+
+FIX APPLIED 2026-08-03, not yet verified live: Filter 6b in decision_logic._check_filters returns ACCOUNT_STATE_UNAVAILABLE when the flag is set. Placed after the signal only filters 1 to 6 so a signal that fails on its own merits still reports its own reason, and before 7 to 10 because those four are the blind ones. Decision gains the field account_state_unavailable. Four tests added, including backward compatibility for callers that predate the flag and for the None default.
+
+DEPENDS ON TASK-55. This filter stops the damage, it does not stop the 429. While the quota is exhausted the agent will now SKIP instead of entering blind, which is correct but is still lost trading time. The quota pressure is live: 29/7 had 175 cancelled agent_minute runs against 2 on 22/7.
+
+STILL OPEN: the 22/7 day produced 43 ENTERs against a daily cap of 10, which the decision_log read alone should have enforced. That implies both reads failed in the entering runs, not only paper_portfolio. Confirming it needs a decision_log read, which is quota heavy and must wait for market close.

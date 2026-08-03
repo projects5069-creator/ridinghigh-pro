@@ -175,10 +175,13 @@ validation on the forward hold-out (n≥150, ~mid-July).
 
 ---
 
-## §F · HYP-002 — minimal-MxV-gate (REGISTERED)
+## §F · HYP-002 — minimal-MxV-gate (VOIDED 2026-08-03, re-registered same day)
 
 ### HYP-002 · minimal-MxV-gate
-- Status:            REGISTERED  (live capture since the 2026-06-29 flip; criterion locked 2026-07-02)
+- Status:            VOIDED (2026-08-03) — the original run is dead; see "VOIDED 2026-08-03" at the
+                     end of this section. Every number below is the ORIGINAL registration and is kept
+                     verbatim on purpose. A fresh run under the identical criterion starts 2026-08-03.
+                     Was: REGISTERED  (live capture since the 2026-06-29 flip; criterion locked 2026-07-02)
 - Registered:        2026-07-02  (criterion locked; gate itself live in config since 2026-06-29:
                      EXPLICIT_GATE_MODE=active, ENTRY_GATE_MINIMAL=True)
 - Scope:             DUAL-CONDITION ONLY (MxV<=-100 ∧ price>=$3). The 3 additional research-199
@@ -223,6 +226,41 @@ validation on the forward hold-out (n≥150, ~mid-July).
 restores the 6 filters; EXPLICIT_GATE_MODE=shadow restores Score). It was flipped ahead of the
 ≥2-week multi-regime shadow precondition (TASK-194 AC#4, 0 shadow rows at flip) as an explicit
 owner decision — so the early n is single-regime and NOT evidence until the power target is met.
+
+### VOIDED 2026-08-03
+
+The stopping rule fired and the sample cannot be scored. Both are true at once, which is why the
+run is voided rather than concluded.
+
+Measured 2026-08-03 after close, read only, from decision_log 06 07 08 plus paper_portfolio 07 08.
+
+- n post-flip ENTERs = 173, against a threshold of 150. The rule fired on n, not on the calendar.
+- Tier split: 82 PHANTOM_CONFIRMED, 4 PHANTOM_SUSPECT, 87 CLEAN. 86 of 173 contaminated, 49.7 percent.
+- 84 entries have no outcome at all. They count toward n but can never contribute to expectancy.
+- The frozen config allows at most 1 reentry per ticker per day. Eleven ticker day pairs exceeded
+  two, with 54 entries beyond the cap: LLABT 11, IINLF 11, AADVB 11, ZZCMD 10 on 07-22, AATPC 9
+  and VVEEE 8 on 07-16.
+
+The registration states that ANY change to the frozen config voids the run. The cap was not changed
+in config, it was breached in practice: under a Sheets 429 build_account_state returned defaults and
+the three exposure filters passed together, so the agent entered as if the account were empty.
+Evidence and fix in TASK-244, quota cause in TASK-55.
+
+WHY NOT SALVAGE THE 87 CLEAN ROWS. Selecting a subset after seeing the data is the exact failure the
+pre-registration exists to prevent. The subset was not chosen by a rule fixed in advance; it is
+chosen by knowing which rows went bad. Its expectancy was deliberately not computed, so that no
+number from this run can anchor the next one.
+
+RE-REGISTERED as a fresh run starting 2026-08-03, the first session with a clean feed and a
+fail-closed guard. The finviz DOM fix landed 2026-07-29 and was verified on 2026-08-03: zero
+confirmed phantoms after that date. The account-state guard landed 2026-08-03. Same criterion, same
+frozen config, same stopping rule. 45 trading days from 2026-08-03 reaches early October.
+
+CARRIED FORWARD: nothing. No row from before 2026-08-03 enters the new sample.
+
+WHAT WOULD VOID THE NEW RUN TOO: another breach of the reentry cap, or any change to TP, SL, HOLD or
+the gate. If the guard from TASK-244 works, a 429 now produces a SKIP with reason
+ACCOUNT_STATE_UNAVAILABLE instead of a blind entry. That is the thing to watch.
 
 ---
 

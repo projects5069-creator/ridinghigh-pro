@@ -31,3 +31,9 @@ Root-cause (docs/DIAGNOSIS_post_analysis_2026-06-23.md): the collect job in post
 <!-- SECTION:NOTES:BEGIN -->
 AC#5 verified 2026-06-27 (Sat) via dry-run re-check: REAL-GAP fillable=0. CLWT 2026-06-17 D5 (open as of 6/26) was filled by the Fri 6/26 16:45 Peru backfill run — end-to-end outcome confirmed (fillable 1->0 across scheduled run). May=0 stable. Only remainder: HSPT 2026-06-11 = known-unfillable (yfinance/Alpaca return empty, delisted/no-data) — documented, not a backfill failure. Gap closed for all fillable rows.
 <!-- SECTION:NOTES:END -->
+
+## AUDIT 2026-08-03: ISOLATION DONE, STATED GOAL NOT REACHED
+
+The backfill was isolated and that part holds. The title goal, fix the job timeout, was not achieved: the collector reached 27 minutes on 2026-07-31 and the ceiling had to be raised twice, to 30 on 28/7 and to 45 on 30/7.
+
+Measured cause, from four run logs: 15/7 43 candidates 8 minutes, 21/7 56 and 11, 28/7 77 and 23, 31/7 89 and 27, with zero skips in every run. Tracked in TASK-249. Status left unchanged.

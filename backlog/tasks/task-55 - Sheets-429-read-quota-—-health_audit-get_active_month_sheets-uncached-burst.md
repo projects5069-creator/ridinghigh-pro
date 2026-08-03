@@ -21,3 +21,11 @@ ROOT (6-round recon 2026-05-28): health_audit calls get_active_month_sheets 11x/
 <!-- SECTION:NOTES:BEGIN -->
 PHASE 2 (2026-05-29): root was the sentinel_events read in S1 (line 1347) exhausting the 3-retry/15s backoff during market-hours SA contention (3 minute-cadence workflows share one SA). Phase-1 memoize of get_active_month_sheets was correct but covered a different path. Cron move 17->16 UTC REJECTED — collision map shows 16 UTC equally crowded (auto_scan */1 13-19 + agent_minute */1 13-20 cover both). Fix: _ha_cached_read retries 3->5, backoff cap 40s (~115s total patience across >1 minute-window), TTL 300->600. Root-cause separate-SA solution tracked in TASK-58.
 <!-- SECTION:NOTES:END -->
+
+## STILL LIVE 2026-08-03
+
+The quota pressure is not historical. Cancelled agent_minute runs: 2 on 2026-07-22, 175 on 2026-07-29 out of 488.
+
+This task is now the parent of TASK-244. A 429 on the paper_portfolio read made build_account_state return defaults, the log printed "Account state: 0 open positions" while 69 were open, and the three exposure filters passed together. Evidence in TASK-244, run 29940103210.
+
+TASK-244 added Filter 6b so the agent SKIPs instead of entering blind. That converts silent overexposure into lost trading time, which is the right trade, but the underlying read burst is untouched. Every minute the quota is exhausted is now a minute the agent cannot enter at all.
