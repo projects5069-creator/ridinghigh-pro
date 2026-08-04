@@ -23,3 +23,13 @@ E2E-audit S2 (3/7) established: there is NO live forced-exit — MAX_HOLDING_DAY
 - [ ] #1 read-only analysis of D1-D25 outcomes (night/TP/SL/adverse-tail per horizon) documented with n per cell
 - [ ] #2 recommendation (keep TP/SL-only vs add forced-exit at day-K) presented ONLY after HYP-002 verdict
 <!-- AC:END -->
+
+## GATE DATE MOVED 2026-08-04
+
+The hard gate in the description estimates HYP-002 concluding around 2026-07-27. That estimate is two months out of date.
+
+HYP-002 was voided on 2026-08-03. Its stopping rule had already fired at n equal to 173 against a threshold of 150, but the sample could not be scored: 86 of the 173 entries sat on phantom tickers, 84 had no outcome at all, and 54 exceeded the frozen reentry cap of one per ticker per day. It was re-registered the same day as a fresh run starting 2026-08-03, with no carry forward, under the identical criterion and the identical frozen configuration.
+
+NEW GATE DATE: early October 2026. Forty five trading days from 2026-08-03, or n greater than or equal to 150 post flip entries, whichever comes first, exactly as before.
+
+Everything else in this task is unchanged and still correct. There is still no live forced exit, MAX_HOLDING_DAYS remains display only at 5, AGENT_FORCE_EOD_CLOSE is still False at config.py line 315, and positions still ride until TP or SL. The read only research permission also stands: analysing the D1 to D25 outcomes may begin at any time. Only the recommendation and any implementation wait for the verdict.
