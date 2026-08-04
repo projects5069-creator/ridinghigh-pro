@@ -3,9 +3,10 @@ id: TASK-228
 title: >-
   Test-order state leak: test_agent_score_matches_scanner fails in full suite,
   passes isolated
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-07-04 01:49'
+updated_date: '2026-08-04 00:32'
 labels: []
 dependencies: []
 priority: low
@@ -17,3 +18,11 @@ ordinal: 234000
 <!-- SECTION:DESCRIPTION:BEGIN -->
 E2E-audit S4 (3/7): tests/agent/integration/test_scanner_agent_match.py::test_agent_score_matches_scanner FAILS in a full local 'pytest tests/' run (624 passed, 2 failed) but PASSES in isolation (1 passed, 7.14s) => order-dependent state leak from an earlier test (module-level cache/config/monkeypatch not undone), NOT a code bug. In CI it is skipped anyway (-m 'not integration', tests.yml:30). Triage: bisect test order (pytest -p no:randomly --lf / --stepwise or pytest-random reorder) to find the leaking test; fix the leak (fixture teardown), not the victim. Local triage MUST use -m 'not integration' awareness — the sibling test_write_real_decision_to_sheet needs live creds and attempts a REAL Sheets write.
 <!-- SECTION:DESCRIPTION:END -->
+
+## MERGED INTO TASK-250, 2026-08-04
+
+Closed as a merge. Same family: unit tests that are not hermetic.
+
+This task is an order dependent state leak; TASK-250 is a live Sheets read from a file whose docstring claims it touches nothing. Both end at the same fix, a conftest fixture that isolates, and both are in the same suite. Fixing one without the other leaves the suite unreliable either way.
+
+Detail carried to 250: the local triage here must stay aware of -m "not integration", because the sibling test_write_real_decision_to_sheet attempts a real Sheets write.

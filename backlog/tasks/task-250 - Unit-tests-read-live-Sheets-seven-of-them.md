@@ -28,3 +28,11 @@ Fix direction, not chosen yet: patch sheets_manager.get_worksheet in the test fi
 
 Not verified: whether other unit tests outside this file also reach live Sheets. That sweep has not been run.
 <!-- SECTION:DESCRIPTION:END -->
+
+## ABSORBS TASK-228, 2026-08-04
+
+TASK-228 closed as a merge into this task. Same family: unit tests that are not hermetic, in the same suite.
+
+228 is an order dependent state leak in tests/agent/integration/test_scanner_agent_match.py, which fails in a full run and passes in isolation. This task is a live Sheets read from tests/agent/unit/test_orchestrator_eod_borrow_wiring_v1.py. Both are solved by the same conftest level isolation, and leaving one open keeps the suite unreliable regardless of the other.
+
+Carried from 228: local triage must stay aware of -m "not integration", because the sibling test_write_real_decision_to_sheet attempts a real Sheets write.
