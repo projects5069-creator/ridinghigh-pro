@@ -29,3 +29,15 @@ ordinal: 66000
 <!-- SECTION:NOTES:BEGIN -->
 אישור-חקירה (צ'אט 2026-06-27, READ-ONLY): מ-sentinel_events (45,008 שורות) — scan_freshness = 25,311 events (הרכיב הדומיננטי), price_freshness 15,456. מתוך 13,033 ה-CRITICAL — כולם SENTINEL_BLOCK בשאדו (EXPLICIT_GATE_MODE=shadow → לא-נאכף = רעש-לוג). counterfactual would-block n=36 (כפי שכבר רשום). הנמכת ה-severity מכוסה ב-TASK-96.
 <!-- SECTION:NOTES:END -->
+
+## ACCURACY FIX 2026-08-04
+
+The investigation note above says EXPLICIT_GATE_MODE=shadow, so the CRITICAL events are unenforced log noise. That is no longer true.
+
+Verified live: config.py line 374 sets EXPLICIT_GATE_MODE to "active", and it has been active since the flip of 2026-06-29. Line 378 sets ENTRY_GATE_MINIMAL to True.
+
+What has NOT changed, and is the reason this task still stands: SENTINEL_MODE is still "shadow" at config.py line 359. The two are separate switches. The sentinel still logs rather than blocks, so the counterfactual this task records is still a counterfactual and no trade was actually blocked by it.
+
+What the correction does change is the framing of the 13,033 CRITICAL rows. They are not noise from an unenforced explicit gate; they are sentinel events under a sentinel that is deliberately in shadow. The finding itself is untouched: would-block correlates positively with winners, WR 64 percent against 41 percent on n=36, single regime.
+
+This task remains the blocker on ever moving SENTINEL_MODE to active.

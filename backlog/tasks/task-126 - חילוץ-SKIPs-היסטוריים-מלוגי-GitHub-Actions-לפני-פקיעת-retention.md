@@ -36,3 +36,15 @@ resume/checkpoint, per-run count anti-silent-fail). רץ 10/6: research/historic
 - [ ] #2 resume להשלמת פער 6/04→6/30 (לא דחוף, פוקע ~ספטמבר)
 - [ ] #3 DR: גיבוי ה-CSV המוקדם מחוץ-למכונה לפני ~9/8 (local-only ב-gitignore)
 <!-- AC:END -->
+
+## RESTATED 2026-08-04, AND IT HAS A DEADLINE
+
+The extraction is done. What is left is a backup, and it expires within days.
+
+DONE: 138,915 SKIP records covering 2026-05-11 to 2026-06-04, extracted 10/6 into research/historical_skips.csv. The urgent window, the earliest logs, was saved.
+
+THE ONLY THING THAT MATTERS NOW is AC#3. Verified 2026-08-04: the file exists at research/historical_skips.csv, 15,992,167 bytes, dated 10 June, and research/ is in .gitignore at line 86. It exists on one machine and nowhere else. GitHub Actions log retention is about 90 days, so the 2026-05-11 logs expire around 2026-08-09. After that, if the machine is lost, the data is gone permanently and cannot be re-extracted.
+
+This is a single copy of a 16 MB file to somewhere off the machine. It is the cheapest action in the whole backlog and it has the nearest deadline.
+
+AC#2, resuming the 6/04 to 6/30 gap, is not urgent; those logs expire around September.

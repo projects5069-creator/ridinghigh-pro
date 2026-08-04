@@ -31,3 +31,11 @@ post_analysis_collector.run() resolves every sheet op to the CURRENT month, so a
 <!-- SECTION:NOTES:BEGIN -->
 Context: surfaced by TASK-200 backfill (commit 96de9f0). 5 broken points all default to current month: collector:396/411/454 (reads), :461 load, :617 save; load/save route via _get_post_analysis_ws (gsheets_sync:52) -> get_worksheet(no month). May/April backfill returned 0 candidates (read June tab). Documented debt; not started.
 <!-- SECTION:NOTES:END -->
+
+## ABSORBS TASK-11, 2026-08-04
+
+TASK-11 closed as a merge into this task. Same root stated at two levels.
+
+11 said the dashboard and analytics cannot aggregate across months because each month is siloed in its own sheets_config entry. This task is the concrete version: five read and write points in post_analysis_collector.run that all resolve to the current month, with acceptance criteria and a TDD requirement already written.
+
+Scope note: the same month scoping breaks ticker_follow_up on the first trading day of every month, because it filters timeline_live of the active month for days earlier than today and finds none. Recorded in the audit note on TASK-124.

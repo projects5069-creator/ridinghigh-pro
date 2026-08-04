@@ -1,9 +1,10 @@
 ---
 id: TASK-239
 title: Fix post_analysis collector 15min GHA timeout
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-07-28 12:40'
+updated_date: '2026-08-04 00:32'
 labels:
   - bug
   - perf
@@ -38,3 +39,13 @@ The title says 15min timeout. The ceiling has been 45 since 2026-07-30 and 30 si
 The measured cause is that the collector reprocesses the whole month every night: select_candidates at post_analysis_collector.py:78 filters on MxV with no date bound, and COLLECT_DAYS_FORWARD of 25 from the 2026-06-13 cutoff means no row can complete inside a month. Four runs, zero skips in all of them.
 
 Moved to TASK-249 with the correct framing. This task should be closed or merged rather than worked as written.
+
+## MERGED INTO TASK-249, 2026-08-04
+
+Closed as a merge, not as completed work. The remaining scope moved to TASK-249.
+
+Same code, verified: post_analysis_collector.py line 78 select_candidates and COLLECT_DAYS_FORWARD at line 55. TASK-249 measured the mechanism on 2026-08-03 and the verdict was ROOT_CONFIRMED: 4 candidates ran in 48 seconds against 89 candidates in 22.9 minutes. This task describes a 15 minute ceiling that has been 45 since 30/7.
+
+CARRIED TO 249: nothing new, 249 already holds the mechanism and the measurement.
+
+NOT CARRIED, recorded here so it is not lost: three gaps this task raised that 249 does not cover. There is no timeout on the provider call, no skip cache for dead symbols, and no dedup, and post_analysis_collector.py line 638 saves a single batch after the loop so a cancelled run loses the whole day. If any of those matters later, open a task for it rather than reopening this one.

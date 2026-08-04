@@ -42,3 +42,11 @@ SECOND, a concrete candidate for volume variance that was not in the task. auto_
 A failure part way through the scan therefore produces a short result set with no error, no log line and a successful workflow conclusion. auto_scanner.py carries 5 bare except clauses and 7 handler bodies that are pass, continue or return with no logging. Every other write path module is clean by comparison: orchestrator, orchestrator_eod, post_analysis_collector and order_manager have zero bare handlers and log through except Exception.
 
 NOT VERIFIED: whether those handlers actually swallow anything in practice. Proving it needs instrumentation, a counter or a log line on each swallow, run over a full trading day. That measurement should come before any theory about the volume.
+
+## ABSORBS TASK-227, 2026-08-04
+
+TASK-227 closed as a merge into this task. Same pattern, same file.
+
+227 covers load_mc_cache and save_mc_cache at auto_scanner.py lines 108 and 117, whose bare except at lines 113 and 122 hide the fact that the cache loads empty and saves to a discarded path on every CI run. That is two of the five bare handlers this task already records, and the fix is the same: replace bare handlers with logged warnings so a swallow becomes visible.
+
+The open question from 227 travels with it: make the cache path workspace relative and persist it, or document it as local development only.

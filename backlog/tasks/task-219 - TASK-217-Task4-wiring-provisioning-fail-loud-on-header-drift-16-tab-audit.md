@@ -21,3 +21,11 @@ Guard functions header_matches_canonical + assert_header_canonical are committed
 <!-- SECTION:NOTES:BEGIN -->
 Wiring implemented+committed (66c984c, PK v4.01): CORE_TABS raise (paper_portfolio/decision_log/postmortems), observability warn, _set_headers hardened. Guard sits in create_agent_sheets idempotency (not-dry-run). Live audit confirmed CORE 9/9 MATCH across 05-07 pre-commit. CI green. NOT Done: raise fires only at rotation 1/8 — pending live behavior verification (or controlled dry-run). Kept To Do.
 <!-- SECTION:NOTES:END -->
+
+## RESTATED 2026-08-04
+
+The description says the wiring is deferred. It is not. Verified live: create_agent_sheets.py line 337 calls assert_header_canonical for tabs in CORE_TABS and line 338 warns for the rest, exactly the raise versus warn split the task asked to decide. The decision was made and implemented in commit 66c984c under PK v4.01.
+
+What actually remains is one thing and it is not code: the raise has never fired, because it only runs at a rotation. The next rotation is 2026-09-01, twenty eight days from now, and that is the same run that creates October and the same run TASK-243 is about.
+
+So this task is waiting on an event, not on work. Either verify it at the 1/9 rotation, or force a controlled dry run before then rather than letting the first real test be the one that provisions October.

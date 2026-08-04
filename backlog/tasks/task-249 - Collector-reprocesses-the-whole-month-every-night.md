@@ -54,3 +54,9 @@ WHAT THIS RULES OUT: the alternative reading was that phantom tickers were burni
 WHAT THIS DOES NOT PROVE: this is one measurement at the extreme low end of the range. The model would be fully confirmed by watching August climb back through the same slope. At the July accumulation rate, about 4.2 candidates per trading day, August should end near 88 candidates and roughly 19 minutes, still under the 45 minute ceiling. If the scan volume rises, the ceiling comes closer.
 
 NO FIX CHOSEN. The three options in the description above stand as written: bound select_candidates by date, make is_complete horizon aware so a row can settle at D5 for classification purposes, or cache the settled rows. Each changes what the research dataset collects, so each needs TDD and a before and after run comparison. Status unchanged.
+
+## ABSORBS TASK-239, 2026-08-04
+
+TASK-239 closed as a merge into this task. Same code, and this task holds the measurement that 239 was missing.
+
+Three gaps 239 raised that this task does NOT cover, recorded so they are not lost: no timeout on the provider call, no skip cache for dead symbols, no dedup, and post_analysis_collector.py line 638 saves a single batch after the loop so a cancelled run loses the whole day. None of them is the runtime driver, which is why they stayed out of the fix options above, but they are real.

@@ -39,3 +39,15 @@ update_live_trades ENTRY_MIN_SCORE=TRADE_ENTRY_MIN_SCORE (:994 — לא היה �
 run_eod פילטר Score>= + sort_values('Score') (:1332-1338). החישובים עצמם דרך formulas (SSoT תקין);
 הכתיבה קפואה ב-score_cell. ראיות: plans/stateless-seeking-sifakis.md S3.
 <!-- SECTION:NOTES:END -->
+
+## RESTATED 2026-08-04
+
+Half of this task is already done and the other half is deliberately parked, and the title does not say either.
+
+DONE: AC#1, borrow selection by MxV instead of Score, landed in commit 5a127ad on 29/6, the same day as the flip. The hypothesis that it broke at the flip was disproven.
+
+STILL LIVE, verified 2026-08-04, four sites in auto_scanner.py: line 504 portfolio selection at Score >= TRADE_ENTRY_MIN_SCORE, line 592 peak selection by Score idxmax, line 1008 ENTRY_MIN_SCORE inside update_live_trades, and line 1349 the EOD portfolio filter.
+
+PARKED BY DECISION, not blocked: the owner decision of 30/6 is that all remaining Score work waits and is handled as one body, together with TASK-209.
+
+NOTE ADDED 2026-08-04: line 1008 is why live_trades holds zero rows in every month. The gate is Score >= 70 and the highest scanner Score in the live run of 2026-08-03 was 60.86. See TASK-251.
