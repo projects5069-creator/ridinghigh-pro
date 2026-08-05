@@ -6,6 +6,7 @@ title: >-
 status: To Do
 assignee: []
 created_date: '2026-07-04 01:48'
+updated_date: '2026-08-05 18:19'
 labels: []
 dependencies: []
 priority: medium
@@ -23,6 +24,50 @@ E2E-audit S2 (3/7): _calculate_position (decision_logic.py:139-151) does qty=int
 - [ ] #1 qty<1 returns SKIP with dedicated skip_reason (e.g. PRICE_ABOVE_NOTIONAL), TDD RED->GREEN
 - [ ] #2 no behavior change for any price where qty>=1 (regression suite green)
 <!-- AC:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+RULING 2026-08-05 (עמיחי)
+
+הכרעה: ההחלטה נדחית עד למדידה אחת — כמה סיגנלים במחיר מעל $1000 היו בפועל.
+עד שהמספר הזה ידוע, אין בסיס להכריע בין "לממש עכשיו" ל"להמתין לאוקטובר".
+
+ממצא הביקורת (2026-08-05) — ההתנהגות הפוכה ממה שהתיק מניח:
+
+תחת DRY_RUN, שהוא המצב היום: _sim_bracket_order (alpaca_broker.py:322) אינו בודק qty
+ומחזיר SimulatedOrder(qty="0"). _write_to_portfolio כותב שורת paper_portfolio עם
+Quantity=0. ב-position_manager.py:254 qty=int(...)=0 ולכן unrealized_pnl=0, אבל בדיקת
+ה-TP/SL של DRY_RUN (position_manager.py:244-251) בודקת מחיר בלבד ואינה בודקת qty —
+ולכן הפוזיציה תיסגר על TP או SL עם RealizedPnL=0 ותיכנס למדגם.
+
+תחת LIVE_PAPER: submit_bracket_order בונה LimitOrderRequest(qty=0) ושולח ל-Alpaca,
+ה-API דוחה, _submit_with_retry מנסה 3 פעמים ומחזיר None, order_status=REJECTED ואין
+שורת paper_portfolio כלל.
+
+כלומר הברוקר אוכף את מה שהקוד לא, והמצב שאנחנו נמצאים בו — DRY_RUN — הוא היחיד מבין
+השניים שבו הבאג מייצר רשומה.
+
+על שאלת הנייטרליות למדידת HYP-002:
+גארד qty<1 יכול לעשות דבר אחד בלבד — להסיר תצפיות מנוונות. הוא אינו יכול להוסיף תצפית,
+אינו יכול לשנות מחיר כניסה, ואינו יכול להזיז TP או SL. השפעתו על ה-expectancy חד-כיוונית:
+הוצאת אפסים. אין תרחיש שבו הוא מטה את התוצאה לטובה. סעיף ה-config freeze
+(HYPOTHESES.md:210-215) מונה ארבעה פרמטרים — TP, SL, HOLD, reentry — וגארד אינו אחד מהם,
+כפי שהתיק עצמו כותב.
+
+הצד השני, לתיעוד: שדה Universe ברישום (HYPOTHESES.md:193-194) מתאר את השער כארבעה תנאים —
+MxV<=-100 AND price>=$3 AND data-quality AND exposure-safety. תנאי חמישי הופך את התיאור
+הזה ללא מדויק. מי שיבקר את ההרצה בעוד חודשיים יראה שער שאינו מה שנרשם.
+
+מצב מאומת בקוד 2026-08-05: אין שום בדיקת quantity על נתיב הביצוע. grep על
+decision_logic.py, order_manager.py, alpaca_broker.py, position_manager.py מחזיר אפס
+השוואות. הרצפה היחידה היא AGENT_MIN_SCANPRICE_USD=3.0 (config.py:300); אין תקרת מחיר
+בשום מקום, ו-AGENT_MARKET_CAP_MAX כבוי תחת ENTRY_GATE_MINIMAL.
+
+הערה על מקור הראיה: התיק מפנה ל-plans/stateless-seeking-sifakis.md S2. הקובץ אינו קיים
+בריפו (ls -d plans -> No such file or directory). ה-RULING של 3/7 שהתיק נשען עליו אינו
+ניתן לאימות מהריפו. נפתח תיק נפרד על כך.
+<!-- SECTION:NOTES:END -->
 
 ## FROZEN UNTIL OCTOBER, 2026-08-04
 

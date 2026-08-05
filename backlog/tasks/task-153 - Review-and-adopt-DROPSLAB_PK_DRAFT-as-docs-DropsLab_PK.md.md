@@ -4,7 +4,7 @@ title: Review and adopt DROPSLAB_PK_DRAFT as docs/DropsLab_PK.md
 status: To Do
 assignee: []
 created_date: '2026-06-11 04:03'
-updated_date: '2026-06-12 22:56'
+updated_date: '2026-08-05 18:16'
 labels:
   - TASK-139-INV
 dependencies: []
@@ -22,4 +22,30 @@ TASK-139-INV phase7 deliverable: docs/research/INVESTIGATION_2026-06-10/DROPSLAB
 
 <!-- SECTION:NOTES:BEGIN -->
 TASK-156 merge: absorbs TASK-27 (DropsLab integration #N25 — integrate DropsLab signals as Trader input; unblocked 3/6). Adopt DropsLab_PK draft AND wire the integration here.
+
+RULING 2026-08-05 (עמיחי)
+
+הכרעה: לאמץ את DROPSLAB_PK_DRAFT כ-docs/DropsLab_PK.md תחת חוזה ה-Anti-Drift. אימוץ בלבד.
+
+היקף שיוצא מ-153: החיווט של סיגנלי DropsLab כקלט ל-Trader (שנספג לכאן דרך מיזוג TASK-156
+שבלע את TASK-27) מוצא מהתיק הזה ועובר לתיק נפרד.
+
+נימוק ראשון — הסוכן החי לא מסוגל לבצע את HYP-001:
+HYPOTHESES.md:128 נועל את היציאה של crossover-short על "Cover at D5_Close — exactly 5
+trading days after the d1_close entry; time-only, zero-discretion, NO TP/SL".
+לסוכן החי אין שום יציאה מבוססת-זמן: AGENT_FORCE_EOD_CLOSE=False (config.py:315) גורם
+ל-is_eod_window להחזיר False תמיד (agent/orchestrator.py:117-124), ו-MAX_HOLDING_DAYS
+הוא display-only (config.py:146). היציאה היחידה היא TP/SL (position_manager.py:244-251).
+חיווט DropsLab ל-Trader לא ייצר את HYP-001 אלא אסטרטגיה שלישית: סיגנל DropsLab -> שער
+MxV -> יציאת TP10/SL10. זו לא ההשערה הרשומה ולא זו שנמדדת.
+
+נימוק שני — זיהום המדגם של HYP-002:
+HYPOTHESES.md:193-194 מגדיר את היקום כ-"FINVIZ screener (Price>$2 AND Today+15%) ->
+tickers passing the LIVE ENTRY_GATE_MINIMAL gate". הזנת יקום שני ל-Trader הופכת את המדגם
+שנאסף מ-3/8 לתערובת של שני יקומים. הערה למען הדיוק: סעיף ה-config freeze (:210-215) מונה
+ארבעה פרמטרים בלבד (TP/SL/HOLD/reentry) ו-Universe אינו ביניהם, ולכן לפי האות שינוי-יקום
+אינו פוסל אוטומטית. לפי המהות כן: ההרצה כבר לא מודדת את מה שנרשם.
+
+מצב לא מאומת: האם DropsLab עצמו עדיין חי. TASK-144 (Revive DropsLab collector) סטטוס Done
+מ-2026-06-15, אך לא נבדק מאז.
 <!-- SECTION:NOTES:END -->

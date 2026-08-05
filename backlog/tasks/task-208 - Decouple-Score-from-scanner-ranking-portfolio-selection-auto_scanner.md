@@ -4,7 +4,7 @@ title: Decouple Score from scanner ranking + portfolio selection (auto_scanner)
 status: To Do
 assignee: []
 created_date: '2026-06-29 21:46'
-updated_date: '2026-07-04 01:50'
+updated_date: '2026-08-05 18:21'
 labels: []
 dependencies: []
 priority: low
@@ -38,6 +38,31 @@ run_scan portfolio-selection Score>=TRADE_ENTRY_MIN_SCORE (auto_scanner.py:488-4
 update_live_trades ENTRY_MIN_SCORE=TRADE_ENTRY_MIN_SCORE (:994 — לא היה ברשימה המקורית) ·
 run_eod פילטר Score>= + sort_values('Score') (:1332-1338). החישובים עצמם דרך formulas (SSoT תקין);
 הכתיבה קפואה ב-score_cell. ראיות: plans/stateless-seeking-sifakis.md S3.
+
+RULING 2026-08-05 (עמיחי)
+
+הכרעה: אשרור הדחייה. אשכול ה-Score כולו נדחה לאחרי הוורדיקט של HYP-002
+(תחילת אוקטובר, HYPOTHESES.md:257). זה מאשרר את החלטת 30/6 שכבר מתועדת ב-Notes,
+ומצמיד אותה לתאריך.
+
+מה כן אושר לביצוע עכשיו, בנפרד מהאשכול ובקומיט נפרד:
+מחיקת normalize_mxv (formulas.py:556) ו-normalize_atrx (formulas.py:567) + שתי שורות
+הייבוא שלהן ב-dashboard.py:58-59.
+היתכנות מאומתת 2026-08-05: grep repo-wide (ללא backups/project_sync/research) מחזיר עבור
+כל אחת מהן ארבע תוצאות בלבד — ההגדרה ב-formulas.py ושורת הייבוא ב-dashboard.py. ספירת
+האזכורים ב-dashboard.py היא 1 לכל אחת, כלומר שורת הייבוא בלבד ואפס קריאות. grep על
+test_formulas.py, test_utils.py וכל tests/ מחזיר אפס. calculate_score (formulas.py:584)
+אינו נוגע בהן — הוא קורא ל-SCORE_WEIGHTS_V2 ו-SCORE_CAPS_V2 בלבד (:594-595).
+
+תיקון לתוכנית שהיה שגוי:
+calculate_vwap_dist אינו קוד מת. יש לו שתי קריאות חיות — dashboard.py:380 ו-dashboard.py:560
+— וחמש assertions ב-test_formulas.py:146-150 ש-CI מריץ כסקריפט (tests.yml:34).
+auto_scanner.py:33 מייבא אותו אך אינו קורא לו (שלוש הקריאות שם הן
+ל-calculate_typical_price_dist ב-:256, :936, :1246). הטיפול הנכון הוא החלפה
+ב-calculate_typical_price_dist בשלושה מקומות — dashboard.py:380, dashboard.py:560,
+ו-test_formulas.py — ולא מחיקה. זו עבודה נפרדת ותועדה ב-TASK-209.
+אזהרה: שתי הקריאות בדשבורד יושבות בתוך "except:" עירום (dashboard.py:381, :561), ולכן
+מחיקה הייתה נבלעת בשקט ומחזירה vwap_dist=0 במקום לקרוס. הטסט הוא מה שהיה תופס, לא הפרודקשן.
 <!-- SECTION:NOTES:END -->
 
 ## RESTATED 2026-08-04
