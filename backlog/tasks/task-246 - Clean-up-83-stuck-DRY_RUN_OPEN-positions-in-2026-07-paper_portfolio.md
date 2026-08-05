@@ -4,6 +4,7 @@ title: Clean up 83 stuck DRY_RUN_OPEN positions in 2026-07 paper_portfolio
 status: To Do
 assignee: []
 created_date: '2026-07-29 09:28'
+updated_date: '2026-08-05 20:33'
 labels:
   - data-integrity
   - cleanup
@@ -45,3 +46,34 @@ Future second layer, recorded not implemented: utils.validate_stock_data already
 TOOL WIRED 2026-08-03. mark_phantom_rows_v1 now filters on classify_phantom_tier instead of is_confirmed_phantom alone, so both tiers are marked with distinct values: PhantomTicker gets PHANTOM or PHANTOM_SUSPECT, and paper_portfolio.DataQuality gets PHANTOM_TICKER or PHANTOM_TICKER_SUSPECT. Column choices are unchanged, so post_analysis stays required_subset and paper_portfolio stays at 25 columns. Previously the tool would have marked 67 of the 83 stuck positions and left the 16 hardest with no mark at all.
 
 NOT DONE: no dry run has been executed against July, and nothing has been written to any sheet. The market is open. Both wait for close.
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+MEASURED 2026-08-05 — SCOPE NARROWED. Historical, confined to 2026-07, blocking nothing.
+
+Source: reports/2026-08-05_1455_measurement.md Q-246.
+
+paper_portfolio 2026-08, live read after the close:
+  total rows            = 16
+  Status counts         = {'DRY_RUN_CLOSED': 15, 'DRY_RUN_OPEN': 1}
+  DRY_RUN_OPEN          = 1     (SHPH, entered 2026-08-05)
+  age in trading days   = 0     (min = median = max, n = 1)
+  older than MAX_HOLDING_DAYS (config.py:133 = 5) = 0
+  phantom tier counts   = {'CLEAN': 1}   via formulas.classify_phantom_tier
+
+Age was counted in TRADING days through utils.is_trading_day (NASDAQ calendar), not
+calendar days.
+
+WHAT THIS CHANGES. The phenomenon this ticket describes does not exist in the active
+month. There is no accumulation, nothing past the hold window, and nothing sitting on a
+corrupted symbol. The ticker fix (TASK-238, 2026-07-29) and the fail-closed account-state
+guard (TASK-244, 2026-08-03) both landed before August opened.
+
+WHAT THIS DOES NOT CHANGE. The 83 rows in the 2026-07 paper_portfolio are still there and
+were not touched. The owner decision this ticket asks for — mark them, never delete —
+is still open. It is now a cleanup of a closed month rather than a live containment
+problem, which is why the ticket is narrowed rather than closed.
+
+Stays To Do at low priority. Reopen scope only if a new month starts accumulating.
+<!-- SECTION:NOTES:END -->

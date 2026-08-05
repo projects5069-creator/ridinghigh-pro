@@ -3,10 +3,10 @@ id: TASK-224
 title: >-
   qty guard: quantity<1 => SKIP with dedicated skip_reason (notional-uniformity
   ruling)
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-07-04 01:48'
-updated_date: '2026-08-05 18:19'
+updated_date: '2026-08-05 20:32'
 labels: []
 dependencies: []
 priority: medium
@@ -67,6 +67,32 @@ decision_logic.py, order_manager.py, alpaca_broker.py, position_manager.py מח�
 הערה על מקור הראיה: התיק מפנה ל-plans/stateless-seeking-sifakis.md S2. הקובץ אינו קיים
 בריפו (ls -d plans -> No such file or directory). ה-RULING של 3/7 שהתיק נשען עליו אינו
 ניתן לאימות מהריפו. נפתח תיק נפרד על כך.
+
+MEASURED 2026-08-05 — CLOSED. The scenario is not reachable in the current scan universe.
+
+Source: reports/2026-08-05_1455_measurement.md Q-224.
+
+timeline_live 2026-08, all 71,397 rows carry a parseable price:
+  rows with price > 1000 = 0
+  price distribution: min = 2.0   p50 = 9.25   max = 545.38
+
+decision_logic.py:145 computes qty = int(AGENT_POSITION_SIZE_USD / price), and
+config.py:320 sets AGENT_POSITION_SIZE_USD = 1000. qty == 0 therefore requires a signal
+priced above $1000. The highest price the scanner produced in August is 545.38, and the
+median is 9.25 — an order of magnitude below the threshold. The degenerate order this
+ticket guards against cannot occur on this data.
+
+EXPLICITLY NOT A RETRACTION OF THE ANALYSIS. The review of 2026-08-05
+(reports/2026-08-05_1244_decisions_review.md) established that qty=0 is dangerous under
+DRY_RUN — SimulatedOrder accepts it and a zero-quantity row reaches paper_portfolio —
+while under LIVE_PAPER the broker rejects it. That reasoning is unchanged and is retained
+here on purpose.
+
+IF THE UNIVERSE CHANGES, THE GUARD IS NEEDED AGAIN. The finviz filter today is
+"Price: Over $2" (auto_scanner.py:346-348) with no upper bound, so a single high-priced
+pump entering the screen is enough to reintroduce the case. Reopen this ticket if the
+scan universe ever produces a price above AGENT_POSITION_SIZE_USD, or if
+AGENT_POSITION_SIZE_USD is lowered.
 <!-- SECTION:NOTES:END -->
 
 ## FROZEN UNTIL OCTOBER, 2026-08-04

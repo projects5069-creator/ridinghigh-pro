@@ -4,7 +4,7 @@ title: score_analytics reports n=0 while July closed sixty positions
 status: To Do
 assignee: []
 created_date: '2026-08-03 22:08'
-updated_date: '2026-08-05 19:29'
+updated_date: '2026-08-05 20:33'
 labels:
   - investigation
   - analytics
@@ -62,4 +62,25 @@ Score. Recommend folding the tab into the 208/209 retirement list rather than re
 pending_suggestions and config_history CONFIRMED writer-less: create_agent_sheets.py
 creates the tabs (:45,:46), the dashboard reads them, and _data_loaders.update_suggestion_status
 (:179-216) only updates an existing row found by ws.find() — it never creates one.
+
+MEASURED 2026-08-05 — live confirmation of the static trace recorded earlier today.
+
+Source: reports/2026-08-05_1455_measurement.md Q-254. One read per tab, after the close.
+
+  score_analytics        @2026-08: data rows = 0
+  score_analytics        @2026-07: data rows = 0
+  pending_suggestions    @2026-08: data rows = 0
+  config_history         @2026-08: data rows = 0
+
+All three tabs are empty in the live sheets, in both months where applicable. This
+matches the code trace in the ANSWERED block above: orchestrator_eod.py:173 and :191
+construct ScoreAnalytics() with no arguments, so _postmortem_reader is None and
+score_analytics.py:131 returns an empty DataFrame regardless of the data, AND
+_analytics_writer is None (score_analytics.py:215) so nothing would be written even if
+the sample were non-empty.
+
+Nothing here changes the recommendation already recorded: fold the tab into the Score
+retirement work in TASK-208 and TASK-209 rather than wiring the injections.
+
+Stays To Do.
 <!-- SECTION:NOTES:END -->
