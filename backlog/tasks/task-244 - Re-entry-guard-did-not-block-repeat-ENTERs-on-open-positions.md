@@ -49,7 +49,7 @@ The signal already existed and nobody consumed it. build_account_state sets pape
 
 FIX APPLIED 2026-08-03, not yet verified live: Filter 6b in decision_logic._check_filters returns ACCOUNT_STATE_UNAVAILABLE when the flag is set. Placed after the signal only filters 1 to 6 so a signal that fails on its own merits still reports its own reason, and before 7 to 10 because those four are the blind ones. Decision gains the field account_state_unavailable. Four tests added, including backward compatibility for callers that predate the flag and for the None default.
 
-DEPENDS ON TASK-55. This filter stops the damage, it does not stop the 429. While the quota is exhausted the agent will now SKIP instead of entering blind, which is correct but is still lost trading time. The quota pressure is live: 29/7 had 175 cancelled agent_minute runs against 2 on 22/7.
+DEPENDS ON TASK-215 (Dedicated SA for auto_scan, To Do). Corrected 2026-08-05: this line previously named TASK-55, which has status Done — TASK-55 covered the health_audit contribution and closed on it, and TASK-213 verified that reduction. What remains open is the agent_minute and auto_scan read burst, owned by TASK-215. This filter stops the damage, it does not stop the 429. While the quota is exhausted the agent will now SKIP instead of entering blind, which is correct but is still lost trading time. The quota pressure is live: 29/7 had 175 cancelled agent_minute runs against 2 on 22/7.
 
 STILL OPEN: the 22/7 day produced 43 ENTERs against a daily cap of 10, which the decision_log read alone should have enforced. That implies both reads failed in the entering runs, not only paper_portfolio. Confirming it needs a decision_log read, which is quota heavy and must wait for market close.
 

@@ -6,6 +6,7 @@ title: >-
 status: To Do
 assignee: []
 created_date: '2026-08-03 21:01'
+updated_date: '2026-08-05 19:29'
 labels:
   - data-integrity
   - sheets
@@ -43,3 +44,38 @@ The reason is the entry criterion, not the sheet id. auto_scanner.update_live_tr
 CONSEQUENCE FOR THIS TASK: the divergence recorded here is real in the config but has no observable effect, because nothing writes to either target. The section 10 problem, two SHEET_NAMES lists that disagree, is still worth fixing and belongs with TASK-243. The August specific question, whether to realign the id, is close to moot and this task may be closable on that basis.
 
 Not verified: whether live_trades was ever written in an earlier month, before the Score freeze.
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+CORRECTION + SCOPE CUT 2026-08-05 (read-only, from sheets_config.json in the repo — no API call).
+
+FACTUAL CORRECTION. The Description says 2026-09 aliases score_tracker. It does not.
+  2026-04 1shVEIrA / 1shVEIrA  ALIAS      2026-08 1b0VbCM1 / 1_NC6LOT  STANDALONE
+  2026-05 1tQg2Le9 / 1tQg2Le9  ALIAS      2026-09 1l6j9cXz / 1ca4J5tI  STANDALONE
+  2026-06 1MQwNUeh / 1MQwNUeh  ALIAS
+  2026-07 1_lhYPO6 / 1_lhYPO6  ALIAS
+Two months diverge, not one. This was already true when the ticket was written: the last
+commit touching sheets_config.json is dd38543 (2026-07-29) and the working tree is identical
+to HEAD, so no change occurred between 2026-08-03 and today.
+
+FOLLOWS FROM THAT: the September live_trades id 1l6j9cXz, described here as "overwritten by
+the 1/8 automatic run and now unreferenced", is still referenced — it is what
+sheets_config.json 2026-09.live_trades points at. Treat it as live config, not as an orphan,
+until that is re-verified.
+
+ALSO: the 1/8 rotation did not commit sheets_config.json at all (last commit 2026-07-29),
+consistent with TASK-243's note that the pre-created September short-circuits the run on
+_already_done. The current layout is the product of the 29/7 manual repair, not of rotation.
+
+SCOPE. The section 10 root — sheets_manager.SHEET_NAMES (9, includes live_trades) vs
+prepare_next_month.SHEET_NAMES (8, plus the :240 alias) vs fix_august_provisioning_v1.py:305
+iterating the 9-list — moves to TASK-243. Note that TASK-243's five listed fixes do not
+currently mention SHEET_NAMES, so this must be ADDED there as item (6), not merely
+referenced.
+
+WHAT REMAINS HERE: the owner decision on whether to realign 2026-08 and 2026-09 to the
+score_tracker file. That is a write to a live month sheet for consistency alone. Also
+remaining: archive_live_trades will place August and September archives in a different file
+from every other month.
+<!-- SECTION:NOTES:END -->

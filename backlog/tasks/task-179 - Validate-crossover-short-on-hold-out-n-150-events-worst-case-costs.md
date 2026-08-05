@@ -15,7 +15,7 @@ ordinal: 182000
 ## Description
 
 <!-- SECTION:DESCRIPTION:BEGIN -->
-171-B3. Validation of the pre-registered crossover-short: hold-out on NEW data only (post pre-registration), worst-case HTB borrow model (from TASK-172 data), slippage 2x, fitness locked = net expectancy. Power: needs >=150 crossover events (~450 RH rows, ~4-5 months at current capture rate — see power_analysis.md). BLOCKED ON: TASK-172 + TASK-177 + pre-registration task.
+171-B3. Validation of the pre-registered crossover-short: hold-out on NEW data only (post pre-registration), worst-case HTB borrow model (from TASK-172 data), slippage 2x, fitness locked = net expectancy. Power: needs >=150 crossover events (~450 RH rows, ~4-5 months at current capture rate — see power_analysis.md). DEPENDENCIES CLEARED 2026-06-23: TASK-172 ✔ Done, TASK-177 ✔ Done, TASK-178 ✔ Done (pre-registration) — recorded in docs/HYPOTHESES.md §D lines 97-101 and 167-171. REAL BLOCKER (verified 2026-08-05): there is no crossover-event detector in the live codebase. A grep for "crossover" across all live .py returns exactly two COMMENT lines (config.py:155, post_analysis_collector.py:210) and zero executable code; a grep for "dropslab" returns three comment lines and no module; research/ holds no crossover artifact. n is therefore not "below 150" — it is unmeasured, and cannot be measured until an RH-scan x DropsLab-drop join (<=10 calendar days) is built and starts accumulating events dated after 2026-06-23. Building that detector is prerequisite work that no ticket currently owns.
 <!-- SECTION:DESCRIPTION:END -->
 
 ## Acceptance Criteria

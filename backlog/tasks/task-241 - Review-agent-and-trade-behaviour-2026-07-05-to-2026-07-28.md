@@ -26,4 +26,4 @@ Win rate is not computable for July. paper_portfolio holds 83 DRY_RUN_OPEN and 4
 
 Repeat entries on the same open symbol were found, 43 ENTERs on 4 tickers on 07-22. Filed as TASK-244.
 
-BLOCKED ON: TASK-238 for the ticker fix, TASK-246 for the stuck positions, TASK-247 for the SKIP source. The HYP-002 checkpoint that fell on 27/7 cannot be evaluated on this data.
+BLOCKED ON: TASK-246 (stuck positions) — that is the only blocker left. Updated 2026-08-05: TASK-238 (ticker fix) and TASK-247 (SKIP source) are both Done; TASK-246 is still To Do. The HYP-002 checkpoint that fell on 27/7 cannot be evaluated on this data.
