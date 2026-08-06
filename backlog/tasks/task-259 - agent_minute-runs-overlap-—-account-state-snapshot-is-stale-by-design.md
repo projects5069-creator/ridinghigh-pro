@@ -4,7 +4,7 @@ title: agent_minute runs overlap — account state snapshot is stale by design
 status: To Do
 assignee: []
 created_date: '2026-08-05 20:34'
-updated_date: '2026-08-05 20:34'
+updated_date: '2026-08-06 18:45'
 labels:
   - bug
   - agent
@@ -86,4 +86,48 @@ NOT ESTABLISHED, do not assume:
     were active.
 
 No fix is proposed here by design.
+
+SCOPE NARROWED 2026-08-06.
+
+PART B AS ORIGINALLY FRAMED — batching sentinel events into one append per run — WAS NOT
+DONE AND WILL NOT BE DONE IN THAT FORM. Two reasons, both established by measurement:
+
+1. It requires orchestrator.py. Accumulate-then-flush already exists twice in this repo
+   and in BOTH cases the flush is called from the orchestrator:
+       agent/orchestrator.py:794  decision_logger.flush_skip_summary()        (TASK-125)
+       agent/orchestrator.py:800  decision_logger.flush_shadow_gate_summary() (TASK-128)
+   There is no alternative anchor: check_system runs at the START of the run, and run()
+   has five `return summary` exits (:566 :573 :688 :728 :856) of which four precede the
+   existing flushes — so even the existing pattern loses rows on an early exit.
+   orchestrator.py is a protected path (RUN_MODE_DECISION.md:40-43).
+
+2. It targets the wrong axis. The 429 measured on 2026-08-05 was on 'Read requests', so
+   the failing call was get_worksheet, not the append. safe_append_row already retries
+   (sheets_manager.py:389). Batching would have addressed a write-quota problem that was
+   never observed as a failure.
+
+WHAT WAS DONE INSTEAD: TASK-218, closed 2026-08-06 (commit 1df9cba) — the worksheet handle
+is looked up once per run instead of once per event, inside data_sentinel.py only, with no
+flush and no orchestrator change. That removes ~60 READ calls per run, which is the axis
+that actually failed.
+
+WHAT REMAINS IN THIS TICKET. One thing: MEASURE THE RUN DURATION IN PRODUCTION now that
+two fixes have landed —
+    fcdb0aa  SMA20 batched into one Alpaca request  (merged, in main)
+    1df9cba  sentinel_events handle cached per run   (this session)
+Baseline to beat, measured 2026-08-05 on 487 runs: median 203s, 79 percent of consecutive
+pairs overlapping.
+
+WHY IT MATTERS: the concurrency YAML for agent_minute and auto_scan is still sitting
+uncommitted in the working tree, and whether it is still needed depends on this number.
+The arithmetic says 203 - 106 (SMA20) - 45 (sentinel loop) = 52s, under the 60s cron — but
+BOTH subtrahends are upper-bound estimates. The 106s was never reproduced outside Actions
+(9.05s serially from a laptop, a factor of 12 unexplained), and the 45s is the whole signal
+loop, not only the sentinel writes. The measurement decides; the arithmetic does not.
+
+⚠️ Do not deploy concurrency before that measurement. Its known side effect is unresolved:
+check_06/D3 is expected to flip to CRITICAL because a concurrency-cancelled run is
+status=completed with conclusion=cancelled, which enters the denominator at
+health_audit.py:596-605 but not the numerator. Documented in
+reports/2026-08-05_1926_task259_concurrency.md section 6.3.
 <!-- SECTION:NOTES:END -->
