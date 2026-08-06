@@ -4,7 +4,7 @@ title: התקנת security-guidance plugin + אימות אי-התנגשות עם
 status: To Do
 assignee: []
 created_date: '2026-06-02 17:34'
-updated_date: '2026-06-04 19:10'
+updated_date: '2026-08-05 19:30'
 labels:
   - infra
   - security
@@ -26,4 +26,21 @@ ordinal: 101000
 
 <!-- SECTION:NOTES:BEGIN -->
 Verified 2026-06-04 (Iron Rule — live mechanism, not task text): (1) claude plugin CLI works; (2) marketplace claude-plugins-official EXISTS (GitHub anthropics/claude-plugins-official); (3) plugin security-guidance@claude-plugins-official EXISTS in catalog cache (source ./plugins/security-guidance) — so /plugin install security-guidance@claude-plugins-official is a VALID verified one-liner; (4) conflict with skill-gate LOW: both are additive PreToolUse hooks (CC runs all matching, no override), skill-gate is fail-OPEN, kill-switches exist (SECURITY_GUIDANCE_DISABLE=1 / ENABLE_PATTERN_RULES=0 / ENABLE_STOP_REVIEW=0). NOT installed now — gated on TASK-93/94 auto-mode (attended until then = user is the review). Future install is known-safe.
+
+GATE RESTATED 2026-08-05.
+
+The Notes entry of 2026-06-04 ends with "NOT installed now — gated on TASK-93/94 auto-mode".
+Both of those are now Done: TASK-93 ✔ Done, TASK-94 ✔ Done. At ticket-ID level the gate is
+cleared.
+
+It is NOT cleared in substance. The condition that sentence describes is not "those tickets
+close", it is "an autonomous nightly batch is actually running, so the user stops being the
+review". That batch does not run: the overnight runner was disarmed on 2026-07-02
+(docs/POSTMORTEM_overnight_ARMED_2026-07-02.md) and TASK-186, which owns building it, is
+still In Progress.
+
+CORRECTED GATE: gated on an autonomous batch actually running — TASK-186 (In Progress).
+TASK-93 and TASK-94 no longer gate this ticket. Everything else in the 2026-06-04 entry
+still holds: the plugin exists, the one-liner install is valid, and the skill-gate conflict
+was assessed LOW.
 <!-- SECTION:NOTES:END -->

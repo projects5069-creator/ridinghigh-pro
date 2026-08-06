@@ -6,6 +6,7 @@ title: >-
 status: To Do
 assignee: []
 created_date: '2026-08-03 21:01'
+updated_date: '2026-08-05 20:33'
 labels:
   - data-integrity
   - sheets
@@ -43,3 +44,70 @@ The reason is the entry criterion, not the sheet id. auto_scanner.update_live_tr
 CONSEQUENCE FOR THIS TASK: the divergence recorded here is real in the config but has no observable effect, because nothing writes to either target. The section 10 problem, two SHEET_NAMES lists that disagree, is still worth fixing and belongs with TASK-243. The August specific question, whether to realign the id, is close to moot and this task may be closable on that basis.
 
 Not verified: whether live_trades was ever written in an earlier month, before the Score freeze.
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+CORRECTION + SCOPE CUT 2026-08-05 (read-only, from sheets_config.json in the repo — no API call).
+
+FACTUAL CORRECTION. The Description says 2026-09 aliases score_tracker. It does not.
+  2026-04 1shVEIrA / 1shVEIrA  ALIAS      2026-08 1b0VbCM1 / 1_NC6LOT  STANDALONE
+  2026-05 1tQg2Le9 / 1tQg2Le9  ALIAS      2026-09 1l6j9cXz / 1ca4J5tI  STANDALONE
+  2026-06 1MQwNUeh / 1MQwNUeh  ALIAS
+  2026-07 1_lhYPO6 / 1_lhYPO6  ALIAS
+Two months diverge, not one. This was already true when the ticket was written: the last
+commit touching sheets_config.json is dd38543 (2026-07-29) and the working tree is identical
+to HEAD, so no change occurred between 2026-08-03 and today.
+
+FOLLOWS FROM THAT: the September live_trades id 1l6j9cXz, described here as "overwritten by
+the 1/8 automatic run and now unreferenced", is still referenced — it is what
+sheets_config.json 2026-09.live_trades points at. Treat it as live config, not as an orphan,
+until that is re-verified.
+
+ALSO: the 1/8 rotation did not commit sheets_config.json at all (last commit 2026-07-29),
+consistent with TASK-243's note that the pre-created September short-circuits the run on
+_already_done. The current layout is the product of the 29/7 manual repair, not of rotation.
+
+SCOPE. The section 10 root — sheets_manager.SHEET_NAMES (9, includes live_trades) vs
+prepare_next_month.SHEET_NAMES (8, plus the :240 alias) vs fix_august_provisioning_v1.py:305
+iterating the 9-list — moves to TASK-243. Note that TASK-243's five listed fixes do not
+currently mention SHEET_NAMES, so this must be ADDED there as item (6), not merely
+referenced.
+
+WHAT REMAINS HERE: the owner decision on whether to realign 2026-08 and 2026-09 to the
+score_tracker file. That is a write to a live month sheet for consistency alone. Also
+remaining: archive_live_trades will place August and September archives in a different file
+from every other month.
+
+MEASURED 2026-08-05 — the "Not verified" line in this ticket is now verified.
+
+Source: reports/2026-08-05_1455_measurement.md Q-251. Read-only inspection of the file
+structure through gspread; no cell was written.
+
+2026-08: live_trades=1b0VbCM1...  score_tracker=1_NC6LOT...  alias=False
+  file title  = 'RH-2026-08-live_trades'
+  worksheets  = ['Sheet1']
+  'live_trades' tab present = False
+  tab 'Sheet1': row_count=1000 col_count=26 non_empty_rows=1
+
+2026-07: live_trades=1_lhYPO6...  score_tracker=1_lhYPO6...  alias=True
+  file title  = 'RH-2026-07-score_tracker'
+  worksheets  = ['Sheet1', 'live_trades']
+  'live_trades' tab present = True
+  tab 'Sheet1':      row_count=2619 col_count=26 non_empty_rows=2619
+  tab 'live_trades': row_count=1000 col_count=30 non_empty_rows=1
+
+ANSWER TO "Not verified: whether a tab named live_trades exists inside 1b0Vb, or whether
+writes are landing on sheet1 through the fallback": there is NO tab named live_trades in
+the August file. Sheet1 is the only worksheet. Any write routed to the live_trades tab
+lands on Sheet1 through the get_worksheet fallback described in the Description.
+
+A SECOND FACT THE TICKET DID NOT HAVE: July's live_trades tab exists but holds ONE
+non-empty row — a header. So live_trades is effectively empty in BOTH months, not just
+August. That is consistent with the entry criterion already recorded here (a scanner
+Score must reach TRADE_ENTRY_MIN_SCORE = 70, config.py:106, while SCORE_WRITE_FROZEN is
+True) rather than with the sheet-id divergence.
+
+Stays To Do. The owner decision — realign 2026-08 and 2026-09 to the score_tracker file,
+or leave it and document — is unchanged, and the section 10 root moved to TASK-243 item (6).
+<!-- SECTION:NOTES:END -->

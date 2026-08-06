@@ -1,9 +1,10 @@
 ---
 id: TASK-245
 title: 'Scan volume halved starting 2026-07-15, same date as ticker corruption'
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-07-29 09:28'
+updated_date: '2026-08-05 20:32'
 labels:
   - bug
   - data-integrity
@@ -50,3 +51,26 @@ TASK-227 closed as a merge into this task. Same pattern, same file.
 227 covers load_mc_cache and save_mc_cache at auto_scanner.py lines 108 and 117, whose bare except at lines 113 and 122 hide the fact that the cache loads empty and saves to a discarded path on every CI run. That is two of the five bare handlers this task already records, and the fix is the same: replace bare handlers with logged warnings so a swallow becomes visible.
 
 The open question from 227 travels with it: make the cache path workspace relative and persist it, or document it as local development only.
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+MEASURED 2026-08-05 — CLOSED. The premise does not hold.
+
+Source: reports/2026-08-05_1455_measurement.md Q-245 (one-pass read after the close,
+no writes).
+
+daily_snapshots rows per day:
+  2026-07  total 913 rows over 22 days   median 35.0 rows/day
+  2026-08  total 269 rows over  3 days   median 85   rows/day
+
+Volume did not merely recover after the finviz DOM fix of 2026-07-29 (TASK-238) — the
+August median is 2.4x the July median. Within July itself the series runs 80/68/59 early,
+bottoms at 23/14/12 on 07-15..07-17, and returns to 57/145/57 from 07-29 onward.
+
+Both competing hypotheses in this ticket are therefore moot:
+  - "same root as the ticker corruption" cannot be tested against a volume that is now
+    above the pre-drop level;
+  - "a second unidentified cause" has no surviving symptom to attach to.
+Nothing measurable remains open here. Reopen only if a fresh drop appears.
+<!-- SECTION:NOTES:END -->

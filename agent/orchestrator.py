@@ -366,6 +366,19 @@ def read_latest_signals() -> List[Dict[str, Any]]:
         )
         latest_records = [r for r in today_records if str(r.get("ScanTime", "")) == latest_scan_time]
 
+        # TASK-259: prime the SMA20 cache for the whole scan in ONE provider
+        # request, before the per-row mapping below calls get_price_vs_sma20 per
+        # ticker. Best-effort — on any failure the per-row path just fetches
+        # serially, exactly as before.
+        try:
+            from agent.enrichment.sma20_cache import prime_sma20_cache
+            _tickers = [str(r.get("Ticker", "")).strip().upper()
+                        for r in latest_records if str(r.get("Ticker", "")).strip()]
+            prime_sma20_cache(_tickers)
+        except Exception as e:
+            logger.warning("SMA20 prime skipped (%s: %s) — falling back to per-ticker fetch",
+                           type(e).__name__, e)
+
         signals = [_signal_from_timeline_row(r) for r in latest_records]
         logger.info("Latest scan: %d signals at %s", len(signals), latest_scan_time)
         return signals

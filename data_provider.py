@@ -158,6 +158,26 @@ class DataProvider(ABC):
         """
         ...
 
+    def get_daily_bars_batch(
+        self,
+        tickers: List[str],
+        days: int = 60,
+        end_date: Optional[datetime] = None,
+    ) -> Dict[str, pd.DataFrame]:
+        """TASK-259: daily bars for many tickers. NOT abstract — the default is
+        the serial loop, so a provider without a native batch API keeps working.
+        Providers that can do it in one request override this (see
+        providers/alpaca_provider.py).
+
+        Contract: a ticker with no data is ABSENT from the returned dict.
+        """
+        out: Dict[str, pd.DataFrame] = {}
+        for tk in tickers:
+            df = self.get_daily_bars(tk, days=days, end_date=end_date)
+            if df is not None and not df.empty:
+                out[tk] = df
+        return out
+
     # ── 5-day OHLC after a scan date ────────────────────────────────
     
     @abstractmethod
@@ -395,6 +415,12 @@ def reset_providers():
 def get_daily_bars(ticker: str, days: int = 60, end_date: Optional[datetime] = None) -> pd.DataFrame:
     """Top-level convenience — uses configured provider."""
     return get_data_provider().get_daily_bars(ticker, days=days, end_date=end_date)
+
+
+def get_daily_bars_batch(tickers: List[str], days: int = 60,
+                         end_date: Optional[datetime] = None) -> Dict[str, pd.DataFrame]:
+    """Top-level convenience — uses configured provider (TASK-259)."""
+    return get_data_provider().get_daily_bars_batch(tickers, days=days, end_date=end_date)
 
 
 def get_5day_ohlc(ticker: str, scan_date: Union[str, datetime]) -> Dict:

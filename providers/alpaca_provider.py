@@ -220,7 +220,54 @@ class AlpacaDataProvider(DataProvider):
         except Exception as e:
             logger.warning(f"Alpaca get_daily_bars({ticker}) failed: {e}")
             return pd.DataFrame(columns=["open", "high", "low", "close", "volume"])
-    
+
+    def get_daily_bars_batch(
+        self,
+        tickers: List[str],
+        days: int = 60,
+        end_date: Optional[datetime] = None,
+    ) -> Dict[str, pd.DataFrame]:
+        """TASK-259: the SAME request as get_daily_bars, for many symbols at once.
+
+        StockBarsRequest takes `symbol_or_symbols: str | List[str]` (alpaca-py
+        0.43.5) and get_daily_bars already passes a one-item list, so this is the
+        same call with a longer list. Measured 2026-08-05 on the 60 real tickers
+        of run 31030383592: 9.05s serial vs 0.67s batched.
+
+        Returns {ticker: bars_df}. A symbol with no data is simply ABSENT from
+        the Alpaca frame (verified live — a bogus symbol does not raise and does
+        not return an empty row), so it is absent from this dict too. Callers
+        must treat "missing key" as "no data", not as an error.
+
+        Raises on a transport/auth failure so the caller can fall back — unlike
+        get_daily_bars, which swallows and returns an empty frame per ticker.
+        """
+        if not tickers:
+            return {}
+        if end_date is None:
+            end_date = datetime.now() - timedelta(minutes=20)
+        start_date = end_date - timedelta(days=int(days * 1.5) + 5)
+
+        req = self._sdk["StockBarsRequest"](
+            symbol_or_symbols=list(tickers),
+            timeframe=self._sdk["TimeFrame"].Day,
+            start=start_date,
+            end=end_date,
+            feed=self._sdk["DataFeed"].IEX,  # paper plan — same as get_daily_bars
+        )
+        raw = self.data_client.get_stock_bars(req).df
+
+        out: Dict[str, pd.DataFrame] = {}
+        for tk in tickers:
+            # _normalize_bars_df already slices the (symbol, timestamp) MultiIndex
+            # and returns an empty frame when the symbol is not present.
+            df = _normalize_bars_df(raw, tk)
+            if df is not None and not df.empty:
+                if len(df) > days:
+                    df = df.iloc[-days:].copy()
+                out[tk] = df
+        return out
+
     # ── 5-day OHLC after a scan date ────────────────────────────────
     
     def get_5day_ohlc(

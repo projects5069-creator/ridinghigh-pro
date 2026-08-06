@@ -6,7 +6,7 @@ title: >-
 status: To Do
 assignee: []
 created_date: '2026-07-04 04:44'
-updated_date: '2026-07-04 04:55'
+updated_date: '2026-08-05 18:20'
 labels: []
 dependencies: []
 priority: medium
@@ -39,3 +39,46 @@ ordinal: 236000
 - [ ] #2 שלב-4 enrichment: כל שדה-חדש נכתב union-writer-safe + PK/SCHEMA מעודכנים + אפס תוספת-קריאות בשעות-שוק
 - [x] #3 שלבי-נרות (2-3): **verdict 4/7 = blocked-by-data** — feed=IEX-בלבד (paper-plan, alpaca_provider:365), median 28/390 נרות ליום למיקרו-קאפ (n=168 מדגם-מרובד, 33 שמישים-מזווגים); חתימת-פתילים/נפח **לא ניתנת-לבדיקה** על ה-feed הנוכחי. על השבר: אין wick-signature (36.4% [22-53]) ואין volume-fade — אנקדוטת **volume-climax הפוכה** (27.3% fade, n=33 small) = שאלה פתוחה לדאטת-forward. דו"ח מלא: candle-research 4/7 (צ'אט) + PK v4.04
 <!-- AC:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+RULING 2026-08-05 (עמיחי)
+
+הכרעה: לבצע את ה-recon של IBKR (שלב 4ג) — לעמלת השאלה אמיתית ולסטטוס halts.
+SIP בתשלום: לא. אינו נבחן בשלב הזה.
+
+תיקון היקף מחייב לשלב 4ג:
+התיק עצמו כותב "IBKR API הוא session-based (דורש Gateway/TWS רץ, לא REST)". המסקנה
+התפעולית שנובעת מזה ולא נכתבה: IBKR אינו יכול לרוץ ב-GitHub Actions. ה-runner הוא
+container חולף בלי תצוגה ובלי אפשרות להריץ TWS ולעבור אימות. כל 17 ה-workflows של
+המערכת רצים ב-Actions. לכן הניסוח בתיק — "Verdict: כיסוי-נרות טוב => IBKR מחליף את
+אופציית-SIP-בתשלום כמסלול-ה-backfill המרכזי" — יורד. IBKR יכול להיות רק משימה מקומית
+ידנית על המק, off-hours. ה-recon עדיין שווה עבור שני הפערים האחרים (borrow fee, halts),
+אך לא עבור "מסלול מרכזי".
+
+אזהרה שיש לשקול לפני כל חיווט של עמלת השאלה אמיתית:
+HYPOTHESES.md:137-141 (HYP-001) ו-:198-200 (HYP-002) נועלות שתיהן את ה-locked fitness על
+borrow 500%/yr. §A.5(a) מגדיר את זה כמתודולוגיה נעולה. החלפת הקבוע בנתון אמיתי היא שינוי
+ב-fitness הנעול ולכן פוסלת את שתי ההשערות ודורשת רישום מחדש של שתיהן.
+השגת הנתון והחיווט שלו הן שתי עבודות נפרדות. ה-recon הוא רק הראשונה.
+
+ממצא הביקורת (2026-08-05) — ארבעה מקומות מחזיקים "עמלת השאלה" ואף אחד אינו נתון:
+  1. agent/perception/tradability.py:30  -> MOCK_DEFAULTS borrow_fee_pct = 12.5 (קבוע).
+     נבחר תחת "if broker is None or AGENT_DRY_RUN" (:62) — כלומר תמיד היום.
+  2. agent/perception/tradability.py:89  -> 0.0, עם ההערה
+     "Alpaca paper doesn't expose real fees".
+  3. agent/perception/borrow_collector.py:119 -> "" עם ההערה "BorrowFeePct — NULL".
+  4. config.py:165 BORROW_SCENARIOS = [0.50, 2.00, 5.00], עם ההערה
+     "assumed annual borrow rates (fee=NULL from TASK-139 — assumptions flagged)".
+
+רק #4 מגיע ל-calculate_net_pnl. כל הקוראים: utils.py:495 (לולאה על BORROW_SCENARIOS),
+utils.py:506 (0.0 מפורש), dashboard.py:2423/2424/2432 (לולאה על אותם תרחישים).
+שלושת האחרים אינם מחוברים לשום חישוב.
+
+ממצא נוסף: decision_log.BorrowFee הוא write-only. הוא נכתב בכל ENTER עם הקבוע 12.5
+(decision_logic.py:327 -> decision_logger.py:83 mapping -> create_agent_sheets.py:72
+header), ואף קוד חי אינו קורא אותו בחזרה. הקוראים היחידים הם טסטים
+(test_tradability.py:28,56,61 · test_decision_logger_writes.py:71). כל ניתוח עתידי
+שיקרא את העמודה יקבל קבוע ויחשוב שזה נתון.
+<!-- SECTION:NOTES:END -->
