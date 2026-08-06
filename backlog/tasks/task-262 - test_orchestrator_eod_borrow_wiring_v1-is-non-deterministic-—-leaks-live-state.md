@@ -1,10 +1,10 @@
 ---
 id: TASK-262
 title: test_orchestrator_eod_borrow_wiring_v1 is non-deterministic — leaks live state
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-08-06 01:17'
-updated_date: '2026-08-06 01:18'
+updated_date: '2026-08-06 15:03'
 labels:
   - tests
   - ci
@@ -73,4 +73,27 @@ RELATED: TASK-250 (unit tests read live Sheets, seven of them) covers the same c
 may already own this file. Decide whether this is a duplicate before working it.
 
 NO FIX ATTEMPTED. Opened as a record only.
+
+CLOSED 2026-08-06 — verified live, not from memory.
+
+THE FIX (tests/ only, commit 7dffb04, merged to main in 13d048a): an autouse fixture in
+tests/agent/unit/test_orchestrator_eod_borrow_wiring_v1.py closes the unpatched branch for
+every test in the file, so no test can forget it.
+
+VERIFICATION:
+  five consecutive runs, identical:   7 passed, 1 xfailed  (0.26s each)
+  file runtime:                       40.84s -> 0.26s, a factor of 157
+  full suite:                         2 failed -> 0 failed
+The runtime collapse is the proof that the live I/O is gone; the earlier 40.84s could not
+have been anything else in a mocked unit test.
+
+WHAT THIS TICKET DID NOT FIX, and who owns it: the production helper still called out
+unconditionally. That is TASK-263, closed the same day — collect_borrow_snapshot now takes
+snapshots_reader and coverage_writer, the xfail is removed, and the invariant test passes
+for real.
+
+SIDE FINDING, filed as TASK-264: the unpatched path had been writing rows to the live
+borrow_coverage tab. 198 of 290 rows across 2026-07/08 sit outside the agent_eod window.
+Four of them, 2026-08-06 09:23:54 to 09:24:18, are this build's own baseline runs — and
+nothing was written after the fixture landed.
 <!-- SECTION:NOTES:END -->
