@@ -130,4 +130,53 @@ check_06/D3 is expected to flip to CRITICAL because a concurrency-cancelled run 
 status=completed with conclusion=cancelled, which enters the denominator at
 health_audit.py:596-605 but not the numerator. Documented in
 reports/2026-08-05_1926_task259_concurrency.md section 6.3.
+
+────────────────────────────────────────────────────────────────────────────────
+UPDATE 2026-08-06 — a third option exists, and two claims above are now WRONG.
+
+1. THERE IS A THIRD OPTION: `queue: max`. GitHub's workflow-syntax documentation,
+   read today, describes it as allowing "multiple runs to queue instead of being
+   canceled — up to 100 pending runs to wait in order." Every analysis in this
+   ticket assumed the only choice was cancel-the-pending-run. It was not. A real
+   queue of up to 100 changes the cost side of this decision completely: the
+   scans would be delayed rather than dropped, and the "effective interval of
+   4.5 minutes" framing does not apply to it at all.
+   ⚠️ NOT verified as available on this plan. Verify before designing around it.
+
+2. THE SEMANTICS ARE NOW SOURCED, NOT ASSUMED. Same doc, verbatim: "any existing
+   pending job or workflow in the same concurrency group will be canceled and the
+   new queued job or workflow will take its place." So with N runs waiting, N-1
+   are cancelled and the newest survives. This confirms what was assumed here —
+   but it is now a citation rather than a guess.
+
+3. ⚠️ THE check_06 WARNING ABOVE IS OVERSTATED. It was computed from the DAILY
+   aggregate (about 26 percent success). But check_06 does not see a day: it
+   fetches per_page=50 at health_audit.py:639, which at two runs per minute is a
+   24-minute window, and health_audit fires at 11:00 / 20:30 / 03:00 UTC. Run
+   against 1,000 real runs from 2026-08-05, the verdict at the two evening times
+   is PASSED 100 percent (50/50) — the window lands entirely after the close,
+   where runs exit in 30-40s and concurrency would never supersede anything.
+   The 06:00 check could not be computed (pagination capped at 1,000 runs) and no
+   claim is made about it.
+   The CRITICAL flip is therefore much less likely than stated above. Still not
+   certain: two days of data, health_audit was never actually run. See TASK-267,
+   which covers the underlying counting defects in check_06 itself.
+
+4. ⚠️ THE 203s BASELINE IS CONTAMINATED. On 2026-08-05, 188 of 487 agent_minute
+   runs (38.6 percent) were cut off by the 5-minute timeout at timeout-minutes: 5.
+   A truncated run cannot report a duration longer than its truncation, so the
+   median is biased downward by an unknown amount. See TASK-266. The production
+   measurement this ticket is waiting for must be taken on a day without that
+   truncation, or the comparison is meaningless.
+
+5. ⚠️ DO NOT DEPLOY WHILE GITHUB IS BROKEN. GitHub Actions entered a major outage
+   at 2026-08-06T15:22:49Z (impact: critical; "jobs may remain queued for an
+   extended period"). Deploying concurrency during a provider outage mixes two
+   variables and makes every subsequent measurement uninterpretable. The queue of
+   374 runs seen today is the outage, NOT saturation — in_progress was 0 across
+   four consecutive measurements, and saturation looks like in_progress equal to
+   the cap, not zero.
+
+Evidence: reports/2026-08-06_1406_queue_recon.md
+────────────────────────────────────────────────────────────────────────────────
 <!-- SECTION:NOTES:END -->
