@@ -4,7 +4,7 @@ title: borrow_coverage contains rows written by unit tests
 status: To Do
 assignee: []
 created_date: '2026-08-06 14:37'
-updated_date: '2026-08-06 14:37'
+updated_date: '2026-08-06 15:03'
 labels:
   - data-integrity
   - tests
@@ -68,4 +68,40 @@ the same rule TASK-246 records. Nothing was deleted or marked.
 NOT VERIFIED. Which other test files write here. tests/test_task172_coverage_v1.py and
 tests/test_task172_names_gap_v1.py both reference collect_borrow_coverage and were not
 inspected. That belongs with TASK-250.
+
+CORRECTION 2026-08-06 — a suspicion recorded in this ticket is refuted. NOT a closure.
+
+WHAT THIS TICKET GOT WRONG. The "NOT VERIFIED" paragraph named
+tests/test_task172_coverage_v1.py and tests/test_task172_names_gap_v1.py as possible
+contamination sources. The first was read in full while working TASK-263:
+
+  tests/test_task172_coverage_v1.py:176   monkeypatch.setattr(sheets_manager, "get_worksheet",
+                                            lambda tab,*a,**k: _WS() if tab=="daily_snapshots" else None)
+  tests/test_task172_coverage_v1.py:177   monkeypatch.setattr(bc, "collect_borrow_coverage", lambda universe, **k: ...)
+
+Both hops are patched. That file was already isolated and CANNOT have written to the live
+tab. The suspicion against it is refuted. test_task172_names_gap_v1.py was still not read.
+
+THE ONE PROVEN WRITER is tests/agent/unit/test_orchestrator_eod_borrow_wiring_v1.py, and
+the proof is a matched before/after, not an inference:
+  four rows on 2026-08-06 at 09:23:54, 09:23:59, 09:24:10, 09:24:18 with ScannedUniverse
+  3, 1, 1, 3 — exactly the fixtures — written during that build's three baseline runs;
+  after the fix landed, ~10 further test runs in the same session added nothing, and the
+  tab still ends at 09:24:18.
+That path is now closed twice over: the autouse fixture (TASK-262) and the injected seams
+(TASK-263, commit 9a12942).
+
+WHAT REMAINS OPEN, and it is the substance of this ticket. Of the 198 out-of-window rows,
+only 4 are attributed with certainty. The other 194 are not:
+  2026-07: 07-01 11 · 07-02 21 · 07-03 6 · 07-04 30 · 07-05 52 · 07-29 15 · 07-30 6 · 07-31 3
+  2026-08: 08-03 23 · 08-05 27
+The 08-05 rows at 19:29-20:11 carry ScannedUniverse of 4, 5 and 7 with WithBorrowData=4 —
+a real broker answered, so those are NOT this file's fixtures. Candidates not yet checked:
+test_task172_names_gap_v1.py, manual local runs of orchestrator_eod, and any ad-hoc script.
+
+ALSO STILL OPEN: TASK-261's row counts. It read the tail of the August tab, which contains
+test output. Its conclusion about get_scanned_universe rests on code reading and stands;
+its NUMBERS should be re-derived from the 16:00-17:59 subset only.
+
+Nothing deleted, nothing marked. That is still an owner decision and a live-sheet write.
 <!-- SECTION:NOTES:END -->

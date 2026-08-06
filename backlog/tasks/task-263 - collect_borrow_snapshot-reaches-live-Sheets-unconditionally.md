@@ -1,10 +1,10 @@
 ---
 id: TASK-263
 title: collect_borrow_snapshot reaches live Sheets unconditionally
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-08-06 14:37'
-updated_date: '2026-08-06 14:37'
+updated_date: '2026-08-06 15:03'
 labels:
   - bug
   - testability
@@ -65,4 +65,42 @@ marker — its removal is the acceptance test.
 NOT DECIDED HERE: whether the same seam is needed for the other call sites in
 orchestrator_eod (there is a second in-function `import sheets_manager as _sm` at :132,
 inside _system_events_alert). That one was NOT investigated.
+
+CLOSED 2026-08-06 — verified live, not from memory.
+
+THE FIX (commit 9a12942). Two seams added to agent/orchestrator_eod.py:
+
+  _default_snapshots_reader()        new module-level function holding exactly the code
+                                     that used to be inline: get_worksheet("daily_snapshots")
+                                     -> get_all_values(). Returns None when there is no ws,
+                                     raises on failure so the caller keeps owning the fallback.
+
+  collect_borrow_snapshot(summary, snapshots_reader=None, coverage_writer=None)
+                                     both optional, both defaulting to the previous
+                                     behaviour. The single production caller at
+                                     orchestrator_eod.py:168 is unchanged.
+
+The coverage writer resolves at CALL time (`coverage_writer or borrow_collector.collect_borrow_coverage`)
+so the existing monkeypatch.setattr(bc, "collect_borrow_coverage", ...) in
+tests/test_task172_coverage_v1.py keeps working. Verified: that file is 12 passed.
+
+ACCEPTANCE, as written in this ticket: "delete the xfail marker — its removal is the
+acceptance test." Done. The marker is gone and
+test_collect_borrow_snapshot_never_touches_live_sheets passes on its own merits.
+
+VERIFICATION:
+  five consecutive runs, identical:   8 passed (0.23s each), no xfail
+  full suite before:                  730 passed, 1 xfailed
+  full suite after:                   731 passed, 0 failed, 0 xfailed
+  other caller (test_task172_coverage_v1): 12 passed
+  borrow_coverage after ~10 test runs this session: still 74 rows, last row still
+                                      2026-08-06 09:24:18 — zero new rows
+
+NOT DONE, deliberately. orchestrator_eod.py:132 has the same in-function
+`import sheets_manager as _sm` pattern inside _system_events_alert. It was named as
+un-investigated when this ticket was opened and it still is. Untouched here.
+
+ANTI-DRIFT: checked against the seven categories in the rhpro-live contract — formulas,
+weights, scoring, workflows, sheets configuration, schema, health checks. A data-source
+seam in an EOD helper is none of them, so no PK bump was made.
 <!-- SECTION:NOTES:END -->

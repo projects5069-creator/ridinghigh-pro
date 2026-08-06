@@ -33,10 +33,10 @@ from agent import orchestrator_eod as eod
 P_ACCOUNT = "agent.orchestrator.build_account_state"
 P_BROKER = "agent.execution.alpaca_broker.AlpacaBroker"
 P_COLLECT = "agent.perception.borrow_collector.collect_borrow_data"
-# TASK-262: collect_borrow_snapshot does its OWN `import sheets_manager`
-# (orchestrator_eod.py:54) and reads daily_snapshots at :57. Patching the module
-# object is not enough — the helper looks the name up on the sheets_manager
-# module itself at call time, so the patch target is the function there.
+# TASK-263: the two injectable seams. Defaults preserve production behaviour.
+P_READER = "agent.orchestrator_eod._default_snapshots_reader"
+P_COVERAGE = "agent.perception.borrow_collector.collect_borrow_coverage"
+# The layer underneath. Nothing in this file may reach it — asserted in test 8.
 P_SHEETS = "sheets_manager.get_worksheet"
 
 
@@ -47,22 +47,22 @@ def _state(tickers):
 
 @pytest.fixture(autouse=True)
 def _no_live_sheets():
-    """TASK-262: close the live-Sheets branch for EVERY test in this file.
+    """TASK-262 found it; TASK-263 gave it a seam.
 
-    Two call sites in collect_borrow_snapshot were never patched:
-      orchestrator_eod.py:57  get_worksheet("daily_snapshots") + get_all_values()  READ
-      orchestrator_eod.py:95  collect_borrow_coverage(universe) -> borrow_data READ
-                              + borrow_coverage append_rows                        WRITE
+    collect_borrow_snapshot used to reach Sheets with no way to stop it:
+      the snapshots read and the borrow_coverage write were both inline, and
+      P_COLLECT only covers collect_borrow_data — a different function.
 
-    P_COLLECT patches collect_borrow_data, a DIFFERENT function, so the coverage
-    write at :95 ran unpatched. Returning None makes get_worksheet fail closed:
-    the snapshots branch skips (`if ws is not None`) and the coverage branch
-    raises into its own try/except, which the helper already treats as non-fatal.
+    Now both hops are injectable, so this closes them AT THE SEAM instead of
+    patching the Sheets layer underneath: _default_snapshots_reader is the
+    production reader, collect_borrow_coverage the production writer. Nothing
+    below them is touched, which is why P_SHEETS can now assert *not called*.
 
     autouse, so a test added later cannot forget it.
     """
-    with patch(P_SHEETS, return_value=None) as gw:
-        yield gw
+    with patch(P_READER, return_value=None), \
+         patch(P_COVERAGE, return_value=None):
+        yield
 
 
 # ─────────────── 1. ticker source: open positions + today ENTERs, deduped ───────────────
@@ -171,18 +171,6 @@ def test_no_tickers_skips_collector_and_does_not_fail():
 
 # ─────────── 8. TASK-262: the helper must never reach the live Sheets layer ───────────
 
-@pytest.mark.xfail(
-    strict=True,
-    reason=(
-        "TASK-262: PRODUCTION DEFECT, not a test defect. collect_borrow_snapshot "
-        "reaches the Sheets layer unconditionally at orchestrator_eod.py:57 "
-        "(daily_snapshots) and :95 (collect_borrow_coverage -> borrow_data read + "
-        "borrow_coverage append_rows). A tests-only change can neutralise those "
-        "calls (see the _no_live_sheets fixture) but cannot remove them, and this "
-        "BUILD was scoped to tests/ only. strict=True so this flips to a failure "
-        "the day production stops calling out, instead of rotting silently."
-    ),
-)
 def test_collect_borrow_snapshot_never_touches_live_sheets():
     """The docstring at the top of this file claims "zero real API/Sheets". It was
     not true.
@@ -210,6 +198,6 @@ def test_collect_borrow_snapshot_never_touches_live_sheets():
     with patch(P_ACCOUNT, return_value=_state(["AAA"])), \
          patch(P_BROKER), \
          patch(P_COLLECT), \
-         patch(P_SHEETS) as get_worksheet:      # shadows the autouse fixture's patch
+         patch(P_SHEETS) as get_worksheet:      # the layer BELOW the seams
         eod.collect_borrow_snapshot(summary)
     get_worksheet.assert_not_called()

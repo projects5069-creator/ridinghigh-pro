@@ -28,8 +28,44 @@ logging.basicConfig(
 logger = logging.getLogger("agent.orchestrator_eod")
 
 
-def collect_borrow_snapshot(summary: Dict[str, Any]) -> None:
+def _default_snapshots_reader():
+    """TASK-263: the production reader for the scanned universe.
+
+    Split out of collect_borrow_snapshot so the Sheets hop has a name a caller
+    can replace. Returns the raw daily_snapshots grid (list of rows) or None.
+    Raises on a Sheets failure — the caller owns the fallback, exactly as before.
+    """
+    import sheets_manager
+    ws = sheets_manager.get_worksheet("daily_snapshots")
+    if ws is None:
+        return None
+    return ws.get_all_values()
+
+
+def collect_borrow_snapshot(
+    summary: Dict[str, Any],
+    snapshots_reader=None,
+    coverage_writer=None,
+) -> None:
     """TASK-139 + TASK-172: best-effort daily borrow / shortability snapshot.
+
+    TASK-263 — injectable data source. Both parameters default to the production
+    behaviour, so the single call site (run(), below) is unchanged and so is
+    every existing caller:
+
+      snapshots_reader  callable() -> list[list[str]] | None
+                        default: _default_snapshots_reader (reads daily_snapshots)
+      coverage_writer   callable(universe) -> dict | None
+                        default: borrow_collector.collect_borrow_coverage
+                        (reads borrow_data, APPENDS a row to borrow_coverage)
+
+    Why: these two hops were the only ones in this helper with no seam.
+    build_account_state, AlpacaBroker and collect_borrow_data were all already
+    replaceable; these were not, so a unit test could not stop the function
+    reading — and writing — live Sheets. Measured 2026-08-06: 198 of 290
+    borrow_coverage rows across 2026-07/08 were written outside the agent_eod
+    window, 156 of them carrying the 1-and-3 ticker counts of the test fixtures
+    (TASK-262, TASK-264).
 
     Ticker universe = union of:
       - the scanned universe (daily_snapshots, Score >= MIN_SCORE_DISPLAY today)
@@ -51,18 +87,15 @@ def collect_borrow_snapshot(summary: Dict[str, Any]) -> None:
     scanned = set()
     try:
         import pandas as pd
-        import sheets_manager
         import utils
         from agent.perception import borrow_collector
-        ws = sheets_manager.get_worksheet("daily_snapshots")
-        if ws is not None:
-            vals = ws.get_all_values()
-            if vals and len(vals) > 1:
-                df = pd.DataFrame(vals[1:], columns=vals[0])
-                today = utils.get_peru_time().strftime("%Y-%m-%d")
-                if "Date" in df.columns:
-                    df = df[df["Date"] == today]
-                scanned = borrow_collector.get_scanned_universe(df)  # TASK-208-B: MxV<=-100 (scoreless-era)
+        vals = (snapshots_reader or _default_snapshots_reader)()
+        if vals and len(vals) > 1:
+            df = pd.DataFrame(vals[1:], columns=vals[0])
+            today = utils.get_peru_time().strftime("%Y-%m-%d")
+            if "Date" in df.columns:
+                df = df[df["Date"] == today]
+            scanned = borrow_collector.get_scanned_universe(df)  # TASK-208-B: MxV<=-100 (scoreless-era)
     except Exception as e:
         logger.warning("Borrow snapshot: scanned-universe read failed (non-fatal, fallback to positions): %s", e)
         scanned = set()
@@ -93,7 +126,9 @@ def collect_borrow_snapshot(summary: Dict[str, Any]) -> None:
     # TASK-172: write one borrow_coverage row (coverage of the scanned universe).
     try:
         from agent.perception import borrow_collector
-        cov = borrow_collector.collect_borrow_coverage(universe)
+        # Resolved at call time so monkeypatching borrow_collector still works.
+        writer = coverage_writer or borrow_collector.collect_borrow_coverage
+        cov = writer(universe)
         if cov is not None:
             logger.info("Borrow coverage: universe=%d with_borrow=%d (%.1f%%) shortable=%d (%.1f%%)",
                         cov["ScannedUniverse"], cov["WithBorrowData"], cov["PctWithBorrowData"],
