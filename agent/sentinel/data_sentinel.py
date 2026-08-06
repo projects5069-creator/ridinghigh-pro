@@ -27,6 +27,41 @@ logger = logging.getLogger("agent.sentinel")
 DecisionType = Literal["ALLOW", "WARN", "BLOCK"]
 
 
+# TASK-218: the sentinel_events worksheet handle, looked up once per run.
+#
+# LIFETIME. Module-level, i.e. one per PROCESS. On a GitHub runner
+# `python -m agent.orchestrator` is a fresh process per run, so process lifetime
+# IS run lifetime and nothing leaks between runs. This is the same shape as the
+# _sentinel_instance singleton already at the bottom of this file (:294-302),
+# and as sheets_manager._read_counts / reset_read_counts (sheets_manager.py:428).
+#
+# RESET. reset_sentinel_ws_cache() exists for anything longer-lived than one
+# run — the test suite, and any future in-process re-entry. There is no built-in
+# per-run lifecycle hook in this module to hang it on, and this BUILD is scoped
+# to data_sentinel.py, so the reset is explicit rather than automatic.
+_sentinel_ws_cache = None
+
+
+def reset_sentinel_ws_cache() -> None:
+    """Drop the cached sentinel_events handle. Call at the start of a new run."""
+    global _sentinel_ws_cache
+    _sentinel_ws_cache = None
+
+
+def _get_sentinel_ws(sm):
+    """Return the sentinel_events worksheet, fetching it at most once per run.
+
+    A failed or empty lookup is NEVER cached: today every event re-looks-up and
+    therefore self-heals after a transient 429, and that property must survive.
+    Caching a dead handle would turn one quota blip at the start of a run into a
+    total loss for the rest of it — strictly worse than the behaviour it replaces.
+    """
+    global _sentinel_ws_cache
+    if _sentinel_ws_cache is None:
+        _sentinel_ws_cache = sm.get_worksheet("sentinel_events")
+    return _sentinel_ws_cache
+
+
 def _log_sentinel_event(decision: str, component: str, reason: str,
                         details: dict, action_taken: str) -> None:
     """
@@ -35,6 +70,12 @@ def _log_sentinel_event(decision: str, component: str, reason: str,
     Schema: [Timestamp, EventType, Severity, Component, Message, Details, ActionTaken]
     Only called for BLOCK/WARN (never ALLOW) to keep Sheets quota low.
     Failures are swallowed (logged) — never break the trading loop.
+
+    TASK-218: the worksheet lookup is cached per run. Measured 2026-08-05, the
+    429 that lost 55 of 60 events in one run was on 'Read requests' — the
+    get_worksheet lookup, not the append. safe_append_row already retries
+    (sheets_manager.py:389); the lookup did not. One lookup per run instead of
+    one per event removes ~60 reads/run from the quota.
     """
     try:
         import json
@@ -55,7 +96,12 @@ def _log_sentinel_event(decision: str, component: str, reason: str,
             json.dumps(details, default=str)[:500],  # Details
             action_taken,                      # ActionTaken
         ]
-        ws = sm.get_worksheet("sentinel_events")
+        ws = _get_sentinel_ws(sm)
+        if ws is None:
+            # Not an exception — get_worksheet can return None. Nothing was
+            # cached, so the next event tries again.
+            logger.warning("Sentinel event dropped: sentinel_events worksheet unavailable")
+            return
         sm.safe_append_row(ws, row)
     except Exception as e:
         logger.warning("Failed to log sentinel event to sentinel_events: %s", e)
