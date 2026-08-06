@@ -33,11 +33,36 @@ from agent import orchestrator_eod as eod
 P_ACCOUNT = "agent.orchestrator.build_account_state"
 P_BROKER = "agent.execution.alpaca_broker.AlpacaBroker"
 P_COLLECT = "agent.perception.borrow_collector.collect_borrow_data"
+# TASK-262: collect_borrow_snapshot does its OWN `import sheets_manager`
+# (orchestrator_eod.py:54) and reads daily_snapshots at :57. Patching the module
+# object is not enough — the helper looks the name up on the sheets_manager
+# module itself at call time, so the patch target is the function there.
+P_SHEETS = "sheets_manager.get_worksheet"
 
 
 def _state(tickers):
     """A build_account_state() return value exposing the unified ticker set."""
     return {"existing_positions": set(tickers)}
+
+
+@pytest.fixture(autouse=True)
+def _no_live_sheets():
+    """TASK-262: close the live-Sheets branch for EVERY test in this file.
+
+    Two call sites in collect_borrow_snapshot were never patched:
+      orchestrator_eod.py:57  get_worksheet("daily_snapshots") + get_all_values()  READ
+      orchestrator_eod.py:95  collect_borrow_coverage(universe) -> borrow_data READ
+                              + borrow_coverage append_rows                        WRITE
+
+    P_COLLECT patches collect_borrow_data, a DIFFERENT function, so the coverage
+    write at :95 ran unpatched. Returning None makes get_worksheet fail closed:
+    the snapshots branch skips (`if ws is not None`) and the coverage branch
+    raises into its own try/except, which the helper already treats as non-fatal.
+
+    autouse, so a test added later cannot forget it.
+    """
+    with patch(P_SHEETS, return_value=None) as gw:
+        yield gw
 
 
 # ─────────────── 1. ticker source: open positions + today ENTERs, deduped ───────────────
@@ -142,3 +167,49 @@ def test_no_tickers_skips_collector_and_does_not_fail():
         eod.collect_borrow_snapshot(summary)   # must not raise
     collect.assert_not_called()
     assert summary["errors"] == 0
+
+
+# ─────────── 8. TASK-262: the helper must never reach the live Sheets layer ───────────
+
+@pytest.mark.xfail(
+    strict=True,
+    reason=(
+        "TASK-262: PRODUCTION DEFECT, not a test defect. collect_borrow_snapshot "
+        "reaches the Sheets layer unconditionally at orchestrator_eod.py:57 "
+        "(daily_snapshots) and :95 (collect_borrow_coverage -> borrow_data read + "
+        "borrow_coverage append_rows). A tests-only change can neutralise those "
+        "calls (see the _no_live_sheets fixture) but cannot remove them, and this "
+        "BUILD was scoped to tests/ only. strict=True so this flips to a failure "
+        "the day production stops calling out, instead of rotting silently."
+    ),
+)
+def test_collect_borrow_snapshot_never_touches_live_sheets():
+    """The docstring at the top of this file claims "zero real API/Sheets". It was
+    not true.
+
+    collect_borrow_snapshot builds its universe from TWO sources and unions them
+    (agent/orchestrator_eod.py:70):
+
+        existing = build_account_state()["existing_positions"]   ← patched by P_ACCOUNT
+        scanned  = daily_snapshots via sheets_manager            ← NOT patched, went LIVE
+
+    The second branch (orchestrator_eod.py:54-65) does its own `import
+    sheets_manager` and calls get_worksheet("daily_snapshots") + get_all_values().
+    Patching agent.perception.borrow_collector.sheets_manager (test 3) does not
+    cover it — that is a different module namespace.
+
+    Consequence, measured 2026-08-05: tests 1 and 7 picked up the live tickers of
+    the day (INLF, SHPH, YXT, ZYBT) on top of the fixture, and the file's result
+    moved from 2 failures to 1 within an hour with no code change. On 2026-08-06
+    it passed three times in a row — because daily_snapshots is still empty that
+    early in the session. Pass/fail therefore depends on the clock, not the code.
+
+    This test pins the invariant directly instead of asserting on the symptom.
+    """
+    summary = {"errors": 0}
+    with patch(P_ACCOUNT, return_value=_state(["AAA"])), \
+         patch(P_BROKER), \
+         patch(P_COLLECT), \
+         patch(P_SHEETS) as get_worksheet:      # shadows the autouse fixture's patch
+        eod.collect_borrow_snapshot(summary)
+    get_worksheet.assert_not_called()
