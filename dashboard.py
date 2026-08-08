@@ -55,8 +55,6 @@ from formulas import (
     calculate_vwap_dist,
     calculate_rel_vol,
     calculate_float_pct,
-    normalize_mxv,
-    normalize_atrx,
     fmt_rate_ci,
 )
 from auto_scanner import calculate_score, is_snapshot_time

@@ -40,3 +40,23 @@ E2E-AUDIT S5 (3/7) — הכותרת הקודמת ('flip after shadow proves beni
 ## HYP-002 VOIDED 2026-08-03
 
 The run this task monitors was voided. n reached 173 against a threshold of 150 while 86 of those entries sat on phantom tickers and 54 breached the frozen reentry cap. Re-registered from 2026-08-03 with no carry forward. Whatever this task tracks starts again from that date.
+
+--- השאלה הפתוחה 2026-08-08 (מתוכנית-העבודה) — לא הוכרע ---
+AC#4 (הניטור) הוא הפריט היחיד שנותר פתוח, והבסיס שלו נמחק: הריצה שהוא עקב
+אחריה בוטלה ב-3/8. ‏`docs/MEASUREMENT_HORIZON.md` נעל מאז חלון חדש
+(10/8→4/9, ‏n_ENTER≥100, הכרעה 7/9).
+
+**השאלה: מה בדיוק AC#4 מודד עכשיו?**
+1. א. **לנסח מחדש מול האופק הנעול** — הניטור הופך ל"אוסף כניסות-active
+      ותוצאותיהן בחלון, מול baseline היסטורי Score-gated"; זו עבודת-הגדרה
+      (docs), אפס קוד.
+   ב. לסגור את AC#4 ולתת ל-MEASUREMENT_HORIZON לרשת אותו במלואו — התיק
+      נסגר, אבל אז אין תיק-בעלים לניטור עצמו.
+   ג. להשאיר כמות-שהוא — ⚠️ פסול בפועל: מודד תקופה שכבר לא קיימת.
+   ⚠️ אין ברירת-מחדל. **לא הוכרע.**
+
+2. מה ה-baseline להשוואה? ‏Score-gated היסטורי — אבל עמודת ה-Score ריקה
+   מיולי (SCORE_WRITE_FROZEN), כך שההשוואה אינה טריוויאלית. **פתוח.**
+
+⚠️ אם אף אחת מהאפשרויות לא נבחרת לפני 10/8: החלון ייאסף ולא יהיה מוגדר
+מי קורא אותו ב-7/9.

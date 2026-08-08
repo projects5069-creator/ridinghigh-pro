@@ -1,7 +1,7 @@
 ---
 id: TASK-176
 title: News Detective demotion — EOD-only or disable pending value proof
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-06-13 01:26'
 updated_date: '2026-07-02 04:43'
@@ -37,3 +37,12 @@ The scope is narrower than the title suggests. AC#1 is done and verified: config
 What remains is AC#2 alone, measuring the quota saving, and the tool for it already exists at scripts/measure_429_by_workflow_v1.py. It was never run.
 
 Consider whether that measurement is still worth a separate task. The 429 picture is now owned by TASK-215, whose own verification step is exactly a before and after 429 comparison over trading days. If 215 runs that measurement, this task closes with it.
+
+--- נסגר Done 2026-08-08 (מרשם TASK_REGISTER_2026-08-08 §3) ---
+AC#1 בוצע ואומת בקוד החי: `config.py:364 NEWS_DETECTIVE_ENABLED = False` —
+זו ההדחה עצמה, וה-tab news_findings מראה 3,012 שורות ביולי מול אפס באוגוסט.
+AC#2 (מדידת-החיסכון) נסגר ככפילות לפי הכרעת התיק עצמו: "The 429 picture is
+now owned by TASK-215 ... If 215 runs that measurement, this task closes with it".
+⚠️ שארית מוצהרת: AC#5 של TASK-215 ("verify live — 429 frequency drops") ימדוד
+את ה-429 הכולל, לא את תרומת news_detective בבידוד. המספר המבודד לא ייגזר —
+זו עלות מקובלת של הסגירה, לא פספוס.
