@@ -1,7 +1,7 @@
 ---
 id: TASK-254
 title: score_analytics reports n=0 while July closed sixty positions
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-08-03 22:08'
 updated_date: '2026-08-05 20:33'
@@ -84,3 +84,13 @@ retirement work in TASK-208 and TASK-209 rather than wiring the injections.
 
 Stays To Do.
 <!-- SECTION:NOTES:END -->
+
+--- נסגר Done 2026-08-08 (מרשם TASK_REGISTER_2026-08-08 §3) ---
+החקירה שהתיק ביקש הושלמה בגופו והשורש אומת חי בסשן הסגירה:
+`agent/orchestrator_eod.py:208` ו-`:226` בונים `ScoreAnalytics()` ללא
+הזרקות, ולכן `score_analytics.py` נעצר על ה-guard של DataFrame ריק —
+n=0 הוא **מבני ואינו תלוי בדאטה**: "Sixty closed July positions could not
+have changed it".
+⚠️ ההמלצה חייבת לשרוד את הסגירה: **לקפל את score_analytics לרשימת-הפרישה
+של TASK-208/209 במקום לחווט reader+writer.** הפניה נוספה ל-TASK-209 כדי
+שלא תלך לאיבוד (אף אחד משני התיקים לא הזכיר את הטאב לפני כן).

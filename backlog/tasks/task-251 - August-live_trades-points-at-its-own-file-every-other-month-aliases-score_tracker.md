@@ -3,7 +3,7 @@ id: TASK-251
 title: >-
   August live_trades points at its own file, every other month aliases
   score_tracker
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-08-03 21:01'
 updated_date: '2026-08-05 20:33'
@@ -111,3 +111,13 @@ True) rather than with the sheet-id divergence.
 Stays To Do. The owner decision — realign 2026-08 and 2026-09 to the score_tracker file,
 or leave it and document — is unchanged, and the section 10 root moved to TASK-243 item (6).
 <!-- SECTION:NOTES:END -->
+
+--- נסגר Done 2026-08-08 (מרשם TASK_REGISTER_2026-08-08 §3) ---
+ההחלטה שהתיק ביקש מתייתרת: ל-divergence אין אפקט נצפה. הטאב live_trades
+ריק בשני החודשים — "live_trades holds zero rows in 2026-07 and zero in
+2026-08", והשער שממלא אותו (Score>=TRADE_ENTRY_MIN_SCORE=70) בלתי-עביר
+תחת SCORE_WRITE_FROZEN. התיק עצמו הגיע למסקנה: "this task may be closable
+on that basis".
+⚠️ השורש האמיתי (§10, שתי רשימות SHEET_NAMES) **אינו אובד** — הועבר
+ל-TASK-243 והוא שם במפורש כפריט (6): "Unify the two SHEET_NAMES lists".
+TASK-243 נשאר פתוח.

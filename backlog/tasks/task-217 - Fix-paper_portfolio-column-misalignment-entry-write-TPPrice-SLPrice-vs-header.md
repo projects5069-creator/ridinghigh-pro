@@ -3,7 +3,7 @@ id: TASK-217
 title: >-
   Fix paper_portfolio column misalignment (entry-write TPPrice/SLPrice vs
   header)
-status: In Progress
+status: Done
 assignee: []
 created_date: '2026-07-01 21:25'
 updated_date: '2026-07-02 04:43'
@@ -23,3 +23,13 @@ REFINED root cause (code is CORRECT): create_agent_sheets.py:87 header DOES defi
 <!-- SECTION:NOTES:BEGIN -->
 Core misalign FIXED end-to-end + live-verify (Task1-3 pushed: dd46470/7c6f079/0c441b7). Task4 guard funcs done (ad95806); WIRING = TASK-219. 2026-07 tab migrated (backup research/…231931.json), 8 rows MANUAL_CLEANUP.
 <!-- SECTION:NOTES:END -->
+
+--- נסגר Done 2026-08-08 (מרשם TASK_REGISTER_2026-08-08 §3) ---
+הליבה תוקנה, נפרסה ואומתה חי; ארבעת הקומיטים אומתו קיימים בסשן הסגירה:
+dd46470 (entry-write by-name) · 7c6f079 (remap_row + mark_manual_cleanup) ·
+0c441b7 (מיגרציית 2026-07 חיה) · ad95806 (פונקציות header-guard).
+tab 2026-07 מוגר עם גיבוי, 8 השורות סומנו MANUAL_CLEANUP.
+השארית היחידה — חיווט ה-guard — יש לה תיק משלה (TASK-219), ולכן החזקת התיק
+הזה כ-In Progress ניפחה את מניין המשימות-הפעילות בלי עבודה מאחוריה.
+גורל השורות הפגומות הוכרע בנפרד: docs/DECISIONS_2026-08-08.md §D4 (לסמן
+לפי כלל TASK-246, לעולם לא למחוק).

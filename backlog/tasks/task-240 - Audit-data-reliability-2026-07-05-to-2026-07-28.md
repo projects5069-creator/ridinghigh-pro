@@ -1,7 +1,7 @@
 ---
 id: TASK-240
 title: Audit data reliability 2026-07-05 to 2026-07-28
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-07-28 12:40'
 labels:
@@ -29,3 +29,14 @@ The two regime hypothesis is confirmed but the cutover is 2026-07-15, not 2026-0
 One thin day, 2026-07-17 at 12 rows against a median of 25.
 
 REMAINING: per metric missing rates beyond MxV were not measured. The scan volume drop is filed as TASK-245.
+
+--- נסגר Done 2026-08-08 (מרשם TASK_REGISTER_2026-08-08 §3) ---
+שש משבע השאלות ענו בגוף התיק עצמו תחת "ANSWERED (2026-07-29, read only)":
+כיסוי-ימים 17/17 · MxV שלם 77/77 · SCORE_WRITE_FROZEN התנהג כמתוכנן
+(0/77 נושאות Score) · שתי-הרג'ימות אושרו עם cutover מתוקן ל-2026-07-15
+(לא 07-22) · היום-הדק 17/7 · ירידת-נפח הועברה ל-TASK-245.
+החוסם שנרשם ("ticker corruption scope") הוסר — TASK-238 Done ותיקון ה-scrape
+נפרס ל-main (fd95a25).
+השארית — שיעורי-חוסר פר-מדד מעבר ל-MxV — היא ערך-תיעוד בלבד: החלון שהתיק
+בודק (5-28/7) נמצא **מחוץ** להיקף-ההכרעה שננעל, שמתחיל 2026-08-10
+(docs/MEASUREMENT_HORIZON.md), ושער-הסיכון (gate3) הוגבל לאותו תאריך.
