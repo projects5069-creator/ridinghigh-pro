@@ -68,7 +68,9 @@ def collect_borrow_snapshot(
     (TASK-262, TASK-264).
 
     Ticker universe = union of:
-      - the scanned universe (daily_snapshots, Score >= MIN_SCORE_DISPLAY today)
+      - the scanned universe (daily_snapshots, MxV <= AGENT_MXV_MAX today).
+        NOT Score >= MIN_SCORE_DISPLAY: TASK-208-B switched the selector because
+        under SCORE_WRITE_FROZEN the Score column is blank and selected nothing.
       - build_account_state()["existing_positions"] (OPEN + today ENTERs)
     Uses a DEDICATED read-only AlpacaBroker(dry_run=False) so real shortability
     is read even under AGENT_DRY_RUN (only get_asset_info is touched). After
@@ -82,7 +84,8 @@ def collect_borrow_snapshot(
         logger.warning("Borrow snapshot: existing-positions collection failed (non-fatal): %s", e)
         existing = set()
 
-    # Scanned universe (TASK-172): daily_snapshots Score>=MIN_SCORE_DISPLAY for today.
+    # Scanned universe (TASK-172): daily_snapshots MxV<=AGENT_MXV_MAX for today
+    # (TASK-208-B; see the docstring on why it is no longer a Score threshold).
     # Isolated try/except — a snapshots read failure falls back to existing only.
     scanned = set()
     try:

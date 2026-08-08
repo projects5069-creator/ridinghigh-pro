@@ -553,26 +553,10 @@ def calculate_pnl_pct(entry_price, exit_price, is_short=True):
 # Dynamic Score (v2.0 - experimental, based on empirical correlations)
 # ═══════════════════════════════════════════════════════════════════════
 
-def normalize_mxv(mxv, min_val=-5000, max_val=0):
-    """Normalize MxV to 0-100 scale. More negative MxV = higher score."""
-    try:
-        if mxv is None:
-            return 0.0
-        clipped = max(min(mxv, max_val), min_val)
-        return float(((clipped - max_val) / (min_val - max_val)) * 100)
-    except (TypeError, ValueError, ZeroDivisionError):
-        return 0.0
-
-
-def normalize_atrx(atrx, min_val=0, max_val=50):
-    """Normalize ATRX to 0-100 scale. Higher ATRX = higher score."""
-    try:
-        if atrx is None:
-            return 0.0
-        clipped = max(min(atrx, max_val), min_val)
-        return float((clipped - min_val) / (max_val - min_val) * 100)
-    except (TypeError, ValueError, ZeroDivisionError):
-        return 0.0
+# normalize_mxv / normalize_atrx were removed 2026-08-08 (TASK-208 carve-out).
+# They scaled MxV and ATRX to 0-100 for a scoring scheme that never shipped:
+# calculate_score reads the raw metrics against SCORE_CAPS_V2 instead. Verified
+# zero call-sites repo-wide (tests included) before deletion.
 
 
 # ═══════════════════════════════════════════════════════════════════════
