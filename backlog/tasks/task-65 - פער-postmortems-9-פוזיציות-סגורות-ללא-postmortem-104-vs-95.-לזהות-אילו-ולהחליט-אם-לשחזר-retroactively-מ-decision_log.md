@@ -6,7 +6,7 @@ title: >-
 status: To Do
 assignee: []
 created_date: '2026-05-31 00:48'
-updated_date: '2026-07-01 00:52'
+updated_date: '2026-08-08 20:55'
 labels:
   - data-quality
   - postmortems
@@ -81,4 +81,21 @@ OWNER מדויק = TASK-105 (silent paper_portfolio write loss). מאומת בק
 ה-pp-write כבר מוקשח: safe_append_row (order_manager.py:290) עם dedup לפי PositionID + retry 3x (backoff 2/4/8s) + חשיפת-כשל (:283 מחזיר False על retry-exhaustion -> orchestrator:141 סופר ככשל).
 מה קרה ל-GVH/SDOT: ה-retry מוצה תחת 429-storm מתמשך (>3 ניסיונות) -> False -> reconciler flag @16:00. 105 עשה את תפקידו (שקט->גלוי); הוא לא מונע אובדן כש-429 נמשך מעבר ל-retry — by-design, לא באג.
 השארית (לא ב-105): (1) TASK-109 — RECONCILE_AUTO_REPAIR (auto-backfill השורה, gated על track-record; GVH/SDOT=2 true-positives). (2) TASK-215 — SA נפרד מפחית 429 במקור (פעיל 1/7). GVH/SDOT מחזקים שניהם.
+
+--- עדות-לוואי 2026-08-08: הסוויטה שיחזרה את סימפטום B-07 בשוגג ---
+
+ריצת-סוויטה של 8/8 שנעשתה בלי -m "not integration" הריצה את
+tests/agent/integration/test_decision_logger_writes.py::test_write_real_decision_to_sheet.
+הטסט כתב, קיבל בחזרה DEC-id תקין (assert decision_id.startswith("DEC-") עבר, שורה 86),
+ואז נכשל בקריאה-חוזרת מהגיליון — assert len(our_rows) > 0 / השוואת DecisionID (שורות 96,103).
+
+זה בדיוק הדפוס של B-07: הכתיבה מדווחת הצלחה, השורה איננה בקריאה-חוזרת. כאן זה
+נפל במקרה, כתופעת-לוואי של ריצת-סוויטה — לא כניסוי מכוון. לכן זו עדות חיה
+וניתנת-לשחזור לדפוס, שנוצרה בלי לבנות עבורה מתקן-בדיקה.
+
+שווה עיון בעבודת-הגלאי: הטסט הזה הוא כבר, בפועל, גלאי-B-07 מקצה-לקצה (כתיבה →
+קריאה-חוזרת → assert). אם רוצים גלאי, ייתכן שהבסיס כבר קיים ולא צריך להיכתב מאפס.
+
+סייג: לא מדדתי שוב ולא שיחזרתי בכוונה — זו תצפית מריצה בודדת. הקישור ל-B-07
+מבוסס על זהות-דפוס, לא על בידוד סיבתי.
 <!-- SECTION:NOTES:END -->

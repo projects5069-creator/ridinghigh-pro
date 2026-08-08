@@ -4,6 +4,7 @@ title: 'Unit tests read live Sheets, seven of them'
 status: To Do
 assignee: []
 created_date: '2026-08-03 21:01'
+updated_date: '2026-08-08 20:55'
 labels:
   - bug
   - tests
@@ -36,3 +37,23 @@ TASK-228 closed as a merge into this task. Same family: unit tests that are not 
 228 is an order dependent state leak in tests/agent/integration/test_scanner_agent_match.py, which fails in a full run and passes in isolation. This task is a live Sheets read from tests/agent/unit/test_orchestrator_eod_borrow_wiring_v1.py. Both are solved by the same conftest level isolation, and leaving one open keeps the suite unreliable regardless of the other.
 
 Carried from 228: local triage must stay aware of -m "not integration", because the sibling test_write_real_decision_to_sheet attempts a real Sheets write.
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+--- 2026-08-08: קרה בפועל — טסט-אינטגרציה שכותב ל-Sheets רץ בשוגג ---
+
+הסייג שנשמר מ-TASK-228 ("local triage must stay aware of -m not integration")
+אינו תיאורטי. ב-8/8 הורצה הסוויטה בלי הדגל, ו-test_write_real_decision_to_sheet
+ביצע כתיבה אמיתית ל-decision_log החי (שורת TEST_INTEGRATION_M4).
+
+כלומר: ההגנה היחידה מפני כתיבה-לייב מסוויטה מקומית היא שהמריץ יזכור לכתוב
+-m "not integration" בשורת-הפקודה. אין conftest, אין marker-default, אין
+guard — רק זיכרון אנושי. זה אותו סוג-כשל שהתיק הזה כבר מתאר לגבי קריאות
+(unit שקורא לייב), רק בכיוון הכתיבה, שהוא החמור מבין השניים.
+
+רלוונטי לכיוון-התיקון שכבר רשום כאן: ה-conftest שמונע מ-tests/agent/unit לפתוח
+לקוח אמיתי צריך לכסות גם את נתיב-הכתיבה, לא רק את הקריאה.
+
+שאריות: לא בדקתי אם שורת TEST_INTEGRATION_M4 של 8/8 נוקתה מהגיליון.
+<!-- SECTION:NOTES:END -->

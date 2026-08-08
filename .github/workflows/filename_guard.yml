@@ -1,5 +1,8 @@
-name: filename-length guard
+name: repo guards (filename length · hook wiring)
 
+# The job id stays `guard` on purpose — that is the check name already referenced
+# on open PRs. Two independent guards run in it; each fails the job on its own.
+#
 # Why (TASK-133): a 333-byte backlog basename broke actions/checkout on the Linux
 # runner (ext4 caps a filename component at 255 bytes), taking CI down ~16h. This
 # guard runs the SSoT byte-check over the whole tracked tree on every push / PR and
@@ -21,3 +24,12 @@ jobs:
       - uses: actions/checkout@v5
       - name: Check tracked filename byte-lengths (>= 250 fails)
         run: FILENAME_BYTE_LIMIT=250 bash scripts/check_filename_length.sh
+
+      # Why (2026-08-08): the measurement-window guard shipped wired to an absolute
+      # path in one developer's home directory. A clone anywhere else got the script
+      # and a dead hook. The guard is deliberately fail-open (TASK-53), so a broken
+      # path does not raise — measured that day, a real Edit on the frozen
+      # order_manager.py went through with no error surfacing. A hook cannot report
+      # its own absence; CI is the only place that can be loud about it.
+      - name: Check hook wiring is reachable from a fresh clone
+        run: bash scripts/check_hook_wiring.sh
