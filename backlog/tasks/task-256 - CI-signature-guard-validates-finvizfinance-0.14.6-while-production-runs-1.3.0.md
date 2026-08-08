@@ -1,7 +1,7 @@
 ---
 id: TASK-256
 title: CI signature guard validates finvizfinance 0.14.6 while production runs 1.3.0
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-08-05 18:22'
 labels:
@@ -23,6 +23,17 @@ ordinal: 254000
 ## Implementation Notes
 
 <!-- SECTION:NOTES:BEGIN -->
+--- נסגר Done 2026-08-08 — הפער נסגר בקומיטים 3c9558f+9c406fd (main fd95a25) ---
+אומת מול origin/main: tests.yml:30 מריץ `uv run --with-requirements
+requirements.txt` ו-requirements.txt:8 מצמיד finvizfinance==1.3.0 = בדיוק מה
+שהייצור מריץ (auto_scan.yml:23 מתקין מ-requirements מאז 9c406fd). ה-guard של
+TASK-238 רץ מעכשיו על אותה גרסה שהייצור מריץ. התחזית של התיק ("יחזור בלי שאף
+בדיקה תיפול", שורה 50) התממשה מילולית ב-7/8 — יום לפני הסגירה — וזה מה שכפה
+את התיקון. שארית לא-חוסמת (דפוס importorskip השקט): בפועל bs4+finvizfinance
+מגיעים דרך requirements ב-tests.yml, כך שהבדיקות רצות ולא מדלגות; היגיינת
+ה-skip-פורמלית נבלעת בטסט החדש tests/test_finviz_change_pct_v1.py שנכשל-קשה
+(לא מדלג) אם הספרייה חסרה מה-requirements.
+
 מקור: ביקורת ההחלטות 2026-08-05 (RULING עמיחי). התגלה תוך כדי בחינת TASK-248.
 
 הפער, מאומת בקוד:

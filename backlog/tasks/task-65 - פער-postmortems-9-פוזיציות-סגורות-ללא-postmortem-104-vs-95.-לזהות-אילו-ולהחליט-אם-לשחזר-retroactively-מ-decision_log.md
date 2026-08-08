@@ -31,6 +31,30 @@ ordinal: 65000
 ## Implementation Notes
 
 <!-- SECTION:NOTES:BEGIN -->
+--- כתיבה-מחדש 2026-08-08 (ביקורת 28 הסבבים, B-07) — מחליפה את אבחנת "by-design, לא באג" ---
+
+האבחנה למטה ("ה-retry מוצה תחת 429-storm... by-design, לא באג") הופרכה. המנגנון
+האמיתי, שמסביר את *שני* הסימפטומים של התיק הזה כאחד — 36 נתיחות-חסרות /
+MetricsAtEntry ריק *וגם* ENTER-ללא-שורת-pp (GVH/SDOT) — הוא **B-07, אובדן
+כתיבות-באפר סביב ה-flush**, בשלושה נתיבים בלתי-תלויים:
+
+1. **בליעת-חריגה ב-flush** — `agent/orchestrator.py:496-508`, ה-docstring
+   מצהיר "Never raises": כשל בכתיבת שורות-סגירה לא מגדיל errors ולא מתריע.
+2. **קטיעה לפני הכתיבה** — 32.4% מהריצות נהרגות (SIGKILL/timeout-5min) לפני
+   שה-flush רץ בכלל; מדידה בלתי-תלויה: 38.6% מבוטלות ב-5/8 (TASK-266).
+   ל-run() חמש נקודות `return summary` שארבע מהן לפני ה-flush (TASK-259:100).
+3. **נתיחה שרצה לפני ה-flush** — `_close_position` מפיק postmortem לפני
+   שהבאפר נכתב ⇒ נתיחה "סגורה" על פוזיציה שנשארה OPEN בגיליון = יתומים.
+
+המשמעות: 429-retry-exhaustion (הנתיב שתועד למטה) הוא מקרה-פרטי אחד; האוכלוסייה
+העיקרית היא ריצות שנקטעו/בלעו — שיטתית, לא אירוע-קצה. לכן "by-design" אינו
+תקף: העיצוב מאבד דאטה בשקט בשליש מהריצות.
+
+הטיפול: T-205 (גלאי-STALE_WRITE ביישוב-לאחר-ריצה, הרחבת ה-reconciler) —
+במיזוג עם TASK-49 (הכיוון ההפוך pp>dl) ובתיאום TASK-109 (auto-repair).
+התיק נשאר פתוח עד שהגלאי קיים והרשימה השמית של ה-36 מוכרעת.
+
+--- (היסטוריה — האבחנות המקוריות, חלקן הופרכו כאמור) ---
 צ'אט-recon 2026-06-27 (READ-ONLY, נפרד+נוסף ל-scope=36 שכבר תועד): מעבר על 182 ה-postmortems הקיימים מצא MetricsAtEntry ריק (={}) ב-55% (101/182) — בעיה מובחנת מ-36 ה-חסרים (כאן ה-postmortem קיים אך חסר-מדדים). היפותזה-לשורש (לא מאומת): postmortem_engine._get_decision_context קורא ל-_read_decision(position_id) שעושה linear-scan ב-decision_log ומחזיר {} ב-miss — לחקור quota-drop של כתיבת decision_log מול PositionID!=DecisionID מול eventual-consistency. רלוונטי גם ל-TASK-198. הערה: אין כאן מסקנת-edge — ה-edge-verdict השלילי הופרך בדוח IB (PK v3.63).
 
 MERGED TASK-198 (30/6): חקירת-שורש אחת על _read_decision (linear-scan→{} ב-miss) המכסה שני סימפטומים — 36 postmortems חסרי-MetricsAtEntry + 20 ENTERs ללא שורת paper_portfolio. read-only עד הכרעה.
