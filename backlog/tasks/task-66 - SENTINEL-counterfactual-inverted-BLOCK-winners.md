@@ -5,7 +5,7 @@ title: >-
   המנצחות (WR 64% vs 41% not-blocked, n=36 RELIABLE). רוב ה-BLOCKs
   scan_freshness (6188/7466). הפעלת active mode היתה חוסמת את הטובות. לחקור לפני
   כל מעבר ל-active
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-05-31 01:47'
 updated_date: '2026-06-28 01:54'
@@ -41,3 +41,9 @@ What has NOT changed, and is the reason this task still stands: SENTINEL_MODE is
 What the correction does change is the framing of the 13,033 CRITICAL rows. They are not noise from an unenforced explicit gate; they are sentinel events under a sentinel that is deliberately in shadow. The finding itself is untouched: would-block correlates positively with winners, WR 64 percent against 41 percent on n=36, single regime.
 
 This task remains the blocker on ever moving SENTINEL_MODE to active.
+
+--- הומר לתיעוד ונסגר 2026-08-08 (מרשם TASK_REGISTER_2026-08-08 §3) ---
+זה לא היה משימה אלא הכרעה שכבר התקבלה. ההכרעה, הנימוקים והמספרים הועברו
+במלואם ל-`docs/DECISIONS_2026-08-08.md`, סעיף **D6 · TASK-66 — ה-counterfactual ההפוך (וטו עומד על SENTINEL active)**.
+גוף התיק נשאר כאן כמקור-היסטורי ואינו נמחק. אם ההכרעה תשתנה — לפתוח תיק חדש
+שמפנה לסעיף שם, לא להחיות את זה.
