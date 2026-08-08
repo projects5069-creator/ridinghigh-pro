@@ -28,6 +28,13 @@ jobs:
           ALPACA_SECRET_KEY: ${{ secrets.ALPACA_SECRET_KEY }}
           ALPACA_PAPER: 'true'
           DATA_PROVIDER: alpaca
+          # T-201: without SMTP env, is_configured()=False and every
+          # send_alert in the core is a silent no-op (email_sender.py:54-56).
+          SMTP_HOST: ${{ secrets.SMTP_HOST }}
+          SMTP_PORT: ${{ secrets.SMTP_PORT }}
+          SMTP_USER: ${{ secrets.SMTP_USER }}
+          SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+          EMAIL_TO: ${{ secrets.EMAIL_TO }}
         run: python -m agent.orchestrator_eod
       - name: Self-heal — provision current-month agent sheets (idempotent, TASK-207)
         env:

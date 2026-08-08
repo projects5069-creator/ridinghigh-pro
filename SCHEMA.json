@@ -335,6 +335,22 @@
       "mode": "exact",
       "source": "AGENT_SHEET_HEADERS"
     },
+    "skip_metrics": {
+      "columns": [
+        "Timestamp",
+        "RunID",
+        "Ticker",
+        "SkipReason",
+        "MxV",
+        "RunUp",
+        "ATRX",
+        "RSI",
+        "REL_VOL",
+        "ScanChange"
+      ],
+      "mode": "exact",
+      "source": "AGENT_SHEET_HEADERS"
+    },
     "skip_summary": {
       "columns": [
         "Timestamp",

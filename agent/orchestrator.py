@@ -792,6 +792,8 @@ def run() -> Dict[str, Any]:
     # otherwise trigger the alert email every minute.
     try:
         summary["skip_summary_rows"] = decision_logger.flush_skip_summary()
+        # T-401 (E-05): per-rejection entry metrics — one batched append/run.
+        summary["skip_metrics_rows"] = decision_logger.flush_skip_metrics()
     except Exception as e:
         logger.warning("skip_summary flush failed (non-fatal): %s", e)
 
