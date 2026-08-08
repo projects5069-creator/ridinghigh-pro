@@ -28,6 +28,19 @@ Do not change the pin without a live fetch proving the chosen version parses. Al
 ## Implementation Notes
 
 <!-- SECTION:NOTES:BEGIN -->
+--- עדכון 2026-08-08: הליבה בוצעה ונפרסה; התיק נשאר פתוח על שארית מוגדרת ---
+בוצע היום, מוזג ל-main (fd95a25, PR #37), אומת מול origin/main:
+(1) requirements.txt:8 — finvizfinance==1.3.0 (ההצמדה, אחרי fetch חי שהוכיח
+    ש-1.3.0 מפרסרת: 138 טיקרים — תנאי-הקדם של התיק בוצע כלשונו); קומיט 3c9558f.
+(2) auto_scan.yml:23 — pip install -r requirements.txt (הדפוס של agent_minute);
+    קומיט 9c406fd, כולל אימות-דריפט מלא מול הגרסאות ש-CI פתר בפועל ב-7/8.
+ההקשר: השינוי נכפה ע"י שבר-הייצור של 7/8 (finviz שינתה th ל-'Change %') —
+ראו PK v4.15.
+**השארית שבגללה התיק לא נסגר:** post_analysis.yml:30 ו-backfill_ohlc.yml:29
+עדיין מתקינים רשימה ידנית unpinned (כולל finvizfinance) — אותה מחלת-דריפט,
+זרועות בעלות blast-radius קטן יותר (הם לא סורקים, אבל שחרור-ספרייה עדיין
+ישבור אותם בשקט). ה-scope מצטמצם לשני ה-yml האלה.
+
 RULING 2026-08-05 (עמיחי)
 
 הכרעה: להצמיד finvizfinance ל-1.3.0, ואז לאחד את ההתקנה ב-workflows דרך -r requirements.txt.
