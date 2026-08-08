@@ -1,0 +1,264 @@
+# Handoff — 2026-08-06
+
+---
+
+## א. Where things stand
+
+```
+branch  docs/handoff-2026-07-29
+HEAD    29ebfac  docs(backlog): watchdog deployment plus five findings from the outage
+        4 commits ahead of origin/main, 14 behind
+PR #36  OPEN · MERGEABLE · 4 commits · 11 files · zero workflows · zero checks reported
+```
+
+⚠️ **The branch is 14 commits behind `main`.** PRs #34 and #35 were merged into `main`
+today and the branch was never re-synced. That is fine for #36 (GitHub merges against the
+current base) but any local reasoning about "what is in the tree" must account for it.
+
+**Uncommitted on purpose — `.github/workflows/` stays `M`:**
+
+```
+ M .github/workflows/agent_minute.yml
+ M .github/workflows/auto_scan.yml
+```
+
+Both hold a `concurrency:` block with `cancel-in-progress: false`. They have been sitting
+uncommitted for two days, deliberately. Two reasons, both measured:
+
+1. The production duration measurement that decides whether they are still needed has not
+   been taken (TASK-259).
+2. GitHub Actions is in a **major outage right now**. Deploying a concurrency change during
+   a provider outage mixes two variables and makes every later measurement uninterpretable.
+
+**Do not commit, stash, checkout or reset these two files.**
+
+---
+
+## ב. What closed today
+
+| ticket | what it was | evidence it is really done |
+|---|---|---|
+| **TASK-262** | unit tests reached the live `borrow_coverage` tab and wrote rows | the tab's last row stayed at 09:24:18 across ten later test runs |
+| **TASK-263** | `collect_borrow_snapshot` had no test seam — the Sheets read and the coverage write were both inline | `snapshots_reader` / `coverage_writer` injected; the TASK-262 `xfail` removed and the invariant test passes for real; suite 731 green, zero xfail |
+| **TASK-218** | `sentinel_events` worksheet looked up once per event — 60 lookups per run | handle cached per run; 5 unit tests; suite 736 green. ⚠️ the ~60→1 saving is **arithmetic, not measured in production** |
+
+**Landed in production (merged to `main`):**
+
+```
+fcdb0aa  perf(agent): batch SMA20 enrichment into one Alpaca request   (08-05)
+13d048a  Merge pull request #34                                        (08-06)
+5b52ef9  Merge pull request #35                                        (08-06)
+```
+
+**Waiting in PR #36 (not merged):**
+
+```
+7dffb04  test(eod): isolate borrow-wiring tests from the live Sheets layer
+9a12942  fix(eod): inject the data source into collect_borrow_snapshot
+1df9cba  perf(sentinel): look the sentinel_events worksheet up once per run
+4406a92  feat(watchdog): an outage detector that does not run on GitHub Actions
+29ebfac  docs(backlog): watchdog deployment plus five findings from the outage
+```
+
+**The SMA20 batch is measured and it worked.** Median run lifetime for `agent_minute`,
+same hour, day over day: 14h **138s → 110s** (−20%), 15h **172s → 154s** (−10%).
+`auto_scan`, which was not touched, did not move. The improvement is where the fix was.
+
+---
+
+## ג. Awaiting your decision — four things
+
+### 1. Install the watchdog — TASK-265 (High)
+
+The code is committed and does nothing until installed by hand. Four manual steps in
+`scripts/watchdog/README.md`. The authorisation is your Google account, which is the
+entire point: it survives every credential the system holds expiring, and it survives
+GitHub being down.
+
+### 2. Merge PR #36
+
+`MERGEABLE`, zero workflows in the diff, and **zero checks reported** — CI never started
+because Actions is down. Merging without green CI is a judgment call that is yours.
+
+### 3. `concurrency` — and there is now a third option
+
+The GitHub docs describe **`queue: max`** — "up to 100 pending runs to wait in order".
+Every analysis so far assumed the only alternative was cancelling the pending run. It was
+not. A real queue delays scans instead of dropping them, which changes the cost side
+completely. ⚠️ Not verified as available on this plan.
+
+### 4. HYP-002 — the re-entry breach
+
+F9 caps re-entry at one per ticker per day. On 2026-08-05 it was breached twice:
+
+```
+DFNS  09:32:29  ENTER  ExistingPosition=FALSE  qty=17
+DFNS  09:32:54  ENTER  ExistingPosition=FALSE  qty=17     ← 25 seconds later
+SHPH  11:40:39  ENTER  ExistingPosition=FALSE  qty=232
+SHPH  11:43:55  ENTER  ExistingPosition=FALSE  qty=231    ← 3 minutes later
+
+2026-08 totals: ENTER=17 · distinct (date,ticker)=15 · entries beyond cap=2
+```
+
+**2 breaches out of 17 entries.** The cause is TASK-259: `build_account_state` snapshots
+once at the start of a run, and overlapping runs decide against a pre-event world. The
+question for you is whether this contaminates the HYP-002 sample or is small enough to
+carry.
+
+---
+
+## ד. Five new tickets
+
+| | |
+|---|---|
+| **TASK-265** (High) | Deploy the external watchdog to Apps Script — four manual steps, four acceptance criteria, four documented blind spots |
+| **TASK-266** | 188 of 487 `agent_minute` runs on 08-05 were killed by `timeout-minutes: 5` — job duration median 315s against a 300s limit — which also means the 203s baseline in TASK-259 is biased downward |
+| **TASK-267** | `check_06` fetches `per_page=50`, so its "24 hours" is really ~24 minutes, and it returns **INFO** when every run is queued — it was blind to a total outage |
+| **TASK-268** | `detect_outage` is called from inside `run()`, so when no agent runs there is nobody to detect — `grep -ic outage` on the last four runs returned 0,0,0,0 |
+| **TASK-269** | run `31120743074` waited 1h54m, then wrote 18:37 market prices under a 16:42 signal timestamp, and reported success |
+
+**65 tickets open.**
+
+---
+
+## ה. The GitHub outage — status and how to check
+
+```
+Incident with Actions · impact CRITICAL · started 2026-08-06T15:22:49Z
+Actions component: MAJOR OUTAGE
+latest update 19:43:21Z: "Capacity remains constrained and jobs may still be
+                          delayed or fail while it recovers gradually."
+```
+
+Measured in our repo, same moment: **430 queued, 0 in progress.** It was 283 six hours
+ago and has only deepened.
+
+**How to check whether it is over — two commands, both read-only:**
+
+```bash
+# 1. the provider
+curl -s https://www.githubstatus.com/api/v2/summary.json \
+  | python3 -c "import json,sys; d=json.load(sys.stdin); print(d['status']['description']); [print(i['name'], i['status'], i['incident_updates'][0]['body'][:120]) for i in d['incidents']]"
+
+# 2. our repo — recovery looks like queued FALLING and in_progress ABOVE ZERO
+gh api "repos/projects5069-creator/ridinghigh-pro/actions/runs?status=queued&per_page=1" --jq '.total_count'
+gh api "repos/projects5069-creator/ridinghigh-pro/actions/runs?status=in_progress&per_page=1" --jq '.total_count'
+```
+
+⚠️ **`in_progress` is the discriminator.** Saturation looks like `in_progress = the cap`.
+An unavailable pool looks like `in_progress = 0`. Today it was 0 in every measurement.
+
+⚠️ There is also a run stuck in `queued` since **2026-07-09** — 28 days. Unrelated to
+today, but it proves runs in this repo can hang in `queued` forever unnoticed. Not
+cancelled (cancelling runs was out of scope).
+
+---
+
+## ו. First move next session
+
+**Check whether the outage closed, then take the TASK-259 production measurement.**
+
+The reasoning: almost everything else is blocked behind it. `concurrency` cannot be
+deployed or dismissed without knowing the current run duration; the duration cannot be
+measured while runners are unavailable; and the old 203s baseline is contaminated by the
+timeout truncation in TASK-266, so it needs re-measuring on a clean day anyway.
+
+Concretely, once `in_progress > 0` and the queue is draining, wait for one full clean
+trading session, then measure `agent_minute` median duration on completed, non-truncated
+runs and compare against 203s.
+
+**If the outage is still open:** do not measure and do not deploy. TASK-265 (installing
+the watchdog) is the one item that is completely independent of GitHub and can proceed at
+any time.
+
+---
+
+## ז. Report index — by subject
+
+All 47 reports are in `reports/`. Grouped by what they answer, not by time.
+
+**System orientation — read these first if context is lost (4 parts)**
+`2026-08-05_0853_system_orientation.md` · `0932_..._part2.md` · `0951_..._part3.md` ·
+`1045_..._part4.md`
+
+**Tickets and dependencies**
+`2026-08-05_1055_tasks_full_a.md` · `1055_tasks_full_b.md` ·
+`1131_dependency_graph_a.md` · `1131_dependency_graph_b.md` · `1244_decisions_review.md` ·
+`1206_task126_backup.md`
+
+**Rulings and stage-1 closures**
+`1330_rulings_diff.md` · `1341_rulings_commit.md` · `1347_rulings_push.md` ·
+`1406_stage1_closures.md` · `1427_stage1_applied.md` · `1446_stage1_commit.md`
+
+**Measurement session and the re-entry breach**
+`1455_measurement.md` · **`1515_reentry_breach.md`** · `1531_stage2_closures.md` ·
+`1815_stage2_commit.md` · `1820_stage2_push.md`
+
+**TASK-259 — overlap, duration, concurrency**
+`1845_task259_triggers.md` · `1917_task259_duration.md` ·
+**`1926_task259_concurrency.md`** · `1937_task259_shortening.md` ·
+`1947_task259_sma20_batch.md` · `1958_task259_rounding_pk.md` · `2007_..._commit.md` ·
+`2016_..._push.md` · `2022_pr33_merge.md` · `2026-08-06_0824_batch_prod_measure.md` ·
+`0831_autoscan_duration.md`
+
+**Test isolation — TASK-262 / 263 / 218**
+`0923_task262_build.md` · `0934_task262_land.md` · `0953_task263_build.md` ·
+`1001_task263_land.md` · `1011_task259B_build.md` · `1017_task218_build.md` ·
+`1344_task218_land.md`
+
+**The outage and the watchdog**
+**`1406_queue_recon.md`** — the root cause · **`1439_watchdog_design.md`** — five options
+weighed · `1456_watchdog_build.md` — the dry run · `1511_watchdog_land.md` ·
+`1524_handoff_close.md`
+
+**Working method**
+`0844_workflow_redesign.md` · **`0911_method_final.md`** → distilled into
+`docs/WORKING_METHOD.md`
+
+---
+
+## ח. ⚠️ Three diagnoses that were WRONG today and got corrected
+
+Recorded so they are not repeated.
+
+### 1. "The two minute workflows are saturating the runner quota"
+
+Stated twice, including as "the strongest argument yet for concurrency". **Wrong.**
+`in_progress = 0` across four consecutive measurements. Saturation looks like
+`in_progress = the cap`, never zero. The real cause was a GitHub-side major outage, and
+`githubstatus.com` answered it in one request. **The lesson: a deep queue with zero
+execution is an availability failure, not a capacity failure — and check the provider
+before blaming your own config.**
+
+### 2. "The SMA20 batch might have made runs slower"
+
+**Wrong, and the opposite is true.** Day-over-day at the same hour, `agent_minute` went
+138s → 110s and 172s → 154s, while the untouched `auto_scan` did not move.
+
+### 3. "`concurrency` will flip `check_06` to CRITICAL"
+
+**Overstated.** That was computed from the daily aggregate (~26% success). But `check_06`
+never sees a day: `per_page=50` at `health_audit.py:639` is a ~24-minute window, and
+`health_audit` fires at 20:30Z and 03:00Z — both after the close, where runs finish in
+30-40s and nothing would ever be superseded. Against 1,000 real runs the verdict at those
+times is **PASSED 100%**. The 06:00 check could not be computed and no claim is made
+about it.
+
+**The pattern in all three: a plausible story was fitted to the evidence instead of the
+evidence being checked first.**
+
+---
+
+## ט. Warnings for a parallel session
+
+1. **Do not touch `.github/workflows/agent_minute.yml` or `auto_scan.yml`.** They carry
+   uncommitted `concurrency:` work. No `git checkout`, `git stash`, `git reset`, and no
+   `git add -A` — those two files must stay `M`.
+2. **The post-commit hook reads Google Sheets.** Every commit runs
+   `generate_project_state`, which pulls Sheets stats and takes 30-60s. Harmless when the
+   market is closed; during market hours it adds read-quota pressure on top of the 429s
+   already being seen. `PROJECT_STATE.md` is gitignored, so it never enters a commit.
+3. **`reports/` is tracked as of this commit.** 47 files. It is not in `.gitignore`
+   (verified with `git check-ignore`).
+4. **Do not deploy the watchdog from a session.** Installation is manual and belongs to
+   the owner — TASK-265.

@@ -49,6 +49,7 @@ AGENT_SHEET_NAMES = [
     "agent_scorecard",
     "weekly_summary",
     "skip_summary",
+    "skip_metrics",
     "shadow_gate_events",
 ]
 
@@ -215,6 +216,12 @@ AGENT_SHEET_HEADERS = {
         # Aggregation (5)
         "SkipReason", "Count", "Tickers", "ScoreMin", "ScoreMax",
     ],  # 7 columns
+    "skip_metrics": [
+        # T-401 (E-05): per-rejection entry metrics — the counterfactual the
+        # aggregated skip_summary never carried. One row per rejected candidate.
+        "Timestamp", "RunID", "Ticker", "SkipReason",
+        "MxV", "RunUp", "ATRX", "RSI", "REL_VOL", "ScanChange",
+    ],  # 10 columns
     "shadow_gate_events": [
         # TASK-128: per-run explicit-gate shadow summary (one row/run). ScoreSkips =
         # live SKIPs on Score; WouldAllow = of those, how many the explicit-only gate

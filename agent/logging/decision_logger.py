@@ -134,6 +134,8 @@ class DecisionLogger:
         self.run_start = _now.strftime("%Y-%m-%d %H:%M:%S")
         self.run_id = os.environ.get("GITHUB_RUN_ID") or _now.strftime("%Y%m%d-%H%M%S")
         self._skip_acc = {}  # reason_key -> {count, tickers[], score_min, score_max}
+        # T-401 (E-05): per-rejection entry metrics, flushed to skip_metrics.
+        self._skip_metrics_rows = []
         # TASK-128: in-run shadow-gate aggregation (one summary row per run). Tracks,
         # of the live SCORE_TOO_LOW skips, how many the explicit-only gate would ALLOW.
         self._shadow_acc = {"score_skips": 0, "would_allow": [], "mxv_price_enter": []}
@@ -153,6 +155,25 @@ class DecisionLogger:
             except (TypeError, ValueError):
                 score = None
         ticker = getattr(decision, "ticker", "?") or "?"
+        # T-401 (E-05): persist the six entry metrics for every rejection —
+        # skip_summary aggregates by reason and carries none of them, so the
+        # gate has no counterfactual. Parallel buffer; skip_summary untouched.
+        # getattr-guard: _accumulate_skip promises "never raises", and tests
+        # construct DecisionLogger via __new__ (no __init__).
+        if getattr(self, "_skip_metrics_rows", None) is None:
+            self._skip_metrics_rows = []
+        self._skip_metrics_rows.append([
+            getattr(decision, "timestamp", "") or getattr(self, "run_start", ""),
+            getattr(self, "run_id", ""),
+            ticker,
+            reason_raw,
+            getattr(decision, "mxv", ""),
+            getattr(decision, "run_up", ""),
+            getattr(decision, "atrx", ""),
+            getattr(decision, "rsi", ""),
+            getattr(decision, "rel_vol", ""),
+            getattr(decision, "scan_change", ""),
+        ])
         entry = self._skip_acc.get(key)
         if entry is None:
             self._skip_acc[key] = {
@@ -207,6 +228,34 @@ class DecisionLogger:
             return len(rows)
         except Exception as e:
             print(f"[DecisionLogger] skip_summary flush failed (non-fatal): {e}", file=sys.stderr)
+            return 0
+
+    def flush_skip_metrics(self, writer=None) -> int:
+        """T-401 (E-05): write the per-rejection entry metrics to the
+        skip_metrics tab — the counterfactual skip_summary never carried.
+
+        Mirrors flush_skip_summary: ONE batched append per run, lazy worksheet
+        resolution, never raises. `writer` is an injectable seam for tests
+        (same idiom as reconciler.portfolio_row_appender). Returns the number
+        of rows written (0 on no-op/error).
+        """
+        if not self._skip_metrics_rows:
+            return 0
+        rows = self._skip_metrics_rows
+        try:
+            if writer is not None:
+                if not writer(rows):
+                    return 0
+            else:
+                ws = sheets_manager.get_worksheet("skip_metrics")
+                if ws is None:
+                    print("[DecisionLogger] skip_metrics worksheet unavailable", file=sys.stderr)
+                    return 0
+                sheets_manager.safe_append_rows(ws, rows)
+            self._skip_metrics_rows = []
+            return len(rows)
+        except Exception as e:
+            print(f"[DecisionLogger] skip_metrics flush failed (non-fatal): {e}", file=sys.stderr)
             return 0
 
     # ── TASK-128: explicit-gate shadow summary (mirrors skip_summary) ──────────

@@ -15,6 +15,7 @@ Used by:
 import os
 import smtplib
 import logging
+from datetime import datetime, timedelta
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from typing import Optional
@@ -99,8 +100,83 @@ def send_email(subject: str, html_body: str) -> bool:
     return sender.send(subject, html_body)
 
 
-def send_alert(error_summary: str, details: str = "") -> bool:
-    """Send urgent alert email immediately."""
+# T-201 leg B: alert throttle — idempotency-key (error_summary) checked
+# against system_events inside a window. Without it a persistent failure
+# (e.g. a 429-storm keeping errors>0 every minute) mails every minute.
+ALERT_THROTTLE_WINDOW_MIN = 30
+_ALERT_EVENT_TYPE = "ALERT_EMAIL"
+
+
+def _default_event_reader():
+    # The same cached read the orchestrator already performs each cycle
+    # (sheets_manager.get_sheet_records carries a 60s TTL cache).
+    import sheets_manager
+    return sheets_manager.get_sheet_records("system_events") or []
+
+
+def _default_event_writer(row):
+    import sheets_manager
+    ws = sheets_manager.get_worksheet("system_events")
+    if ws:
+        sheets_manager.safe_append_row(ws, row)
+
+
+def _recently_alerted(error_summary, records, now) -> bool:
+    cutoff = now - timedelta(minutes=ALERT_THROTTLE_WINDOW_MIN)
+    for rec in records:
+        if rec.get("EventType") != _ALERT_EVENT_TYPE:
+            continue
+        if rec.get("Message") != error_summary:
+            continue
+        try:
+            ts = datetime.fromisoformat(str(rec.get("Timestamp", "")))
+        except ValueError:
+            continue
+        if ts.tzinfo is None:
+            ts = ts.replace(tzinfo=now.tzinfo)
+        if ts >= cutoff:
+            return True
+    return False
+
+
+def send_alert(error_summary: str, details: str = "", *,
+               sender=None, event_reader=None, event_writer=None,
+               now=None) -> bool:
+    """Send urgent alert email, throttled per error_summary.
+
+    Identical error_summary already alerted inside the last
+    ALERT_THROTTLE_WINDOW_MIN minutes (per system_events) ⇒ no send,
+    returns False. Never raises. Fail-CLOSED on a failed system_events
+    read: during the exact storm this throttle exists for, the read is
+    what fails — sending on read-failure would mail every minute.
+    """
+    if now is None:
+        import pytz
+        now = datetime.now(pytz.timezone("America/Lima"))
+    # Default (uninjected) throttle state lives in the LIVE system_events
+    # tab. Touch it only when SMTP is actually configured: without SMTP no
+    # real mail can go out, so there is no storm to throttle — and an
+    # uninjected local/test call must never do live Sheets I/O (on
+    # 2026-08-07 exactly that wrote a test row into production).
+    _configured = EmailSender().is_configured()
+    reader = event_reader or (_default_event_reader if _configured else None)
+    writer = event_writer or (_default_event_writer if _configured else None)
+    if reader is not None:
+        try:
+            records = reader()
+        except Exception as e:
+            logger.error(
+                "Alert throttle: system_events read failed (%s) — suppressing '%s'",
+                e, error_summary,
+            )
+            return False
+        if _recently_alerted(error_summary, records, now):
+            logger.info(
+                "Alert throttled (<%d min, already alerted): %s",
+                ALERT_THROTTLE_WINDOW_MIN, error_summary,
+            )
+            return False
+
     subject = f"🚨 RidingHigh Agent — {error_summary}"
     html = f"""
     <html><body style="font-family: -apple-system, sans-serif;">
@@ -114,4 +190,14 @@ def send_alert(error_summary: str, details: str = "") -> bool:
       </p>
     </body></html>
     """
-    return send_email(subject, html)
+    ok = (sender or send_email)(subject, html)
+    if ok and writer is not None:
+        # Record the send so sibling processes (each minute-run is a new
+        # process) see it through system_events. Best-effort, never raises.
+        row = [now.isoformat(), _ALERT_EVENT_TYPE, "CRITICAL",
+               "email_sender", error_summary, "", "sent"]
+        try:
+            writer(row)
+        except Exception as e:
+            logger.warning("Alert throttle: event write failed (non-fatal): %s", e)
+    return ok

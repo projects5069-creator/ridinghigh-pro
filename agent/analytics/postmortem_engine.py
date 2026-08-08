@@ -204,12 +204,18 @@ class PostmortemEngine:
             exit_dt = datetime.strptime(exit_date, "%Y-%m-%d")
             days = max((exit_dt - entry_dt).days + 1, 1)
 
-            bars = self.data_provider.get_daily_bars(ticker, days=days, end_date=exit_date)
+            bars = self.data_provider.get_daily_bars(ticker, days=days, end_date=exit_dt)
             if bars is None or len(bars) == 0:
                 return None, None
 
-            mfe = float(bars["Low"].min()) if "Low" in bars.columns else None
-            mae = float(bars["High"].max()) if "High" in bars.columns else None
+            # T-402 (C-09 root cause): data_provider.get_daily_bars returns
+            # lowercase columns ('low'/'high'); the old "Low"/"High" lookup
+            # silently yielded None,None on every close — 0/169 filled.
+            # Case-insensitive lookup fixes it either way.
+            cols = {str(c).lower(): c for c in bars.columns}
+            lo_col, hi_col = cols.get("low"), cols.get("high")
+            mfe = float(bars[lo_col].min()) if lo_col is not None else None
+            mae = float(bars[hi_col].max()) if hi_col is not None else None
 
             return mfe, mae
         except Exception as e:
