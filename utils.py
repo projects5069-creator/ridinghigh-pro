@@ -884,6 +884,16 @@ def _sanitized_overview_class():
         def _get_table(self, rows, df, num_col_index, table_header, limit=-1):
             import pandas as pd
 
+            # finviz renamed the screener th 'Change' → 'Change %' (2026-08-07),
+            # which both broke every sort_values(by='Change') downstream and
+            # dropped the column from NUMBER_COL's numeric conversion, leaving
+            # raw '19.63%' strings. Restore the old contract at the single
+            # funnel: same column name, fraction floats.
+            table_header = ["Change" if h == "Change %" else h
+                            for h in table_header]
+            num_col_index = set(num_col_index) | {
+                i for i, h in enumerate(table_header) if h == "Change"}
+
             body = rows[1:]
             if limit != -1:
                 body = body[0:limit]

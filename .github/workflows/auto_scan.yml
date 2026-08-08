@@ -20,8 +20,7 @@ jobs:
           python-version: '3.11'
 
       - name: Install dependencies
-        run: |
-          pip install finvizfinance yfinance pandas gspread google-auth google-auth-oauthlib google-api-python-client ta pytz pandas_market_calendars alpaca-py
+        run: pip install -r requirements.txt
 
       - name: Run scanner
         env:
