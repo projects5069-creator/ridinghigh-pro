@@ -351,3 +351,20 @@ Two hard constraints on the Project Knowledge file (`docs/*PK*.md`):
 This refines RULE #13 (still update the PK on close) and the rhpro-live
 skill (still read the live PK): read it and act on it, but do NOT echo its
 body into output.
+
+---
+
+## RULE #15: אזכורי-כלי לא נכנסים לתוצרים ציבוריים
+
+הכלל שחל על הודעות-קומיט חל **באותה מידה** על גוף PR ועל תיאורי issue:
+אין "🤖 Generated with Claude Code", אין קישור ל-claude.com/claude-code,
+אין `Co-Authored-By: Claude`, ואין אזכור אחר של הכלי.
+
+חל על: הודעת-קומיט · גוף PR · תגובות ב-PR · תיאור issue · תגובות ב-issue.
+
+⚠️ למה נכתב (8/8/2026): הכלל היה מנוסח לקומיטים בלבד
+(`.claude/skills/rh-task/SKILL.md`), ולכן חמשת הקומיטים של אותו יום יצאו
+נקיים בעוד ש-PR ‏#40/#41/#42 נשאו את השורה. הפער היה בניסוח, לא בביצוע.
+
+⚠️ המקור אינו קובץ שאפשר לכבות — זו ברירת-מחדל של הכלי. הכלל הזה גובר עליה,
+ולכן הוא חייב להיות **כתוב**. בדיקה לפני כל `gh pr create` / `gh pr edit`.

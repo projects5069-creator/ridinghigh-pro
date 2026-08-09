@@ -1,7 +1,7 @@
-name: repo guards (filename length · hook wiring)
+name: repo guards (filename length · hook wiring · tool mentions)
 
 # The job id stays `guard` on purpose — that is the check name already referenced
-# on open PRs. Two independent guards run in it; each fails the job on its own.
+# on open PRs. Three independent guards run in it; each fails the job on its own.
 #
 # Why (TASK-133): a 333-byte backlog basename broke actions/checkout on the Linux
 # runner (ext4 caps a filename component at 255 bytes), taking CI down ~16h. This
@@ -12,7 +12,16 @@ name: repo guards (filename length · hook wiring)
 
 on:
   push:
+  # ⚠️ `edited` is listed on purpose. The default pull_request types are
+  # opened, synchronize and reopened — NOT edited — so a PR opened clean and
+  # then edited to add a tool attribution would never be re-checked, and the
+  # tool-mention guard below would be decorative.
+  # ⚠️ This affects the OTHER TWO guards in this job as well: they will now
+  # also run when a PR title or body is edited. Harmless (both read only the
+  # repo tree, which an edit does not change) but it is a real behaviour
+  # change and a few extra runs, so it is stated rather than discovered.
   pull_request:
+    types: [opened, edited, synchronize, reopened]
 
 permissions:
   contents: read
@@ -33,3 +42,14 @@ jobs:
       # its own absence; CI is the only place that can be loud about it.
       - name: Check hook wiring is reachable from a fresh clone
         run: bash scripts/check_hook_wiring.sh
+
+      # Why (2026-08-08): the no-attribution rule was written for COMMIT
+      # MESSAGES only, so all five commits that day were clean while PR #40,
+      # #41 and #42 each carried the tool line. A wording gap is invisible
+      # until someone reads it; this reads it every time. RULE #15 in CLAUDE.md.
+      # The script reads $GITHUB_EVENT_PATH rather than an interpolated
+      # ${{ }} expression, so the exact CI path can be reproduced off-runner
+      # with a synthetic payload — `check_no_tool_mentions.sh --self-test`
+      # covers all four patterns in both directions plus the push-event skip.
+      - name: PR body carries no tool attribution
+        run: bash scripts/check_no_tool_mentions.sh

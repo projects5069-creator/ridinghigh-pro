@@ -45,3 +45,7 @@ description: Use when executing a numbered backlog task (TASK-NNN) in RidingHigh
 
 קומיט בשם מפורש (בלי Co-Authored-By, בלי `git add -A`), עדכון סטטוס התיק,
 ‏PK אם השתנו נוסחאות/משקלים/workflows. ‏push ומיזוג — באישור נפרד תמיד.
+
+⚠️ **אזכורי-כלי — לא בקומיט ולא ב-PR.** אין "Generated with Claude Code",
+אין קישור ל-claude.com/claude-code, אין `Co-Authored-By: Claude` — לא
+בהודעת-הקומיט, לא בגוף ה-PR, לא בתגובות ולא בתיאורי issue. ‏RULE #15.
