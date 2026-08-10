@@ -69,12 +69,29 @@ for x in tasks:
         if r in nums:
             indeg[r] += 1
 
-WIN = re.compile(r"חלון-המדידה|חלון המדידה|7/9|n_ENTER|קפוא עד 4/9|measurement window")
+WIN = re.compile(r"חלון-המדידה|חלון המדידה|7/9|n_ENTER|measurement window")
 BLK = re.compile(r"חוסם|נחסם|blocked|blocks |תלוי-סדר|gated on")
 GATE = re.compile(r"ייסגר כאשר:|שער-קבלה|שער קבלה|Acceptance Criteria|acceptance gate")
+# ⚠️ 2026-08-10, second pass. The first version collapsed "touches the
+# measurement window" and "needs attention now" into one 🔴, so TASK-276 and
+# TASK-279 — both ruled explicitly to land AFTER 2026-09-04 — sat at the top of
+# the urgent list. A list that shows you what you cannot act on is a list you
+# stop reading. Urgency and window-state are now two independent fields.
+# ⚠️ the first cut of this regex missed TASK-279 for two independent reasons,
+# both measured 2026-08-10: it states its constraint in ISO form ("after
+# 2026-09-04 only"), and its Hebrew phrasing wrapped across a line break
+# ("…אלא אחרי\n4/9…"). Hence \s+ instead of a literal space, and the ISO date.
+FROZEN = re.compile(r"אחרי[\s-]+4/9|קפוא עד[\s-]+4/9|לא לפני[\s-]+4/9|נכנסת אחרי"
+                    r"|after\s+4/9|after\s+2026-09-04|2026-09-04 only|frozen until")
+LATE = re.compile(r"1/11|2026-11-01|November|נובמבר|15/8|שבת 15/8|בחורף|אוקטובר")
 
 for x in tasks:
-    if WIN.search(x["text"]):
+    frozen = bool(FROZEN.search(x["text"]))
+    late = bool(LATE.search(x["text"]))
+    x["w"] = "🧊" if frozen else ("⏳" if late else "  ")
+    if frozen:                                   # ruled for after the window
+        x["p"] = "🟡"
+    elif WIN.search(x["text"]):
         x["p"] = "🔴"
     elif indeg[x["n"]] >= 2 or BLK.search(x["text"]):
         x["p"] = "🟠"
@@ -88,26 +105,34 @@ tasks.sort(key=lambda x: (order[x["p"]], -x["deg"], -x["age"]))
 
 nogate = [x for x in tasks if x["gate"] == "❌"]
 red = [x for x in tasks if x["p"] == "🔴"]
-urgent = (red + [x for x in tasks if x["p"] == "🟠"])[:8]
+# a frozen ticket is never urgent — that is the whole point of the split
+urgent = [x for x in (red + [y for y in tasks if y["p"] == "🟠"]) if x["w"] != "🧊"][:8]
 
 L = []
 L.append(f"# מה יושב על הראש — {len(tasks)} תיקים פתוחים")
 L.append(f"נוצר {datetime.datetime.now():%Y-%m-%d %H:%M} · `scripts/generate_open_tasks_digest.sh`")
 L.append("")
-L.append("🔴 מאיים על חלון-המדידה · 🟠 חוסם עבודה אחרת · 🟡 יכול לחכות")
+L.append("**דחיפות:** 🔴 עכשיו · 🟠 חוסם עבודה אחרת · 🟡 יכול לחכות")
+L.append("**חלון:** 🧊 הוכרע לאחרי 4/9 · ⏳ דדליין מאוחר (נוב׳/אוק׳/15.8) · ריק = ללא")
 L.append("`שער` = יש קריטריון-סגירה מדיד · `↘N` = כמה תיקים פתוחים מפנים אליו")
+L.append("⚠️ תיק 🧊 לעולם אינו ברשימת-הדחופים, גם אם גופו נוקב בחלון-המדידה.")
 L.append("")
 L.append(f"## הדחופים ({len(urgent)})")
 for x in urgent:
-    L.append(f"- {x['p']} **{x['id']}** ({x['age']}d) {x['title'][:70]}")
+    L.append(f"- {x['p']}{x['w'].strip()} **{x['id']}** ({x['age']}d) {x['title'][:68]}")
+L.append("")
+L.append(f"## קפואים לאחרי 4/9 ({sum(1 for x in tasks if x['w']=='🧊')})")
+L.append(" ".join(x["id"] for x in tasks if x["w"] == "🧊") or "—")
 L.append("")
 L.append("## כל התיקים")
 for x in tasks:
     ttl = x["title"]
-    line = f"{x['id']} | {ttl} | {x['age']}d | {x['p']} | {x['gate']} | ↘{x['deg']}"
+    def mk(t):
+        return f"{x['id']} | {t} | {x['age']}d | {x['p']} | {x['w']} | {x['gate']} | ↘{x['deg']}"
+    line = mk(ttl)
     while len(line) > MAXLINE and len(ttl) > 12:
         ttl = ttl[:-4] + "…"
-        line = f"{x['id']} | {ttl} | {x['age']}d | {x['p']} | {x['gate']} | ↘{x['deg']}"
+        line = mk(ttl)
     L.append(line)
 L.append("")
 L.append(f"## חוב: {len(nogate)}/{len(tasks)} תיקים בלי שער-קבלה מדיד "
