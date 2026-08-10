@@ -35,13 +35,27 @@ else
   echo "3. אכיפת-סקילים : כבויה · הדלקה: touch $ENFORCE"
 fi
 
-TODAY=$(date +%F)
+# Test-only override, אותו דפוס בדיוק כמו window_guard.sh שורה 35 —
+# מנגנון אחד בשני המקומות, לא שניים שונים.
+TODAY="${WINDOW_GUARD_DATE:-$(date +%F)}"
 if [ "$TODAY" \< "$WIN_START" ]; then
   echo "4. חלון-המדידה  : טרם נפתח (נפתח $WIN_START) · היום $TODAY"
 elif [ "$TODAY" \> "$WIN_END" ]; then
   echo "4. חלון-המדידה  : נסגר ($WIN_END) · היום $TODAY"
 else
-  echo "4. חלון-המדידה  : ⚠️ פתוח ($WIN_START..$WIN_END) · היום $TODAY — order_manager.py ו-decision_logic.py קפואים"
+  # יום-מסחר N מתוך 20: ספירת ימי-חול מ-WIN_START ועד היום, כולל.
+  # אין חגי-בורסה בתוך 10/8..4/9 (Labor Day הוא 7/9, אחרי הסגירה).
+  DAYN=$(/usr/bin/python3 - "$WIN_START" "$TODAY" <<'PYEOF'
+import sys, datetime as dt
+a=dt.date.fromisoformat(sys.argv[1]); b=dt.date.fromisoformat(sys.argv[2])
+n=0; d=a
+while d<=b:
+    if d.weekday()<5: n+=1
+    d+=dt.timedelta(days=1)
+print(n)
+PYEOF
+)
+  echo "4. חלון-המדידה  : ⚠️ פתוח — יום $DAYN מתוך 20 ($WIN_START..$WIN_END) · היום $TODAY — order_manager.py ו-decision_logic.py קפואים"
 fi
 
 PK=$(ls -1t "$HOME/RidingHighPro"/docs/*PK*.md 2>/dev/null | head -1)

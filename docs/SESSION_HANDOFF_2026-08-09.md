@@ -15,7 +15,7 @@
 ## 2 · מצב חי
 
 ```
-origin/main       d5bd6b9  (Merge pull request #48 from projects5069-creator/docs/handof)
+origin/main       נגזר חי: `git log origin/main --oneline -1` (אל תצטט מכאן)
 PR #48            מוזג 2026-08-10 · merge=d5bd6b9 · 4/4 בדיקות עברו
 ענף עבודה         docs/window-open-2026-08-10  (בסיס d5bd6b9, נוצר מ-origin/main)
 ⚠️ ענף ישן        docs/handoff-2026-07-29 מוזג ונסגר — לא ממשיכים עליו
