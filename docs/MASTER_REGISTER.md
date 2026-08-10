@@ -788,3 +788,18 @@ dispatching-parallel-agents      ~/.claude/plugins/cache/superpowers-marketplace
 מלאי-הסקילים המלא (שלב 0): 9 ייעודיים · anthropic-bundle 18 · superpowers 14
 (כפול בשני marketplaces) · trailofbits 3 · data 12 · אפס ברמת-הפרויקט.
 נדחו בנימוק בסריקה שבראש הסשן.
+
+---
+
+## עדכון 2026-08-09 · סגירת-יום
+
+**הכרעה — TASK-259: לא פורסים.** החפיפה ירדה מ-92.5% ל-10.2%;
+gate266_timeout.sh מודד 10/8 בערב ועונה מעצמו. ה-yml נשארים לא-מקומטים.
+
+**נסגרו:** TASK-270 · TASK-126 AC#2 — 359,034 רשומות, אפס FAILED.
+
+**TASK-289 הוכרע:** 27/5 היה יום 429 מלא. נגזרו TASK-297 ו-TASK-298.
+
+**נפתחו:** 283..299.
+
+**לבדיקה:** TASK-248 — כותרת סותרת את requirements החי.
