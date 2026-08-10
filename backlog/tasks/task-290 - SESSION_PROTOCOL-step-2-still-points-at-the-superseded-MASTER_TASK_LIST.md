@@ -4,6 +4,7 @@ title: SESSION_PROTOCOL step 2 still points at the superseded MASTER_TASK_LIST
 status: To Do
 assignee: []
 created_date: '2026-08-09 14:24'
+updated_date: '2026-08-10 03:57'
 labels: []
 dependencies: []
 priority: low
@@ -18,6 +19,6 @@ ordinal: 288000
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 הפרוטוקול מצביע על MASTER_REGISTER
+- [x] #1 הפרוטוקול מצביע על MASTER_REGISTER
 - [ ] #2 אומת בפתיחת-היום הבא
 <!-- AC:END -->

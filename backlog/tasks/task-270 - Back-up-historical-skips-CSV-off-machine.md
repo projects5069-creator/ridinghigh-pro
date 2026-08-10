@@ -1,9 +1,10 @@
 ---
 id: TASK-270
 title: Back up historical skips CSV off-machine
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-08-08 16:20'
+updated_date: '2026-08-10 03:51'
 labels: []
 dependencies: []
 priority: high
@@ -34,3 +35,9 @@ research/historical_skips.csv — 16MB, 138,915 SKIP records from 2026-05-11, gi
 
 מה שאינו פתוח: העובדה שאחרי ~9/8, מק שאובד = דאטה שאבד לצמיתות ולא ניתן
 לחילוץ חוזר.
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+Closed 2026-08-09. Two verified off-machine archives under ~/ClaudeWork/RidingHighPro/archives, synced by Drive Desktop: historical_skips_20260511-0604_v1.csv.gz (the range the ticket asked for) and historical_skips_20260511-0630_v2.csv.gz (the same plus the 6/04-6/30 gap). Both pass gzip -t; the v2 md5 matches MANIFEST_v2. The head of the file is byte-identical to v1, so the original 138,915 rows were not disturbed by the append.
+<!-- SECTION:FINAL_SUMMARY:END -->
