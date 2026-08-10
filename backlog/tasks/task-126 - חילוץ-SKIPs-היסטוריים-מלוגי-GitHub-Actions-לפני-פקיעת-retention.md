@@ -1,10 +1,10 @@
 ---
 id: TASK-126
 title: חילוץ SKIPs היסטוריים מלוגי GitHub Actions לפני פקיעת retention
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-06-10 01:03'
-updated_date: '2026-06-30 19:39'
+updated_date: '2026-08-10 03:51'
 labels: []
 dependencies: []
 priority: medium
@@ -16,6 +16,13 @@ ordinal: 129000
 <!-- SECTION:DESCRIPTION:BEGIN -->
 Route B prints [SKIP] lines to Actions stdout. Logs retained ~90 days: May-12 runs expire ~Aug-10. One-off scraper (gh run list + gh run view --log, grep [SKIP]) to rebuild counterfactual dataset May-12..today into local CSV. Read-only, no Sheets writes.
 <!-- SECTION:DESCRIPTION:END -->
+
+## Acceptance Criteria
+<!-- AC:BEGIN -->
+- [x] #1 ליבת-חילוצה בוצעה — 138,915 SKIPs, טווח 5/11→6/04 (Done 10/6)
+- [x] #2 resume להשלמת פער 6/04→6/30 (לא דחוף, פוקע ~ספטמבר)
+- [x] #3 DR: גיבוי ה-CSV המוקדם מחוץ-למכונה לפני ~9/8 (local-only ב-gitignore)
+<!-- AC:END -->
 
 ## Implementation Notes
 
@@ -30,21 +37,8 @@ resume/checkpoint, per-run count anti-silent-fail). רץ 10/6: research/historic
 אם המק נופל + הלוגים המוקדמים פקעו (~9/8) → דאטה אבוד לתמיד. שווה גיבוי מחוץ-למכונה לפני 9/8.
 <!-- SECTION:NOTES:END -->
 
-## Acceptance Criteria
-<!-- AC:BEGIN -->
-- [x] #1 ליבת-חילוצה בוצעה — 138,915 SKIPs, טווח 5/11→6/04 (Done 10/6)
-- [ ] #2 resume להשלמת פער 6/04→6/30 (לא דחוף, פוקע ~ספטמבר)
-- [ ] #3 DR: גיבוי ה-CSV המוקדם מחוץ-למכונה לפני ~9/8 (local-only ב-gitignore)
-<!-- AC:END -->
+## Final Summary
 
-## RESTATED 2026-08-04, AND IT HAS A DEADLINE
-
-The extraction is done. What is left is a backup, and it expires within days.
-
-DONE: 138,915 SKIP records covering 2026-05-11 to 2026-06-04, extracted 10/6 into research/historical_skips.csv. The urgent window, the earliest logs, was saved.
-
-THE ONLY THING THAT MATTERS NOW is AC#3. Verified 2026-08-04: the file exists at research/historical_skips.csv, 15,992,167 bytes, dated 10 June, and research/ is in .gitignore at line 86. It exists on one machine and nowhere else. GitHub Actions log retention is about 90 days, so the 2026-05-11 logs expire around 2026-08-09. After that, if the machine is lost, the data is gone permanently and cannot be re-extracted.
-
-This is a single copy of a 16 MB file to somewhere off the machine. It is the cheapest action in the whole backlog and it has the nearest deadline.
-
-AC#2, resuming the 6/04 to 6/30 gap, is not urgent; those logs expire around September.
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+Closed 2026-08-09. AC#2: the 6/04-6/30 gap was extracted - 7,440 runs, 195,923 SKIPs, zero mismatches, zero failures - and the archived v2 CSV covers 2026-05-11 to 2026-06-30. AC#3: the CSV now exists off this machine, in the Drive-synced ClaudeWork archive, alongside a manifest recording its md5 and row count.
+<!-- SECTION:FINAL_SUMMARY:END -->

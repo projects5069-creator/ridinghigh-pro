@@ -45,6 +45,11 @@
 
 כשמזוהה כוונת פתיחת יום, בצע לפי הסדר:
 
+**צעד 0 — חובה, לפני כל דבר אחר:** `bash ~/RidingHighPro/scripts/session_startup_check.sh`
+והדפס את הפלט המלא. שש השורות שלו הן התנאים שהסשן פועל תחתם — שומר-החלון,
+אכיפת-הסקילים, מצב החלון, גרסת ה-PK ומספר המשימות. **אם שורה 1 ושורה 2
+שתיהן "לא" — אין שומר-חלון בסשן הזה; אל תיגע בקוד עד שהוא נטען.**
+
 ### שלב 1 — סקיל + אימות תקינות
 1. קרא ~/.claude/skills/rhpro-live/SKILL.md והצג שורת סקילים עם line count אמיתי.
 2. **הרץ `bash ~/RidingHighPro/scripts/check_skills_integrity.sh`** — חובה. אם FAIL, עצור ותקן לפני שממשיכים. (מונע את באג 26/5 שבו ה-superpowers שונו ל-.bak והסקילים נעלמו בשקט.)
@@ -56,7 +61,9 @@
 2. ה-SESSION_HANDOFF העדכני ביותר — ls -1t docs/SESSION_HANDOFF_*.md | head -1 ואז cat עליו. לעולם לא תאריך קשיח.
 3. PROJECT_STATE.md (בשורש) — מקומי-בלבד, gitignored (TASK-161). אם חסר (clone טרי / ריצת-ענן) — לחדש עם `uv run python3 generate_project_state.py`, לא לתהות למה הוא חסר.
 4. git log --oneline -10
-5. MASTER_TASK_LIST מלא + backlog task list --plain מלא
+5. `docs/MASTER_REGISTER.md` מלא + `backlog task list --plain` מלא.
+   ⚠️ **לא** `MASTER_TASK_LIST*` — הוא סומן SUPERSEDED ב-8/8 וקריאה ממנו
+   מחזירה תמונת-מצב מתה (TASK-290).
 6. בדיקות חיות: decision_log היום, ENTERs, Filter 9, reconciliation, agent_minute
 
 ### שלב 3 — קריאה לפני דיבור
