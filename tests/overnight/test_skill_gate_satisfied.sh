@@ -12,6 +12,14 @@ GATE="$HOME/.claude/hooks/pretooluse_skill_gate.sh"
 
 fail=0
 tmp="$(mktemp -d)"; sat="$tmp/sat.jsonl"; unsat="$tmp/unsat.jsonl"
+# 2026-08-10 — ISOLATION ONLY, no expectation changed. Phase-2 of the gate became
+# ENFORCING that day (it used to warn and never block). Phase-2 reads
+# /tmp/cc-task-type, so without isolating it this test inherits whatever the live
+# session happens to have declared and passes or fails by accident: measured
+# exit=1 against a live "declared:...:463" state and exit=0 the same minute with
+# the state isolated. A keystone test must not depend on ambient state.
+printf 'none:none:0\n' > "$tmp/state"; export SKILL_GATE_STATE="$tmp/state"
+export SKILL_GATE_LOGDIR="$tmp/log"   # synthetic blocks stay out of the real log
 # Real serialization (verified from a live transcript): name:Skill + "skill":"..."
 printf '%s\n' '{"type":"tool_use","name":"Skill","input":{"skill":"superpowers:systematic-debugging"}}' > "$sat"
 printf '%s\n' '{"type":"tool_use","name":"Bash","input":{"command":"ls"}}'                              > "$unsat"
