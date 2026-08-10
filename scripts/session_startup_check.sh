@@ -69,3 +69,12 @@ fi
 N=$(cd "$HOME/RidingHighPro" && backlog task list --plain 2>/dev/null \
      | awk '/:$/{h=$0} /TASK-/{if(h!~/Done|Archived|Cancelled/)c++} END{print c+0}')
 echo "6. משימות פתוחות: $N"
+
+# 7 (2026-08-10) — שורה 3 מדווחת רק אם מתג-האכיפה קיים; ב-10/8 נמדד ששער דלוק
+# יכול לדווח ירוק ולא לבדוק דבר. הבקרה היחידה שמבדילה היא הרצת ה-selftest,
+# וספירת החסימות בפועל: שער שלא ירה מעולם ושער שבור נראים זהה בלעדיה.
+SELF=$(cd "$HOME/RidingHighPro" && bash scripts/skill_gate_selftest.sh -q 2>/dev/null | head -1)
+LOG="$HOME/ClaudeWork/_machine/skill_gate/blocks.log"
+TDAY=$(date +%Y-%m-%d); YDAY=$(date -v-1d +%Y-%m-%d 2>/dev/null || date -d yesterday +%Y-%m-%d)
+BLK=$(grep -c -e "^$TDAY" -e "^$YDAY" "$LOG" 2>/dev/null | tr -d ' ')
+echo "7. ${SELF:-שער-סקילים: לא זמין} · חסימות מאתמול: ${BLK:-0}"
