@@ -78,3 +78,22 @@ LOG="$HOME/ClaudeWork/_machine/skill_gate/blocks.log"
 TDAY=$(date +%Y-%m-%d); YDAY=$(date -v-1d +%Y-%m-%d 2>/dev/null || date -d yesterday +%Y-%m-%d)
 BLK=$(grep -c -e "^$TDAY" -e "^$YDAY" "$LOG" 2>/dev/null | tr -d ' ')
 echo "7. ${SELF:-שער-סקילים: לא זמין} · חסימות מאתמול: ${BLK:-0}"
+
+# 8 (2026-08-10) — כפילויות-כניסה. ב-10/8, יום 1 של חלון-המדידה, JWEL ו-DKI
+# נכנסו פעמיים כל אחד בהפרש שנייה, משתי ריצות שהתחילו job באותה שנייה. איש לא
+# היה יודע אלמלא חיפשנו. הגלאי אינו מונע — הוא מוודא שלא נגלה את זה ב-7/9.
+# קורא דוח מוכן בלבד (הסריקה עולה מאות שליפות-לוג ואינה שייכת לפתיחת-סשן):
+#   uv run python3 scripts/detect_duplicate_entries_v1.py --date <יום>
+DUPDIR="$HOME/ClaudeWork/RidingHighPro/audit/duplicates"
+LASTSUM=$(ls -1 "$DUPDIR"/*.summary 2>/dev/null | sort | tail -1)
+if [ -n "$LASTSUM" ] && [ -r "$LASTSUM" ]; then
+  DUPDATE=$(basename "$LASTSUM" .summary)
+  DUPLINE=$(head -1 "$LASTSUM")
+  case "$DUPLINE" in
+    STATUS=CLEAN*) MARK="✅" ;;
+    *)             MARK="❌" ;;
+  esac
+  echo "8. כפילויות-כניסה: $MARK $DUPDATE — $DUPLINE"
+else
+  echo "8. כפילויות-כניסה: ⚠️ אין דוח — הגלאי טרם רץ (scripts/detect_duplicate_entries_v1.py)"
+fi
