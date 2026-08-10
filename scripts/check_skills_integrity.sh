@@ -34,7 +34,7 @@ for skill in systematic-debugging brainstorming writing-plans verification-befor
 done
 
 # 4) RH-dedicated skills
-for skill in rhpro-live rhpro-session backtest-expert data-quality-checker position-sizer signal-postmortem trader-memory-core time-check; do
+for skill in rhpro-live rhpro-session claudework-filing backtest-expert data-quality-checker position-sizer signal-postmortem trader-memory-core time-check; do
   if [[ -f ~/.claude/skills/$skill/SKILL.md ]]; then
     echo "✅ rh: $skill"
   else
