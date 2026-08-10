@@ -15,15 +15,20 @@
 ## 2 · מצב חי
 
 ```
-origin/main       7d9353f
-ענף               docs/handoff-2026-07-29
-לא מקומט במכוון   2 yml (concurrency, הכרעת-259) · docs/auto-dancer/
+origin/main       d5bd6b9  (Merge pull request #48 from projects5069-creator/docs/handof)
+PR #48            מוזג 2026-08-10 · merge=d5bd6b9 · 4/4 בדיקות עברו
+ענף עבודה         docs/window-open-2026-08-10  (בסיס d5bd6b9, נוצר מ-origin/main)
+⚠️ ענף ישן        docs/handoff-2026-07-29 מוזג ונסגר — לא ממשיכים עליו
+⚠️ main מקומי     מסועף: 92 מאחור + 29 קומיטים שאינם ב-origin (TASK-300).
+                  אל תריץ git branch -f main. bundle נשמר ב-_machine/repo_bundles
+לא מקומט במכוון   2 yml (הכרעת-259; patch ב-ClaudeWork/RidingHighPro/decisions)
+                  docs/auto-dancer/ — נכלל ב-TASK-300
 קוד-מסחר          order_manager · decision_logic · config — לא נגענו
 window_guard      אומת 6/6. רשום גם גלובלית וגם בפרויקט. נדלק בחצות פרו
 skill-gate        אכיפה דלוקה. REQUIRE-SKILLS = חובה בפועל
 startup check     scripts/session_startup_check.sh — צעד 0 בפרוטוקול
 PK                v4.20 (נקרא מהקובץ החי, לא מצוטט)
-משימות פתוחות     79
+משימות פתוחות     80
 ClaudeWork        819M, מגובה ל-Drive
 ```
 
@@ -81,7 +86,9 @@ hook ב-.claude של פרויקט   לא נטען בסשן שנפתח מהבית
 
 ## 8 · פתוח
 
-TASK-290 AC#2 (אימות בפתיחת-היום מחר) · 3 ריפוזיטוריז לריפו פרטי ·
-TASK-291 סידור audit · TASK-294 Vardan.
+TASK-300 (main מסועף + auto-dancer — נפתח 9/8, high) · TASK-290 AC#2 (נסגרת
+מעצם צעד-0 מחר) · TASK-296 החלפת מפתח 15/8 · TASK-292 · TASK-294 · TASK-291 ·
+gate265 AC#4 · שלושת הריפואים חסרי-remote.
 
-חתימה: 2026-08-09, נכתב מחדש אחרי סגירת-הפערים. אפס שינוי בקוד-מסחר.
+חתימה: 2026-08-09, נכתב מחדש אחרי סגירת-הפערים ואחרי מיזוג PR #48.
+אפס שינוי בקוד-מסחר.
