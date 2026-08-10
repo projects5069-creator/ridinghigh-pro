@@ -60,11 +60,23 @@ def gh(args):
 
 
 def run_ids(date):
+    # ⚠️ --limit truncates from the NEWEST side. Measured 2026-08-10 evening:
+    # with --limit 400 the day had grown to 431+ runs (the cron keeps creating
+    # post-close runs until 21:59Z), the MORNING fell off the list, and the
+    # detector reported CLEAN on the very day it was built to flag — 4 ENTERs
+    # instead of 9, both duplicate pairs gone. A minute-cron weekday tops out
+    # at ~540 runs; 1000 covers it with margin, and the cap is asserted below.
     out = gh(["run", "list", "--repo", REPO, "--workflow", WORKFLOW,
-              "--created", date, "--limit", "400",
+              "--created", date, "--limit", "1000",
               "--json", "databaseId,conclusion",
               "--jq", '.[]|select(.conclusion=="success")|.databaseId'])
-    return [x for x in out.splitlines() if x.strip()]
+    ids = [x for x in out.splitlines() if x.strip()]
+    if len(ids) >= 950:
+        print(f"⚠️ run list near the 1000 cap ({len(ids)}) — coverage no longer "
+              f"guaranteed; refusing to report CLEAN from a truncated list.",
+              file=sys.stderr)
+        sys.exit(2)
+    return ids
 
 
 def enters_from_gh(date):
