@@ -19,8 +19,17 @@ origin/main       d5bd6b9  (Merge pull request #48 from projects5069-creator/doc
 PR #48            מוזג 2026-08-10 · merge=d5bd6b9 · 4/4 בדיקות עברו
 ענף עבודה         docs/window-open-2026-08-10  (בסיס d5bd6b9, נוצר מ-origin/main)
 ⚠️ ענף ישן        docs/handoff-2026-07-29 מוזג ונסגר — לא ממשיכים עליו
-⚠️ main מקומי     מסועף: 92 מאחור + 29 קומיטים שאינם ב-origin (TASK-300).
-                  אל תריץ git branch -f main. bundle נשמר ב-_machine/repo_bundles
+⚠️ main מקומי     מסועף: 92 מאחור + 29 קדימה — מצביע על קצה
+                  origin/fix/auto-dancer-planmd. הקומיטים כן ב-remote
+                  (תוקן 9/8; המדידה הראשונה השוותה מול origin/main בלבד).
+                  מלכודת, לא אובדן. אל תריץ checkout main. TASK-300
+⚠️ גיבוי-ריפואים  6 מתוך 14 מחזיקים קוד שאינו באף remote: ReboundPro 33 ·
+                  biotech 9 · RHPro 1 · vardan 26 · smallcap 4 · trade 71.
+                  7 bundles מאומתים ב-_machine/repo_bundles
+✅ צעד-0          session_startup_check נוסף ל-allowlist של השער — נמדד
+                  שהוא נחסם ב-exit 2 בתחילת סשן. בקרה 3/3 אחרי התיקון
+✅ ניטור-429      פקודה (א) תוקנה ואומתה בשני הכיוונים: errors=0 ב-6/8,
+                  errors=28/28 ב-27/5. תקרת-Sheets: 3 הרצות ביום
 לא מקומט במכוון   2 yml (הכרעת-259; patch ב-ClaudeWork/RidingHighPro/decisions)
                   docs/auto-dancer/ — נכלל ב-TASK-300
 קוד-מסחר          order_manager · decision_logic · config — לא נגענו

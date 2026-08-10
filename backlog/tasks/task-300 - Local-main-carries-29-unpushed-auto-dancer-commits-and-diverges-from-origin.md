@@ -1,9 +1,12 @@
 ---
 id: TASK-300
-title: Local main carries 29 unpushed auto-dancer commits and diverges from origin
+title: >-
+  Six repos carry commits that exist on no remote; local main is diverged and
+  misleading
 status: To Do
 assignee: []
 created_date: '2026-08-10 04:13'
+updated_date: '2026-08-10 04:40'
 labels: []
 dependencies: []
 priority: high
@@ -13,15 +16,18 @@ ordinal: 298000
 ## Description
 
 <!-- SECTION:DESCRIPTION:BEGIN -->
-נמצא 9/8 בהכנת בסיס-העבודה לחלון. ה-checkout ל-main נעצר, והחקירה גילתה שני דברים.
+נמצא 9/8, ותוקן באותו יום אחרי מדידה רחבה יותר.
 
-ה-main המקומי מפגר 92 קומיטים אחרי origin, ובמקביל מחזיק 29 קומיטים שאינם ב-origin - כלומר הוא מסועף, לא רק ישן. 29 הקומיטים הם עבודת auto-dancer מ-4-5 ביולי: 1,664 שורות ב-scripts/overnight ו-tests/overnight, כולל תשתית RPI מלאה - PLANNER, CRITIC, EXECUTOR, VERIFIER, scope-lock, תקציב-טוקנים לכל משימה, וטסטים הרמטיים לכל שלב.
+הממצא הראשון היה שגוי בחלקו. נקבע שם ש-29 קומיטים של auto-dancer אינם באף remote; המדידה הנכונה - git rev-list --count main --not --remotes - מחזירה אפס, ו-git branch -r --contains מראה שהם יושבים ב-origin/fix/auto-dancer-planmd. הטעות היתה להשוות מול origin/main בלבד. זו אותה מחלקת-שגיאה של כלי שבודק משהו צר יותר ממה שנראה.
 
-הסיכון: הקוד קיים רק על המק הזה. מדיניות-הגיבוי מ-9/8 מניחה ששנים-עשר הריפואים מגובים דרך ה-remote שלהם, וההנחה הזאת שגויה כאן. בנוסף, git branch -f main origin/main - פעולת-ניקוי שנראית שגרתית - היתה מייתמת אותם. הפעולה הזאת כמעט בוצעה ב-9/8 ונמנעה רק בגלל בדיקת ahead-count.
+מה שנכון ונשאר: ה-main המקומי מסועף - 92 קומיטים מאחור ו-29 קדימה - ולכן git checkout main נותן את תוכן ענף-ה-auto-dancer ולא את main. מלכודת אמיתית, אך לא סיכון-אובדן.
 
-הוקטן ב-9/8: bundle של main נשמר ב-ClaudeWork/_machine/repo_bundles/ridinghigh-pro_local-main_29-unpushed_2026-08-09.bundle ומגובה ל-Drive. זה מנטרל את סיכון-האובדן אך לא את השאלה.
+הסריקה הרחבה מצאה שישה ריפואים עם קוד שאינו אצל אף remote:
+ReboundPro 33 קומיטים ב-11 ענפים (יש remote, ובכל זאת) · biotech-screener 9 · RidingHighPro 1 בענף fix/96-check06-robustness · projects/vardan-tracker 26 (אין remote) · smallcap-median-study 4 (אין remote) · trade-tracker 71 (אין remote).
 
-באותה הכרעה נכללת docs/auto-dancer/: ארבעה קבצים untracked, שניים מהם .bak, ושניים תורי-הרצה מ-4-5 ביולי. הם שייכים לאותו מאמץ ואין טעם להכריע עליהם בנפרד.
+הוקטן 9/8: bundles מלאים (--all) נוצרו ואומתו לכולם תחת ClaudeWork/_machine/repo_bundles ומגובים ל-Drive. מדיניות-הגיבוי עודכנה - ההנחה 'יש remote ⇒ מגובה' הוחלפה בקריטריון הנמדד 'אפס קומיטים שאינם באף remote, בכל ענף'.
 
-שער-קבלה: הוכרע מה קורה ל-29 הקומיטים - נדחפים לענף, נזרקים, או נשארים מקומיים במודע עם גיבוי; ואם הם נשארים מקומיים, הוסף אזהרה מפורשת ב-BACKUP_POLICY שה-remote אינו מכסה אותם. הוכרע גם מה קורה ל-docs/auto-dancer/.
+נכלל גם docs/auto-dancer/: ארבעה קבצים untracked, שניים .bak ושניים תורי-הרצה מאותו מאמץ.
+
+שער-קבלה: לכל אחד מששת הריפואים הוכרע - נדחף, נזרק, או נשאר מקומי במודע עם bundle; ה-main המקומי יושר או סומן; והוכרע מה קורה ל-docs/auto-dancer.
 <!-- SECTION:DESCRIPTION:END -->
