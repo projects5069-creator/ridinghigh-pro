@@ -97,3 +97,29 @@ if [ -n "$LASTSUM" ] && [ -r "$LASTSUM" ]; then
 else
   echo "8. כפילויות-כניסה: ⚠️ אין דוח — הגלאי טרם רץ (scripts/detect_duplicate_entries_v1.py)"
 fi
+
+# 9-11 (2026-08-10) — חוב-המשימות. נמדד באותו יום: 87 תיקים פתוחים, 61 נפתחו
+# בשבוע מול 28 שנסגרו, 48% בלי קריטריון-סגירה, ושלושה תיקים חדשים שכפלו
+# קיימים. בקלוג שאיש לא רואה גדל פי-2.4 מקצב-הסגירה שלו.
+RHDIR="$HOME/RidingHighPro"
+
+# 9 · טריות ה-DIGEST — קובץ בן יומיים מתאר בקלוג אחר
+DG="$RHDIR/docs/OPEN_TASKS_DIGEST.md"
+if [ -r "$DG" ]; then
+  AGE_H=$(( ( $(date +%s) - $(stat -f %m "$DG" 2>/dev/null || stat -c %Y "$DG") ) / 3600 ))
+  CNT=$(grep -cE '^TASK-[0-9]+ \| ' "$DG" 2>/dev/null | tr -d ' ')
+  if [ "$AGE_H" -lt 24 ]; then
+    echo "9. תקציר-המשימות: ✅ $CNT תיקים · גיל ${AGE_H}ש"
+  else
+    echo "9. תקציר-המשימות: ❌ ישן (${AGE_H}ש) — הרץ scripts/generate_open_tasks_digest.sh"
+  fi
+else
+  echo "9. תקציר-המשימות: ❌ אינו קיים — הרץ scripts/generate_open_tasks_digest.sh"
+fi
+
+# 10 · תיקים חדשים בלי תנאי-סגירה (לא רטרואקטיבי — רק של היום)
+echo "10. $(bash "$RHDIR/scripts/check_task_gate.sh" -q 2>/dev/null || true)"
+
+# 11 · כמה תיקים נפתחו אתמול — התקציב, במבט לאחור
+YD=$(date -v-1d +%Y-%m-%d 2>/dev/null || date -d yesterday +%Y-%m-%d)
+echo "11. $(bash "$RHDIR/scripts/check_task_budget.sh" -q --date "$YD" 2>/dev/null || true)"
