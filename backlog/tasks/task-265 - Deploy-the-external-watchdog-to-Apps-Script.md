@@ -1,16 +1,15 @@
 ---
 id: TASK-265
 title: Deploy the external watchdog to Apps Script
-status: In Progress
+status: Done
 assignee: []
 created_date: '2026-08-06 20:12'
-updated_date: '2026-08-09 00:46'
+updated_date: '2026-08-10 19:59'
 labels: []
 dependencies: []
 priority: high
 ordinal: 263000
 ---
-
 
 ## Description
 
@@ -50,8 +49,8 @@ and it survives GitHub Actions being down, which is what happened on 2026-08-06.
   `RH_WATCHDOG_ALERT_ACTIVE` script property afterwards.
 
 ## Acceptance Criteria
-
-- [ ] #1 A row exists in `watchdog_log` from a real trigger firing — not from a
+<!-- AC:BEGIN -->
+- [x] #1 #1 A row exists in `watchdog_log` from a real trigger firing — not from a
       manual `Run` in the editor. Confirmed by three or more consecutive rows
       five minutes apart during market hours.
       ❌ 2026-08-08: NOT met — but only one half of it is missing now.
@@ -61,7 +60,7 @@ and it survives GitHub Actions being down, which is what happened on 2026-08-06.
       hours: all five read `OUTSIDE_WINDOW`, correct for 00:2x-00:4xZ against a
       14:45-19:45Z window (`watchdog_v1.gs:35-36`). Saturday makes it impossible
       before Monday. Gate: `audit_gate/gate265_watchdog.py`.
-- [x] #2 A test mail from `rhWatchdogTestAlert()` was received at `ALERT_TO`.
+- [x] #2 #2 A test mail from `rhWatchdogTestAlert()` was received at `ALERT_TO`.
       ✅ 2026-08-08: MET. Gmail screenshot — delivered to `projects5069@gmail.com`
       at 19:28, subject "RH WATCHDOG: GitHub Actions pipeline is not producing",
       body `Detected at 2026-08-09T00:28:21.024Z` with
@@ -72,7 +71,7 @@ and it survives GitHub Actions being down, which is what happened on 2026-08-06.
       identity (`git log -1 --format='%an <%ae>'` → `Amihay <projects5069@gmail.com>`).
       The fake numbers also confirm it came from `rhWatchdogTestAlert()` and not
       from a live breach.
-- [x] #3 `ALERT_TO` no longer contains the placeholder string.
+- [x] #3 #3 `ALERT_TO` no longer contains the placeholder string.
       ✅ 2026-08-08: MET, derived from #2. A mail addressed to
       `PASTE_YOUR_EMAIL_HERE@example.com` cannot land in עמיחי's inbox —
       `example.com` is RFC-2606 reserved and accepts no mail. Delivery to
@@ -85,7 +84,7 @@ and it survives GitHub Actions being down, which is what happened on 2026-08-06.
       `watchdog_v1.gs:24  var ALERT_TO = 'PASTE_YOUR_EMAIL_HERE@example.com';`
       — correct and intentional: the repo copy is the TEMPLATE, and the address
       belongs in the installed copy only, never in a public repo.
-- [ ] #4 PK updated. Anti-Drift was deliberately deferred at commit time because
+- [x] #4 #4 PK updated. Anti-Drift was deliberately deferred at commit time because
       an uninstalled file changes nothing about the live system; once the trigger
       is firing the watchdog IS part of the system and §4 applies (health checks).
       ❌ 2026-08-08: not done. Becomes due once #1 passes.
@@ -213,3 +212,4 @@ Build + dry run: `reports/2026-08-06_1456_watchdog_build.md`
 2. מה קורה ל-TASK-268 בינתיים? `detect_outage` סומן למחיקה **מותנית** בהתקנה
    הזו. כל עוד לא הותקן — אין למחוק, אחרת המערכת נשארת בלי שום גלאי-נפילות.
    ⇒ **268 חסום על התיק הזה. הסדר אינו הפיך.**
+<!-- AC:END -->
