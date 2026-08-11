@@ -31,3 +31,18 @@ ReboundPro 33 קומיטים ב-11 ענפים (יש remote, ובכל זאת) · 
 
 שער-קבלה: לכל אחד מששת הריפואים הוכרע - נדחף, נזרק, או נשאר מקומי במודע עם bundle; ה-main המקומי יושר או סומן; והוכרע מה קורה ל-docs/auto-dancer.
 <!-- SECTION:DESCRIPTION:END -->
+
+## ממצא 2026-08-10 — סיכון-האובדן סגור. נותרה החלטת-דיספוזיציה בלבד.
+נמדד: כל ששת הפרויקטים מגובים — 7 bundles ב-`ClaudeWork/_machine/repo_bundles`, כולם מ-9/8.
+חלוקה לפי פעילות (התאריך הוא השינוי האחרון, המספר הוא קומיטים שאינם באף remote):
+  vardan-tracker 3/8 · 26 · **אין remote**   ← היחיד שגם פעיל וגם בלי מקום-אחסון
+  ReboundPro 29/7 · 33 · יש · biotech-screener 28/7 · 9 · יש
+  smallcap-median-study 28/7 · 4 · אין  ·  trade-tracker 20/6 · 71 · אין
+  RidingHighPro · 1 קומיט מ-11/6 בענף fix/96-check06-robustness
+**הענף הראשי המקומי — המלכודת, במספרים:** 110 מאחור / 29 קדימה; קצה 69c0c21 מ-**5/7**;
+`git branch -r --contains main` → `origin/fix/auto-dancer-planmd` בלבד.
+⇒ `git checkout main` מחזיר תוכן מ-5 ביולי, 36 ימים ו-110 קומיטים אחורה.
+⚠️ **אין סיכון-אובדן** — 29 הקומיטים כבר על remote.
+הדרך הבטוחה (אינה עושה checkout כלל, ולכן אינה נוגעת בעץ-העבודה בתוך החלון):
+`git branch auto-dancer-local main` ואז `git branch -f main origin/main`.
+מניעת הישנות: שורה בבדיקת-הפתיחה שמדווחת `rev-list --count origin/main...main`.
