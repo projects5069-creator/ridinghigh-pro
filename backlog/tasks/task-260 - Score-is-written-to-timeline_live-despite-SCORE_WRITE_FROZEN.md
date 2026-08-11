@@ -65,3 +65,20 @@ NOT ESTABLISHED: whether this is deliberate (timeline_live kept as the raw resea
 record) or an omission. Nothing in the code comments at :441-448 says either way.
 No fix proposed here.
 <!-- SECTION:NOTES:END -->
+
+## ⛔ ממצא 2026-08-10 — ההקפאה מפילה את צינור-המחקר. אין להחיל לפני שומר.
+נמדד בהרצה (pandas 3.0.5), לא בהסקה:
+    day_tl["Score"].idxmax()  →  ValueError: Encountered all NA values
+`enrich_post_analysis.py:163` — **בלי try, ולפני כל הכתיבות** (:174-185). רץ יומית דרך
+`.github/workflows/post_analysis.yml:60`. ⇒ `IntraDay_TP10`, `SL_Hit_D0`, `IntraHigh`,
+`IntraLow`, `DayRunUp%` **מפסיקים להיכתב** — בדיוק בחלון שנועד לאסוף אותם.
+מדויק ולא מנופח: לפי אות §F ההקפאה **אינה** פוסלת את ההשערה (הפוסלים הם פריצת-תקרה
+או שינוי TP/SL/HOLD/שער; ומקורות הכשירות הם decision_log+paper_portfolio, HYPOTHESES:235;
+ו-`calculate_net_pnl`/`classify_trade` מחזירים אפס אזכורי Score). היא הורסת בשקט
+מערך-נתונים מקביל שנאסף באותו חלון.
+הסוכן החי **אינו** נפגע: `orchestrator.py:49` ממיר תא ריק ל-0.0, ו-`decision_logic.py:270`
+מחשב את הציון מחדש משבעה מדדים אחרים.
+צרכנים נוספים: `auto_scanner.py:591` (קורס, עטוף ⇒ שקט) · `post_analysis_collector.py:437`
+(`sort_values` אינו זורק ⇒ בוחר שורה שרירותית) · `auto_scanner.py:1348` (בחירה ריקה).
+⇒ **תנאי-קדם מחייב:** הפונקציה הבטוחה + בקרה דו-כיוונית (יום עם Score עובר, יום בלי
+Score כותב את שדות-התוצאה ואינו זורק). התיק קשור ל-208 כהחלטה אחת.

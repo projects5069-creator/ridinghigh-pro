@@ -40,3 +40,10 @@ master plan 2026-06-29: core AC added for MxV+price shadow observer separate fro
 config.py line 374 EXPLICIT_GATE_MODE = "active" and line 378 ENTRY_GATE_MINIMAL = True. The flip happened on 2026-06-29, so the gate has not been in shadow mode for over a month. The task title and status are describing a state that no longer exists.
 
 The forward experiment on the flipped gate is HYP-002 in docs/HYPOTHESES.md section F. Its stopping rule fired on 2026-08-03 at n equals 173 against a threshold of 150, and the sample is 86 of 173 on phantom tickers with 54 entries beyond the frozen reentry cap. Whatever this task concludes depends on that decision first.
+
+## הכרעת עמיחי 2026-08-10 — להשאיר פתוח, לתקן כותרת, לסמן קפוא
+התיק נשאר פתוח כבעלים של ההרחבה לארבעה ממדים. הכותרת והסטטוס מתוקנים כך שלא יתארו
+"shadow mode" — השער חי מ-29/6 (config.py:374 EXPLICIT_GATE_MODE="active").
+הנימוק: המחקר שההרחבה נשענת עליו מתכווץ מ-n=28 ל-n=13 בהוספת הממד הרביעי — לא בשל,
+אך גם לא זבל. תיק שנשאר בעלים ומסומן קפוא הוא הטיפול הנכון בפריט לא-בשל.
+ההרחבה קפואה עד הוורדיקט של HYP-002 (2026-10-02). ⚠️ הסטטוס לא שונה בהכרעה זו.

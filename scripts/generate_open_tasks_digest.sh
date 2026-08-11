@@ -7,10 +7,24 @@
 # 259, 308 vs 54+286, all measured that day). The full bodies stay where they
 # are; this is the index you can actually read, regenerated on demand.
 #
-# Writes docs/OPEN_TASKS_DIGEST.md. Hard ceiling 150 lines: with 87 tickets the
-# titles are truncated to fit — **completeness before beauty, never drop a
-# ticket to make room.** Age comes from the ticket's own created_date, never
-# from file mtime (a touched file is not a young ticket).
+# Writes docs/OPEN_TASKS_DIGEST.md. Age comes from the ticket's own created_date,
+# never from file mtime (a touched file is not a young ticket).
+#
+# MERGED 2026-08-10: this file used to be one of TWO task lists — the short index
+# here, and a hand-written "what it means / what to do" per ticket that lived
+# outside the repo. Two lists means two truths, so the explanations moved in as
+# docs/TASK_EXPLANATIONS.md and are joined here by ticket number.
+#
+# ⚠️ THE 150-LINE CEILING IS GONE, DELIBERATELY. Three lines per ticket over ~90
+# open tickets cannot fit in 150 and no arithmetic makes it fit. The rule that
+# survives is the one that always mattered: **completeness before beauty, never
+# drop a ticket to make room.** The ceiling is now derived from the ticket count
+# instead of being a constant, so it still fails loudly if the file bloats for
+# any OTHER reason.
+#
+# ⚠️ The explanations are AUTHORED, not derived — written by reading 88 full
+# bodies. No script can regenerate them. A ticket with no entry is marked
+# explicitly as missing rather than silently skipped.
 #
 # Priority rule, so it is reproducible and not a mood:
 #   🔴 body names the measurement window (חלון-המדידה / 7/9 / n_ENTER /
@@ -29,7 +43,8 @@ from collections import Counter
 repo, out = sys.argv[1], sys.argv[2]
 TODAY = datetime.date.today()
 CLOSED = {"Done", "Archived", "Cancelled"}
-MAXLINE, MAXFILE = 120, 150
+MAXLINE = 120
+EXPL = os.path.join(repo, "docs/TASK_EXPLANATIONS.md")
 
 
 def fm(t, k):
@@ -44,6 +59,22 @@ def title(t, p):
     x = fm(t, "title")
     return x if x and x not in (">-", "|", ">") else os.path.basename(p)
 
+
+# ── authored explanations, joined by ticket number ────────────────────────
+# Two fields per ticket: what it means, what to do. Anything else in that file
+# (status, evidence) is deliberately NOT pulled in — the digest is an index, and
+# status already lives in the ticket itself.
+expl = {}
+if os.path.exists(EXPL):
+    blocks = re.split(r"\n(?=## TASK-)", open(EXPL, encoding="utf-8").read())
+    for b in blocks:
+        m = re.match(r"## TASK-(\d+)", b)
+        if not m:
+            continue
+        def grab(label):
+            g = re.search(rf"\*\*{label}:\*\*\s*(.+)", b)
+            return g.group(1).strip() if g else ""
+        expl[int(m.group(1))] = (grab("מה זה אומר"), grab("מה צריך לעשות"))
 
 tasks = []
 for p in sorted(glob.glob(os.path.join(repo, "backlog/tasks/*.md"))):
@@ -125,6 +156,8 @@ L.append(f"## קפואים לאחרי 4/9 ({sum(1 for x in tasks if x['w']=='�
 L.append(" ".join(x["id"] for x in tasks if x["w"] == "🧊") or "—")
 L.append("")
 L.append("## כל התיקים")
+L.append("")
+missing_expl = []
 for x in tasks:
     ttl = x["title"]
     def mk(t):
@@ -134,7 +167,28 @@ for x in tasks:
         ttl = ttl[:-4] + "…"
         line = mk(ttl)
     L.append(line)
-L.append("")
+    m, d = expl.get(x["n"], ("", ""))
+    if m or d:
+        # wrap prose so the 120-char rule keeps holding — it was written for the
+        # table rows, and adding un-wrapped prose would have quietly broken it
+        # on 64 lines (measured 2026-08-10 on the first run of the merged format)
+        def emit(label, body):
+            words, row = body.split(), f"  · **{label}:**"
+            for w in words:
+                if len(row) + 1 + len(w) > MAXLINE:
+                    L.append(row)
+                    row = "    "
+                row += (" " if row.strip() else "") + w
+            if row.strip():
+                L.append(row)
+        if m:
+            emit("מה זה אומר", m)
+        if d:
+            emit("מה צריך לעשות", d)
+    else:
+        missing_expl.append(x["id"])
+        L.append("  · ⚠️ **אין הסבר** — נכתב ביד, לא נגזר. להוסיף ל-docs/TASK_EXPLANATIONS.md")
+    L.append("")
 L.append(f"## חוב: {len(nogate)}/{len(tasks)} תיקים בלי שער-קבלה מדיד "
          f"({100*len(nogate)//max(1,len(tasks))}%)")
 # wrap the id list — a single 372-char line was the only thing breaching the
@@ -149,8 +203,17 @@ for x in nogate:
 if row:
     L.append(row)
 
+# derived, not constant. Budget per ticket: 1 table row + up to 3 wrapped lines
+# of "what it means" + up to 3 of "what to do" + 1 blank ~= 7. Measured on the
+# first merged run: 450 lines for 89 tickets = 4.6/ticket, so 7 leaves real
+# headroom and still fires if the file bloats for some other reason.
+MAXFILE = 7 * len(tasks) + 60
+if missing_expl:
+    L.append("")
+    L.append(f"## ⚠️ בלי הסבר ({len(missing_expl)}) — נכתב ביד, אינו נגזר")
+    L.append(" ".join(missing_expl))
 if len(L) > MAXFILE:
-    L.append(f"⚠️ הקובץ חרג ({len(L)}>{MAXFILE}) — הכותרות קוצרו, אף תיק לא הושמט.")
+    L.append(f"⚠️ הקובץ חרג ({len(L)}>{MAXFILE}) — אף תיק לא הושמט.")
 
 with open(out, "w", encoding="utf-8") as f:
     f.write("\n".join(L) + "\n")
@@ -159,6 +222,7 @@ over = [i for i, l in enumerate(L, 1) if len(l) > MAXLINE]
 print(f"נכתב {out}")
 print(f"  תיקים: {len(tasks)} · שורות: {len(L)} (תקרה {MAXFILE}) · "
       f"שורות מעל {MAXLINE} תווים: {len(over)}")
+print(f"  בלי הסבר: {len(missing_expl)}")
 print(f"  🔴 {sum(1 for x in tasks if x['p']=='🔴')} · "
       f"🟠 {sum(1 for x in tasks if x['p']=='🟠')} · "
       f"🟡 {sum(1 for x in tasks if x['p']=='🟡')} · בלי שער: {len(nogate)}")

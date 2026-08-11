@@ -1,5 +1,5 @@
-# מה יושב על הראש — 88 תיקים פתוחים
-נוצר 2026-08-10 18:19 · `scripts/generate_open_tasks_digest.sh`
+# מה יושב על הראש — 89 תיקים פתוחים
+נוצר 2026-08-10 22:54 · `scripts/generate_open_tasks_digest.sh`
 
 **דחיפות:** 🔴 עכשיו · 🟠 חוסם עבודה אחרת · 🟡 יכול לחכות
 **חלון:** 🧊 הוכרע לאחרי 4/9 · ⏳ דדליין מאוחר (נוב׳/אוק׳/15.8) · ריק = ללא
@@ -11,106 +11,439 @@
 - 🔴 **TASK-194** (47d) ADR-009 post-flip monitoring: track active-mode entries vs Score-gat
 - 🔴 **TASK-280** (2d) pip install is ~90% of every agent_minute run — cache or split requi
 - 🔴 **TASK-296** (0d) Rotate the exposed ridinghigh-sheets-v2 service account key on 2026-
+- 🔴 **TASK-310** (0d) Task-debt mechanism: digest, closing-criterion gate, duplicate check
 - 🔴 **TASK-297** (0d) 2026-05-27 was a full-day Sheets 429 outage - decisions made, none r
 - 🔴⏳ **TASK-303** (0d) Hardcoded market-hours windows: orchestrator gate + 3 more sites - D
 - 🔴 **TASK-305** (0d) MEASUREMENT_HORIZON has no written invalidation rule
-- 🔴 **TASK-310** (0d) Task-debt mechanism: digest, closing-criterion gate, duplicate check
 
-## קפואים לאחרי 4/9 (7)
-TASK-209 TASK-266 TASK-276 TASK-279 TASK-301 TASK-278 TASK-302
+## קפואים לאחרי 4/9 (10)
+TASK-209 TASK-266 TASK-301 TASK-279 TASK-276 TASK-268 TASK-278 TASK-302 TASK-306 TASK-312
 
 ## כל התיקים
-TASK-259 | agent_minute runs overlap — account state snapshot is stale by design | 5d | 🔴 |    | ❌ | ↘4
-TASK-194 | ADR-009 post-flip monitoring: track active-mode entries vs Score-gated baseline (fli… | 47d | 🔴 |    | ✅ | ↘1
-TASK-280 | pip install is ~90% of every agent_minute run — cache or split requirements | 2d | 🔴 |    | ✅ | ↘1
-TASK-296 | Rotate the exposed ridinghigh-sheets-v2 service account key on 2026-08-15 | 0d | 🔴 |    | ✅ | ↘0
-TASK-297 | 2026-05-27 was a full-day Sheets 429 outage - decisions made, none recorded | 0d | 🔴 |    | ✅ | ↘0
-TASK-303 | Hardcoded market-hours windows: orchestrator gate + 3 more sites - DST deadline Nov 1 | 0d | 🔴 | ⏳ | ✅ | ↘0
-TASK-305 | MEASUREMENT_HORIZON has no written invalidation rule | 0d | 🔴 |    | ✅ | ↘0
-TASK-310 | Task-debt mechanism: digest, closing-criterion gate, duplicate check, daily budget | 0d | 🔴 |    | ✅ | ↘0
-TASK-208 | Decouple Score from scanner ranking + portfolio selection (auto_scanner) | 42d | 🟠 | ⏳ | ✅ | ↘6
-TASK-215 | Dedicated SA for auto_scan (mirror TASK-58) — real fix for market-hours 429 | 41d | 🟠 |    | ❌ | ↘5
-TASK-128 | Gate כניסה מבוסס-מדדים בא shadow mode | 61d | 🟠 |    | ✅ | ↘4
-TASK-244 | Re-entry guard did not block repeat ENTERs on open positions | 12d | 🟠 |    | ❌ | ↘4
-TASK-179 | Validate crossover-short on hold-out (n>=150 events, worst-case costs) | 58d | 🟠 |    | ✅ | ↘3
-TASK-186 | Build overnight autonomous bug-fix runner | 52d | 🟠 | ⏳ | ❌ | ↘3
-TASK-246 | Clean up 83 stuck DRY_RUN_OPEN positions in 2026-07 paper_portfolio | 12d | 🟠 |    | ❌ | ↘3
-TASK-153 | Review and adopt DROPSLAB_PK_DRAFT as docs/DropsLab_PK.md | 60d | 🟠 |    | ❌ | ↘2
-TASK-230 | Data-gap audit + enrichment for peak-signature research (volume-fade, halts, premar… | 37d | 🟠 |    | ✅ | ↘2
-TASK-252 | Three missing health checks: symbol sanity, position over HOLD, row count | 7d | 🟠 |    | ❌ | ↘2
-TASK-253 | timeline_live duplicate rows from overlapping scanner runs | 7d | 🟠 |    | ❌ | ↘2
-TASK-255 | DropsLab signal integration into Trader — gated on TASK-179 validation | 5d | 🟠 |    | ❌ | ↘2
-TASK-267 | check_06 samples 50 runs, a 24-minute window, and returns INFO when everything is qu… | 4d | 🟠 |    | ✅ | ↘2
-TASK-277 | Build gate 6 - no aggregate includes a non-CLEAN row | 2d | 🟠 |    | ❌ | ↘2
-TASK-71 | ניתוח 'הצד השני' — מכל המניות שתועדו (לא רק 104 שנכנסו): אילו ירדו/עלו הכי הרבה ואי… | 71d | 🟠 |    | ❌ | ↘1
-TASK-74 | השלמת תוצאות ל-946 מניות חסרות (post_analysis 54/~1000 עם תוצאה) | 71d | 🟠 |    | ❌ | ↘1
-TASK-109 | enable RECONCILE_AUTO_REPAIR after flag-only proves accurate | 67d | 🟠 |    | ✅ | ↘1
-TASK-234 | auto-dancer: PLANNER plan.md write-path blocked by night allow-list -> execute-proo… | 36d | 🟠 | ⏳ | ❌ | ↘1
-TASK-101 | התקנת security-guidance plugin + אימות אי-התנגשות עם skill-gate hook | 69d | 🟠 |    | ❌ | ↘0
-TASK-225 | Hold-window research: D1-D25 optimal holding analysis — decision blocked until HYP-… | 37d | 🟠 |    | ✅ | ↘0
-TASK-235 | auto-dancer: classify_verdict claude -p gets empty stdin -> 'Input must be provided… | 36d | 🟠 |    | ❌ | ↘0
-TASK-237 | auto-dancer token ceiling not enforced WITHIN a run -> single task burned 2.8M token… | 36d | 🟠 |    | ❌ | ↘0
-TASK-258 | Build crossover-event detector — HYP-001 has no collection mechanism | 5d | 🟠 |    | ❌ | ↘0
-TASK-268 | detect_outage runs inside an agent run, so it dies with the system it guards | 4d | 🟠 |    | ✅ | ↘0
-TASK-287 | Extractor _SUMMARY_RE demands sentinel_blocks, leaving 189 May-era runs unverified | 1d | 🟠 |    | ✅ | ↘0
-TASK-299 | 2026-05-28 run summary contradicts itself - decisions 75 vs SKIP 82 | 0d | 🟠 |    | ✅ | ↘0
-TASK-306 | Ruling needed: does an enforcement-duplicate count as a reentry-cap breach under HY… | 0d | 🟠 |    | ✅ | ↘0
-TASK-308 | Prompt classifier maps to a single skill - should return a list | 0d | 🟠 |    | ✅ | ↘0
-TASK-209 | Retire calculate_score or demote to logged diagnostic (~15 consumers) | 42d | 🟡 | 🧊 | ❌ | ↘6
-TASK-266 | agent_minute runs are killed by the 5-minute timeout, 188 of 487 | 4d | 🟡 | 🧊 | ✅ | ↘4
-TASK-39 | AUDIT.4 — Email consolidation | 78d | 🟡 |    | ❌ | ↘1
-TASK-49 | NCT recon mismatch — decision_log vs paper_portfolio | 74d | 🟡 |    | ❌ | ↘1
-TASK-65 | פער postmortems: 9 פוזיציות סגורות ללא postmortem (104 vs 95). לזהות אילו ולהחליט אם … | 71d | 🟡 |    | ✅ | ↘1
-TASK-82 | הוספת 5 מדדי-שורט מקצועיים חסרים ל-DropsLab/RidingHigh | 71d | 🟡 |    | ✅ | ↘1
-TASK-206 | add fundamental fields (core cols + raw_fundamentals_json) with guards | 42d | 🟡 |    | ✅ | ↘1
-TASK-226 | Active alert on scanner-writes=0 during market hours (unify with TASK-166) | 37d | 🟡 |    | ❌ | ↘1
-TASK-229 | HYP-004-draft: late-entry (>=15:30 ET) forward research — thesis, criterion, falsif… | 37d | 🟡 |    | ✅ | ↘1
-TASK-248 | requirements.txt pins finvizfinance 0.14.6 which cannot parse finviz today | 12d | 🟡 |    | ❌ | ↘1
-TASK-250 | Unit tests read live Sheets, seven of them | 7d | 🟡 |    | ❌ | ↘1
-TASK-257 | plans/ directory missing — six tickets cite it as evidence source | 5d | 🟡 |    | ❌ | ↘1
-TASK-261 | borrow_coverage measures a universe of 2-5 tickers per day | 5d | 🟡 |    | ❌ | ↘1
-TASK-276 | Portfolio heat cap - block new ENTERs above the configured ceiling | 2d | 🟡 | 🧊 | ❌ | ↘1
-TASK-279 | Recompute Quantity and PositionSizeUSD at the live-price override | 2d | 🟡 | 🧊 | ❌ | ↘1
-TASK-281 | Session reports live outside the repo while the open ritual reads from docs | 1d | 🟡 |    | ✅ | ↘1
-TASK-301 | Single-entry cap leaks between concurrent runs - snapshot TOCTOU | 0d | 🟡 | 🧊 | ✅ | ↘1
-TASK-54 | PreToolUse Phase 2 — enforce RELEVANT skill, not just any | 73d | 🟡 |    | ✅ | ↘0
-TASK-73 | הרחבת CRITIC במודול ניתוח-עומק (מתודולוגיית TASK-62) — אוטומציה שבועית/חודשית של הנ… | 71d | 🟡 |    | ❌ | ↘0
-TASK-202 | fix: collector cross-month backfill — thread month through all 5 read/write points | 43d | 🟡 |    | ✅ | ↘0
-TASK-205 | Display D6-D25 forward journey in dashboard | 42d | 🟡 |    | ✅ | ↘0
-TASK-216 | Structural: mid-month agent-tab misses pre-provisioned next month (no backfill) | 40d | 🟡 |    | ❌ | ↘0
-TASK-222 | dashboard.py:1928 _is_day_complete duplicates utils.is_day_complete — consolidate t… | 39d | 🟡 | ⏳ | ❌ | ↘0
-TASK-236 | auto-dancer VERIFY produces empty verify.json -> task_result=stage_error (execute-pr… | 36d | 🟡 |    | ❌ | ↘0
-TASK-241 | Review agent and trade behaviour 2026-07-05 to 2026-07-28 | 13d | 🟡 |    | ❌ | ↘0
-TASK-243 | Harden root resolution and rotation guards | 12d | 🟡 |    | ❌ | ↘0
-TASK-249 | Collector reprocesses the whole month every night | 7d | 🟡 |    | ❌ | ↘0
-TASK-260 | Score is written to timeline_live despite SCORE_WRITE_FROZEN | 5d | 🟡 |    | ❌ | ↘0
-TASK-264 | borrow_coverage contains rows written by unit tests | 4d | 🟡 |    | ❌ | ↘0
-TASK-269 | Delayed runs write current prices under a stale signal timestamp | 4d | 🟡 |    | ✅ | ↘0
-TASK-271 | Delete quota_health check per T-206 decision | 2d | 🟡 |    | ❌ | ↘0
-TASK-272 | Write DataQuality from validate_quality flags, not the CLEAN literal | 2d | 🟡 |    | ❌ | ↘0
-TASK-273 | Qualify or remove Total/Avg PnL on the Score Brain page | 2d | 🟡 |    | ❌ | ↘0
-TASK-274 | Qualify the REALIZED P&L dollars in the daily email | 2d | 🟡 |    | ❌ | ↘0
-TASK-275 | Health check: timeline_live cell count against the 10M ceiling | 2d | 🟡 |    | ❌ | ↘0
-TASK-278 | calculate_score has zero unit tests in the main formulas suite | 2d | 🟡 | 🧊 | ❌ | ↘0
-TASK-282 | The seven gates exist on one Mac only, and seven repo files point at them | 1d | 🟡 |    | ✅ | ↘0
-TASK-284 | Protocol: md deliverables are handed off as files, not clipboard pastes | 1d | 🟡 |    | ✅ | ↘0
-TASK-285 | Protocol: every CC block declares its model tier | 1d | 🟡 |    | ✅ | ↘0
-TASK-286 | Protocol: skill selection must span the full inventory by fit, not habit | 1d | 🟡 |    | ✅ | ↘0
-TASK-288 | 29 extraction runs carry a real SKIP count mismatch (1,077 rows) | 1d | 🟡 |    | ✅ | ↘0
-TASK-291 | Organize audit archive internals without breaking repo path references | 0d | 🟡 |    | ✅ | ↘0
-TASK-292 | Rotate three GitHub tokens embedded in git remote URLs | 0d | 🟡 |    | ✅ | ↘0
-TASK-293 | Decide disposition of three quarantined secret files | 0d | 🟡 |    | ✅ | ↘0
-TASK-294 | Resolve the three VardanTracker copies | 0d | 🟡 |    | ✅ | ↘0
-TASK-295 | Mark the stale RidingHighPro repo copy as dead | 0d | 🟡 |    | ✅ | ↘0
-TASK-298 | A run where every decision errors still logs Run complete and exits green | 0d | 🟡 |    | ✅ | ↘0
-TASK-300 | Six repos carry commits that exist on no remote; local main is diverged and misleading | 0d | 🟡 |    | ✅ | ↘0
-TASK-302 | ROCKET_GUARD calibration comment contradicts measurement | 0d | 🟡 | 🧊 | ✅ | ↘0
-TASK-304 | Done-without-control pattern: TASK-223 and TASK-111 closed, regressed silently | 0d | 🟡 |    | ✅ | ↘0
-TASK-307 | 429 monitor command flips direction between closed and open days - index instead of t… | 0d | 🟡 |    | ✅ | ↘0
-TASK-309 | Four doc alignments: TASK-248 title, TASK-128 title+status, WORK_PLAN 259, concurren… | 0d | 🟡 |    | ✅ | ↘0
 
-## חוב: 42/88 תיקים בלי שער-קבלה מדיד (47%)
-TASK-259 TASK-215 TASK-244 TASK-186 TASK-246 TASK-153 TASK-252 TASK-253 TASK-255 TASK-277 TASK-71 TASK-74 TASK-234
-TASK-101 TASK-235 TASK-237 TASK-258 TASK-209 TASK-39 TASK-49 TASK-226 TASK-248 TASK-250 TASK-257 TASK-261 TASK-276
-TASK-279 TASK-73 TASK-216 TASK-222 TASK-236 TASK-241 TASK-243 TASK-249 TASK-260 TASK-264 TASK-271 TASK-272 TASK-273
-TASK-274 TASK-275 TASK-278
+TASK-259 | agent_minute runs overlap — account state snapshot is stale by design | 5d | 🔴 |    | ❌ | ↘4
+  · **מה זה אומר:** תמונת-מצב-החשבון נבנית פעם אחת בתחילת כל ריצה. כששתי ריצות רצות יחד, השנייה מחליטה מול עולם שקדם
+    לכניסה של הראשונה.
+  · **מה צריך לעשות:** להכריע אם פורסים סריאליזציה של הריצות. המחיר נמדד ב-10/8: 137 מתוך 365 ריצות היו נזרקות.
+
+TASK-194 | ADR-009 post-flip monitoring: track active-mode entries vs Score-gated baseline (fli… | 47d | 🔴 |    | ✅ | ↘1
+  · **מה זה אומר:** נותר בו סעיף אחד — לעקוב אחרי הכניסות במצב החדש מול הישן. אבל הריצה שהוא עקב אחריה בוטלה ב-3/8.
+  · **מה צריך לעשות:** להכריע מה הוא מודד עכשיו, אחרי שחלון-מדידה חדש ננעל (10/8→4/9).
+
+TASK-280 | pip install is ~90% of every agent_minute run — cache or split requirements | 2d | 🔴 |    | ✅ | ↘1
+  · **מה זה אומר:** התיק אומר שכ-45 שניות מתוך 48 הן התקנת חבילות, כולל חבילות-תצוגה שהסוכן לא משתמש בהן.
+  · **מה צריך לעשות:** למדוד מחדש לפני שבוחרים — המספר בגוף התיק נמדד ביום בלי סיגנלים.
+
+TASK-296 | Rotate the exposed ridinghigh-sheets-v2 service account key on 2026-08-15 | 0d | 🔴 |    | ✅ | ↘1
+  · **מה זה אומר:** מפתח של חשבון-שירות נמצא בקובץ בתוך עותק-ריפו ישן שסונכרן בטעות לענן לכ-11 דקות. הענן פרטי, והאשפה
+    רוקנה.
+  · **מה צריך לעשות:** להחליף בשבת 15/8 בסדר מחייב: מפתח חדש, עדכון הסוד, אימות שריצה כותבת, ורק אז מחיקת הישן.
+
+TASK-310 | Task-debt mechanism: digest, closing-criterion gate, duplicate check, daily budget | 0d | 🔴 |    | ✅ | ↘1
+  · **מה זה אומר:** 88 תיקים פתוחים עם אלפי שורות גוף. אף אחד לא יכול להחזיק את זה בראש, ולכן תיקים נפתחים פעמיים
+    ותנאי-סגירה לא נכתבים.
+  · **מה צריך לעשות:** להשתמש בארבעת הכלים שנבנו ב-10/8 — תקציר יומי, דרישת תנאי-סגירה, בדיקת-כפילות לפני פתיחה, ותקציב
+    שלושה ליום.
+
+TASK-297 | 2026-05-27 was a full-day Sheets 429 outage - decisions made, none recorded | 0d | 🔴 |    | ✅ | ↘0
+  · **מה זה אומר:** באותו יום כל החלטה נכשלה בכתיבה. 387 ריצות רצו, אפס שורות נרשמו. היום אבוד ומוסבר.
+  · **מה צריך לעשות:** לתעד את 27/5 כיום-חנק בהסתייגויות של דוח 7/9, ולא לספור אותו כפער-חילוץ.
+
+TASK-303 | Hardcoded market-hours windows: orchestrator gate + 3 more sites - DST deadline Nov 1 | 0d | 🔴 | ⏳ | ✅ | ↘0
+  · **מה זה אומר:** שעות-המסחר כתובות כמספרים קבועים. בחורף, כשהשעון בארה"ב זז, הסוכן יחשוב שהשוק פתוח שעה לפני הפתיחה
+    ויעצור שעה לפני הסגירה.
+  · **מה צריך לעשות:** לגזור את השעות מאזור-הזמן של ניו-יורק בכל מקום חי, ולהוכיח בשני הכיוונים עם תאריך-חורף מוזרק.
+
+TASK-305 | MEASUREMENT_HORIZON has no written invalidation rule | 0d | 🔴 |    | ✅ | ↘0
+  · **מה זה אומר:** מסמך-האופק של החלון בן 170 שורות ואין בו מילה אחת על מה פוסל יום או מה פוסל את החלון. וכבר ביום 1
+    נרשמו שתי כפילויות.
+  · **מה צריך לעשות:** לכתוב סעיף כללי-פסילה לפני שנצברים עוד נתונים.
+
+TASK-208 | Decouple Score from scanner ranking + portfolio selection (auto_scanner) | 42d | 🟠 | ⏳ | ✅ | ↘7
+  · **מה זה אומר:** הסורק עדיין ממיין ובוחר לפי Score בארבעה מקומות, אף שה-Score כבר לא מגייט כניסות.
+  · **מה צריך לעשות:** נדחה בהכרעה. חצי מהתיק כבר בוצע (בחירת-borrow עברה ל-MxV ב-29/6); השאר מחכה עם אשכול-ה-Score.
+
+TASK-215 | Dedicated SA for auto_scan (mirror TASK-58) — real fix for market-hours 429 | 41d | 🟠 |    | ❌ | ↘5
+  · **מה זה אומר:** התיק אומר שכל הרכיבים חולקים חשבון-שירות אחד ולכן מתנגשים במכסת-הקריאות.
+  · **מה צריך לעשות:** כלום — נמדד ב-10/8 שהחשבונות הנפרדים כבר קיימים ופרוסים.
+
+TASK-128 | Gate כניסה מבוסס-מדדים בא shadow mode | 61d | 🟠 |    | ✅ | ↘4
+  · **מה זה אומר:** הכותרת אומרת "מצב-צל" אבל השער חי ופעיל מ-29/6. התיק מתאר מצב שאינו קיים.
+  · **מה צריך לעשות:** להכריע מה התיק אומר עכשיו — הוא תלוי בתוצאת הניסוי HYP-002 שנפסל ונרשם מחדש ב-3/8.
+
+TASK-244 | Re-entry guard did not block repeat ENTERs on open positions | 12d | 🟠 |    | ❌ | ↘4
+  · **מה זה אומר:** ב-22/7 נרשמו 43 כניסות על 4 מניות בלבד. השורש: קריאה שנכשלה החזירה "חשבון ריק", ושלושת פילטרי-החשיפה
+    עברו יחד.
+  · **מה צריך לעשות:** התיקון (Filter 6b) כבר נחת ב-3/8 ואומת בהרצה ב-10/8. מה שנותר: אימות חי תחת 429 אמיתי.
+
+TASK-186 | Build overnight autonomous bug-fix runner | 52d | 🟠 | ⏳ | ❌ | ↘3
+  · **מה זה אומר:** סוכן שרץ בלילה, מתקן באגים לבד ופותח PR. הקוד קיים, ההפעלה מוקפאת.
+  · **מה צריך לעשות:** מוקפא רשמית עד תוצאת HYP-002 (תחילת אוקטובר) — סוכן שמתקן קוד בזמן שרצה השערה עלול לפסול אותה.
+
+TASK-246 | Clean up 83 stuck DRY_RUN_OPEN positions in 2026-07 paper_portfolio | 12d | 🟠 |    | ❌ | ↘3
+  · **מה זה אומר:** 83 פוזיציות נפתחו ולא נסגרו, כולן על סמלים משובשים שהספק לא מזהה, ולכן אין מחיר ואין יציאה.
+  · **מה צריך לעשות:** לסמן אותן (לא למחוק), אחרי גיבוי ואישור. כלל-הסיווג כבר הוכרע והכלי כבר מחווט.
+
+TASK-179 | Validate crossover-short on hold-out (n>=150 events, worst-case costs) | 58d | 🟠 |    | ✅ | ↘2
+  · **מה זה אומר:** השערת-מחקר רשומה שמחכה ל-150 אירועים כדי להיבדק.
+  · **מה צריך לעשות:** אי-אפשר להתחיל — אין בכלל מנגנון שאוסף את האירועים. זה TASK-258.
+
+TASK-230 | Data-gap audit + enrichment for peak-signature research (volume-fade, halts, premar… | 37d | 🟠 |    | ✅ | ↘2
+  · **מה זה אומר:** רוצים לדעת אם יש סימן מקדים לפני שמניה מתחילה לרדת. הנתונים הנוכחיים לא מספיקים.
+  · **מה צריך לעשות:** לבצע בדיקת-היתכנות מול IBKR (אושר) לעמלת-השאלה אמיתית ולסטטוס-עצירות. פיד בתשלום נדחה.
+
+TASK-248 | requirements.txt pins finvizfinance 0.14.6 which cannot parse finviz today | 12d | 🟠 |    | ❌ | ↘2
+  · **מה זה אומר:** הכותרת אומרת שהקובץ נעול על 0.14.6 שאינה מפרסרת את האתר. זה כבר לא נכון.
+  · **מה צריך לעשות:** נשארה שארית מוגדרת: שני קבצי workflow (post_analysis, backfill_ohlc) עדיין מתקינים רשימה ידנית
+    בלי נעילה.
+
+TASK-252 | Three missing health checks: symbol sanity, position over HOLD, row count | 7d | 🟠 |    | ❌ | ↘2
+  · **מה זה אומר:** אין בדיקה לסמלים משובשים, אין בדיקה לפוזיציה שעברה את חלון-ההחזקה, ואין בדיקה לירידה חדה במספר
+    השורות. כל אחת מהן הייתה תופסת כשל אמיתי מוקדם יותר.
+  · **מה צריך לעשות:** להוסיף שלוש בדיקות עם ספים מוגדרים, כל אחת בקומיט נפרד ועם טסט.
+
+TASK-253 | timeline_live duplicate rows from overlapping scanner runs | 7d | 🟠 |    | ❌ | ↘2
+  · **מה זה אומר:** 308 שורות כפולות ביום מסחר אחד. שתי ריצות חופפות בודקות "האם כבר קיים" לפני שאחת מהן כתבה, ושתיהן
+    כותבות.
+  · **מה צריך לעשות:** לבנות גלאי קודם ולקבל בסיס-השוואה לכמה ימים; רק אחר כך לגעת בנתיב-הכתיבה שרץ כל דקה.
+
+TASK-267 | check_06 samples 50 runs, a 24-minute window, and returns INFO when everything is qu… | 4d | 🟠 |    | ✅ | ↘2
+  · **מה זה אומר:** שתי תקלות באותה בדיקה. היא מסתכלת על 50 הריצות האחרונות (כרבע שעה) בעוד היא מצהירה על 24 שעות, והיא
+    דוגמת דווקא את הרגע השקט ביותר ביום. ובנוסף — כשכל הריצות תקועות בתור היא מחזירה "מידע" במקום אזעקה.
+  · **מה צריך לעשות:** להרחיב את החלון שיהיה מבוסס-זמן, לגרום ל"אפס ריצות שהסתיימו" להיות אות-אזעקה, ולהכריע איך נספרת
+    ריצה מבוטלת.
+
+TASK-277 | Build gate 6 - no aggregate includes a non-CLEAN row | 2d | 🟠 |    | ❌ | ↘2
+  · **מה זה אומר:** נבנו חמישה שערי-בדיקה ולא שישה. הטענה ש"סיכומים לא כוללים שורות פגומות" מעולם לא נמדדה.
+  · **מה צריך לעשות:** לבנות את השער השישי — כלי-מדידה מחוץ לריפו, אפס סיכון-ייצור. אוצר-המילים כבר הוכרע ב-TASK-246
+    ואין להמציא כלל שני.
+
+TASK-71 | ניתוח 'הצד השני' — מכל המניות שתועדו (לא רק 104 שנכנסו): אילו ירדו/עלו הכי הרבה ואי… | 71d | 🟠 |    | ❌ | ↘1
+  · **מה זה אומר:** אנחנו יודעים מה קרה ל-104 המניות שנכנסו, ולא יודעים מה קרה לכל השאר. אולי המדדים שהיו צריכים להוביל
+    הם אחרים.
+  · **מה צריך לעשות:** אי-אפשר להתחיל לפני TASK-74 (השלמת התוצאות ל-946 המניות). התיק בלע גם את TASK-72 ו-75.
+
+TASK-74 | השלמת תוצאות ל-946 מניות חסרות (post_analysis 54/~1000 עם תוצאה) | 71d | 🟠 |    | ❌ | ↘1
+  · **מה זה אומר:** מתוך כ-1000 מניות שנסרקו, רק 54 יש להן תוצאה ידועה. 94% מהסריקה עיוורת.
+  · **מה צריך לעשות:** למשוך מחירי חמישה ימים קדימה ל-946 הנותרות ולחשב להן תוצאה. עבודה כבדה מול ספק-הנתונים.
+
+TASK-109 | enable RECONCILE_AUTO_REPAIR after flag-only proves accurate | 67d | 🟠 |    | ✅ | ↘1
+  · **מה זה אומר:** יש מנגנון שיודע להשלים שורת-פוזיציה חסרה, והוא כבוי. הוא כותב לגיליון, ולכן זיהוי שגוי אחד יוצר שורה
+    שגויה.
+  · **מה צריך לעשות:** להשאיר כבוי עד שהגלאי (במצב סימון-בלבד) יוכיח אפס טעויות לאורך תקופה משמעותית. נכון להיום יש
+    יום-הוכחה אחד בלבד.
+
+TASK-153 | Review and adopt DROPSLAB_PK_DRAFT as docs/DropsLab_PK.md | 60d | 🟠 |    | ❌ | ↘1
+  · **מה זה אומר:** נכתבה טיוטה מלאה של מסמך-הידע של DropsLab, וצריך להחליט אם לאמץ אותה כמסמך חי.
+  · **מה צריך לעשות:** להכריע מחדש — ב-10/8 בוטלה ההוראה לבנות גשר ל-DropsLab, והמשפט "מתוכנן PK ייעודי ל-DropsLab" הוסר
+    מה-PK.
+
+TASK-234 | auto-dancer: PLANNER plan.md write-path blocked by night allow-list -> execute-proo… | 36d | 🟠 | ⏳ | ❌ | ↘1
+  · **מה זה אומר:** רכיב-התכנון של הסוכן הלילי מנסה לכתוב קובץ במקום שאסור לו, השלב הבא לא מוצא אותו, והכל נעצר בשקט.
+  · **מה צריך לעשות:** התיקון כבר כתוב על ענף שלא מוזג. מוקפא עם TASK-186 עד אוקטובר.
+
+TASK-101 | התקנת security-guidance plugin + אימות אי-התנגשות עם skill-gate hook | 69d | 🟠 |    | ❌ | ↘0
+  · **מה זה אומר:** פלאגין שמזהיר על דפוסי-קוד מסוכנים. שווה רק כשסוכן כותב קוד לבד; כל עוד עמיחי בודק כל שינוי, הוא
+    הביקורת.
+  · **מה צריך לעשות:** להתקין כשהריצה הלילית האוטונומית באמת תרוץ. ההתקנה עצמה שורה אחת ומאומתת.
+
+TASK-225 | Hold-window research: D1-D25 optimal holding analysis — decision blocked until HYP-… | 37d | 🟠 |    | ✅ | ↘0
+  · **מה זה אומר:** אין בפועל יציאה מבוססת-זמן — פוזיציה רוכבת עד TP או SL. השאלה אם כדאי לצאת ביום מסוים.
+  · **מה צריך לעשות:** המחקר עצמו מותר בקריאה-בלבד מתי שרוצים. ההמלצה והמימוש חסומים עד תוצאת HYP-002.
+
+TASK-235 | auto-dancer: classify_verdict claude -p gets empty stdin -> 'Input must be provided… | 36d | 🟠 |    | ❌ | ↘0
+  · **מה זה אומר:** מקף ארוך בגוף המשימה גורם לשלב-הסיווג לקבל קלט ריק, להיכשל, ולחסום את הביצוע.
+  · **מה צריך לעשות:** לנרמל תווים לא-אנגליים לפני השליחה. השורש אומת בהרצה חיה.
+
+TASK-237 | auto-dancer token ceiling not enforced WITHIN a run -> single task burned 2.8M token… | 36d | 🟠 |    | ❌ | ↘0
+  · **מה זה אומר:** משימה אחת שרפה 2.8 מיליון טוקנים מול תקרה של 600 אלף, כי הבדיקה נעשית רק בין משימות.
+  · **מה צריך לעשות:** שומר בתוך-הריצה שעוצר כשחוצים את התקרה.
+
+TASK-258 | Build crossover-event detector — HYP-001 has no collection mechanism | 5d | 🟠 |    | ✅ | ↘0
+  · **מה זה אומר:** יש השערת-מחקר רשומה שמחכה ל-150 אירועים, אבל אף אחד לא סופר אותם — אין קוד כזה בכלל.
+  · **מה צריך לעשות:** לבנות את החיבור בין סריקה של המערכת הראשית לאירוע-ירידה של המערכת השנייה, ולהחליט איזה צד מחזיק
+    את החיבור.
+
+TASK-287 | Extractor _SUMMARY_RE demands sentinel_blocks, leaving 189 May-era runs unverified | 1d | 🟠 |    | ✅ | ↘0
+  · **מה זה אומר:** ביטוי-החיפוש דורש שדה מסוים בשורת-הסיכום. בלוגים של מאי השדה לא היה, ולכן 189 ריצות סומנו "לא נמצא
+    סיכום".
+  · **מה צריך לעשות:** לרכך את הביטוי כך שיאמת גם סיכומים בלי השדה, ולאמת את 189 הריצות מהנתונים הקיימים בלי משיכה
+    חוזרת.
+
+TASK-299 | 2026-05-28 run summary contradicts itself - decisions 75 vs SKIP 82 | 0d | 🟠 |    | ✅ | ↘0
+  · **מה זה אומר:** הסיכום אומר 82 סיגנלים, 75 החלטות, 82 דילוגים. אבל החלטות אמורות להיות סכום הכניסות והדילוגים. הפער
+    הוא בדיוק מספר החסימות.
+  · **מה צריך לעשות:** להכריע איזה מונה נכון, ואז ליישר את הסיכום או לתעד שאי-העקביות מכוונת.
+
+TASK-308 | Prompt classifier maps to a single skill - should return a list | 0d | 🟠 |    | ✅ | ↘0
+  · **מה זה אומר:** פרומפט שהוא גם ניתוח וגם באג מקבל סקיל אחד בלבד — ההתאמה הראשונה זוכה.
+  · **מה צריך לעשות:** שינוי במקום אחד בלבד — אם המסווג יחזיר רשימה, השער כבר יודע לטפל בה.
+
+TASK-311 | pandas 3 all-NA: idxmax raises and sort_values lies across 11 live sites; two existi… | -1d | 🟠 |    | ✅ | ↘0
+  · ⚠️ **אין הסבר** — נכתב ביד, לא נגזר. להוסיף ל-docs/TASK_EXPLANATIONS.md
+
+TASK-209 | Retire calculate_score or demote to logged diagnostic (~15 consumers) | 42d | 🟡 | 🧊 | ❌ | ↘6
+  · **מה זה אומר:** ה-Score מזין כ-15 צרכנים ומחושב בכל החלטה גם בעידן שבו הוא לא מגייט. השאלה אם מוחקים או משאירים
+    כמדד-תיעוד.
+  · **מה צריך לעשות:** נדחה עד תוצאת HYP-002 (תחילת אוקטובר). היקף-פגיעה גדול.
+
+TASK-266 | agent_minute runs are killed by the 5-minute timeout, 188 of 487 | 4d | 🟡 | 🧊 | ✅ | ↘4
+  · **מה זה אומר:** כמעט שתיים מכל חמש ריצות נחתכות באמצע העבודה. הן לא תקועות — הן זוחלות בגלל חנק במכסת-הקריאות.
+  · **מה צריך לעשות:** להכריע מחדש. ההכרעה מ-8/8 הייתה "לא נוגעים ומודדים בשני", ושער-הקבלה שרץ ב-10/8 אחרי הסגירה החזיר
+    FAIL.
+
+TASK-301 | Single-entry cap leaks between concurrent runs - snapshot TOCTOU | 0d | 🟡 | 🧊 | ✅ | ↘3
+  · **מה זה אומר:** ב-10/8, יום 1 של חלון-המדידה, שתי מניות נכנסו פעמיים כל אחת בהפרש שנייה, משתי ריצות שהתחילו באותה
+    שנייה. הציון היה זהה — כלומר זו אותה החלטה שהשתכפלה, לא החלטה חדשה.
+  · **מה צריך לעשות:** להכריע איך מונעים. גלאי-הכפילויות כבר פרוס ורץ יומית; ההכרעה על סריאליזציה תלויה ב-3-4 ימי
+    נתונים.
+
+TASK-279 | Recompute Quantity and PositionSizeUSD at the live-price override | 2d | 🟡 | 🧊 | ❌ | ↘2
+  · **מה זה אומר:** הקוד מעדכן את המחיר למחיר החי אבל משאיר את הכמות מהרגע הקודם. התוצאה: מחיר כפול כמות לא שווה
+    לגודל-הפוזיציה ב-205 מתוך 291 שורות.
+  · **מה צריך לעשות:** לחשב מחדש את הכמות מהמחיר החי, ולאכוף שלושה אינווריאנטים לפני הכתיבה. ובנוסף — אין שום בדיקה
+    שהכמות לפחות 1.
+
+TASK-39 | AUDIT.4 — Email consolidation | 78d | 🟡 |    | ❌ | ↘1
+  · **מה זה אומר:** המערכת שולחת שישה מיילים ביום (שלוש בדיקות-בריאות, בוקר, יומי, critic), רובם ירוקים ולא מוסיפים
+    מידע.
+  · **מה צריך לעשות:** לאחד לסיכום יומי אחד ב-16:30 פרו, ולשלוח התרעה מיידית רק על שגיאות. התיק בלע גם את TASK-89 (סימון
+    ימים עם נפח-מסחר חריג).
+
+TASK-49 | NCT recon mismatch — decision_log vs paper_portfolio | 74d | 🟡 |    | ❌ | ↘1
+  · **מה זה אומר:** ב-28/5 מניה בשם NCT הופיעה פעם אחת ביומן-ההחלטות אבל פעמיים בתיק-הפוזיציות. יש שורה כפולה או יתומה.
+  · **מה צריך לעשות:** להוסיף בדיקת-התאמה בכיוון ההפוך — שורת-פוזיציה בלי החלטה מתאימה, וזיהוי PositionID כפול. הכלי של
+    TASK-106 בודק רק את הכיוון ההפוך.
+
+TASK-65 | פער postmortems: 9 פוזיציות סגורות ללא postmortem (104 vs 95). לזהות אילו ולהחליט אם … | 71d | 🟡 |    | ✅ | ↘1
+  · **מה זה אומר:** 36 פוזיציות נסגרו בלי שנכתב עליהן דוח-סיכום, ו-101 מתוך 182 הדוחות הקיימים חסרים את מדדי-הכניסה.
+    השורש נכתב מחדש: אובדן כתיבות סביב ה-flush, בשלושה נתיבים.
+  · **מה צריך לעשות:** לבנות גלאי לכתיבות-שנבלעו ביישוב-שאחרי-הריצה, ואז להכריע אם משחזרים את ה-36 רטרואקטיבית.
+    קריאה-בלבד עד אישור.
+
+TASK-82 | הוספת 5 מדדי-שורט מקצועיים חסרים ל-DropsLab/RidingHigh | 71d | 🟡 |    | ✅ | ↘1
+  · **מה זה אומר:** מחקר זיהה חמישה מדדים שהשחקנים הגדולים משתמשים בהם ואין לנו. עמיחי הכריע 5/8 מה נכנס ומה לא.
+  · **מה צריך לעשות:** לממש רצועות-סטיית-תקן בלבד (אושר, אפס קריאות נוספות לספק). VWAP נסגר. שלושת המדדים בתשלום מוקפאים
+    עד תוצאת בדיקת-IBKR.
+
+TASK-206 | add fundamental fields (core cols + raw_fundamentals_json) with guards | 42d | 🟡 |    | ✅ | ↘1
+  · **מה זה אומר:** חסרים לנו נתוני-יסוד (סקטור, אחוז-שורט, החזקות מוסדיות, ביתא) שנבדקו וזמינים גם למניות ננו-קאפ.
+  · **מה צריך לעשות:** להוסיף עמודות-ליבה + שדה JSON לשאר, עם שמירה על תאימות-לאחור בכתיבה.
+
+TASK-226 | Active alert on scanner-writes=0 during market hours (unify with TASK-166) | 37d | 🟡 |    | ❌ | ↘1
+  · **מה זה אומר:** סריקה שמחזירה אפס תוצאות באמצע יום-מסחר שקטה לגמרי. אף אחד לא יודע עד הבדיקה הלילית.
+  · **מה צריך לעשות:** התרעה פעילה אחרי N דקות רצופות בלי שורה חדשה. הגוף בודק ומאשר שזה לא מכוסה ע"י תיקים אחרים.
+
+TASK-229 | HYP-004-draft: late-entry (>=15:30 ET) forward research — thesis, criterion, falsif… | 37d | 🟡 |    | ✅ | ↘1
+  · **מה זה אומר:** תזה של עמיחי שכניסה מאוחרת ביום עדיפה על כניסה בטריגר הראשון. יש תמיכה ראשונית גולמית.
+  · **מה צריך לעשות:** מחקר קריאה-בלבד עם קריטריון-הצלחה שנרשם מראש. הרישום הפורמלי רק אחרי סיום HYP-002.
+
+TASK-250 | Unit tests read live Sheets, seven of them | 7d | 🟡 |    | ❌ | ↘1
+  · **מה זה אומר:** קובץ טסטים שמצהיר "אפס גישה חיצונית" קורא בפועל מהגיליון. כל הרצת-טסטים מקומית שורפת שבע קריאות
+    ממכסה.
+  · **מה צריך לעשות:** לנטרל את הקריאה בטסטים ולתקן את התיאור. לשקול שומר רוחבי שייכשל על כל טסט-יחידה שפותח חיבור
+    אמיתי.
+
+TASK-257 | plans/ directory missing — six tickets cite it as evidence source | 5d | 🟡 |    | ❌ | ↘1
+  · **מה זה אומר:** קובץ שמצוטט כראיה בשישה תיקים פשוט לא קיים בריפו. הכרעה של עמיחי מ-3/7 נשענת עליו ואינה ניתנת
+    לאימות.
+  · **מה צריך לעשות:** לברר אם נמחק, שונה שמו, קיים מקומית או על ענף אחר; ואם לא ניתן לשחזר — לתעד זאת בשישה התיקים.
+
+TASK-260 | Score is written to timeline_live despite SCORE_WRITE_FROZEN | 5d | 🟡 |    | ❌ | ↘1
+  · **מה זה אומר:** יש הגדרה שאומרת "לא כותבים Score יותר", אבל היא מיושמת פר-מקום-כתיבה — והטאב הגדול ביותר במערכת אינו
+    אחד מהם. 71 אלף שורות עם Score בכל חודש.
+  · **מה צריך לעשות:** להכריע אם זה מכוון (טאב-מחקר גולמי) או שנשכח, ואז ליישר.
+
+TASK-261 | borrow_coverage measures a universe of 2-5 tickers per day | 5d | 🟡 |    | ❌ | ↘1
+  · **מה זה אומר:** הדוח מדווח כיסוי 80-100%, אבל המכנה הוא רק המניות שעברו את שער-הכניסה — 2 עד 5 ביום מול 71 אלף שורות
+    סריקה.
+  · **מה צריך לעשות:** להכריע אם ההגדרה מכוונת (עוברי-שער בלבד) או רגרסיה. הכיסוי כפי שהוא לא יכול לתמוך במחקר צד-השורט.
+
+TASK-276 | Portfolio heat cap - block new ENTERs above the configured ceiling | 2d | 🟡 | 🧊 | ❌ | ↘1
+  · **מה זה אומר:** אין שום מנגנון שמגביל את סך-החשיפה. נמדד 11.1% מול תקרה מבוקשת של 8%.
+  · **מה צריך לעשות:** נכנס אחרי 4/9 יחד עם TASK-279. הוכרע 8/8 לא להנחית לפני החלון.
+
+TASK-281 | Session reports live outside the repo while the open ritual reads from docs | 1d | 🟡 |    | ✅ | ↘1
+  · **מה זה אומר:** הפרוטוקול מחפש את דוח-היום בתיקיית docs, אבל הדוחות נכתבו למקום אחר. ההעתקה נעשתה ידנית, ולכן הפער
+    ייפתח שוב.
+  · **מה צריך לעשות:** להכריע איפה חי דוח-סשן — בריפו בלבד, או בשני מקומות עם שער שאוכף.
+
+TASK-54 | PreToolUse Phase 2 — enforce RELEVANT skill, not just any | 73d | 🟡 |    | ✅ | ↘0
+  · **מה זה אומר:** השער שאמור לוודא שנטענו הסקילים הנכונים הסתפק בכל סקיל שהוא — טעינת time-check לפני pwd עברה.
+  · **מה צריך לעשות:** לגרום לשער לדרוש את הסקיל המתאים לסוג-המשימה. מה שנותר הוא נתיב-ה-keyword בלבד.
+
+TASK-73 | הרחבת CRITIC במודול ניתוח-עומק (מתודולוגיית TASK-62) — אוטומציה שבועית/חודשית של הנ… | 71d | 🟡 |    | ❌ | ↘0
+  · **מה זה אומר:** ה-CRITIC מסכם win-rate ורווח, אבל אין לו שכבת ניתוח (Profit Factor, Expectancy, קורלציות, דגלים
+    אוטומטיים).
+  · **מה צריך לעשות:** להוסיף את שכבת-העומק מעל הסיכום הקיים. זו הרחבה של רכיב קיים ולא סוכן חדש.
+
+TASK-202 | fix: collector cross-month backfill — thread month through all 5 read/write points | 43d | 🟡 |    | ✅ | ↘0
+  · **מה זה אומר:** כשמריצים השלמה על תאריך מחודש קודם, כל חמש נקודות הקריאה והכתיבה פונות לחודש הנוכחי. יוני עבד רק
+    במקרה.
+  · **מה צריך לעשות:** להעביר את החודש דרך כל חמש הנקודות, עם טסט אדום שמתעד את המצב הקיים.
+
+TASK-205 | Display D6-D25 forward journey in dashboard | 42d | 🟡 |    | ✅ | ↘0
+  · **מה זה אומר:** הנתונים על 25 הימים שאחרי הסריקה כבר נאספים ולא מוצגים בשום מקום.
+  · **מה צריך לעשות:** עמוד תצוגה בלבד — טבלה וגרף-מסלול. אפס נגיעה באיסוף או בסכמה.
+
+TASK-216 | Structural: mid-month agent-tab misses pre-provisioned next month (no backfill) | 40d | 🟡 |    | ❌ | ↘0
+  · **מה זה אומר:** כשמוסיפים טאב חדש אחרי ה-1 לחודש, החודש הבא שכבר הוכן לא מקבל אותו, ואין השלמה.
+  · **מה צריך לעשות:** לגרום לרוטציה החודשית להריץ את יצירת-הטאבים גם על החודש הפעיל.
+
+TASK-222 | dashboard.py:1928 _is_day_complete duplicates utils.is_day_complete — consolidate t… | 39d | 🟡 | ⏳ | ❌ | ↘0
+  · **מה זה אומר:** אותה לוגיקה קיימת פעמיים, ושעת-הסגירה מוגדרת בשני קבצים. בחורף השעות משתנות והמקובעים ישקרו.
+  · **מה צריך לעשות:** לאחד למקום אחד ולגזור את השעות מאזור-הזמן של ניו-יורק. התיק בלע את 232 ו-233.
+
+TASK-236 | auto-dancer VERIFY produces empty verify.json -> task_result=stage_error (execute-pr… | 36d | 🟡 |    | ❌ | ↘0
+  · **מה זה אומר:** בריצה מלאה ראשונה כל השלבים עברו חוץ מהאחרון, שהחזיר קובץ ריק ונכשל.
+  · **מה צריך לעשות:** לחקור את שלב-האימות. מוקפא עם 186.
+
+TASK-241 | Review agent and trade behaviour 2026-07-05 to 2026-07-28 | 13d | 🟡 |    | ❌ | ↘0
+  · **מה זה אומר:** לבדוק מה המערכת החליטה בתקופה שלא הייתה תחת השגחה.
+  · **מה צריך לעשות:** חסום על TASK-246 (הפוזיציות התקועות) — בלעדיו כל חישוב win-rate מערבב שתי אוכלוסיות.
+
+TASK-243 | Harden root resolution and rotation guards | 12d | 🟡 |    | ❌ | ↘0
+  · **מה זה אומר:** שרשרת של שש בעיות סביב יצירת החודש הבא — הרשאות חסרות, בדיקה שמשווה קבוע לעצמו, ושומר שיורה על
+    העבודה של עצמו.
+  · **מה צריך לעשות:** לתקן את ששת הפריטים, כולל איחוד שתי רשימות-טאבים שאינן זהות.
+
+TASK-249 | Collector reprocesses the whole month every night | 7d | 🟡 |    | ❌ | ↘0
+  · **מה זה אומר:** במקום לעבד רק את השורות החדשות, הוא מעבד את כל מה שהחודש צבר. הריצה גדלה מ-8 דקות בתחילת החודש ל-27
+    בסופו.
+  · **מה צריך לעשות:** להחליט בין שלוש אפשרויות (הגבלה לפי תאריך, סימון-הושלם מוקדם יותר, או מטמון). כל אחת משנה מה נאסף
+    למחקר.
+
+TASK-264 | borrow_coverage contains rows written by unit tests | 4d | 🟡 |    | ❌ | ↘0
+  · **מה זה אומר:** 198 מתוך 290 השורות נכתבו מחוץ לשעת-הריצה האמיתית, ורובן נושאות חתימה של מתקני-בדיקה.
+  · **מה צריך לעשות:** להכריע מה עושים איתן — מוחקים, מסמנים, או משאירים. מחיקה היא כתיבה לגיליון חי ודורשת גיבוי
+    ואישור.
+
+TASK-268 | detect_outage runs inside an agent run, so it dies with the system it guards | 4d | 🟡 | 🧊 | ✅ | ↘0
+  · **מה זה אומר:** הגלאי היחיד ברזולוציית-דקה נקרא מתוך ריצת-הסוכן. ביום שבו לא רצה אף ריצה — איש לא קרא לו.
+  · **מה צריך לעשות:** להכריע אם הוא נמחק עכשיו כשה-watchdog החיצוני חי ומאומת, או מקבל קורא שאינו תלוי בריצה.
+
+TASK-269 | Delayed runs write current prices under a stale signal timestamp | 4d | 🟡 |    | ✅ | ↘0
+  · **מה זה אומר:** ריצה שהמתינה בתור שעה ו-54 דקות משכה מחירים חיים ורשמה אותם כאילו הם של הדקה שהיא הייתה אמורה לייצג.
+    ודיווחה הצלחה.
+  · **מה צריך לעשות:** המדיניות הוכרעה 8/8 — ריצה שמתחילה יותר משעה באיחור מדלגת ולא עובדת. נותר לממש, ולכמת את הנזק
+    שכבר נגרם.
+
+TASK-271 | Delete quota_health check per T-206 decision | 2d | 🟡 |    | ❌ | ↘0
+  · **מה זה אומר:** בדיקה שאמורה לזהות חנק-מכסה, אבל היא סופרת כתיבות בזמן שהחנק הוא על קריאות, הסף שלה גדול פי-8 ממה
+    שיכול לקרות, והיא רצה לפני שהכתיבות בכלל התרחשו. היא לא יכולה לירות.
+  · **מה צריך לעשות:** להכריע אם מוחקים. הגוף כותב שאפשר לחווט במקומה את מונה-הקריאות.
+
+TASK-272 | Write DataQuality from validate_quality flags, not the CLEAN literal | 2d | 🟡 |    | ❌ | ↘0
+  · **מה זה אומר:** בכל שורת-פוזיציה נכתב "CLEAN" כטקסט קבוע, בלי שמישהו בדק. ובנוסף הבדיקה עצמה לא משווה שדות זה מול זה
+    — שורה עם מחיר 3.46 ושיא 93.59 עברה בציון מלא.
+  · **מה צריך לעשות:** להוסיף בדיקה שהמחיר בתוך טווח היום, לשמור את הדגלים על ההחלטה, ולכתוב CLEAN רק כשאין דגלים.
+
+TASK-273 | Qualify or remove Total/Avg PnL on the Score Brain page | 2d | 🟡 |    | ❌ | ↘0
+  · **מה זה אומר:** העמוד מציג רווח כולל וממוצע כאילו הם תוצאה, בזמן שרווח-הסמך שלהם מכיל אפס — כלומר רעש.
+  · **מה צריך לעשות:** להוסיף כיתוב עם n ורווח-סמך, או להסיר את שני המספרים.
+
+TASK-274 | Qualify the REALIZED P&L dollars in the daily email | 2d | 🟡 |    | ❌ | ↘0
+  · **מה זה אומר:** שורת-הנושא והכותרת של המייל מציגות סכום דולרי שנגזר מכמות-מניות שידוע שהיא שגויה בחלק מהשורות.
+  · **מה צריך לעשות:** להוסיף כיתוב-הסתייגות עד שתיקון-הכמויות ינחת. שיעור-ההצלחה באותו עמוד כבר מוצג עם רווח-סמך.
+
+TASK-275 | Health check: timeline_live cell count against the 10M ceiling | 2d | 🟡 |    | ❌ | ↘0
+  · **מה זה אומר:** לגיליון Google יש תקרה קשיחה של עשרה מיליון תאים. במאי היינו על 84% ממנה, ואין שום אזכור של התקרה
+    בקוד.
+  · **מה צריך לעשות:** בדיקה שקוראת את גודל-הגיליון ומדווחת אחוז מהתקרה. תנאי-מקדים: לקרוא את קוד הרוטציה החודשית שמעולם
+    לא נקרא.
+
+TASK-278 | calculate_score has zero unit tests in the main formulas suite | 2d | 🟡 | 🧊 | ❌ | ↘0
+  · **מה זה אומר:** הפונקציה ששלטה בכל כניסה עד 29/6, ועדיין ממיינת את פלט-הסריקה, מעולם לא נבדקה בסוויטה הראשית. שבעה
+    רכיבים, כל אחד עטוף במלכודת-שגיאות שמחזירה 0 בשקט.
+  · **מה צריך לעשות:** לכתוב טסט-אפיון שמקבע מה הקוד עושה היום (לא מה שהוא צריך לעשות), כדי שאפשר יהיה לפרוש אותו בבטחה.
+
+TASK-282 | The seven gates exist on one Mac only, and seven repo files point at them | 1d | 🟡 |    | ✅ | ↘0
+  · **מה זה אומר:** כל שערי-הבדיקה יושבים בתיקייה שאינה ריפו ואינה מגובה. שבעה קבצים בריפו מפנים אליהם בשם,
+    וקריטריון-קבלה של תיק אחד הוא ממש "הרץ את השער הזה".
+  · **מה צריך לעשות:** להכריע בין שלוש אפשרויות — להכניס לריפו, להשאיר בחוץ ולגבות, או להשאיר ולתעד את הסיכון.
+
+TASK-284 | Protocol: md deliverables are handed off as files, not clipboard pastes | 1d | 🟡 |    | ✅ | ↘0
+  · **מה זה אומר:** הכרעה של עמיחי מ-9/8 — כשנכתב קובץ md, הוא נגרר לצ'אט במקום להיות מודבק. הנימוק: מלא ובלי חיתוך.
+  · **מה צריך לעשות:** לעדכן את הפרוטוקול ולהגדיר מה עובר בקובץ ומה בקליפבורד.
+
+TASK-285 | Protocol: every CC block declares its model tier | 1d | 🟡 |    | ✅ | ↘0
+  · **מה זה אומר:** הכרעה מ-9/8 — כל בלוק מסומן במפורש איזה מודל מריץ אותו. הכלל: אם אפשר לטעות בשקט או שנדרש שיפוט, אז
+    המודל החזק.
+  · **מה צריך לעשות:** לכתוב את הכלל בפרוטוקול ולתייג כל בלוק.
+
+TASK-286 | Protocol: skill selection must span the full inventory by fit, not habit | 1d | 🟡 |    | ✅ | ↘0
+  · **מה זה אומר:** נצפתה נטייה לטעון את אותם שני סקילים מתוך 24, ובמקביל סקיל נטען לפי מילת-מפתח ולא התאים למשימה.
+  · **מה צריך לעשות:** לכתוב כלל שמכיל את שני האנטי-דפוסים, ולדרוש שהדיווח יציין מה כל סקיל תרם.
+
+TASK-288 | 29 extraction runs carry a real SKIP count mismatch (1,077 rows) | 1d | 🟡 |    | ✅ | ↘0
+  · **מה זה אומר:** ב-29 ריצות הסיכום מצהיר על מספר שורות שונה ממה שחולץ בפועל — 1077 שורות. זו אי-התאמה אמיתית ולא
+    תקלת-כלי.
+  · **מה צריך לעשות:** לסווג את 29 הריצות לפי סיבה, ולהכריע אם השורות כשרות למחקר וניתנות לסינון.
+
+TASK-291 | Organize audit archive internals without breaking repo path references | 0d | 🟡 |    | ✅ | ↘0
+  · **מה זה אומר:** הארכיון הועבר כמו-שהוא למקום מגובה, אבל לא סודר לתת-תיקיות כי מסמכי הריפו מצביעים על שמות-קבצים
+    מדויקים.
+  · **מה צריך לעשות:** לסדר לתת-תיקיות ולהשאיר קיצור-דרך שטוח לכל קובץ מופנה. רשימת הקבצים המופנים כבר חושבה ונשמרה.
+
+TASK-292 | Rotate three GitHub tokens embedded in git remote URLs | 0d | 🟡 |    | ✅ | ↘0
+  · **מה זה אומר:** שלושה ריפואים מחזיקים טוקן-גישה בתוך כתובת ה-remote בקובץ ההגדרות. אחד מהם מצביע על ריפו ציבורי.
+  · **מה צריך לעשות:** להחליף את שלושת הטוקנים, לנקות את הכתובות, ולעבור לאימות דרך הכלי הרשמי.
+
+TASK-293 | Decide disposition of three quarantined secret files | 0d | 🟡 | ⏳ | ✅ | ↘0
+  · **מה זה אומר:** שלושה קבצים שמכילים מידע רגיש הועברו לתיקיית-בידוד עם הרשאות מוגבלות, מחוץ לכל סנכרון.
+  · **מה צריך לעשות:** להכריע לכל אחד — נחוץ ונשמר במקום מוגן, או מיותר ונמחק אחרי אימות שאין תלות.
+
+TASK-294 | Resolve the three VardanTracker copies | 0d | 🟡 |    | ✅ | ↘0
+  · **מה זה אומר:** שלושה עותקים בגדלים שונים; העותק בשולחן-העבודה גדול יותר למרות שיש בו פחות קבצים, כלומר יש בו קבצים
+    כבדים שאין באחרים. זו לא כפילות פשוטה.
+  · **מה צריך לעשות:** להכריע מי המקור, לסמן או לאחד את השאר, ולאמת בהצלבת-חתימות שאף קובץ ייחודי לא אבד.
+
+TASK-295 | Mark the stale RidingHighPro repo copy as dead | 0d | 🟡 |    | ✅ | ↘0
+  · **מה זה אומר:** יש עותק מלא של הריפו מ-23/4 עם היסטוריה משלו והגדרות משלו, שמצביע על אותו remote. סשן שייפתח שם
+    יעבוד על ריפו מת.
+  · **מה צריך לעשות:** לסמן במפורש בשם התיקייה שהוא מת, או להעביר אותו לארכיון.
+
+TASK-298 | A run where every decision errors still logs Run complete and exits green | 0d | 🟡 |    | ✅ | ↘0
+  · **מה זה אומר:** ריצה עם 65 שגיאות מתוך 65 החלטות הדפיסה "הריצה הושלמה" ויצאה בקוד תקין. כל היום נראה ירוק.
+  · **מה צריך לעשות:** לגרום לריצה שבה אחוז השגיאות גבוה להיכשל בקול או להתריע. לבדוק בשני הכיוונים.
+
+TASK-300 | Six repos carry commits that exist on no remote; local main is diverged and misleading | 0d | 🟡 |    | ✅ | ↘0
+  · **מה זה אומר:** קוד שקיים רק על המק הזה. ובנוסף — ה-main המקומי מסועף ומצביע על תוכן של ענף אחר, כך שמעבר אליו נותן
+    משהו אחר לגמרי.
+  · **מה צריך לעשות:** להכריע לכל אחד מששת הריפואים — נדחף, נזרק, או נשאר מקומי במודע. וליישר או לסמן את ה-main המקומי.
+
+TASK-302 | ROCKET_GUARD calibration comment contradicts measurement | 0d | 🟡 | 🧊 | ✅ | ↘0
+  · **מה זה אומר:** הערה בקוד טוענת שהשומר חוסם 16 הפסדים ואפס מנצחות. מדידה על 292 עסקאות מקומיות מראה שהוא חוסם 18
+    כניסות שמהן 10 מנצחות.
+  · **מה צריך לעשות:** לתקן את ההערה כך שתשקף את שתי המדידות עם תאריכיהן, או לפתוח כיול-מחדש.
+
+TASK-304 | Done-without-control pattern: TASK-223 and TASK-111 closed, regressed silently | 0d | 🟡 |    | ✅ | ↘0
+  · **מה זה אומר:** שני תיקים נסגרו כ"בוצע" וחזרו להישבר בשקט תוך שבועות. הדפוס: התיק נסגר על "הפעולה נעשתה", לא על
+    "קיימת בדיקה שתיכשל אם זה יישבר".
+  · **מה צריך לעשות:** כלל כתוב — תיק-תשתית לא נסגר בלי בקרה אוטומטית, או בלי סימון מפורש "חד-פעמי, ללא בקרה".
+
+TASK-306 | Ruling needed: does an enforcement-duplicate count as a reentry-cap breach under HYP-0… | 0d | 🟡 | 🧊 | ✅ | ↘0
+  · **מה זה אומר:** מסמך-ההשערות אומר שפריצה נוספת של התקרה פוסלת את הניסוי. ב-10/8 נמדדו שתי כפילויות. אבל אותו סעיף
+    עצמו מנוסח בשני אופנים סותרים.
+  · **מה צריך לעשות:** להכריע איזו קריאה תקפה, ולרשום את ההכרעה עם תאריך.
+
+TASK-307 | 429 monitor command flips direction between closed and open days - index instead of t… | 0d | 🟡 |    | ✅ | ↘0
+  · **מה זה אומר:** הפקודה בוחרת ריצות לפי מיקום ברשימה ולא לפי זמן. ביום-מסחר היא מסתכלת דווקא על הריצות שלפני הפתיחה
+    ומחזירה "אין נתונים".
+  · **מה צריך לעשות:** לסנן לפי חותמת-זמן בתוך שעות-המסחר במקום לפי אינדקס, ולבדוק בשני המצבים.
+
+TASK-309 | Four doc alignments: TASK-248 title, TASK-128 title+status, WORK_PLAN 259, concurren… | 0d | 🟡 |    | ✅ | ↘0
+  · **מה זה אומר:** ארבע כותרות והצהרות שמתארות מצב שכבר לא קיים. כל אחת מהן שלחה לחקירה מיותרת ב-10/8.
+  · **מה צריך לעשות:** ליישר את ארבעתם, כל אחד עם תאריך ומקור, ולאמת שאף ניסוח ישן לא נותר.
+
+TASK-312 | Order-submit retry treats a duplicate-rejection as a transient failure and retries i… | -1d | 🟡 | 🧊 | ✅ | ↘0
+  · ⚠️ **אין הסבר** — נכתב ביד, לא נגזר. להוסיף ל-docs/TASK_EXPLANATIONS.md
+
+## חוב: 40/89 תיקים בלי שער-קבלה מדיד (44%)
+TASK-259 TASK-215 TASK-244 TASK-186 TASK-246 TASK-248 TASK-252 TASK-253 TASK-277 TASK-71 TASK-74 TASK-153 TASK-234
+TASK-101 TASK-235 TASK-237 TASK-209 TASK-279 TASK-39 TASK-49 TASK-226 TASK-250 TASK-257 TASK-260 TASK-261 TASK-276
+TASK-73 TASK-216 TASK-222 TASK-236 TASK-241 TASK-243 TASK-249 TASK-264 TASK-271 TASK-272 TASK-273 TASK-274 TASK-275
+TASK-278
+
+## ⚠️ בלי הסבר (2) — נכתב ביד, אינו נגזר
+TASK-311 TASK-312

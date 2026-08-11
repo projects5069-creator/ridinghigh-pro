@@ -76,3 +76,16 @@ STILL LIVE, verified 2026-08-04, four sites in auto_scanner.py: line 504 portfol
 PARKED BY DECISION, not blocked: the owner decision of 30/6 is that all remaining Score work waits and is handled as one body, together with TASK-209.
 
 NOTE ADDED 2026-08-04: line 1008 is why live_trades holds zero rows in every month. The gate is Score >= 70 and the highest scanner Score in the live run of 2026-08-03 was 60.86. See TASK-251.
+
+## ממצא 2026-08-10 — 208 ו-260 הן החלטה אחת, לא שתיים
+התיק מתאר את ארבע נקודות-הבחירה כ"שכבת תצוגה". נמדד ש**שתיים מהן קוראות מהגיליון**
+ולא מהזיכרון, ולכן הן מושפעות ישירות מהכרעת-260 (הקפאת כתיבת ה-Score ל-timeline_live):
+  `:503`  results_df בזיכרון      ⇒ לא מושפעת (ההקפאה עובדת על עותק, `:57-64`)
+  `:591`  _save_daily_summary     ⇒ **קוראת מהגיליון** · `idxmax` ⇒ ValueError · עטוף ב-try
+                                     ⇒ daily_summary מפסיק להיכתב **בשקט, בכל דקה**
+  `:1110` update_live_trades      ⇒ `float(r.get("Score",0) or 0)` ⇒ 0<70 ⇒ כבר אפס שורות היום
+  `:1348` run_eod portfolio       ⇒ **קוראת מהגיליון** · NaN>=70=False ⇒ בחירה ריקה, שקט
+⇒ **תנאי-קדם משותף:** הפונקציה הבטוחה (`safe_idxmax` — לספור ערכים תקינים, לא לבדוק
+ריקנות) חייבת לנחות לפני כל צעד בשני התיקים.
+ייסגר כאשר: ארבעת אתרי-הדירוג אינם קוראים Score, או שהוכרע במפורש שהם נשארים —
+והפונקציה הבטוחה קיימת ומכוסה בבדיקה דו-כיוונית.
